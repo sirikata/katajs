@@ -196,7 +196,7 @@ function render(){
 }
 setInterval(render,15);
 var inc=0.2;
-document.getElementById("canvas").onmousedown=function(e){gameScene.pick(e.clientX-this.parentNode.offsetLeft,e.clientY-this.parentNode.offsetTop); }
+//document.getElementById("canvas").onmousedown=function(e){gameScene.pick(e.clientX-this.parentNode.offsetLeft,e.clientY-this.parentNode.offsetTop); }
 document.getElementById("canvas").onmouseover=function(e){mouseovercanvas=true;}
 document.getElementById("canvas").onmousemove=function(e){mouseovercanvas=true;}
 document.getElementById("canvas").onmouseout=function(e){mouseovercanvas=false;}
