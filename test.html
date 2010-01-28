@@ -69,7 +69,6 @@ function pdebug_clear() {
 	document.getElementById("dbg").innerHTML = ""
 }
 
-pdebug("GLGE.Object.prototype.status: " + GLGE.Object.prototype.status)
 function inspectObject(o) {
 	pdebug_clear()
 	pdebug("inspectObject:" + o)
@@ -104,16 +103,9 @@ function mouselook(){
                     selected_obj = obj;
                     pdebug("selected: " + selected_obj.id, 2)
                 }
-                start_mouse_x = parseInt(mousepos.x)
-                start_selected_x = parseFloat(selected_obj.getLocX())
-                //				inspectObject(selected_obj)
-            }            
-            if (selected_obj.getId() != "wallobject") {
-                move_x = (parseInt(mousepos.x) - start_mouse_x) * -0.04
-                new_x = start_selected_x + move_x
-                pdebug("dragging: " + selected_obj.id + " from: " + start_selected_x + " to: " + new_x, 4)
-                selected_obj.setLocX(new_x)
+				if (selected_obj.dragable) selected_obj.dragStart(mousepos.x, mousepos.y)
             }
+			if (selected_obj.dragable) selected_obj.dragUpdate(mousepos.x, mousepos.y)
         }
         else {            
             if (obj && obj != hover_obj) {
@@ -200,6 +192,10 @@ var inc=0.2;
 document.getElementById("canvas").onmouseover=function(e){mouseovercanvas=true;}
 document.getElementById("canvas").onmousemove=function(e){mouseovercanvas=true;}
 document.getElementById("canvas").onmouseout=function(e){mouseovercanvas=false;}
+
+//pdebug("monkey object:" + gameScene.getObjectById("monkeyobject") + " is " + gameScene.getObjectById("monkeyobject").id)
+gameScene.getObjectById("crate5").makeDragMovable()
+pdebug("crate5 dragable: " + gameScene.getObjectById("crate5").dragable)
 }
 </script>
 
