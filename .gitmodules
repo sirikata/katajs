@@ -1,0 +1,3 @@
+[submodule "GLGE"]
+	path = GLGE
+	url = git://github.com/danielrh/GLGE.git
