@@ -95,9 +95,9 @@ function mouselook(){
         if (leftbutton) {
             if (old_leftbutton == false) {
                 if (obj && obj != selected_obj) {
-					if (selected_obj) selected_obj.set_status(null)
+					if (selected_obj) selected_obj.setStatus(null)
                     if (obj.getId() != "wallobject") {
-                        obj.set_status("selected")
+                        obj.setStatus("selected")
                     }
                     selected_obj = obj;
                     pdebug("selected: " + selected_obj.id, 2)
@@ -115,10 +115,10 @@ function mouselook(){
         }
         else {            
             if (obj && obj != hover_obj) {
-				if (hover_obj != selected_obj) if(hover_obj) hover_obj.set_status(null)
+				if (hover_obj != selected_obj) if(hover_obj) hover_obj.setStatus(null)
                 hover_obj = obj;
                 if (obj.getId() != "wallobject" && obj != selected_obj) {
-                    obj.set_status("hover")
+                    obj.setStatus("hover")
                 }
                 pdebug("hovering over: " + hover_obj.id, 3)
             }

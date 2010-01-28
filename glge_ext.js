@@ -11,7 +11,7 @@ function addProtoSafely(cls, proto, func){
     }
 }
 
-addProtoSafely(GLGE.Object, "set_status", function(status) {
+addProtoSafely(GLGE.Object, "setStatus", function(status) {
     if (status != this.status) {
         if (status == null) {
 //			pdebug("set material to: " + obj.original_material)
