@@ -24,10 +24,11 @@ height="500"></canvas>
 <div id="framerate" style="position:absolute; left: 750px; top: 20px; background-color: #000; opacity: 0.5;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
 <div id="debug" style="padding: 5px"></div>
 </div>
-<div onclick = document.pdebug("JO!") style="padding: 5px;position:absolute; left: 20px; top: 370px; background-color: #000; opacity: 0.3;height: 100px; width: 400px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
-<h2 style="margin:0;padding:0;padding-bottom: 5px;font-size: 20px">Picking Demo</h2>
-<p style="margin:0;padding:0;padding-bottom: 5px;">Hover the mouse over objects to highlight</p>
-<p style="margin:0;padding:0;padding-bottom: 5px;">Use the mouse and WASD Keys to move the camera</p>
+<div onclick = 'alert("2D Javascript element")' style="padding: 5px;position:absolute; left: 20px; top: 370px; background-color: #000; opacity: 0.7;height: 100px; width: 400px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
+<h2 style="margin:0;padding:0;padding-bottom: 5px;font-size: 20px">Extremely early Kata3D 'Demo'</h2>
+<p style="margin:0;padding:0;padding-bottom: 5px;">Hover==cyan; selected==purple; drag objects</p>
+<p style="margin:0;padding:0;padding-bottom: 5px;">arrow keys to move, U & J to pan camera</p>
+<p style="margin:0;padding:0;padding-bottom: 5px;">this box pops a msg, so does the monkey</p>
 </div>
 </div>
 </div>
@@ -96,6 +97,7 @@ function mouselook(){
             if (old_leftbutton == false) {
                 if (obj && obj != selected_obj) {
 					if (selected_obj) selected_obj.setStatus(null)
+					if (obj.getId() == "monkeyobject") alert("MONKEY!!! (3D GLGE element)")
                     if (obj.getId() != "wallobject") {
                         obj.setStatus("selected")
                     }
