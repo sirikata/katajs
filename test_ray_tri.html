@@ -1,0 +1,41 @@
+<html>
+<head></head>
+<body>
+testing ray_tri.js<br>
+<script type="text/javascript" src="GLGE/external/sylvester.src.js"></script> 
+<script type="text/javascript" src="ray_tri.js"></script> 
+<script type="text/javascript">
+
+function print(s) {document.write(s+"<br>")}
+
+A=[0,0,0]
+B=[1,0,0]
+C=[0,1,.3]
+T=[A,B,C]
+P0=[0,0,-1]
+P1=[.5,.5,2]
+R=[P0,P1]
+
+r = intersect_RayTriangle(R, T)
+if(r) print("answer: " + r.elements); else print("answer: null")
+
+P1=[1.5,.5,1]
+R=[P0,P1]
+r = intersect_RayTriangle(R, T)
+if(r) print("answer: " + r.elements); else print("answer: null")
+
+P0=[0,0,0]
+P1=[1,0,0]
+R=[P0,P1]
+r = intersect_RayTriangle(R, T)
+if(r) print("answer: " + r.elements); else print("answer: null")
+
+P0=[0,0,0]
+P1=[1,0,0.0001]
+R=[P0,P1]
+r = intersect_RayTriangle(R, T)
+if(r) print("answer: " + r.elements); else print("answer: null")
+
+</script>
+</body>
+</html>
