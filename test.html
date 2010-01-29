@@ -5,6 +5,7 @@
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
  
  
+<script type="text/javascript" src="pdebug.js"></script> 
 <script type="text/javascript" src="GLGE/external/sylvester.src.js"></script> 
 <script type="text/javascript" src="GLGE/external/glutils.js"></script> 
 <script type="text/javascript" src="GLGE/glge.js"></script> 
@@ -53,29 +54,6 @@ var mouse=new GLGE.MouseInput(document.getElementById('canvas'));
 var keys=new GLGE.KeyInput();
 var selected_obj;
 var mouseovercanvas;
-
-function pdebug(s, l){
-	if (l === undefined) {
-		document.getElementById("dbg").innerHTML += s + "<br>"
-	}
-	else {
-		document.getElementById("dbg" + l).innerHTML = s + "<br>"	
-	}
-}
-
-document.pdebug = pdebug
-
-function pdebug_clear() {
-	document.getElementById("dbg").innerHTML = ""
-}
-
-function inspectObject(o) {
-	pdebug_clear()
-	pdebug("inspectObject:" + o)
-	for (i in o) {
-		pdebug("  " + i + "  :  " + o[i])
-	}
-}
 
 selected_obj=null
 hover_obj=null
@@ -193,7 +171,7 @@ document.getElementById("canvas").onmouseout=function(e){mouseovercanvas=false;}
 
 var hoverable = ["crate", "crate2", "crate3", "crate5", "monkeyobject"]
 var selectable = ["crate", "crate2", "crate5"]
-var dragable = ["crate4", "crate5"]
+var dragable = ["crate", "crate4", "crate5"]
 
 for (i in hoverable) gameScene.getObjectById(hoverable[i]).makeHoverableCyan()
 for (i in selectable) gameScene.getObjectById(selectable[i]).makeSelectablePurple()
@@ -207,6 +185,11 @@ gameScene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
 gameScene.getObjectById("teapotobject").makeClickableCallback(function(x,y) {
 	alert("Would you have some tea?")
 	document.getElementById("canvas").buttonState[0]=false			///	kluge to fix bug where alert() makes GLGE miss mouseUp
+})
+
+gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
+	p = this.getPositions()
+	pdebug("crate positions length: " + p.length + " data: " + p)
 })
 
 }

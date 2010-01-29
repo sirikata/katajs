@@ -2,15 +2,6 @@
  * @author dbm
  */
 
-function pdebug(s, l){
-	if (l === undefined) {
-		document.getElementById("dbg").innerHTML += s + "<br>"
-	}
-	else {
-		document.getElementById("dbg" + l).innerHTML = s + "<br>"	
-	}
-}
-
 function addProtoSafely(cls, proto, func){
     if (cls.prototype[proto] != null) {
         alert("oh no! This prototype already exists: " + proto)
@@ -122,3 +113,18 @@ addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
 		if (this.clickCallbackUp) this.clickCallbackUp(mouse_x, mouse_y)
 	}
 })
+
+// get position buffer
+addProtoSafely(GLGE.Object, "getPositions", function() {
+	for (i in this.mesh.buffers) {
+		if(this.mesh.buffers[i].name=="position") posbuf = this.mesh.buffers[i].data 
+	}
+	return posbuf
+})
+
+// does a ray intersect this object? return null or point
+addProtoSafely(GLGE.Object, "rayIntersect", function() {
+	
+})
+
+

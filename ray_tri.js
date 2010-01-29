@@ -5,7 +5,7 @@
 function intersect_RayTriangle(R, T) {
 	var u,v,n
 	var dir,w0,w
-	var r,a,b
+	var r,a,b,R0
 	u = Vector.create(T[1]).subtract(T[0])
 	v = Vector.create(T[2]).subtract(T[0])
 	n = u.cross(v)
@@ -16,7 +16,7 @@ function intersect_RayTriangle(R, T) {
 	b = n.dot(dir)
 	r = a/b							/// note if b==0 this returns NaN's
     if (r < 0.0)                    // ray goes away from triangle
-        return 0;                  // => no intersect
+        return null;                  // => no intersect
     // for a segment, also test if (r > 1.0) => no intersect
 	I = R0.add(dir.multiply(r))
     // is I inside T?
