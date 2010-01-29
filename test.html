@@ -109,11 +109,13 @@ function mouselook(){
         }
         else {            
             if (obj && obj != hover_obj) {
-				if (hover_obj != selected_obj) if(hover_obj) hover_obj.setStatus(null)
+//				if (hover_obj != selected_obj) if(hover_obj) hover_obj.setStatus(null)
+				if (hover_obj && hover_obj.hoverable) hover_obj.hoverStop(mousepos.x, mousepos.y)
                 hover_obj = obj;
-                if (obj.getId() != "wallobject" && obj != selected_obj) {
-                    obj.setStatus("hover")
-                }
+				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
+//                if (obj.getId() != "wallobject" && obj != selected_obj) {
+//                    obj.setStatus("hover")
+//                }
                 pdebug("hovering over: " + hover_obj.id, 3)
             }
         }
@@ -195,6 +197,7 @@ document.getElementById("canvas").onmouseout=function(e){mouseovercanvas=false;}
 
 //pdebug("monkey object:" + gameScene.getObjectById("monkeyobject") + " is " + gameScene.getObjectById("monkeyobject").id)
 gameScene.getObjectById("crate5").makeDragMovable()
+gameScene.getObjectById("monkeyobject").makeHoverable()
 pdebug("crate5 dragable: " + gameScene.getObjectById("crate5").dragable)
 }
 </script>

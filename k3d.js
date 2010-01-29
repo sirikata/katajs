@@ -34,33 +34,33 @@ addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 addProtoSafely(GLGE.Object, "setStatus", function(status) {
     if (status != this.status) {
         if (status == null) {
-//			pdebug("set material to: " + obj.original_material)
+			//pdebug("..set material to: " + this.original_material)
             this.setMaterial(this.original_material)
         }
         else {
             if (this.status == null) {
                 this.original_material = this.getMaterial()
             }
-//			pdebug("set material to: " + status + "_mat")
+			//pdebug("..set material to: " + status + "_mat")
             this.setMaterial(eval(status + "_mat"))
         }
 		this.status = status
+		//pdebug("..just set this.status to:"+this.status)
     }
+	else {
+		//pdebug("..setStatus: do nothing. old status-->" + this.status + "<--")
+	}
 })
 
 // add makeDragMovable to Object.  One of a series of draggable options maybe?
 
 addProtoSafely(GLGE.Object, "makeDragMovable", function() {
 	this.dragable = true
-	pdebug("makeDragMovable on " + this.id + " dragable: " + this.dragable)
 	this.dragStart = function (mouse_x, mouse_y) {
-		pdebug("mouse_x type: " + typeof(mouse_x))
 		this.dragStartMouseX = mouse_x
 		this.dragStartMouseY = mouse_y
 		this.dragStartLocX = parseFloat(this.getLocX())			///	wtf?
 		this.dragStartLocZ = parseFloat(this.getLocZ())		
-		pdebug("dragStart x: " + this.dragStartMouseX + " y: " + this.dragStartMouseY + " types: " +
-			typeof(mouse_x)+typeof(mouse_y)+typeof(this.dragStartLocX)+typeof(this.dragStartLocY))
 	}
 
 	this.dragUpdate = function (mouse_x, mouse_y) {
@@ -69,5 +69,25 @@ addProtoSafely(GLGE.Object, "makeDragMovable", function() {
 		this.setLocX(this.dragStartLocX-move_x*.04)
 		this.setLocZ(this.dragStartLocZ-move_y*.04)
 		pdebug("dragUpdate x: " + this.getLocX() + " y: " + this.getLocZ(),4)
+	}
+})
+
+// add makeHoverable to Object.
+
+addProtoSafely(GLGE.Object, "makeHoverable", function() {
+	this.hoverable = true
+	this.hoverStart = function (mouse_x, mouse_y) {
+		//pdebug ("hoverStart " + this.id)
+		if (this.status != "selected") this.setStatus("hover")
+		//pdebug(".status:"+this.status)
+	}
+
+	this.hoverStop = function (mouse_x, mouse_y) {
+		//pdebug ("hoverStop " + this.id)
+		//pdebug(".status:"+this.status)
+		if (this.status != "selected") {
+			//pdebug("  setStatus null")
+			this.setStatus(null)
+		}
 	}
 })
