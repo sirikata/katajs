@@ -94,12 +94,10 @@ function mouselook(){
         }
         if (leftbutton) {
             if (old_leftbutton == false) {
+				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
                 if (obj && obj != selected_obj) {
-					if (selected_obj) selected_obj.setStatus(null)
-					if (obj.getId() == "monkeyobject") alert("MONKEY!!! (3D GLGE element)")
-                    if (obj.getId() != "wallobject") {
-                        obj.setStatus("selected")
-                    }
+					if (selected_obj && selected_obj.selectable) selected_obj.selectStop(mousepos.x, mousepos.y)
+                    if (obj.selectable) obj.selectStart(mousepos.x, mousepos.y)
                     selected_obj = obj;
                     pdebug("selected: " + selected_obj.id, 2)
                 }
@@ -109,13 +107,9 @@ function mouselook(){
         }
         else {            
             if (obj && obj != hover_obj) {
-//				if (hover_obj != selected_obj) if(hover_obj) hover_obj.setStatus(null)
 				if (hover_obj && hover_obj.hoverable) hover_obj.hoverStop(mousepos.x, mousepos.y)
                 hover_obj = obj;
 				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
-//                if (obj.getId() != "wallobject" && obj != selected_obj) {
-//                    obj.setStatus("hover")
-//                }
                 pdebug("hovering over: " + hover_obj.id, 3)
             }
         }
@@ -196,9 +190,23 @@ document.getElementById("canvas").onmousemove=function(e){mouseovercanvas=true;}
 document.getElementById("canvas").onmouseout=function(e){mouseovercanvas=false;}
 
 //pdebug("monkey object:" + gameScene.getObjectById("monkeyobject") + " is " + gameScene.getObjectById("monkeyobject").id)
-gameScene.getObjectById("crate5").makeDragMovable()
-gameScene.getObjectById("monkeyobject").makeHoverable()
-pdebug("crate5 dragable: " + gameScene.getObjectById("crate5").dragable)
+
+var hoverable = ["crate", "crate2", "crate3", "crate5", "monkeyobject"]
+var selectable = ["crate", "crate2", "crate5"]
+var dragable = ["crate4", "crate5"]
+
+for (i in hoverable) gameScene.getObjectById(hoverable[i]).makeHoverableCyan()
+for (i in selectable) gameScene.getObjectById(selectable[i]).makeSelectablePurple()
+for (i in dragable) gameScene.getObjectById(dragable[i]).makeDragableMove()
+
+gameScene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
+	alert("MONKEY BIDNESS!")
+})
+
+gameScene.getObjectById("teapotobject").makeClickableCallback(function(x,y) {
+	alert("Would you have some tea?")
+})
+
 }
 </script>
 

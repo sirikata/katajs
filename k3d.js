@@ -52,9 +52,9 @@ addProtoSafely(GLGE.Object, "setStatus", function(status) {
 	}
 })
 
-// add makeDragMovable to Object.  One of a series of draggable options maybe?
+// add makeDragable to Object.
 
-addProtoSafely(GLGE.Object, "makeDragMovable", function() {
+addProtoSafely(GLGE.Object, "makeDragableMove", function() {
 	this.dragable = true
 	this.dragStart = function (mouse_x, mouse_y) {
 		this.dragStartMouseX = mouse_x
@@ -74,7 +74,7 @@ addProtoSafely(GLGE.Object, "makeDragMovable", function() {
 
 // add makeHoverable to Object.
 
-addProtoSafely(GLGE.Object, "makeHoverable", function() {
+addProtoSafely(GLGE.Object, "makeHoverableCyan", function() {
 	this.hoverable = true
 	this.hoverStart = function (mouse_x, mouse_y) {
 		//pdebug ("hoverStart " + this.id)
@@ -89,5 +89,36 @@ addProtoSafely(GLGE.Object, "makeHoverable", function() {
 			//pdebug("  setStatus null")
 			this.setStatus(null)
 		}
+	}
+})
+
+// add makeSelectable to Object.
+
+addProtoSafely(GLGE.Object, "makeSelectablePurple", function() {
+	this.selectable = true
+	this.selectStart = function (mouse_x, mouse_y) {
+		//pdebug ("hoverStart " + this.id)
+		this.setStatus("selected")
+		//pdebug(".status:"+this.status)
+	}
+
+	this.selectStop = function (mouse_x, mouse_y) {
+		//pdebug ("hoverStop " + this.id)
+		//pdebug(".status:"+this.status)
+		if (this.status == "selected") {
+			this.setStatus(null)
+		}
+	}
+})
+
+addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
+	this.clickable = true
+	this.clickCallbackDown = cbDown
+	this.clickCallbackUp = cbUp
+	this.clickDown = function (mouse_x, mouse_y) {
+		if (this.clickCallbackDown) this.clickCallbackDown(mouse_x, mouse_y)
+	}
+	this.clickUp = function (mouse_x, mouse_y) {
+		if (this.clickCallbackUp) this.clickCallbackUp(mouse_x, mouse_y)
 	}
 })
