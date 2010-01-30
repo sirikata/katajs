@@ -45,25 +45,17 @@ addProtoSafely(GLGE.Object, "setStatus", function(status) {
 
 // add makeDragable to Object.
 
-addProtoSafely(GLGE.Object, "makeDragableMove", function() {
+addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 	this.dragable = true
+	this.dragStartCb = cbStart
+	this.dragUpdateCb = cbUpdate
 	this.dragStart = function (mouse_x, mouse_y) {
 		this.dragStartMouseX = mouse_x
 		this.dragStartMouseY = mouse_y
-		this.dragStartLocX = parseFloat(this.getLocX())			///	wtf? strings?
-		this.dragStartLocZ = parseFloat(this.getLocZ())		
-		this.dragStartRotX = parseFloat(this.getRotX())
-		this.dragStartRotZ = parseFloat(this.getRotZ())		
+		this.dragStartCb()
 	}
-
 	this.dragUpdate = function (mouse_x, mouse_y) {
-		move_x = mouse_x-this.dragStartMouseX
-		move_y = mouse_y-this.dragStartMouseY
-		this.setLocX(this.dragStartLocX-move_x*.04)
-		this.setLocZ(this.dragStartLocZ-move_y*.04)
-//		this.setRotZ(this.dragStartRotZ+move_x*.02)
-//		this.setRotX(this.dragStartRotX-move_y*.02)
-//		pdebug("dragUpdate Z: " + this.getRotZ() + " X: " + this.getRotX() + " mat: " + this.getModelMatrix().elements,4)
+		this.dragUpdateCb(mouse_x-this.dragStartMouseX, mouse_y-this.dragStartMouseY)
 	}
 })
 

@@ -176,7 +176,18 @@ var dragable = ["crate", "crate4", "crate5"]
 
 for (i in hoverable) gameScene.getObjectById(hoverable[i]).makeHoverableCyan()
 for (i in selectable) gameScene.getObjectById(selectable[i]).makeSelectablePurple()
-for (i in dragable) gameScene.getObjectById(dragable[i]).makeDragableMove()
+
+// bullstuff drag just uses global x, z
+for (i in dragable) gameScene.getObjectById(dragable[i]).makeDragable(
+	function () {
+		this.dragStartLocX = parseFloat(this.getLocX())			///	wtf? strings?
+		this.dragStartLocZ = parseFloat(this.getLocZ())				
+	},
+	function (dx, dy) {
+		this.setLocX(this.dragStartLocX-dx*.04)
+		this.setLocZ(this.dragStartLocZ-dy*.04)
+	}
+)
 
 //gameScene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
 //	alert("MONKEY BIDNESS!")
