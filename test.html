@@ -64,9 +64,9 @@ function mouselook(){
     if (mouseovercanvas) {
         var mousepos = mouse.getMousePosition();
         var leftbutton = mouse.isButtonDown(0)
-        pdebug("mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         mousepos.x = mousepos.x - document.getElementById("container").offsetLeft;
         mousepos.y = mousepos.y - document.getElementById("container").offsetTop;
+        pdebug("mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
             obj = gameScene.pick(mousepos.x, mousepos.y);
@@ -196,9 +196,16 @@ gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
     var cam = gameScene.camera
     mro = Matrix.rotMat(cam.getRotX(), cam.getRotY(), cam.getRotZ())
     mlo = Matrix.transMat(cam.getLocX(), cam.getLocY(), cam.getLocZ())
-    mat = mlo.x(mro)																		// camera matrix    
-
-	var v = Vector.create([0, 0, -1, 1])														// camera points along -Z axis
+    mat = mlo.x(mro) // camera matrix    
+    var mousepos = mouse.getMousePosition();
+	var w = 900.0
+	var h = 500.0
+    var mx = mousepos.x - document.getElementById("container").offsetLeft;
+    var my = mousepos.y - document.getElementById("container").offsetTop;
+	mx = (mx/w - 0.5)
+	my = -(5/9) * (my/h - 0.5)
+	pdebug ("mx: " + mx + " my: " + my)
+    var v = Vector.create([mx, my, -1, 1]) // camera points along -Z axis
 	v = mat.x(v)																			// transform to camera matrix
     var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
 	var vP0 = Vector.create(P0)
