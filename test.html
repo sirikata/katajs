@@ -170,7 +170,7 @@ document.getElementById("canvas").onmouseout=function(e){mouseovercanvas=false;}
 
 //pdebug("monkey object:" + gameScene.getObjectById("monkeyobject") + " is " + gameScene.getObjectById("monkeyobject").id)
 
-var hoverable = ["crate2", "crate3", "crate5", "monkeyobject"]
+var hoverable = ["crate2", "crate3", "crate5"]
 var selectable = ["crate2", "crate5"]
 var dragable = ["crate", "crate4", "crate5"]
 
@@ -178,10 +178,10 @@ for (i in hoverable) gameScene.getObjectById(hoverable[i]).makeHoverableCyan()
 for (i in selectable) gameScene.getObjectById(selectable[i]).makeSelectablePurple()
 for (i in dragable) gameScene.getObjectById(dragable[i]).makeDragableMove()
 
-gameScene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
-	alert("MONKEY BIDNESS!")
-	document.getElementById("canvas").buttonState[0]=false			///	kluge to fix bug where alert() makes GLGE miss mouseUp
-})
+//gameScene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
+//	alert("MONKEY BIDNESS!")
+//	document.getElementById("canvas").buttonState[0]=false			///	kluge to fix bug where alert() makes GLGE miss mouseUp
+//})
 
 gameScene.getObjectById("teapotobject").makeClickableCallback(function(x,y) {
 	alert("Would you have some tea?")
@@ -194,16 +194,17 @@ gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
     
 	// create raycast from camera to mouse xy
     var cam = gameScene.camera
-    mro = Matrix.rotMat(cam.getRotX(), cam.getRotY(), cam.getRotZ())
-    mlo = Matrix.transMat(cam.getLocX(), cam.getLocY(), cam.getLocZ())
-    mat = mlo.x(mro) // camera matrix    
+    var mro = Matrix.rotMat(cam.getRotX(), cam.getRotY(), cam.getRotZ())
+    var mlo = Matrix.transMat(cam.getLocX(), cam.getLocY(), cam.getLocZ())
+    var mat = mlo.x(mro) // camera matrix    
     var mousepos = mouse.getMousePosition();
 	var w = 900.0
 	var h = 500.0
     var mx = mousepos.x - document.getElementById("container").offsetLeft;
     var my = mousepos.y - document.getElementById("container").offsetTop;
-	mx = (mx/w - 0.5)
-	my = -(5/9) * (my/h - 0.5)
+	var focal = 1.1
+	mx = focal * (mx/w - 0.5)
+	my = -focal*(h/w) * (my/h - 0.5)
 	pdebug ("mx: " + mx + " my: " + my)
     var v = Vector.create([mx, my, -1, 1]) // camera points along -Z axis
 	v = mat.x(v)																			// transform to camera matrix
@@ -212,12 +213,13 @@ gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
     var P1 = [v.e(1), v.e(2), v.e(3)]
     var R = [P0, P1]																		// this is our ray (FIXME: need to use mouse!!)
 	pdebug("R = [[" + R[0]+"],["+R[1]+"]]")
-    // get this object's matrix
-    var mro = Matrix.rotMat(this.getRotX(), this.getRotY(), this.getRotZ()) 				// our rotation matrix
-	var mlo = Matrix.transMat(this.getLocX(), this.getLocY(), this.getLocZ())				// our location matrix
-	var mat = mlo.x(mro)																	// our full matrix
 
-	// scale
+    // get wall matrix
+    mro = Matrix.rotMat(this.getRotX(), this.getRotY(), this.getRotZ()) 				// our rotation matrix
+	mlo = Matrix.transMat(this.getLocX(), this.getLocY(), this.getLocZ())				// our location matrix
+	mat = mlo.x(mro)																	// our full matrix
+
+	// scale wall vertices
 	var sx = parseFloat(this.getScaleX())
 	var sy = parseFloat(this.getScaleY())
 	var sz = parseFloat(this.getScaleZ())
