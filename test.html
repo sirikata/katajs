@@ -10,6 +10,7 @@
 <script type="text/javascript" src="GLGE/external/glutils.js"></script> 
 <script type="text/javascript" src="GLGE/glge.js"></script> 
 <script type="text/javascript" src="GLGE/glge_input.js"></script> 
+<script type="text/javascript" src="ray_tri.js"></script> 
 <script type="text/javascript" src="k3d.js"></script> 
 
 <style>
@@ -188,8 +189,39 @@ gameScene.getObjectById("teapotobject").makeClickableCallback(function(x,y) {
 })
 
 gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
-	p = this.getPositions()
-	pdebug("crate positions length: " + p.length + " data: " + p)
+	var p = this.getPositions()
+	pdebug("crate positions length: " + p.length)
+	/// convert local point to global coords using this object's rotation & location
+	var mro = Matrix.rotMat(this.getRotX(), this.getRotY(), this.getRotZ())
+	var mlo = Matrix.transMat(this.getLocX(), this.getLocY(), this.getLocZ())
+	var mat = mro.multiply(mlo)
+	pdebug("mat: " + mat.elements)
+	var loc = Vector.create([parseFloat(p[0]),parseFloat(p[1]),parseFloat(p[2]),0])
+	var glo = mat.multiply(loc)
+	pdebug("loc: " + loc.elements + " glo: " + glo.elements)
+	var sx = parseFloat(this.getScaleX())
+	var sy = parseFloat(this.getScaleY())
+	var sz = parseFloat(this.getScaleZ())
+	for (i=0; i<p.length; i+=9) {					// each tri
+		var A = Vector.create([sx*parseFloat(p[i]),sy*parseFloat(p[i+1]),sz*parseFloat(p[i+2]),1])
+		var B = Vector.create([sx*parseFloat(p[i+3]),sy*parseFloat(p[i+4]),sz*parseFloat(p[i+5]),1])
+		var C = Vector.create([sx*parseFloat(p[i+6]),sy*parseFloat(p[i+7]),sz*parseFloat(p[i+8]),1])
+		A = mat.multiply(A)
+		B = mat.multiply(B)
+		C = mat.multiply(C)
+		T = [A.elements.slice(0,3), B.elements.slice(0,3), C.elements.slice(0,3)]
+//		pdebug("T: " + T)
+		R = [ [-10,0,1], [0,0,1] ]
+		I = intersect_RayTriangle(R, T)
+		if(I) {
+			pdebug("intersect: " + I.elements + " T: " + T)
+			var monk = gameScene.getObjectById("monkeyobject")
+			monk.setLocX(I.elements[0])
+			monk.setLocY(I.elements[1])
+			monk.setLocZ(I.elements[2])
+			break
+		}
+	}
 })
 
 }

@@ -14,6 +14,7 @@ function intersect_RayTriangle(R, T) {
 	w0 = R0.subtract(T[0])
 	a = -n.dot(w0)
 	b = n.dot(dir)
+	if (Math.abs(b) < 0.0001) return null
 	r = a/b							/// note if b==0 this returns NaN's
     if (r < 0.0)                    // ray goes away from triangle
         return null;                  // => no intersect
