@@ -194,7 +194,7 @@ gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
 	/// convert local point to global coords using this object's rotation & location
 	var mro = Matrix.rotMat(this.getRotX(), this.getRotY(), this.getRotZ())
 	var mlo = Matrix.transMat(this.getLocX(), this.getLocY(), this.getLocZ())
-	var mat = mro.multiply(mlo)
+	var mat = mlo.multiply(mro)
 	pdebug("mat: " + mat.elements)
 	var loc = Vector.create([parseFloat(p[0]),parseFloat(p[1]),parseFloat(p[2]),0])
 	var glo = mat.multiply(loc)
