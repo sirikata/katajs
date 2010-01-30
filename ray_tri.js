@@ -1,8 +1,18 @@
 /*
 * Test for intersection of ray & triangle
+//
+// Copyright 2001, softSurfer (www.softsurfer.com)
+// This code may be freely used and modified for any purpose
+// providing that this copyright notice is included with it.
+// SoftSurfer makes no warranty for this code, and cannot be held
+// liable for any real or imagined damage resulting from its use.
+// Users of this code must verify correctness for their application.
+
+// modifications (c) 2010 Katalabs, inc.
 */
 
 function intersect_RayTriangle(R, T) {
+	/*
 	for(var i=0; i<3; i++) {
 		for(var j=0; j<3; j++) {
 			if(typeof(T[i][j])!="number") alert("NOOO!!! " + T[i][j] + " " + typeof(T[i][j]))
@@ -13,6 +23,7 @@ function intersect_RayTriangle(R, T) {
 			if(typeof(R[i][j])!="number") alert("NOOOoo!!!" + R[i][j] + " " + typeof(R[i][j]) )
 		}
 	}
+	*/
 	var u,v,n
 	var dir,w0,w
 	var r,a,b,R0
