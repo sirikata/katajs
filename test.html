@@ -39,7 +39,7 @@ height="500"></canvas>
 
 doc = new GLGE.Document("level.xml");
 doc.onLoad = function(){
-    scene = initGLGE()
+    scene = K3D.init()
     
     //document.getElementById("canvas").onmousedown=function(e){scene.pick(e.clientX-this.parentNode.offsetLeft,e.clientY-this.parentNode.offsetTop); }
     
@@ -158,7 +158,7 @@ doc.onLoad = function(){
             C = mat.x(C)
             var T = [A.elements.slice(0, 3), B.elements.slice(0, 3), C.elements.slice(0, 3)]
             //		pdebug("T: " + T)
-            var I = intersect_RayTriangle(R, T)
+            var I = ray_tri_intersect(R, T)
             if (I) {
                 dist = vP0.distanceFrom(I)
                 if (dist < mindist) {

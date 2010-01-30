@@ -1,6 +1,7 @@
 /**
  * @author dbm
  */
+K3D = {}
 
 function addProtoSafely(cls, proto, func){
     if (cls.prototype[proto] != null) {
@@ -77,72 +78,71 @@ addProtoSafely(GLGE.Object, "rayIntersect", function() {
 	
 })
 
-function initGLGE(){    
-	// GLGE_ is global namespace.  If that bugs you, just think of it as a singleton instance
+K3D.init = function (){
     //create the renderer.  
-    GLGE_gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
-    GLGE_gameScene = doc.getElement("mainscene");
-    GLGE_gameRenderer.setScene(GLGE_gameScene);
+    K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
+    K3D.gameScene = doc.getElement("mainscene");
+    K3D.gameRenderer.setScene(K3D.gameScene);
     
     
-	if (GLGE_gameScene.mouse) alert("uh oh, method name conflict GLGE_gameScene.mouse!")
-	GLGE_gameScene.mouse = new GLGE.MouseInput(document.getElementById('canvas'));
-    GLGE_keys = new GLGE.KeyInput();
-	GLGE_mouseovercanvas=false
-	document.getElementById("canvas").onmouseover=function(e){GLGE_mouseovercanvas=true;}
-	document.getElementById("canvas").onmousemove=function(e){GLGE_mouseovercanvas=true;}
-	document.getElementById("canvas").onmouseout=function(e){GLGE_mouseovercanvas=false;}
+	if (K3D.gameScene.mouse) alert("uh oh, method name conflict K3D.gameScene.mouse!")
+	K3D.gameScene.mouse = new GLGE.MouseInput(document.getElementById('canvas'));
+    K3D.keys = new GLGE.KeyInput();
+	K3D.mouseovercanvas=false
+	document.getElementById("canvas").onmouseover=function(e){K3D.mouseovercanvas=true;}
+	document.getElementById("canvas").onmousemove=function(e){K3D.mouseovercanvas=true;}
+	document.getElementById("canvas").onmouseout=function(e){K3D.mouseovercanvas=false;}
     
-    GLGE_selectedObj = null
-    GLGE_hoverObj = null
-    GLGE_oldLeftBtn = false
-	GLGE_levelmap=new GLGE.HeightMap("images/map.png",120,120,-50,50,-50,50,0,50);
-	GLGE_lasttime=0;
-	GLGE_frameRateBuffer=60;
-	GLGE_cnt=0;
-	GLGE_inc=0.2;
+    K3D.selectedObj = null
+    K3D.hoverObj = null
+    K3D.oldLeftBtn = false
+	K3D.levelmap=new GLGE.HeightMap("images/map.png",120,120,-50,50,-50,50,0,50);
+	K3D.lasttime=0;
+	K3D.frameRateBuffer=60;
+	K3D.cnt=0;
+	K3D.inc=0.2;
 	setInterval(render,15);
-	return GLGE_gameScene
+	return K3D.gameScene
 }
 
 function mouselook(){
-    if (GLGE_mouseovercanvas) {
-        var mousepos = GLGE_gameScene.mouse.getMousePosition();
-        var leftbutton = GLGE_gameScene.mouse.isButtonDown(0)
+    if (K3D.mouseovercanvas) {
+        var mousepos = K3D.gameScene.mouse.getMousePosition();
+        var leftbutton = K3D.gameScene.mouse.isButtonDown(0)
         mousepos.x = mousepos.x - document.getElementById("container").offsetLeft;
         mousepos.y = mousepos.y - document.getElementById("container").offsetTop;
-        pdebug("GLGE_gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
+        pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-            obj = GLGE_gameScene.pick(mousepos.x, mousepos.y);
+            obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
         }
         if (leftbutton) {
-            if (GLGE_oldLeftBtn == false) {
+            if (K3D.oldLeftBtn == false) {
 				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
-                if (obj && obj != GLGE_selectedObj) {
-					if (GLGE_selectedObj && GLGE_selectedObj.selectable) GLGE_selectedObj.selectStop(mousepos.x, mousepos.y)
+                if (obj && obj != K3D.selectedObj) {
+					if (K3D.selectedObj && K3D.selectedObj.selectable) K3D.selectedObj.selectStop(mousepos.x, mousepos.y)
                     if (obj.selectable) obj.selectStart(mousepos.x, mousepos.y)
-                    GLGE_selectedObj = obj;
-                    pdebug("selected: " + GLGE_selectedObj.id, 2)
+                    K3D.selectedObj = obj;
+                    pdebug("selected: " + K3D.selectedObj.id, 2)
                 }
-				if (GLGE_selectedObj.dragable) GLGE_selectedObj.dragStart(mousepos.x, mousepos.y)
+				if (K3D.selectedObj.dragable) K3D.selectedObj.dragStart(mousepos.x, mousepos.y)
             }
-			if (GLGE_selectedObj.dragable) GLGE_selectedObj.dragUpdate(mousepos.x, mousepos.y)
+			if (K3D.selectedObj.dragable) K3D.selectedObj.dragUpdate(mousepos.x, mousepos.y)
         }
         else {            
-            if (obj && obj != GLGE_hoverObj) {
-				if (GLGE_hoverObj && GLGE_hoverObj.hoverable) GLGE_hoverObj.hoverStop(mousepos.x, mousepos.y)
-                GLGE_hoverObj = obj;
+            if (obj && obj != K3D.hoverObj) {
+				if (K3D.hoverObj && K3D.hoverObj.hoverable) K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
+                K3D.hoverObj = obj;
 				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
-                pdebug("hovering over: " + GLGE_hoverObj.id, 3)
+                pdebug("hovering over: " + K3D.hoverObj.id, 3)
             }
         }
-        GLGE_oldLeftBtn = leftbutton
+        K3D.oldLeftBtn = leftbutton
     }
 }
 
 function checkkeys(){
-	var camera=GLGE_gameScene.camera;
+	var camera=K3D.gameScene.camera;
 	camerapos=camera.getPosition();
 	camerarot=camera.getRotation();
 	var trans=camera.getRotMatrix().inverse().x($V([0,0,-1])).flatten();
@@ -152,48 +152,48 @@ function checkkeys(){
 	var yinc=0;
 	var xinc=0;
 
-	if(GLGE_keys.isKeyPressed(GLGE.KI_W)) {yinc=yinc+parseFloat(trans[1]);xinc=xinc+parseFloat(trans[0]);}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_UP_ARROW)) {yinc=yinc+parseFloat(trans[1]);xinc=xinc+parseFloat(trans[0]);}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_S)) {yinc=yinc-parseFloat(trans[1]);xinc=xinc-parseFloat(trans[0]);}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {yinc=yinc-parseFloat(trans[1]);xinc=xinc-parseFloat(trans[0]);}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_A)) {yinc=yinc+parseFloat(trans[0]);xinc=xinc-parseFloat(trans[1]);}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_D)) {yinc=yinc-parseFloat(trans[0]);xinc=xinc+parseFloat(trans[1]);}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_U)) {GLGE_inc -= 0.025}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_J)) {GLGE_inc += 0.025}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {
+	if(K3D.keys.isKeyPressed(GLGE.KI_W)) {yinc=yinc+parseFloat(trans[1]);xinc=xinc+parseFloat(trans[0]);}
+	if(K3D.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {yinc=yinc+parseFloat(trans[1]);xinc=xinc+parseFloat(trans[0]);}
+	if(K3D.keys.isKeyPressed(GLGE.KI_S)) {yinc=yinc-parseFloat(trans[1]);xinc=xinc-parseFloat(trans[0]);}
+	if(K3D.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {yinc=yinc-parseFloat(trans[1]);xinc=xinc-parseFloat(trans[0]);}
+	if(K3D.keys.isKeyPressed(GLGE.KI_A)) {yinc=yinc+parseFloat(trans[0]);xinc=xinc-parseFloat(trans[1]);}
+	if(K3D.keys.isKeyPressed(GLGE.KI_D)) {yinc=yinc-parseFloat(trans[0]);xinc=xinc+parseFloat(trans[1]);}
+	if(K3D.keys.isKeyPressed(GLGE.KI_U)) {K3D.inc -= 0.025}
+	if(K3D.keys.isKeyPressed(GLGE.KI_J)) {K3D.inc += 0.025}
+	if(K3D.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {
 		camera.setRotY(camerarot.y+0.025);
 	}
-	if(GLGE_keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {
+	if(K3D.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {
 		camera.setRotY(camerarot.y-0.025);
 	}
-	pdebug("GLGE_levelmap: " + GLGE_levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc),5)
-	if(GLGE_levelmap.getHeightAt(camerapos.x+xinc,camerapos.y)>30) xinc=0;
-	if(GLGE_levelmap.getHeightAt(camerapos.x,camerapos.y+yinc)>30) yinc=0;
+	pdebug("K3D.levelmap: " + K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc),5)
+	if(K3D.levelmap.getHeightAt(camerapos.x+xinc,camerapos.y)>30) xinc=0;
+	if(K3D.levelmap.getHeightAt(camerapos.x,camerapos.y+yinc)>30) yinc=0;
     
-    if (GLGE_levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) {
+    if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) {
         yinc = 0;
         xinc = 0;
     }
     else {
-        camera.setLocZ(GLGE_levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
+        camera.setLocZ(K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
     }
 	if(xinc!=0 || yinc!=0){
 		camera.setLocY(camerapos.y+yinc);camera.setLocX(camerapos.x+xinc);
 	}
-	camera.setRotX(1.56-trans[1]*GLGE_inc);
-	camera.setRotZ(-trans[0]*GLGE_inc);
+	camera.setRotX(1.56-trans[1]*K3D.inc);
+	camera.setRotZ(-trans[0]*K3D.inc);
 }
 
 
 function render(){
     var now=parseInt(new Date().getTime());
-    GLGE_cnt=(GLGE_cnt+1)%10;
-    if(GLGE_cnt==0){
-	    GLGE_frameRateBuffer=Math.round(((GLGE_frameRateBuffer*9)+1000/(now-GLGE_lasttime))/10);
-	    document.getElementById("debug").innerHTML="Frame Rate:"+GLGE_frameRateBuffer;
+    K3D.cnt=(K3D.cnt+1)%10;
+    if(K3D.cnt==0){
+	    K3D.frameRateBuffer=Math.round(((K3D.frameRateBuffer*9)+1000/(now-K3D.lasttime))/10);
+	    document.getElementById("debug").innerHTML="Frame Rate:"+K3D.frameRateBuffer;
     }
-    GLGE_lasttime=now;
+    K3D.lasttime=now;
     mouselook();
     checkkeys();
-    GLGE_gameRenderer.render();
+    K3D.gameRenderer.render();
 }

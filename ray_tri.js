@@ -11,7 +11,7 @@
 // modifications (c) 2010 Katalabs, inc.
 */
 
-function intersect_RayTriangle(R, T) {
+function ray_tri_intersect(R, T) {
 	/*
 	for(var i=0; i<3; i++) {
 		for(var j=0; j<3; j++) {
