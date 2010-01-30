@@ -20,9 +20,9 @@ addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 	return null
 })
 
-// add setStatus method to Object
+// add setHighlight method to Object
 
-addProtoSafely(GLGE.Object, "setStatus", function(status) {
+addProtoSafely(GLGE.Object, "setHighlight", function(status) {
     if (status != this.status) {
         if (status == null) {
 			//pdebug("..set material to: " + this.original_material)
@@ -39,7 +39,7 @@ addProtoSafely(GLGE.Object, "setStatus", function(status) {
 		//pdebug("..just set this.status to:"+this.status)
     }
 	else {
-		//pdebug("..setStatus: do nothing. old status-->" + this.status + "<--")
+		//pdebug("..setHighlight: do nothing. old status-->" + this.status + "<--")
 	}
 })
 
@@ -65,7 +65,7 @@ addProtoSafely(GLGE.Object, "makeHoverableCyan", function() {
 	this.hoverable = true
 	this.hoverStart = function (mouse_x, mouse_y) {
 		//pdebug ("hoverStart " + this.id)
-		if (this.status != "selected") this.setStatus("hover")
+		if (this.status != "selected") this.setHighlight("hover")
 		//pdebug(".status:"+this.status)
 	}
 
@@ -73,8 +73,8 @@ addProtoSafely(GLGE.Object, "makeHoverableCyan", function() {
 		//pdebug ("hoverStop " + this.id)
 		//pdebug(".status:"+this.status)
 		if (this.status != "selected") {
-			//pdebug("  setStatus null")
-			this.setStatus(null)
+			//pdebug("  setHighlight null")
+			this.setHighlight(null)
 		}
 	}
 })
@@ -85,7 +85,7 @@ addProtoSafely(GLGE.Object, "makeSelectablePurple", function() {
 	this.selectable = true
 	this.selectStart = function (mouse_x, mouse_y) {
 		//pdebug ("hoverStart " + this.id)
-		this.setStatus("selected")
+		this.setHighlight("selected")
 		//pdebug(".status:"+this.status)
 	}
 
@@ -93,7 +93,7 @@ addProtoSafely(GLGE.Object, "makeSelectablePurple", function() {
 		//pdebug ("hoverStop " + this.id)
 		//pdebug(".status:"+this.status)
 		if (this.status == "selected") {
-			this.setStatus(null)
+			this.setHighlight(null)
 		}
 	}
 })
