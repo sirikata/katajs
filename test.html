@@ -253,6 +253,9 @@ gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
         monk.setLocX(minI.elements[0])
         monk.setLocY(minI.elements[1])
         monk.setLocZ(minI.elements[2])
+		monk.setRotX(this.getRotX())
+		monk.setRotY(this.getRotY())
+		monk.setRotZ(this.getRotZ())
         pdebug("intersect: " + minI.elements + " dist: " + mindist)
         pdebug("T = [[" + T[0] + "],[ " + T[1] + "],[" + T[2] + "]]")        
     }
