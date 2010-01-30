@@ -203,9 +203,9 @@ gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
 	var sy = parseFloat(this.getScaleY())
 	var sz = parseFloat(this.getScaleZ())
 	for (i=0; i<p.length; i+=9) {					// each tri
-		var A = Vector.create([sx*parseFloat(p[i]),sy*parseFloat(p[i+1]),sz*parseFloat(p[i+2]),1])
-		var B = Vector.create([sx*parseFloat(p[i+3]),sy*parseFloat(p[i+4]),sz*parseFloat(p[i+5]),1])
-		var C = Vector.create([sx*parseFloat(p[i+6]),sy*parseFloat(p[i+7]),sz*parseFloat(p[i+8]),1])
+		var A = Vector.create([sx*p[i],sy*p[i+1],sz*p[i+2],1])
+		var B = Vector.create([sx*p[i+3],sy*p[i+4],sz*p[i+5],1])
+		var C = Vector.create([sx*p[i+6],sy*p[i+7],sz*p[i+8],1])
 		A = mat.multiply(A)
 		B = mat.multiply(B)
 		C = mat.multiply(C)
