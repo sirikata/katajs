@@ -79,7 +79,7 @@ K3D.addProtoSafely(GLGE.Object, "rayIntersect", function() {
 })
 
 K3D.init = function (){
-    //create the K3D.renderer.  
+    //create the GLGE renderer.  
     K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
     K3D.gameScene = doc.getElement("mainscene");
     K3D.gameRenderer.setScene(K3D.gameScene);
