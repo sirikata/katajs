@@ -36,259 +36,155 @@ height="500"></canvas>
 </div>
 <div id="debug2"></div>
 <script type="text/javascript">
-var spotlight1
-var doc = new GLGE.Document("level.xml");
-doc.onLoad=function(){
 
-spotlight1=doc.getElement("mainlight");
-var crate=doc.getElement("crate");
-selected_mat=doc.getElement("purple");
-hover_mat=doc.getElement("cyan");
-
-//create the renderer
-var gameRenderer=new GLGE.Renderer(document.getElementById('canvas'));
-gameScene=doc.getElement("mainscene");
-gameRenderer.setScene(gameScene);
-
-
-var mouse=new GLGE.MouseInput(document.getElementById('canvas'));
-var keys=new GLGE.KeyInput();
-var selected_obj;
-var mouseovercanvas;
-
-selected_obj=null
-hover_obj=null
-old_leftbutton=false
-
-function mouselook(){
-    if (mouseovercanvas) {
-        var mousepos = mouse.getMousePosition();
-        var leftbutton = mouse.isButtonDown(0)
-        mousepos.x = mousepos.x - document.getElementById("container").offsetLeft;
-        mousepos.y = mousepos.y - document.getElementById("container").offsetTop;
-        pdebug("mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
-        
-        if (mousepos.x && mousepos.y) {
-            obj = gameScene.pick(mousepos.x, mousepos.y);
-        }
-        if (leftbutton) {
-            if (old_leftbutton == false) {
-				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
-                if (obj && obj != selected_obj) {
-					if (selected_obj && selected_obj.selectable) selected_obj.selectStop(mousepos.x, mousepos.y)
-                    if (obj.selectable) obj.selectStart(mousepos.x, mousepos.y)
-                    selected_obj = obj;
-                    pdebug("selected: " + selected_obj.id, 2)
+doc = new GLGE.Document("level.xml");
+doc.onLoad = function(){
+    scene = initGLGE()
+    
+    //document.getElementById("canvas").onmousedown=function(e){scene.pick(e.clientX-this.parentNode.offsetLeft,e.clientY-this.parentNode.offsetTop); }
+    
+    //pdebug("monkey object:" + scene.getObjectById("monkeyobject") + " is " + scene.getObjectById("monkeyobject").id)
+    
+    selected_mat = doc.getElement("purple");
+    hover_mat = doc.getElement("cyan");
+    pdebug("selected_mat: " + selected_mat + "hover_mat:" + hover_mat)
+    
+    var hoverable = ["crate2", "crate3", "crate5"]
+    var selectable = ["crate2", "crate5"]
+    var dragable = ["crate", "crate4", "crate5"]
+    
+    // function to safely set material and save original for highlighting (hover/select)
+    setHighlightMaterial = function(obj, material){
+        if (material != obj.highlightMaterial) {
+            if (material == null) {
+                obj.setMaterial(obj.originalMaterial)
+            }
+            else {
+                if (obj.highlightMaterial == null) {
+                    obj.originalMaterial = obj.getMaterial()
                 }
-				if (selected_obj.dragable) selected_obj.dragStart(mousepos.x, mousepos.y)
+                obj.setMaterial(material)
             }
-			if (selected_obj.dragable) selected_obj.dragUpdate(mousepos.x, mousepos.y)
+            obj.highlightMaterial = material
         }
-        else {            
-            if (obj && obj != hover_obj) {
-				if (hover_obj && hover_obj.hoverable) hover_obj.hoverStop(mousepos.x, mousepos.y)
-                hover_obj = obj;
-				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
-                pdebug("hovering over: " + hover_obj.id, 3)
+    }
+    
+    // hover cyan
+    for (i in hoverable) {
+        obj = scene.getObjectById(hoverable[i])
+        obj.makeHoverable(function(){
+            if (this.highlightMaterial != selected_mat) setHighlightMaterial(this, hover_mat)
+        }, function(){
+            if (this.highlightMaterial != selected_mat) setHighlightMaterial(this, null)
+        })
+        obj.highlightMaterial = null
+    }
+    
+    
+    // selected are purple
+    for (i in selectable) {
+        obj = scene.getObjectById(selectable[i])
+        scene.getObjectById(selectable[i]).makeSelectable(function(){
+            setHighlightMaterial(this, selected_mat)
+        }, function(){
+            if (this.highlightMaterial == selected_mat) setHighlightMaterial(this, null)
+        })
+        obj.highlightMaterial = null
+    }
+    
+    // bullstuff drag just uses global x, z
+    for (i in dragable) {
+        scene.getObjectById(dragable[i]).makeDragable(function(){
+            this.dragStartLocX = parseFloat(this.getLocX()) ///	wtf? strings?
+            this.dragStartLocZ = parseFloat(this.getLocZ())
+        }, function(dx, dy){
+            this.setLocX(this.dragStartLocX - dx * .04)
+            this.setLocZ(this.dragStartLocZ - dy * .04)
+        })
+	}
+    
+    //scene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
+    //	alert("MONKEY BIDNESS!")
+    //	document.getElementById("canvas").buttonState[0]=false			///	kluge to fix bug where alert() makes GLGE miss mouseUp
+    //})
+    
+    scene.getObjectById("teapotobject").makeClickableCallback(function(x, y){
+        alert("Would you have some tea?")
+        document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
+    })
+    
+    scene.getObjectById("crate").makeClickableCallback(function(x, y){
+        var p = this.getPositions()
+        pdebug("crate positions length: " + p.length)
+        
+        // create raycast from camera to mouse xy
+        var cam = scene.camera
+        var mro = Matrix.rotMat(cam.getRotX(), cam.getRotY(), cam.getRotZ())
+        var mlo = Matrix.transMat(cam.getLocX(), cam.getLocY(), cam.getLocZ())
+        var mat = mlo.x(mro) // camera matrix    
+        var mousepos = scene.mouse.getMousePosition();
+        var w = 900.0
+        var h = 500.0
+        var mx = mousepos.x - document.getElementById("container").offsetLeft;
+        var my = mousepos.y - document.getElementById("container").offsetTop;
+        var focal = 1.1
+        mx = focal * (mx / w - 0.5)
+        my = -focal * (h / w) * (my / h - 0.5)
+        pdebug("mx: " + mx + " my: " + my)
+        var v = Vector.create([mx, my, -1, 1]) // camera points along -Z axis
+        v = mat.x(v) // transform to camera matrix
+        var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
+        var vP0 = Vector.create(P0)
+        var P1 = [v.e(1), v.e(2), v.e(3)]
+        var R = [P0, P1]
+        pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
+        
+        // get wall matrix
+        mro = Matrix.rotMat(this.getRotX(), this.getRotY(), this.getRotZ()) // our rotation matrix
+        mlo = Matrix.transMat(this.getLocX(), this.getLocY(), this.getLocZ()) // our location matrix
+        mat = mlo.x(mro) // our full matrix
+        // scale wall vertices
+        var sx = parseFloat(this.getScaleX())
+        var sy = parseFloat(this.getScaleY())
+        var sz = parseFloat(this.getScaleZ())
+        var minI = null
+        var mindist = 999999.9
+        for (var i = 0; i < p.length; i += 9) { // for each tri
+            var A = Vector.create([sx * p[i], sy * p[i + 1], sz * p[i + 2], 1]) // get vertex points for triangle ABC
+            var B = Vector.create([sx * p[i + 3], sy * p[i + 4], sz * p[i + 5], 1])
+            var C = Vector.create([sx * p[i + 6], sy * p[i + 7], sz * p[i + 8], 1])
+            A = mat.x(A) // convert them to global coords
+            B = mat.x(B)
+            C = mat.x(C)
+            var T = [A.elements.slice(0, 3), B.elements.slice(0, 3), C.elements.slice(0, 3)]
+            //		pdebug("T: " + T)
+            var I = intersect_RayTriangle(R, T)
+            if (I) {
+                dist = vP0.distanceFrom(I)
+                if (dist < mindist) {
+                    mindist = dist
+                    minI = I
+                }
+                //			pdebug("intersect: " + I.elements + " dist: " + dist)
+                //			pdebug("T = [[" + T[0] +"],[ "+ T[1] +"],["+ T[2]+"]]")
             }
         }
-        old_leftbutton = leftbutton
-    }
-}
-
-function checkkeys(){
-	var camera=gameScene.camera;
-	camerapos=camera.getPosition();
-	camerarot=camera.getRotation();
-	var trans=camera.getRotMatrix().inverse().x($V([0,0,-1])).flatten();
-	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
-	trans[0]=trans[0]/mag;
-	trans[1]=trans[1]/mag;
-	var yinc=0;
-	var xinc=0;
-
-	if(keys.isKeyPressed(GLGE.KI_M)) {spotlight1.setRotX(parseFloat(spotlight1.getRotX())+parseFloat(0.01));}
-	if(keys.isKeyPressed(GLGE.KI_N)) {spotlight1.setRotX(parseFloat(spotlight1.getRotX())-parseFloat(0.01));}
-	if(keys.isKeyPressed(GLGE.KI_W)) {yinc=yinc+parseFloat(trans[1]);xinc=xinc+parseFloat(trans[0]);}
-	if(keys.isKeyPressed(GLGE.KI_UP_ARROW)) {yinc=yinc+parseFloat(trans[1]);xinc=xinc+parseFloat(trans[0]);}
-	if(keys.isKeyPressed(GLGE.KI_S)) {yinc=yinc-parseFloat(trans[1]);xinc=xinc-parseFloat(trans[0]);}
-	if(keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {yinc=yinc-parseFloat(trans[1]);xinc=xinc-parseFloat(trans[0]);}
-	if(keys.isKeyPressed(GLGE.KI_A)) {yinc=yinc+parseFloat(trans[0]);xinc=xinc-parseFloat(trans[1]);}
-	if(keys.isKeyPressed(GLGE.KI_D)) {yinc=yinc-parseFloat(trans[0]);xinc=xinc+parseFloat(trans[1]);}
-	if(keys.isKeyPressed(GLGE.KI_U)) {inc -= 0.025}
-	if(keys.isKeyPressed(GLGE.KI_J)) {inc += 0.025}
-	if(keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {
-		camera.setRotY(camerarot.y+0.025);
-	}
-	if(keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {
-		camera.setRotY(camerarot.y-0.025);
-	}
-	pdebug("levelmap: " + levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc),5)
-	if(levelmap.getHeightAt(camerapos.x+xinc,camerapos.y)>30) xinc=0;
-	if(levelmap.getHeightAt(camerapos.x,camerapos.y+yinc)>30) yinc=0;
+        if (minI == null) {
+            pdebug("no intersection found " + I + " mindist: " + mindist)
+        }
+        else {
+            var monk = scene.getObjectById("monkeyobject")
+            monk.setLocX(minI.elements[0])
+            monk.setLocY(minI.elements[1])
+            monk.setLocZ(minI.elements[2])
+            monk.setRotX(this.getRotX())
+            monk.setRotY(this.getRotY())
+            monk.setRotZ(this.getRotZ())
+            pdebug("intersect: " + minI.elements + " dist: " + mindist)
+            pdebug("T = [[" + T[0] + "],[ " + T[1] + "],[" + T[2] + "]]")
+        }
+    })
     
-    if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) {
-        yinc = 0;
-        xinc = 0;
-    }
-    else {
-        camera.setLocZ(levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
-    }
-	if(xinc!=0 || yinc!=0){
-		camera.setLocY(camerapos.y+yinc);camera.setLocX(camerapos.x+xinc);
-	}
-	camera.setRotX(1.56-trans[1]*inc);
-	camera.setRotZ(-trans[0]*inc);
-}
-
-
-levelmap=new GLGE.HeightMap("images/map.png",120,120,-50,50,-50,50,0,50);
-
-
-var lasttime=0;
-var frameratebuffer=60;
-start=parseInt(new Date().getTime());
-var cnt=0;
-function render(){
-    var now=parseInt(new Date().getTime());
-    cnt=(cnt+1)%10;
-    if(cnt==0){
-	    frameratebuffer=Math.round(((frameratebuffer*9)+1000/(now-lasttime))/10);
-	    document.getElementById("debug").innerHTML="Frame Rate:"+frameratebuffer;
-    }
-    lasttime=now;
-    mouselook();
-    checkkeys();
-    gameRenderer.render();
-}
-setInterval(render,15);
-var inc=0.2;
-//document.getElementById("canvas").onmousedown=function(e){gameScene.pick(e.clientX-this.parentNode.offsetLeft,e.clientY-this.parentNode.offsetTop); }
-document.getElementById("canvas").onmouseover=function(e){mouseovercanvas=true;}
-document.getElementById("canvas").onmousemove=function(e){mouseovercanvas=true;}
-document.getElementById("canvas").onmouseout=function(e){mouseovercanvas=false;}
-
-//pdebug("monkey object:" + gameScene.getObjectById("monkeyobject") + " is " + gameScene.getObjectById("monkeyobject").id)
-
-var hoverable = ["crate2", "crate3", "crate5"]
-var selectable = ["crate2", "crate5"]
-var dragable = ["crate", "crate4", "crate5"]
-
-// hover cyan
-for (i in hoverable) gameScene.getObjectById(hoverable[i]).makeHoverable(
-	function () {
-		if (this.status != "selected") this.setHighlight("hover")
-	},
-	function () {
-		if (this.status != "selected") this.setHighlight(null)
-	}
-)
-
-// selected are purple
-for (i in selectable) gameScene.getObjectById(selectable[i]).makeSelectable(
-	function () {
-		this.setHighlight("selected")		
-	},
-	function () {
-		if (this.status == "selected") this.setHighlight(null)
-	}
-)
-
-// bullstuff drag just uses global x, z
-for (i in dragable) gameScene.getObjectById(dragable[i]).makeDragable(
-	function () {
-		this.dragStartLocX = parseFloat(this.getLocX())			///	wtf? strings?
-		this.dragStartLocZ = parseFloat(this.getLocZ())				
-	},
-	function (dx, dy) {
-		this.setLocX(this.dragStartLocX-dx*.04)
-		this.setLocZ(this.dragStartLocZ-dy*.04)
-	}
-)
-
-//gameScene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
-//	alert("MONKEY BIDNESS!")
-//	document.getElementById("canvas").buttonState[0]=false			///	kluge to fix bug where alert() makes GLGE miss mouseUp
-//})
-
-gameScene.getObjectById("teapotobject").makeClickableCallback(function(x,y) {
-	alert("Would you have some tea?")
-	document.getElementById("canvas").buttonState[0]=false			///	kluge to fix bug where alert() makes GLGE miss mouseUp
-})
-
-gameScene.getObjectById("crate").makeClickableCallback(function(x,y) {
-	var p = this.getPositions()
-    pdebug("crate positions length: " + p.length)
-    
-	// create raycast from camera to mouse xy
-    var cam = gameScene.camera
-    var mro = Matrix.rotMat(cam.getRotX(), cam.getRotY(), cam.getRotZ())
-    var mlo = Matrix.transMat(cam.getLocX(), cam.getLocY(), cam.getLocZ())
-    var mat = mlo.x(mro) // camera matrix    
-    var mousepos = mouse.getMousePosition();
-	var w = 900.0
-	var h = 500.0
-    var mx = mousepos.x - document.getElementById("container").offsetLeft;
-    var my = mousepos.y - document.getElementById("container").offsetTop;
-	var focal = 1.1
-	mx = focal * (mx/w - 0.5)
-	my = -focal*(h/w) * (my/h - 0.5)
-	pdebug ("mx: " + mx + " my: " + my)
-    var v = Vector.create([mx, my, -1, 1]) // camera points along -Z axis
-	v = mat.x(v)																			// transform to camera matrix
-    var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
-	var vP0 = Vector.create(P0)
-    var P1 = [v.e(1), v.e(2), v.e(3)]
-    var R = [P0, P1]																		// this is our ray (FIXME: need to use mouse!!)
-	pdebug("R = [[" + R[0]+"],["+R[1]+"]]")
-
-    // get wall matrix
-    mro = Matrix.rotMat(this.getRotX(), this.getRotY(), this.getRotZ()) 				// our rotation matrix
-	mlo = Matrix.transMat(this.getLocX(), this.getLocY(), this.getLocZ())				// our location matrix
-	mat = mlo.x(mro)																	// our full matrix
-
-	// scale wall vertices
-	var sx = parseFloat(this.getScaleX())
-	var sy = parseFloat(this.getScaleY())
-	var sz = parseFloat(this.getScaleZ())
-	var minI = null
-	var mindist = 999999.9
-	for (var i=0; i<p.length; i+=9) {															// for each tri
-		var A = Vector.create([sx*p[i],sy*p[i+1],sz*p[i+2],1])								// get vertex points for triangle ABC
-		var B = Vector.create([sx*p[i+3],sy*p[i+4],sz*p[i+5],1])
-		var C = Vector.create([sx*p[i+6],sy*p[i+7],sz*p[i+8],1])
-		A = mat.x(A)																		// convert them to global coords
-		B = mat.x(B)
-		C = mat.x(C)
-		var T = [A.elements.slice(0,3), B.elements.slice(0,3), C.elements.slice(0,3)]
-//		pdebug("T: " + T)
-		var I = intersect_RayTriangle(R, T)
-		if(I) {
-			dist = vP0.distanceFrom(I)
-			if(dist<mindist) {
-				mindist=dist
-				minI = I
-			}
-//			pdebug("intersect: " + I.elements + " dist: " + dist)
-//			pdebug("T = [[" + T[0] +"],[ "+ T[1] +"],["+ T[2]+"]]")
-		}
-	}    
-    if (minI == null) {
-        pdebug("no intersection found " + I + " mindist: " + mindist)
-    }
-    else {
-        var monk = gameScene.getObjectById("monkeyobject")
-        monk.setLocX(minI.elements[0])
-        monk.setLocY(minI.elements[1])
-        monk.setLocZ(minI.elements[2])
-		monk.setRotX(this.getRotX())
-		monk.setRotY(this.getRotY())
-		monk.setRotZ(this.getRotZ())
-        pdebug("intersect: " + minI.elements + " dist: " + mindist)
-        pdebug("T = [[" + T[0] + "],[ " + T[1] + "],[" + T[2] + "]]")        
-    }
-})
-
 }
 </script>
 
