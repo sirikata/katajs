@@ -59,7 +59,7 @@
 	<scene id="mainscene" camera="#maincamera" ambient_color="#666">
 		<object id="wallobject" mesh="#cube" scale_x="10" scale_y="10" scale_z="10" material="#wallmaterial" />
 		<object id="crate" loc_y="0"  loc_x="0" mesh="#cube2" scale_x="10" scale_y="1" scale_z="6" rot_Z="2.5" material="#box" />
-		<object id="crate2" loc_y="20"  loc_x="-3" mesh="#cube2" scale_x="2" scale_y="2" scale_z="2" material="#box" />
+		<object id="crate2" loc_y="0"  loc_x="10" mesh="#cube2" scale_x="2" scale_y="2" scale_z="2" material="#box" />
 		<object id="crate4" loc_y="25"  loc_x="-10" mesh="#cube2" scale_x="2" scale_y="2" scale_z="2" material="#box" />
 		<object id="crate5" loc_y="25"  loc_x="-10" loc_z="4" rot_z="1" mesh="#cube2" scale_x="1" scale_y="4" scale_z="2" material="#box" />
 		<object id="monkeyobject" loc_y="-10"  rot_z="3.141" loc_x="-3" loc_z="4" mesh="#monkey" scale_x="1" scale_y="1" scale_z="1" material="#gold" />

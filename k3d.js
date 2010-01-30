@@ -3,7 +3,7 @@
  */
 K3D = {}
 
-function addProtoSafely(cls, proto, func){
+K3D.addProtoSafely = function (cls, proto, func){
     if (cls.prototype[proto] != null) {
         alert("oh no! This prototype already exists: " + proto)
     }
@@ -14,7 +14,7 @@ function addProtoSafely(cls, proto, func){
 
 // add getObjectById method to Scene
 
-addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
+K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 	for(var i=0; i<this.objects.length; i++) {
 		if (this.objects[i].id==id) return this.objects[i]
 	}
@@ -23,7 +23,7 @@ addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 
 // add makeDragable to Object.
 
-addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
+K3D.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 	this.dragable = true
 	this.dragStartCb = cbStart
 	this.dragUpdateCb = cbUpdate
@@ -39,7 +39,7 @@ addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 
 // add makeHoverable to Object.
 
-addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
+K3D.addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
 	this.hoverable = true
 	this.hoverStart = cbStart
 	this.hoverStop = cbEnd
@@ -47,13 +47,13 @@ addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
 
 // add makeSelectable to Object.
 
-addProtoSafely(GLGE.Object, "makeSelectable", function(cbSelect, cbDeselect) {
+K3D.addProtoSafely(GLGE.Object, "makeSelectable", function(cbSelect, cbDeselect) {
 	this.selectable = true
 	this.selectStart = cbSelect
 	this.selectStop = cbDeselect
 })
 
-addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
+K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
 	this.clickable = true
 	this.clickCallbackDown = cbDown
 	this.clickCallbackUp = cbUp
@@ -66,7 +66,7 @@ addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
 })
 
 // get position buffer
-addProtoSafely(GLGE.Object, "getPositions", function() {
+K3D.addProtoSafely(GLGE.Object, "getPositions", function() {
 	for (i in this.mesh.buffers) {
 		if(this.mesh.buffers[i].name=="position") posbuf = this.mesh.buffers[i].data 
 	}
@@ -74,12 +74,12 @@ addProtoSafely(GLGE.Object, "getPositions", function() {
 })
 
 // does a ray intersect this object? return null or point
-addProtoSafely(GLGE.Object, "rayIntersect", function() {
+K3D.addProtoSafely(GLGE.Object, "rayIntersect", function() {
 	
 })
 
 K3D.init = function (){
-    //create the renderer.  
+    //create the K3D.renderer.  
     K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
     K3D.gameScene = doc.getElement("mainscene");
     K3D.gameRenderer.setScene(K3D.gameScene);
@@ -101,11 +101,11 @@ K3D.init = function (){
 	K3D.frameRateBuffer=60;
 	K3D.cnt=0;
 	K3D.inc=0.2;
-	setInterval(render,15);
+	setInterval(K3D.render,15);
 	return K3D.gameScene
 }
 
-function mouselook(){
+K3D.mouselook = function(){
     if (K3D.mouseovercanvas) {
         var mousepos = K3D.gameScene.mouse.getMousePosition();
         var leftbutton = K3D.gameScene.mouse.isButtonDown(0)
@@ -141,7 +141,7 @@ function mouselook(){
     }
 }
 
-function checkkeys(){
+K3D.checkkeys = function (){
 	var camera=K3D.gameScene.camera;
 	camerapos=camera.getPosition();
 	camerarot=camera.getRotation();
@@ -185,7 +185,7 @@ function checkkeys(){
 }
 
 
-function render(){
+K3D.render = function (){
     var now=parseInt(new Date().getTime());
     K3D.cnt=(K3D.cnt+1)%10;
     if(K3D.cnt==0){
@@ -193,7 +193,7 @@ function render(){
 	    document.getElementById("debug").innerHTML="Frame Rate:"+K3D.frameRateBuffer;
     }
     K3D.lasttime=now;
-    mouselook();
-    checkkeys();
+    K3D.mouselook();
+    K3D.checkkeys();
     K3D.gameRenderer.render();
 }
