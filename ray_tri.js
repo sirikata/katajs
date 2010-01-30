@@ -3,6 +3,16 @@
 */
 
 function intersect_RayTriangle(R, T) {
+	for(var i=0; i<3; i++) {
+		for(var j=0; j<3; j++) {
+			if(typeof(T[i][j])!="number") alert("NOOO!!! " + T[i][j] + " " + typeof(T[i][j]))
+		}
+	}
+	for(var i=0; i<2; i++) {
+		for(var j=0; j<3; j++) {
+			if(typeof(R[i][j])!="number") alert("NOOOoo!!!" + R[i][j] + " " + typeof(R[i][j]) )
+		}
+	}
 	var u,v,n
 	var dir,w0,w
 	var r,a,b,R0
