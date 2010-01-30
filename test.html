@@ -174,7 +174,7 @@ var hoverable = ["crate2", "crate3", "crate5"]
 var selectable = ["crate2", "crate5"]
 var dragable = ["crate", "crate4", "crate5"]
 
-
+// hover cyan
 for (i in hoverable) gameScene.getObjectById(hoverable[i]).makeHoverable(
 	function () {
 		if (this.status != "selected") this.setHighlight("hover")
@@ -184,8 +184,15 @@ for (i in hoverable) gameScene.getObjectById(hoverable[i]).makeHoverable(
 	}
 )
 
-
-for (i in selectable) gameScene.getObjectById(selectable[i]).makeSelectablePurple()
+// selected are purple
+for (i in selectable) gameScene.getObjectById(selectable[i]).makeSelectable(
+	function () {
+		this.setHighlight("selected")		
+	},
+	function () {
+		if (this.status == "selected") this.setHighlight(null)
+	}
+)
 
 // bullstuff drag just uses global x, z
 for (i in dragable) gameScene.getObjectById(dragable[i]).makeDragable(
