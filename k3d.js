@@ -61,22 +61,10 @@ addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 
 // add makeHoverable to Object.
 
-addProtoSafely(GLGE.Object, "makeHoverableCyan", function() {
+addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
 	this.hoverable = true
-	this.hoverStart = function (mouse_x, mouse_y) {
-		//pdebug ("hoverStart " + this.id)
-		if (this.status != "selected") this.setHighlight("hover")
-		//pdebug(".status:"+this.status)
-	}
-
-	this.hoverStop = function (mouse_x, mouse_y) {
-		//pdebug ("hoverStop " + this.id)
-		//pdebug(".status:"+this.status)
-		if (this.status != "selected") {
-			//pdebug("  setHighlight null")
-			this.setHighlight(null)
-		}
-	}
+	this.hoverStart = cbStart
+	this.hoverStop = cbEnd
 })
 
 // add makeSelectable to Object.
