@@ -131,32 +131,42 @@ doc.onLoad = function(){
         }
     })
     */    
-
-	// stop dragging my monkey around! (drag on wall & whatever else is under cursor)
+    
+    // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
     scene.getObjectById("monkeyobject").makeDragable(
 	function(x, y){
-		pdebug("monkeydragStart xy:" + x + "," + y,7)
-		this.dragOnWallStartX = x
-		this.dragOnWallStartY = y
-    }, 
+        pdebug("monkeydragStart xy:" + x + "," + y, 7)
+        this.dragOnWallStartX = x
+        this.dragOnWallStartY = y
+    },
 	function(dx, dy){
-		x = this.dragOnWallStartX + dx
-		y = this.dragOnWallStartY + dy
-		over = scene.pick(x, y)
-		if (over !== this) {
-			place = over.getPickPoint(x, y)
-			if (place) {
-				pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over.id + " place: " + place,8)
-	            this.setLocX(place[0])
-	            this.setLocY(place[1])
-	            this.setLocZ(place[2]-1)			// monkey center is on chin, place nose under cursor
-	            this.setRotX(this.getRotX())
-	            this.setRotY(this.getRotY())
-	            this.setRotZ(this.getRotZ())
-			}
-		}
-	})
+        var x = this.dragOnWallStartX + dx
+        var y = this.dragOnWallStartY + dy
+        var dragOns = ["wallobject", "crate"]
+        var dist = 9999999.9
+        var place = null
+        for (i in dragOns) {
+            var over = scene.getObjectById(dragOns[i]);
+			var pd = over.getPickPoint(x, y)
+            if (pd) {
+                if (pd[1] < dist) {
+                    place = pd[0]
+                    dist = pd[1]
+                }
+            }
+        }
+        if (place) {
+            pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over.id + " place: " + place, 8)
+            this.setLocX(place[0])
+            this.setLocY(place[1])
+            this.setLocZ(place[2] - 1) // monkey center is on chin, place nose under cursor
+            this.setRotX(this.getRotX())
+            this.setRotY(this.getRotY())
+            this.setRotZ(this.getRotZ())
+        }
+    })
 }
+
 </script>
 
 <div id="dbg0"></div>

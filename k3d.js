@@ -198,7 +198,7 @@ K3D.render = function (){
     K3D.gameRenderer.render();
 }
 
-//  return point at which mouse picks object, or null
+//  return point at which mouse picks object + distance from camera, or null
 
 K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     // create raycast from camera to mouse xy
@@ -256,6 +256,6 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
 		return null
     }
     else {
-		return (minI.elements)
+		return [minI.elements, mindist]
     }
 })
