@@ -11,7 +11,8 @@
 // modifications (c) 2010 Katalabs, inc.
 */
 
-function ray_tri_intersect(R, T) {
+// R = ray T = triangle N = (optional) array to fill with normal
+function ray_tri_intersect(R, T, N) {
 	/*
 	for(var i=0; i<3; i++) {
 		for(var j=0; j<3; j++) {
@@ -30,6 +31,7 @@ function ray_tri_intersect(R, T) {
 	u = Vector.create(T[1]).subtract(T[0])
 	v = Vector.create(T[2]).subtract(T[0])
 	n = u.cross(v)
+	if (N) N[0] = n.toUnitVector().elements
 	R0 = Vector.create(R[0])
 	dir = Vector.create(R[1]).subtract(R[0])
 	w0 = R0.subtract(T[0])

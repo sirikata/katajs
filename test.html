@@ -127,7 +127,7 @@ doc.onLoad = function(){
         var placeIndex = K3D.getNearestObject(dragOns)
         if (placeIndex) {
 			var place = placeIndex[0]; var over = dragOns[placeIndex[1]]
-            pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over + " place: " + place, 8)
+            pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over + " place: " + place + " norm: " + placeIndex[2], 8)
 			over = scene.getObjectById(over)
             this.setLocX(place[0])
             this.setLocY(place[1])

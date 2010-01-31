@@ -232,6 +232,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     var sz = parseFloat(this.getScaleZ())
     var minI = null
     var mindist = 999999.9
+	var minN = null
 	// get vertex coords
     var p = this.getPositions()
     for (var i = 0; i < p.length; i += 9) { // for each tri
@@ -243,12 +244,14 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
         C = mat.x(C)
         var T = [A.elements.slice(0, 3), B.elements.slice(0, 3), C.elements.slice(0, 3)]
         //		pdebug("T: " + T)
-        var I = ray_tri_intersect(R, T)
+		var N = []
+        var I = ray_tri_intersect(R, T, N)
         if (I) {
             dist = vP0.distanceFrom(I)
             if (dist < mindist) {
                 mindist = dist
                 minI = I
+				minN = N
             }
         }
     }
@@ -256,7 +259,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
 		return null
     }
     else {
-		return [minI.elements, mindist]
+		return [minI.elements, mindist, minN]
     }
 })
 
@@ -266,19 +269,21 @@ K3D.getNearestObject = function (olist) {
     var dist = 9999999.9
     var place = null
 	var hit = null
+	var norm = null
     for (var i in olist) {
 		var obj = olist[i]
 		if (typeof(obj)=="string") obj = K3D.gameScene.getObjectById(obj)
-		var pd = obj.getPickPoint()
-        if (pd) {
-            if (pd[1] < dist) {
-                place = pd[0]
-                dist = pd[1]
+		var pdn = obj.getPickPoint()
+        if (pdn) {
+            if (pdn[1] < dist) {
+                place = pdn[0]
+                dist = pdn[1]
 				hit = i
+				norm = pdn[2]
             }
         }
     }
 	if (place)
-		return [place, hit]
+		return [place, hit, norm]
 	return null
 }
