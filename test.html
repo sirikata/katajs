@@ -50,7 +50,7 @@ doc.onLoad = function(){
 //    pdebug("selected_mat: " + selected_mat + "hover_mat:" + hover_mat)
     
     var hoverable = ["crate2", "crate3", "crate5"]
-    var selectable = ["crate2", "crate5"]
+    var selectable = ["crate2", "crate5", "monkeyobject"]
     var dragable = ["crate", "crate4", "crate5"]
     
     // function to safely set material and save original for highlighting (hover/select)
@@ -128,12 +128,13 @@ doc.onLoad = function(){
         if (placeIndex) {
 			var place = placeIndex[0]; var over = dragOns[placeIndex[1]]
             pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over + " place: " + place, 8)
+			over = scene.getObjectById(over)
             this.setLocX(place[0])
             this.setLocY(place[1])
             this.setLocZ(place[2] - 1) // monkey center is on chin, place nose under cursor
-            this.setRotX(this.getRotX())
-            this.setRotY(this.getRotY())
-            this.setRotZ(this.getRotZ())
+            this.setRotX(over.getRotX())
+            this.setRotY(over.getRotY())
+            this.setRotZ(over.getRotZ())
         }
     })
 }
