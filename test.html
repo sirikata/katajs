@@ -55,6 +55,29 @@ setHighlightMaterial = function(obj, material){
     }
 }
 
+dragWallStart = function(x, y){
+    pdebug("dragWallStart: " + this.id + " xy:" + x + "," + y, 7)
+}
+
+dragWallUpdate = function(dx, dy){
+    var placeIndex = K3D.getNearestObject(g_dragOns)
+    if (placeIndex) {
+        var place = placeIndex[0]
+        var over = g_dragOns[placeIndex[1]]
+        var norm = Vector.create(placeIndex[2])
+        var angZ = norm.angleFrom([1, 0, 0])
+        if (norm.cross([1, 0, 0]).e(3) > 0) angZ = -angZ /// assuming approximately vertical
+        pdebug("dragWallUpdate: " + this.id + " over: " + over + " place: " + place + " ang: " + angZ + " norm: " + norm.elements, 8)
+        over = scene.getObjectById(over)
+        this.setLocX(place[0])
+        this.setLocY(place[1])
+        this.setLocZ(place[2] - 1) // monkey center is on chin, place nose under cursor
+        this.setRotX(over.getRotX())
+        this.setRotY(over.getRotY())
+        this.setRotZ(angZ + Math.PI * .5)
+    }
+}
+
 doc.onLoad = function(){
     scene = K3D.init()
     
@@ -63,7 +86,9 @@ doc.onLoad = function(){
     var hoverable = ["monkeyobject", "teapotobject"]
     var selectable = ["crate", "crate2", "crate5", "monkeyobject"]
     var dragable = ["crate", "crate2", "crate5"]
-    
+	var dragWallable = ["monkeyobject", "crate3"]
+    g_dragOns = ["wallobject", "crate", "crate2", "crate4", "crate5"]
+
     // hover cyan
     for (i in hoverable) {
         obj = scene.getObjectById(hoverable[i])
@@ -109,33 +134,9 @@ doc.onLoad = function(){
     })
     
     // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
-    scene.getObjectById("monkeyobject").makeDragable(
-	function(x, y){
-        pdebug("monkeydragStart xy:" + x + "," + y, 7)
-        this.dragOnWallStartX = x
-        this.dragOnWallStartY = y
-    },
-	function(dx, dy){
-        var x = this.dragOnWallStartX + dx
-        var y = this.dragOnWallStartY + dy
-		dragOns = ["wallobject", "crate", "crate2", "crate3", "crate4", "crate5"]
-        var placeIndex = K3D.getNearestObject(dragOns)
-        if (placeIndex) {
-			var place = placeIndex[0]
-			var over = dragOns[placeIndex[1]]
-			var norm = Vector.create(placeIndex[2])
-			var angZ = norm.angleFrom([1,0,0])
-			if (norm.cross([1,0,0]).e(3) > 0) angZ = -angZ			/// assuming approximately vertical
-            pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over + " place: " + place + " ang: " +  angZ + " norm: " + norm.elements, 8)
-			over = scene.getObjectById(over)
-            this.setLocX(place[0])
-            this.setLocY(place[1])
-            this.setLocZ(place[2] - 1) // monkey center is on chin, place nose under cursor
-            this.setRotX(over.getRotX())
-            this.setRotY(over.getRotY())
-            this.setRotZ(angZ+Math.PI*.5)
-        }
-    })
+	for (i in dragWallable) {
+	    scene.getObjectById(dragWallable[i]).makeDragable(dragWallStart, dragWallUpdate)
+	}
 }
 
 </script>
