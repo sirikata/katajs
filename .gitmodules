@@ -1,3 +1,9 @@
 [submodule "GLGE"]
 	path = GLGE
 	url = git://github.com/danielrh/GLGE.git
+[submodule "web-socket-js"]
+	path = web-socket-js
+	url = git://github.com/gimite/web-socket-js.git
+[submodule "protojs"]
+	path = protojs
+	url = git://github.com/sirikata/protojs.git
