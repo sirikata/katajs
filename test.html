@@ -113,7 +113,7 @@ doc.onLoad = function(){
         document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
     })
     
-    scene.getObjectById("crate").makeClickableCallback(function(x, y){
+    scene.getObjectById("wallobject").makeClickableCallback(function(x, y){
 		I = this.getPickPoint()
         if (I == null) {
             pdebug("no pick point found, mouse not over object")

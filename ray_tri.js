@@ -24,9 +24,9 @@ function ray_tri_intersect(R, T) {
 		}
 	}
 	*/
-	var u,v,n
-	var dir,w0,w
-	var r,a,b,R0
+	var u,v,n,uu,uv,vv
+	var dir,w0,w,wu,wv
+	var r,a,b,R0,I,D,s,t
 	u = Vector.create(T[1]).subtract(T[0])
 	v = Vector.create(T[2]).subtract(T[0])
 	n = u.cross(v)
@@ -35,10 +35,9 @@ function ray_tri_intersect(R, T) {
 	w0 = R0.subtract(T[0])
 	a = -n.dot(w0)
 	b = n.dot(dir)
-	if (Math.abs(b) < 0.0001) return null
-	r = a/b							/// note if b==0 this returns NaN's
-    if (r < 0.0)                    // ray goes away from triangle
-        return null;                  // => no intersect
+	if (Math.abs(b) < 0.0001) return null		// parallel or lies on tri
+	r = a/b
+    if (r < 0.0) return null                    // ray goes away from triangle
     // for a segment, also test if (r > 1.0) => no intersect
 	I = R0.add(dir.multiply(r))
     // is I inside T?
