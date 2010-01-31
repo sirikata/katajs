@@ -60,9 +60,9 @@ doc.onLoad = function(){
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    var hoverable = ["crate2", "crate3", "crate5", "monkeyobject"]
-    var selectable = ["crate2", "crate5", "monkeyobject"]
-    var dragable = ["crate", "crate4", "crate5"]
+    var hoverable = ["monkeyobject", "teapotobject"]
+    var selectable = ["crate", "crate2", "crate5", "monkeyobject"]
+    var dragable = ["crate", "crate2", "crate5"]
     
     // hover cyan
     for (i in hoverable) {
@@ -118,7 +118,7 @@ doc.onLoad = function(){
 	function(dx, dy){
         var x = this.dragOnWallStartX + dx
         var y = this.dragOnWallStartY + dy
-		dragOns = ["wallobject", "crate"]
+		dragOns = ["wallobject", "crate", "crate2", "crate3", "crate4", "crate5"]
         var placeIndex = K3D.getNearestObject(dragOns)
         if (placeIndex) {
 			var place = placeIndex[0]
