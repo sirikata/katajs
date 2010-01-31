@@ -30,7 +30,7 @@ K3D.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 	this.dragStart = function (mouse_x, mouse_y) {
 		this.dragStartMouseX = mouse_x
 		this.dragStartMouseY = mouse_y
-		this.dragStartCb()
+		this.dragStartCb(mouse_x, mouse_y)
 	}
 	this.dragUpdate = function (mouse_x, mouse_y) {
 		this.dragUpdateCb(mouse_x-this.dragStartMouseX, mouse_y-this.dragStartMouseY)
