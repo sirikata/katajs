@@ -38,6 +38,23 @@ height="500"></canvas>
 <script type="text/javascript">
 
 doc = new GLGE.Document("level.xml");
+
+// function to safely set material and save original for highlighting (hover/select)
+setHighlightMaterial = function(obj, material){
+    if (material != obj.highlightMaterial) {
+        if (material == null) {
+            obj.setMaterial(obj.originalMaterial)
+        }
+        else {
+            if (obj.highlightMaterial == null) {
+                obj.originalMaterial = obj.getMaterial()
+            }
+            obj.setMaterial(material)
+        }
+        obj.highlightMaterial = material
+    }
+}
+
 doc.onLoad = function(){
     scene = K3D.init()
     
@@ -52,22 +69,6 @@ doc.onLoad = function(){
     var hoverable = ["crate2", "crate3", "crate5"]
     var selectable = ["crate2", "crate5", "monkeyobject"]
     var dragable = ["crate", "crate4", "crate5"]
-    
-    // function to safely set material and save original for highlighting (hover/select)
-    setHighlightMaterial = function(obj, material){
-        if (material != obj.highlightMaterial) {
-            if (material == null) {
-                obj.setMaterial(obj.originalMaterial)
-            }
-            else {
-                if (obj.highlightMaterial == null) {
-                    obj.originalMaterial = obj.getMaterial()
-                }
-                obj.setMaterial(material)
-            }
-            obj.highlightMaterial = material
-        }
-    }
     
     // hover cyan
     for (i in hoverable) {
