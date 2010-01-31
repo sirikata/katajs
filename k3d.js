@@ -251,7 +251,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
             if (dist < mindist) {
                 mindist = dist
                 minI = I
-				minN = N
+				minN = N[0]
             }
         }
     }

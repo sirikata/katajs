@@ -126,15 +126,19 @@ doc.onLoad = function(){
 		dragOns = ["wallobject", "crate"]
         var placeIndex = K3D.getNearestObject(dragOns)
         if (placeIndex) {
-			var place = placeIndex[0]; var over = dragOns[placeIndex[1]]
-            pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over + " place: " + place + " norm: " + placeIndex[2], 8)
+			var place = placeIndex[0]
+			var over = dragOns[placeIndex[1]]
+			var norm = Vector.create(placeIndex[2])
+			var angZ = norm.angleFrom([1,0,0])
+			if (norm.cross([1,0,0]).e(3) > 0) angZ = -angZ			/// assuming approximately vertical
+            pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over + " place: " + place + " ang: " +  angZ + " norm: " + norm.elements, 8)
 			over = scene.getObjectById(over)
             this.setLocX(place[0])
             this.setLocY(place[1])
             this.setLocZ(place[2] - 1) // monkey center is on chin, place nose under cursor
             this.setRotX(over.getRotX())
             this.setRotY(over.getRotY())
-            this.setRotZ(over.getRotZ())
+            this.setRotZ(angZ+Math.PI*.5)
         }
     })
 }
