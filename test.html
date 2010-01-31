@@ -113,25 +113,6 @@ doc.onLoad = function(){
         document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
     })
     
-	/*
-    scene.getObjectById("wallobject").makeClickableCallback(function(x, y){
-		I = this.getPickPoint()
-        if (I == null) {
-            pdebug("no pick point found, mouse not over object")
-        }
-        else {
-            pdebug("Placing my monkey at:" +I, 6)
-            var monk = scene.getObjectById("monkeyobject")
-            monk.setLocX(I[0])
-            monk.setLocY(I[1])
-            monk.setLocZ(I[2])
-            monk.setRotX(this.getRotX())
-            monk.setRotY(this.getRotY())
-            monk.setRotZ(this.getRotZ())
-        }
-    })
-    */    
-    
     // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
     scene.getObjectById("monkeyobject").makeDragable(
 	function(x, y){
@@ -142,21 +123,11 @@ doc.onLoad = function(){
 	function(dx, dy){
         var x = this.dragOnWallStartX + dx
         var y = this.dragOnWallStartY + dy
-        var dragOns = ["wallobject", "crate"]
-        var dist = 9999999.9
-        var place = null
-        for (i in dragOns) {
-            var over = scene.getObjectById(dragOns[i]);
-			var pd = over.getPickPoint(x, y)
-            if (pd) {
-                if (pd[1] < dist) {
-                    place = pd[0]
-                    dist = pd[1]
-                }
-            }
-        }
-        if (place) {
-            pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over.id + " place: " + place, 8)
+		dragOns = ["wallobject", "crate"]
+        var placeIndex = K3D.getNearestObject(dragOns)
+        if (placeIndex) {
+			var place = placeIndex[0]; var over = dragOns[placeIndex[1]]
+            pdebug("monkeydragUpdate xy:" + x + "," + y + " over: " + over + " place: " + place, 8)
             this.setLocX(place[0])
             this.setLocY(place[1])
             this.setLocZ(place[2] - 1) // monkey center is on chin, place nose under cursor

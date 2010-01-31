@@ -259,3 +259,26 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
 		return [minI.elements, mindist]
     }
 })
+
+// return pick point of nearest object in olist under cursor, or null if none
+// list can include actual objects or string id's
+K3D.getNearestObject = function (olist) {
+    var dist = 9999999.9
+    var place = null
+	var hit = null
+    for (var i in olist) {
+		var obj = olist[i]
+		if (typeof(obj)=="string") obj = K3D.gameScene.getObjectById(obj)
+		var pd = obj.getPickPoint()
+        if (pd) {
+            if (pd[1] < dist) {
+                place = pd[0]
+                dist = pd[1]
+				hit = i
+            }
+        }
+    }
+	if (place)
+		return [place, hit]
+	return null
+}
