@@ -63,6 +63,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript" src="TCPSST.js"></script>
 
     <script type="text/javascript">
+
+        var PORT_NUMBER;
+        PORT_NUMBER = 5943; // For ./space_d server
+        //PORT_NUMBER = 4091; // For ./bench echoing test server
+
         function newObject(tcpsst) {
             var substream = tcpsst.clone();
             var myNewUUID = Math.uuidV4Bytes();
@@ -106,7 +111,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             return substream;
         }
         function documentLoaded() {
-            var tcpsst = new Kata.TCPSST("localhost", 5943);
+            var tcpsst = new Kata.TCPSST("localhost", PORT_NUMBER);
             console.log("Making New Object "+tcpsst);
             var substream = newObject(tcpsst);
         }

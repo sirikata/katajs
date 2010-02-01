@@ -90,7 +90,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
             // FIXME: Shouldn't there be some transparent reconnect?
             // What do we do if only one of the streams closes (network error?)
             for (var i in this.mSubstreams) {
-                this.mSubstreams[i].callAllListeners(null);
+                this.mSubstreams[i].callListeners(null);
             }
         };
         Kata.TCPSST.prototype._onOpen = function (which) {
@@ -113,8 +113,11 @@ if (typeof(Kata) == "undefined") {Kata = {};}
             // Set this.mConnected = true; send anything waiting in queue.
         };
         Kata.TCPSST.prototype._onMessage = function (which, b64data) {
-            var stream = new Kata.Base64Stream(b64data);
-            var streamnumber = PROTO.int32.ParseFromStream(stream);
+            var percent = b64data.indexOf('%');
+            var streamnumber = parseInt(b64data.substr(0,percent), 16);
+            // Uncomment for base64 encoded lengths.
+            //var streamnumber = PROTO.int32.ParseFromStream(stream);
+            var stream = new Kata.Base64Stream(b64data.substr(percent+1));
             console.log("Message to socket "+which+" stream "+streamnumber+": "+b64data);
 
             // FIXME: How do we detect a "close" message?
@@ -124,15 +127,19 @@ if (typeof(Kata) == "undefined") {Kata = {};}
                 var substream = new Kata.TCPSST.Substream(this, streamnumber);
                 this.mSubstreams[streamnumber] = substream;
             }
-            this.mSubstreams[streamnumber].callAllListeners(stream);
+            this.mSubstreams[streamnumber].callListeners(stream);
         };
         Kata.TCPSST.prototype.send = function (streamid, base64data) {
+            // Commented code is for base64 encoded lengths.
+            /*
             var streamidStream = new Kata.Base64Stream();
             PROTO.int32.SerializeToStream(streamid, streamidStream);
 
             var finalString =
                 streamidStream.getString().replace("=", "A")
                 + base64data;
+            */
+            var finalString = streamid.toString(16)+"%"+base64data;
 
             if (this.mConnected.length == 0) {
                 this.mMessageQueue.push(finalString);
