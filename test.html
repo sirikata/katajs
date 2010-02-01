@@ -74,18 +74,29 @@ dragWallUpdate = function(dx, dy){
         var place = placeIndex[0]
         var over = g_dragOns[placeIndex[1]]
         var norm = Vector.create(placeIndex[2])
-        var angZ = norm.angleFrom([1, 0, 0])
-        if (norm.cross([1, 0, 0]).e(3) > 0) angZ = -angZ /// assuming approximately vertical
-        pdebug("dragWallUpdate: " + this.id + " over: " + over + " place: " + 
-			niceArray(place,2) + " ang: " + angZ.toFixed(2) + " norm: " +
-			niceArray(norm.elements, 2), 8)
-        over = scene.getObjectById(over)
-        this.setLocX(place[0])
-        this.setLocY(place[1])
-        this.setLocZ(place[2] - 1) // monkey center is on chin, place nose under cursor
-        this.setRotX(over.getRotX())
-        this.setRotY(over.getRotY())
-        this.setRotZ(angZ + Math.PI * 0)
+		if (Math.abs(norm.e(3)) > 0.8) {
+			this.setLocX(place[0])
+			this.setLocY(place[1])
+			this.setLocZ(place[2])
+			this.setRotX(Math.PI * 0.5 * -norm.e(3))
+			this.setRotY(0)
+			this.setRotZ(0)
+		}
+		else {
+			var nx = norm.cross([0, -1, 0])
+			var angZ = norm.angleFrom([0, -1, 0])
+			if (nx.e(3) > 0) 
+			angZ = -angZ /// assuming approximately vertical
+			pdebug("dragWallUpdate: " + this.id + " over: " + over + " place: " +
+				niceArray(place, 2) + " ang: " + angZ.toFixed(2) +" norm: " + niceArray(norm.elements, 2), 9)
+			over = scene.getObjectById(over)
+			this.setLocX(place[0])
+			this.setLocY(place[1])
+			this.setLocZ(place[2] - 2)
+			this.setRotX(over.getRotX())
+			this.setRotY(over.getRotY())
+			this.setRotZ(angZ)
+		}
     }
 }
 
@@ -163,5 +174,6 @@ doc.load("level.xml")
 <div id="dbg6"></div>
 <div id="dbg7"></div>
 <div id="dbg8"></div>
+<div id="dbg9"></div>
 <div id="dbg"></div>
 </body></html>
