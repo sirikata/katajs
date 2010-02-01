@@ -60,6 +60,14 @@ dragWallStart = function(x, y){
     pdebug("dragWallStart: " + this.id + " xy:" + x + "," + y, 7)
 }
 
+niceArray = function (v, places) {
+	r = []
+	for (i in v) {
+		r.push(v[i].toFixed(places))
+	}
+	return r
+}
+
 dragWallUpdate = function(dx, dy){
     var placeIndex = K3D.getNearestObject(g_dragOns)
     if (placeIndex) {
@@ -68,14 +76,16 @@ dragWallUpdate = function(dx, dy){
         var norm = Vector.create(placeIndex[2])
         var angZ = norm.angleFrom([1, 0, 0])
         if (norm.cross([1, 0, 0]).e(3) > 0) angZ = -angZ /// assuming approximately vertical
-        pdebug("dragWallUpdate: " + this.id + " over: " + over + " place: " + place + " ang: " + angZ + " norm: " + norm.elements, 8)
+        pdebug("dragWallUpdate: " + this.id + " over: " + over + " place: " + 
+			niceArray(place,2) + " ang: " + angZ.toFixed(2) + " norm: " +
+			niceArray(norm.elements, 2), 8)
         over = scene.getObjectById(over)
         this.setLocX(place[0])
         this.setLocY(place[1])
         this.setLocZ(place[2] - 1) // monkey center is on chin, place nose under cursor
         this.setRotX(over.getRotX())
         this.setRotY(over.getRotY())
-        this.setRotZ(angZ + Math.PI * .5)
+        this.setRotZ(angZ + Math.PI * 0)
     }
 }
 
