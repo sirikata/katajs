@@ -78,7 +78,7 @@ dragWallUpdate = function(dx, dy){
 			this.setLocX(place[0])
 			this.setLocY(place[1])
 			this.setLocZ(place[2])
-			this.setRotX(Math.PI * 0.5 * -norm.e(3))
+			this.setRotX(Math.PI * -0.5 * -norm.e(3))
 			this.setRotY(0)
 			this.setRotZ(0)
 		}
@@ -95,7 +95,7 @@ dragWallUpdate = function(dx, dy){
 			this.setLocZ(place[2] - 2)
 			this.setRotX(over.getRotX())
 			this.setRotY(over.getRotY())
-			this.setRotZ(angZ)
+			this.setRotZ(Math.PI + angZ)
 		}
     }
 }
