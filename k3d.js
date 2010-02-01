@@ -145,10 +145,11 @@ K3D.checkkeys = function (){
 	var camera=K3D.gameScene.camera;
 	camerapos=camera.getPosition();
 	camerarot=camera.getRotation();
-	var trans=camera.getRotMatrix().inverse().x($V([0,0,-1])).flatten();
-	var mag=Math.pow(Math.pow(trans[0],2)+Math.pow(trans[1],2),0.5);
-	trans[0]=trans[0]/mag;
-	trans[1]=trans[1]/mag;
+	var mat=camera.getRotMatrix();
+	var trans=mat.x([0,0,-1]);
+	var mag=Math.pow(Math.pow(trans.e(1),2)+Math.pow(trans.e(2),2),0.5);
+	trans[0]=trans.e(1)/mag;
+	trans[1]=trans.e(2)/mag;
 	var yinc=0;
 	var xinc=0;
 

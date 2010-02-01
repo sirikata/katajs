@@ -8,6 +8,7 @@
 <script type="text/javascript" src="pdebug.js"></script> 
 <script type="text/javascript" src="GLGE/external/sylvester.src.js"></script> 
 <script type="text/javascript" src="GLGE/external/glutils.js"></script> 
+<script type="text/javascript" src="GLGE/glge_math.js"></script> 
 <script type="text/javascript" src="GLGE/glge.js"></script> 
 <script type="text/javascript" src="GLGE/glge_input.js"></script> 
 <script type="text/javascript" src="ray_tri.js"></script> 
@@ -37,7 +38,7 @@ height="500"></canvas>
 <div id="debug2"></div>
 <script type="text/javascript">
 
-doc = new GLGE.Document("level.xml");
+doc = new GLGE.Document();
 
 // function to safely set material and save original for highlighting (hover/select)
 setHighlightMaterial = function(obj, material){
@@ -138,6 +139,8 @@ doc.onLoad = function(){
 	    scene.getObjectById(dragWallable[i]).makeDragable(dragWallStart, dragWallUpdate)
 	}
 }
+
+doc.load("level.xml")
 
 </script>
 
