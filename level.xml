@@ -68,7 +68,12 @@
 		<material_layer texture="#cratet" mapinput="UV1" mapto="M_COLOR" />
 	</material>
 	
-	<material id="box3" specular="0.3" emit=".7">
+	<material id="box3" specular="0.1" emit="1.5">
+		<texture id="cratet" src="images/jais_test512x512.jpg" />
+		<material_layer texture="#cratet" mapinput="UV1" mapto="M_COLOR" scale_x="1" scale_y="1"/>
+	</material>
+	
+	<material id="box3b" specular="0.1" emit="3.5" alpha = "0.3">
 		<texture id="cratet" src="images/jais_test512x512.jpg" />
 		<material_layer texture="#cratet" mapinput="UV1" mapto="M_COLOR" scale_x="1" scale_y="1"/>
 	</material>
