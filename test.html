@@ -178,8 +178,6 @@ doc.onLoad = function(){
 		obj2.setMesh(obj.getMesh())
 		obj2.setMaterial(obj.getMaterial())
 
-		pdebug("obj X: " + obj.getLocX() + " obj2 X: " + obj2.getLocX())
-//		inspectObject(obj2)
 		scene.addObject(obj2)
 		obj2.makeDragable(dragWallStart, dragWallUpdate)
         obj2.makeHoverable(function(){
