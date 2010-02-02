@@ -56,9 +56,9 @@
 
 	
 	<material id="wallmaterial" specular="0.5">
-		<texture id="wallcolour" src="images/wall.jpg" />
+		<texture id="wallcolour" src="images/test_brick.jpg" />
 		<texture id="wallnorm" src="images/wallnorm.jpg" />
-		<material_layer texture="#wallcolour" mapinput="UV1" mapto="M_COLOR" scale_x="4" scale_y="4" />
+		<material_layer texture="#wallcolour" mapinput="UV1" mapto="M_COLOR" scale_x="2" scale_y="2" />
 		<material_layer texture="#wallnorm" mapinput="UV1" mapto="M_NOR" scale_x="4" scale_y="4" />
 	</material>
 	
