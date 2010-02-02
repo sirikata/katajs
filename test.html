@@ -166,7 +166,7 @@ doc.onLoad = function(){
     scene.getObjectById("teapotobject").makeClickableCallback(function(x, y){
         alert("Would you have some tea?\nAlso, I'm cloning a picture")
         document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
-        obj = scene.getObjectById("crate3")
+        var obj = scene.getObjectById("crate3")
 		obj2 = new GLGE.Object()
 		obj2.setId("newpix")
 		obj2.setLocX(7)
