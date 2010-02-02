@@ -74,6 +74,8 @@ dragWallUpdate = function(dx, dy){
         var place = placeIndex[0]
         var over = g_dragOns[placeIndex[1]]
         var norm = Vector.create(placeIndex[2])
+		
+		// if we're on a floor or ceiling FIXME: we should still rotate so the picture orients to the camera
 		if (Math.abs(norm.e(3)) > 0.8) {
 			this.setLocX(place[0])
 			this.setLocY(place[1])
@@ -82,6 +84,8 @@ dragWallUpdate = function(dx, dy){
 			this.setRotY(0)
 			this.setRotZ(0)
 		}
+		
+		// if we're on a wall
 		else {
 			var nx = norm.cross([0, -1, 0])
 			var angZ = norm.angleFrom([0, -1, 0])
