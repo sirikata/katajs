@@ -78,7 +78,7 @@ dragWallUpdate = function(dx, dy){
 		// if we're on a floor or ceiling FIXME: we should still rotate so the picture orients to the camera
 		if (Math.abs(norm.e(3)) > 0.8) {
 			this.setLocX(place[0])
-			this.setLocY(place[1])
+			this.setLocY(place[1] + parseFloat(this.getScaleZ() ) )
 			this.setLocZ(place[2])
 			this.setRotX(Math.PI * -0.5 * -norm.e(3))
 			this.setRotY(0)
@@ -96,7 +96,7 @@ dragWallUpdate = function(dx, dy){
 			over = scene.getObjectById(over)
 			this.setLocX(place[0])
 			this.setLocY(place[1])
-			this.setLocZ(place[2] - 2)
+			this.setLocZ(place[2] - parseFloat(this.getScaleZ() ) )
 			this.setRotX(over.getRotX())
 			this.setRotY(over.getRotY())
 			this.setRotZ(Math.PI + angZ)
