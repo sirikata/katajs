@@ -187,6 +187,7 @@ doc.onLoad = function(){
 	//	mat.color = {r:0,g:1,b:.4,a:1}
 		mat.addTexture(tx)
 		mat.addMaterialLayer(ml)
+		mat.setEmit(1.5)
 		obj2.setMaterial(mat)
 
 
@@ -194,9 +195,9 @@ doc.onLoad = function(){
 		scene.addObject(obj2)
 		obj2.makeDragable(dragWallStart, dragWallUpdate)
         obj2.makeHoverable(function(){
-            if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, cyan_mat)
+			this.getMaterial().setEmit(2)
         }, function(){
-            if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, null)
+			this.getMaterial().setEmit(.5)
         })
         obj2.highlightMaterial = null
     })
