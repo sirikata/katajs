@@ -167,7 +167,7 @@ doc.onLoad = function(){
         alert("Would you have some tea?\nAlso, I'm cloning a picture")
         document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
         var obj = scene.getObjectById("crate3")
-		obj2 = new GLGE.Object()
+		var obj2 = new GLGE.Object()
 		obj2.setId("newpix")
 		obj2.setLocX(7)
 		obj2.setLocY(0)
@@ -177,7 +177,19 @@ doc.onLoad = function(){
 		obj2.setScaleZ(1 + Math.random()*2)
 		obj2.setMesh(obj.getMesh())
 		obj2.setMaterial(obj.getMaterial())
-//		obj2.getMaterial.setTexture("")
+
+		var tx = new GLGE.Texture("images/jais_test512x512b.jpg")
+		var ml = new GLGE.MaterialLayer(0,GLGE.M_COLOR,GLGE.UV1,null,null)
+		ml.setTexture(tx)
+//		console.log("tx:",tx, "ml:", ml)
+		var mat = new GLGE.Material()
+		mat.id = "numat"
+	//	mat.color = {r:0,g:1,b:.4,a:1}
+		mat.addTexture(tx)
+		mat.addMaterialLayer(ml)
+		obj2.setMaterial(mat)
+
+
 
 		scene.addObject(obj2)
 		obj2.makeDragable(dragWallStart, dragWallUpdate)
