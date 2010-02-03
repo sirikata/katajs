@@ -114,7 +114,7 @@ K3D.mouselook = function(){
         pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-            obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
+            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
         }
         if (leftbutton) {
             if (K3D.oldLeftBtn == false) {
