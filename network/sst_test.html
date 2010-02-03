@@ -68,6 +68,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         PORT_NUMBER = 5943; // For ./space_d server
         //PORT_NUMBER = 4091; // For ./bench echoing test server
 
+        function displayParsedMessage(msg) {
+            var pre = document.createElement('pre');
+            pre.appendChild(document.createTextNode(msg));
+            window.divel.appendChild(pre);
+        }
+
         function substreamListener(substream, data) {
             var header = new Sirikata.Protocol.Header;
             header.ParseFromStream(new PROTO.Base64Stream(data.getString()));
@@ -80,23 +86,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     name = body.message_names[i];
                 }
                 if (name == 'ProxCall') {
-                    console.log("ProxCall");
                     var prox = new Sirikata.Protocol.ProxCall;
                     prox.ParseFromStream(new PROTO.ByteArrayStream(arg));
                     var proximate_object = prox.proximate_object;
-                    if (prox.proximity_event==Sirikata.Protocol.ProxCall.ENTERED_PROXIMITY) {
-                        console.log("proximate object: "+proximate_object);
-                        window.divel.appendChild(document.createTextNode("Got ProxCall: Entered "+proximate_object));
+                    if (prox.proximity_event==Sirikata.Protocol.ProxCall.ProximityEvent.ENTERED_PROXIMITY) {
+                        window.divel.appendChild(document.createTextNode(
+                            "Got ProxCall: Entered "+PBJ.uuid.toString(proximate_object)));
                     }
-                    else if (prox.proximity_event==Sirikata.Protocol.ProxCall.EXITED_PROXIMITY) {
-                        console.log("approximate object: "+proximate_object);
-                        window.divel.appendChild(document.createTextNode("Got ProxCall: Exited "+proximate_object));
+                    else if (prox.proximity_event==Sirikata.Protocol.ProxCall.ProximityEvent.EXITED_PROXIMITY) {
+                        window.divel.appendChild(document.createTextNode(
+                            "Got ProxCall: Exited "+PBJ.uuid.toString(proximate_object)));
                     }
+                    displayParsedMessage(prox);
                 } else if (name == 'RetObj') {
                     var retobj = new Sirikata.Protocol.RetObj;
                     retobj.ParseFromStream(new PROTO.ByteArrayStream(arg));
-                    console.log("Got RetObj: "+retobj.object_reference);
-                    window.divel.appendChild(document.createTextNode("Got RetObj: "+retobj.object_reference));
+                    window.divel.appendChild(document.createTextNode("Got RetObj: "+PBJ.uuid.toString(retobj.object_reference)));
+                    displayParsedMessage(retobj);
 
                     var proxMessage = new PROTO.Base64Stream;
                     var header = new Sirikata.Protocol.Header;
@@ -117,8 +123,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     body.SerializeToStream(proxMessage);
                     substream.sendMessage(proxMessage.getString());
                 } else {
-                    console.log("Unknown message: "+name);
-                    window.divel.appendChild(document.createTextNode(data));
+                    window.divel.appendChild(document.createTextNode("Unknown message: "+name+": "+arg));
                 }
             }
             window.divel.appendChild(document.createElement("br"));
@@ -127,6 +132,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         function newObject(tcpsst) {
             var substream = tcpsst.clone();
             var myNewUUID = Math.uuidV4Bytes();
+
+            window.divel = document.createElement("div");
+            window.divel.style.border = "1px solid black";
+            window.divel.appendChild(document.createTextNode("--- UUID: "+PBJ.uuid.toString(myNewUUID)));
+            window.divel.appendChild(document.createElement("br"));
+
             var registrationMessage = new PROTO.Base64Stream;
             var header = new Sirikata.Protocol.Header;
             header.destination_port = 1; // REGISTRATION
@@ -144,16 +155,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 loc.position = [0,0,0];
                 loc.orientation = [0,0,0];
                 loc.velocity = [0,0,0];
+                displayParsedMessage(newObj);
                 var serializedNewObj = new PROTO.ByteArrayStream;
                 newObj.SerializeToStream(serializedNewObj)
                 body.message_arguments.push(serializedNewObj.getArray());
             }
             body.SerializeToStream(registrationMessage);
 
-            window.divel = document.createElement("div");
-            window.divel.style.border = "1px solid black";
-            window.divel.appendChild(document.createTextNode("--- UUID: "+myNewUUID));
-            window.divel.appendChild(document.createElement("br"));
             document.body.appendChild(window.divel);
             substream.registerListener({
                 receivedMessage: substreamListener
