@@ -113,6 +113,8 @@ shallowClone = function (obj) {
 	return o2
 }
 
+pixnum=1
+
 doc.onLoad = function(){
     scene = K3D.init()
     
@@ -167,34 +169,17 @@ doc.onLoad = function(){
         alert("Would you have some tea?\nAlso, I'm cloning a picture")
         document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
 
-		var obj = new GLGE.Object()
-		obj.setId("newpix")
+		var obj = K3D.createObjectAndAddToScene(
+			"nupix" + pixnum++, 
+			doc.getElement("cube3"), 
+			"images/jais_test512x512b.jpg")
 		obj.setLocX(7)
 		obj.setLocY(0)
 		obj.setLocZ(0)
 		obj.setScaleX(1 + Math.random()*2)
 		obj.setScaleY(.25)
 		obj.setScaleZ(1 + Math.random()*2)
-
-		mesh = doc.getElement("cube3")
-		pdebug("mesh: "+mesh)
-		obj.setMesh(mesh)
-
-		var tx = new GLGE.Texture("images/jais_test512x512b.jpg")
-		var ml = new GLGE.MaterialLayer(0,GLGE.M_COLOR,GLGE.UV1,null,null)
-		ml.setTexture(tx)
-//		console.log("tx:",tx, "ml:", ml)
-		var mat = new GLGE.Material()
-		mat.id = "numat"
-	//	mat.color = {r:0,g:1,b:.4,a:1}
-		mat.addTexture(tx)
-		mat.addMaterialLayer(ml)
-		mat.setEmit(1.5)
-		obj.setMaterial(mat)
-
-
-
-		scene.addObject(obj)
+		obj.getMaterial().setEmit(1.5)
 		obj.makeDragable(dragWallStart, dragWallUpdate)
         obj.makeHoverable(function(){
 			this.getMaterial().setEmit(2)

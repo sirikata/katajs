@@ -288,3 +288,20 @@ K3D.getNearestObject = function (olist) {
 		return [place, hit, norm]
 	return null
 }
+
+// create a standard texture-mapped object with new material & texture; add to the scene
+K3D.createObjectAndAddToScene = function (id, mesh, texurl) {
+	var obj = new GLGE.Object()
+	obj.setId(id)
+	obj.setMesh(mesh)
+	var tx = new GLGE.Texture(texurl)
+	var ml = new GLGE.MaterialLayer(0,GLGE.M_COLOR,GLGE.UV1,null,null)
+	ml.setTexture(tx)
+	var mat = new GLGE.Material()
+	mat.id = id + "_mat"
+	mat.addTexture(tx)
+	mat.addMaterialLayer(ml)
+	obj.setMaterial(mat)
+	scene.addObject(obj)
+	return obj
+}
