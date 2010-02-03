@@ -34,6 +34,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
     // public final class ObjectHost
+    /** @constructor */
     Kata.ObjectHost = function () {
         this.mSimulations = [];
     }

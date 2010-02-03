@@ -43,8 +43,9 @@ if (typeof(Kata) == "undefined") {Kata = {};}
     Kata.SimpleChannel.prototype = new SUPER.constructor;
 
     Kata.SimpleChannel.prototype.pair = function (otherChannel) {
-        if (!otherChannel instanceof Kata.SimpleChannel) {
-            otherChannel.isNotInstanceOf.SimpleChannel(); // throw error.
+        if (!(otherChannel instanceof Kata.SimpleChannel)) {
+            console.error("otherChannel "+otherChannel+" is not instance of SimpleChannel");
+            throw "Error in SimpleChannel.pair";
         }
         otherChannel.mPartner = this;
         this.mPartner = otherChannel;

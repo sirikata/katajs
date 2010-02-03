@@ -41,6 +41,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
 
     // public final class SimpleChannel extends Channel
     var SUPER = Kata.Channel.prototype;
+    /** @constructor */
     Kata.WebWorkerChannel = function (port) {
         this.mMessagePort = port;
         this.mMessagePort.onmessage = getCallback(this);
