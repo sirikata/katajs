@@ -35,6 +35,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
 
     // public abstract class GraphicsSimulation extends Simulation
     var SUPER = Kata.Simulation.prototype;
+    /** @constructor */
     Kata.GraphicsSimulation = function (channel, domElement) {
         this.mChannel = channel;
         this.mElement = domElement;

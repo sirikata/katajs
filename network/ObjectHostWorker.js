@@ -34,6 +34,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
     // public final class ObjectHostWorker
+    /** @constructor */
     Kata.ObjectHostWorker = function (graphicsChannel) {
         this.mObjectHost = new Kata.ObjectHost(graphicsChannel);
 

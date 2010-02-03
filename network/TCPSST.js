@@ -55,6 +55,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
 
     if (typeof(WebSocket)!="undefined") {
         // public final class TCPSST
+        /** @constructor */
         Kata.TCPSST = function (host, port, numStreams) {
             if (!numStreams) {
                 numStreams = 1;
@@ -162,6 +163,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
         };
 
         // final class TCPSST.Substream extends Channel
+        /** @constructor */
         Kata.TCPSST.Substream = function (tcpsst, which) {
             this.mOwner = tcpsst;
             this.mWhich = which;

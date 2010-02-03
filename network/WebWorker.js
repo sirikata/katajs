@@ -42,6 +42,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
 
     // public final class WebWorker
     if (WEB_WORKERS_ENABLED && typeof(Worker)!="undefined") {
+        /** @constructor */
         Kata.WebWorker = function (jsFile, clsName) {
             this.mWorker = new Worker("GenericWorker.js");
             this.mWorker.onerror = getErrorCallback(this);
@@ -49,6 +50,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
             this.mChannel = new Kata.WebWorkerChannel(this.mWorker);
         }
     } else {
+        /** @constructor */
         Kata.WebWorker = function (jsFile, clsName) {
             this.mChannel = new Kata.SimpleChannel;
 /*
