@@ -166,38 +166,39 @@ doc.onLoad = function(){
     //})
     
     scene.getObjectById("teapotobject").makeClickableCallback(function(x, y){
-        alert("Would you have some tea?\nAlso, I'm cloning a picture")
+        alert("Would you have some tea?\nI no longer make pictures.\nsee the button below canvas")
         document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
-
-		var obj = K3D.createObjectAndAddToScene(
-			"nupix" + pixnum++, 
-			doc.getElement("cube3"), 
-			"images/jais_test512x512b.jpg")
-		obj.setLocX(7)
-		obj.setLocY(0)
-		obj.setLocZ(0)
-		obj.setScaleX(1 + Math.random()*2)
-		obj.setScaleY(.25)
-		obj.setScaleZ(1 + Math.random()*2)
-		obj.getMaterial().setEmit(1.5)
-		obj.makeDragable(dragWallStart, dragWallUpdate)
-        obj.makeHoverable(function(){
-			this.getMaterial().setEmit(2)
-        }, function(){
-			this.getMaterial().setEmit(.5)
-        })
-        obj.highlightMaterial = null
     })
-    
+
     // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
 	for (i in dragWallable) {
 	    scene.getObjectById(dragWallable[i]).makeDragable(dragWallStart, dragWallUpdate)
 	}
 }
 
+addPicture = function(){
+    var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), "images/jais_test512x512b.jpg")
+    obj.setLocX(7)
+    obj.setLocY(0)
+    obj.setLocZ(0)
+    obj.setScaleX(1 + Math.random() * 2)
+    obj.setScaleY(.25)
+    obj.setScaleZ(1 + Math.random() * 2)
+    obj.getMaterial().setEmit(1.5)
+    obj.makeDragable(dragWallStart, dragWallUpdate)
+    obj.makeHoverable(function(){
+        this.getMaterial().setEmit(2)
+    }, function(){
+        this.getMaterial().setEmit(.5)
+    })
+    obj.highlightMaterial = null
+}
+
 doc.load("level.xml")
 
 </script>
+
+<button onclick = 'addPicture()' id="addPicture">add picture</button>
 
 <div id="dbg0"></div>
 <div id="dbg1"></div>
