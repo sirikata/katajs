@@ -63,10 +63,66 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript" src="TCPSST.js"></script>
 
     <script type="text/javascript">
-
+    <!--
         var PORT_NUMBER;
         PORT_NUMBER = 5943; // For ./space_d server
         //PORT_NUMBER = 4091; // For ./bench echoing test server
+
+        function substreamListener(substream, data) {
+            var header = new Sirikata.Protocol.Header;
+            header.ParseFromStream(new PROTO.Base64Stream(data.getString()));
+            var body = new Sirikata.Protocol.MessageBody;
+            body.ParseFromStream(data);
+            var name = '';
+            for (var i = 0; i < body.message_arguments.length; i++) {
+                var arg = body.message_arguments[i];
+                if (body.message_names[i] !== undefined) {
+                    name = body.message_names[i];
+                }
+                if (name == 'ProxCall') {
+                    console.log("ProxCall");
+                    var prox = new Sirikata.Protocol.ProxCall;
+                    prox.ParseFromStream(new PROTO.ByteArrayStream(arg));
+                    var proximate_object = prox.proximate_object;
+                    if (prox.proximity_event==Sirikata.Protocol.ProxCall.ENTERED_PROXIMITY) {
+                        console.log("proximate object: "+proximate_object);
+                        window.divel.appendChild(document.createTextNode("Got ProxCall: Entered "+proximate_object));
+                    }
+                    else if (prox.proximity_event==Sirikata.Protocol.ProxCall.EXITED_PROXIMITY) {
+                        console.log("approximate object: "+proximate_object);
+                        window.divel.appendChild(document.createTextNode("Got ProxCall: Exited "+proximate_object));
+                    }
+                } else if (name == 'RetObj') {
+                    var retobj = new Sirikata.Protocol.RetObj;
+                    retobj.ParseFromStream(new PROTO.ByteArrayStream(arg));
+                    console.log("Got RetObj: "+retobj.object_reference);
+                    window.divel.appendChild(document.createTextNode("Got RetObj: "+retobj.object_reference));
+
+                    var proxMessage = new PROTO.Base64Stream;
+                    var header = new Sirikata.Protocol.Header;
+                    header.destination_port = 3; // GEOM
+                    header.destination_object = [];
+                    header.SerializeToStream(proxMessage);
+                    var proxquery = new Sirikata.Protocol.NewProxQuery;
+                    proxquery.query_id = 1;
+                    proxquery.stateless = 0;
+                    proxquery.relative_center = [0,0,0];
+                    proxquery.max_radius = 1.0e+16;
+                    proxquery.min_solid_angle = 0;
+                    var body = new Sirikata.Protocol.MessageBody;
+                    body.message_names.push("NewProxQuery");
+                    var serializedProx = new PROTO.ByteArrayStream;
+                    proxquery.SerializeToStream(serializedProx)
+                    body.message_arguments.push(serializedProx.getArray());
+                    body.SerializeToStream(proxMessage);
+                    substream.sendMessage(proxMessage.getString());
+                } else {
+                    console.log("Unknown message: "+name);
+                    window.divel.appendChild(document.createTextNode(data));
+                }
+            }
+            window.divel.appendChild(document.createElement("br"));
+        }
 
         function newObject(tcpsst) {
             var substream = tcpsst.clone();
@@ -74,7 +130,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             var registrationMessage = new PROTO.Base64Stream;
             var header = new Sirikata.Protocol.Header;
             header.destination_port = 1; // REGISTRATION
-            header.destination_object = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // REGISTRATION
+            header.destination_object = [];
             header.SerializeToStream(registrationMessage);
             var body = new Sirikata.Protocol.MessageBody;
             body.message_names.push("NewObj");
@@ -93,22 +149,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 body.message_arguments.push(serializedNewObj.getArray());
             }
             body.SerializeToStream(registrationMessage);
-            substream.sendMessage(registrationMessage.getString());
 
-            var el = document.createElement("div");
-            el.style.border = "1px solid black";
-            el.appendChild(document.createTextNode("--- UUID: "+myNewUUID));
-            el.appendChild(document.createElement("br"));
-            document.body.appendChild(el);
+            window.divel = document.createElement("div");
+            window.divel.style.border = "1px solid black";
+            window.divel.appendChild(document.createTextNode("--- UUID: "+myNewUUID));
+            window.divel.appendChild(document.createElement("br"));
+            document.body.appendChild(window.divel);
             substream.registerListener({
-                receivedMessage: function(substream, data) {
-                    if (data instanceof PROTO.Base64Stream) {
-                        data = data.getString();
-                    }
-                    el.appendChild(document.createTextNode(data));
-                    el.appendChild(document.createElement("br"));
-                }
+                receivedMessage: substreamListener
             });
+            substream.sendMessage(registrationMessage.getString());
             return substream;
         }
         function documentLoaded() {
@@ -116,6 +166,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             console.log("Making New Object "+tcpsst);
             var substream = newObject(tcpsst);
         }
+    -->
     </script>
   </head>
   <body onload="documentLoaded();">
