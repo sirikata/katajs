@@ -119,11 +119,11 @@ doc.onLoad = function(){
     scene = K3D.init()
     
     var purple_mat = doc.getElement("purple");
-    var cyan_mat = doc.getElement("box3b");   
-    var hoverable = ["monkeyobject", "teapotobject", "crate3"]
+    var cyan_mat = doc.getElement("cyan");   
+    var hoverable = ["crate", "monkeyobject", "teapotobject"]
     var selectable = ["crate", "crate2", "crate5", "monkeyobject"]
-    var dragable = ["crate", "crate2", "crate5"]
-	var dragWallable = ["monkeyobject", "crate3"]
+    var dragable = ["crate", "crate2", "crate4", "crate5"]
+	var dragWallable = ["monkeyobject"]
     g_dragOns = ["wallobject", "crate", "crate2", "crate4", "crate5"]
 
     // hover cyan
@@ -177,24 +177,41 @@ doc.onLoad = function(){
 }
 
 addPicture = function(){
-    var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), "images/jais_test512x512b.jpg")
-    obj.setLocX(7)
-    obj.setLocY(0)
-    obj.setLocZ(0)
+	var pic = "images/jais_test512x512b.jpg"
+	if (pixnum & 1) pic = "images/jais_test512x512.jpg"
+    var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), pic)
+	obj.setLocX(5)
+	obj.setLocZ(5)
     obj.setScaleX(1 + Math.random() * 2)
     obj.setScaleY(.25)
     obj.setScaleZ(1 + Math.random() * 2)
-    obj.getMaterial().setEmit(1.5)
     obj.makeDragable(dragWallStart, dragWallUpdate)
-    obj.makeHoverable(function(){
-        this.getMaterial().setEmit(2)
+    obj.makeSelectable(function(){
+        this.iAmSelected=true
+		this.getMaterial().setEmit(3)
     }, function(){
-        this.getMaterial().setEmit(.5)
+        this.iAmSelected=false
+		this.getMaterial().setEmit(1.5)
     })
-    obj.highlightMaterial = null
 }
 
 doc.load("level.xml")
+
+g_selectedFlag=true
+updateSelected = function(){
+	if (K3D.selectedObj && K3D.selectedObj.iAmSelected) {
+		if (g_selectedFlag) {
+			K3D.selectedObj.getMaterial().setEmit(3)
+			g_selectedFlag = false
+		}
+		else {
+			K3D.selectedObj.getMaterial().setEmit(1.5)
+			g_selectedFlag = true
+		}
+	}
+}
+
+setInterval(updateSelected,500);
 
 </script>
 
