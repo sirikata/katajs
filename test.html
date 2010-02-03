@@ -6,11 +6,11 @@
  
  
 <script type="text/javascript" src="pdebug.js"></script> 
-<script type="text/javascript" src="GLGE/external/sylvester.src.js"></script> 
-<script type="text/javascript" src="GLGE/external/glutils.js"></script> 
-<script type="text/javascript" src="GLGE/glge_math.js"></script> 
-<script type="text/javascript" src="GLGE/glge.js"></script> 
-<script type="text/javascript" src="GLGE/glge_input.js"></script> 
+<script type="text/javascript" src="externals/GLGE/external/sylvester.src.js"></script> 
+<script type="text/javascript" src="externals/GLGE/external/glutils.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
 <script type="text/javascript" src="ray_tri.js"></script> 
 <script type="text/javascript" src="k3d.js"></script> 
 
@@ -177,6 +177,7 @@ doc.onLoad = function(){
 		obj2.setScaleZ(1 + Math.random()*2)
 		obj2.setMesh(obj.getMesh())
 		obj2.setMaterial(obj.getMaterial())
+//		obj2.getMaterial.setTexture("")
 
 		scene.addObject(obj2)
 		obj2.makeDragable(dragWallStart, dragWallUpdate)
