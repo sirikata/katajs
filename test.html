@@ -31,7 +31,7 @@ height="500"></canvas>
 <h2 style="margin:0;padding:0;padding-bottom: 5px;font-size: 20px">Extremely early Kata3D 'Demo'</h2>
 <p style="margin:0;padding:0;padding-bottom: 5px;">Hover==cyan; selected==purple; drag objects</p>
 <p style="margin:0;padding:0;padding-bottom: 5px;">arrow keys to move, U & J to pan camera</p>
-<p style="margin:0;padding:0;padding-bottom: 5px;">this box pops a msg, so does the monkey</p>
+<p style="margin:0;padding:0;padding-bottom: 5px;">this box pops a msg, so does the teapot</p>
 </div>
 </div>
 </div>
@@ -120,7 +120,7 @@ doc.onLoad = function(){
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    var hoverable = ["crate", "monkeyobject", "teapotobject"]
+    var hoverable = ["crate", "crate2", "crate4", "crate5", "monkeyobject", "teapotobject"]
     var selectable = ["crate", "crate2", "crate5", "monkeyobject"]
     var dragable = ["crate", "crate2", "crate4", "crate5"]
 	var dragWallable = ["monkeyobject"]
@@ -166,7 +166,7 @@ doc.onLoad = function(){
     //})
     
     scene.getObjectById("teapotobject").makeClickableCallback(function(x, y){
-        alert("Would you have some tea?\nI no longer make pictures.\nsee the button below canvas")
+        alert("Would you have some tea?\nI no longer make pictures.\ntry 'add picture' lower left")
         document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
     })
 
@@ -180,11 +180,12 @@ addPicture = function(){
 	var pic = "images/jais_test512x512b.jpg"
 	if (pixnum & 1) pic = "images/jais_test512x512.jpg"
     var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), pic)
-	obj.setLocX(5)
-	obj.setLocZ(5)
-    obj.setScaleX(1 + Math.random() * 2)
+	obj.setLocX(2)
+	obj.setLocZ(2.5)
+    obj.setScaleX(1 + Math.random() * 4)
     obj.setScaleY(.25)
-    obj.setScaleZ(1 + Math.random() * 2)
+    obj.setScaleZ(1 + Math.random() * 4)
+	obj.getMaterial().setSpecular(.3)
     obj.makeDragable(dragWallStart, dragWallUpdate)
     obj.makeSelectable(function(){
         this.iAmSelected=true
