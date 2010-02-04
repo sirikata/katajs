@@ -183,47 +183,36 @@ doc.onLoad = function(){
 	}
 }
 
-addPicture = function(){
-	var pic = "images/jais_test512x512b.jpg"
-	if (pixnum & 1) pic = "images/jais_test512x512.jpg"
+addPicture = function(id){
+//	var pic = "images/jais_test512x512b.jpg"
+//	if (pixnum & 1) pic = "images/jais_test512x512.jpg"
+	var pic = document.getElementById(id).value
     var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), pic)
 	obj.setLocX(2)
 	obj.setLocZ(2.5)
     obj.setScaleX(1 + Math.random() * 4)
     obj.setScaleY(.25)
     obj.setScaleZ(1 + Math.random() * 4)
-	obj.getMaterial().setSpecular(.3)
+	obj.getMaterial().setSpecular(0)
+	obj.getMaterial().setEmit(1)
     obj.makeDragable(dragWallStart, dragWallUpdate)
-    obj.makeSelectable(function(){
-        this.iAmSelected=true
-		this.getMaterial().setEmit(3)
+    obj.makeHoverable(function(){
+		this.getMaterial().setEmit(0)
     }, function(){
-        this.iAmSelected=false
-		this.getMaterial().setEmit(1.5)
+		this.getMaterial().setEmit(1)
     })
 }
 
 doc.load("level.xml")
 
-g_selectedFlag=true
-updateSelected = function(){
-	if (K3D.selectedObj && K3D.selectedObj.iAmSelected) {
-		if (g_selectedFlag) {
-			K3D.selectedObj.getMaterial().setEmit(3)
-			g_selectedFlag = false
-		}
-		else {
-			K3D.selectedObj.getMaterial().setEmit(1.5)
-			g_selectedFlag = true
-		}
-	}
-}
-
-setInterval(updateSelected,500);
-
 </script>
 
-<button onclick = 'addPicture()' id="addPicture">add picture</button>
+<button onclick = 'addPicture("input_tex1")' id="addPicture">add picture</button>
+<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"></input><br>
+<button onclick = 'addPicture("input_tex2")' id="addPicture">add picture</button>
+<input type="text" id="input_tex2" size="50" value="images/jais_test512x512b.jpg"></input><br>
+<button onclick = 'addPicture("input_tex3")' id="addPicture">add picture</button>
+<input type="text" id="input_tex3" size="50" value="http://danbmil.com/dan_headshot_small.JPG"></input><br>
 
 <div id="dbg0"></div>
 <div id="dbg1"></div>
