@@ -117,6 +117,7 @@ pixnum=1
 
 doc.onLoad = function(){
     scene = K3D.init()
+	scene.setAmbientColor("#999999")
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
@@ -153,10 +154,16 @@ doc.onLoad = function(){
     for (i in dragable) {
         scene.getObjectById(dragable[i]).makeDragable(function(){
             this.dragStartLocX = parseFloat(this.getLocX()) ///	wtf? strings?
+            this.dragStartLocY = parseFloat(this.getLocY())
             this.dragStartLocZ = parseFloat(this.getLocZ())
         }, function(dx, dy){
-            this.setLocX(this.dragStartLocX - dx * .04)
-            this.setLocZ(this.dragStartLocZ - dy * .04)
+			ang = scene.camera.getRotY()
+			x = Math.cos(ang-Math.PI)
+			y = Math.sin(ang-Math.PI)
+//			pdebug("x: " + x + "y: " + y + "ang: "+ (parseFloat(ang)-Math.PI),9)
+            this.setLocX(this.dragStartLocX - dx * x * 0.05)
+            this.setLocY(this.dragStartLocY - dx * y * 0.05)
+            this.setLocZ(this.dragStartLocZ - dy * y * 0.05)
         })
 	}
     
@@ -213,7 +220,6 @@ updateSelected = function(){
 }
 
 setInterval(updateSelected,500);
-scene.setAmbientColor("#999999")
 
 </script>
 
