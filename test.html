@@ -163,7 +163,7 @@ doc.onLoad = function(){
 //			pdebug("x: " + x + "y: " + y + "ang: "+ (parseFloat(ang)-Math.PI),9)
             this.setLocX(this.dragStartLocX - dx * x * 0.05)
             this.setLocY(this.dragStartLocY - dx * y * 0.05)
-            this.setLocZ(this.dragStartLocZ - dy * y * 0.05)
+            this.setLocZ(this.dragStartLocZ - dy * 0.05)
         })
 	}
     
@@ -189,15 +189,16 @@ addPicture = function(id){
 	var pic = document.getElementById(id).value
     var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), pic)
 	obj.setLocX(2)
+	obj.setLocY(-20)
 	obj.setLocZ(2.5)
     obj.setScaleX(1 + Math.random() * 4)
     obj.setScaleY(.25)
     obj.setScaleZ(1 + Math.random() * 4)
-	obj.getMaterial().setSpecular(0)
+	obj.getMaterial().setSpecular(.4)
 	obj.getMaterial().setEmit(1)
     obj.makeDragable(dragWallStart, dragWallUpdate)
     obj.makeHoverable(function(){
-		this.getMaterial().setEmit(0)
+		this.getMaterial().setEmit(3)
     }, function(){
 		this.getMaterial().setEmit(1)
     })
