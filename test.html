@@ -150,20 +150,48 @@ doc.onLoad = function(){
         obj.highlightMaterial = null
     }
     
-    // bullstuff drag just uses global x, z
+	var fix = function(v) {
+		v = 57.2958*v
+		while(v>180) v-=360
+		while(v<-180) v+=360
+		return v.toFixed(1)
+	}
+	var show = function(self) {
+		pdebug("edit rotate X="+fix(self.getRotX())+" Y="+fix(self.getRotY())+" Z="+fix(self.getRotZ()),4)
+	}
+
+    // drag is modal: move, rotatex, rotatey, rotatez
     for (i in dragable) {
         scene.getObjectById(dragable[i]).makeDragable(function(){
             this.dragStartLocX = parseFloat(this.getLocX()) ///	wtf? strings?
             this.dragStartLocY = parseFloat(this.getLocY())
             this.dragStartLocZ = parseFloat(this.getLocZ())
+            this.dragStartRotX = parseFloat(this.getRotX()) ///	wtf? strings?
+            this.dragStartRotY = parseFloat(this.getRotY())
+            this.dragStartRotZ = parseFloat(this.getRotZ())
         }, function(dx, dy){
-			ang = scene.camera.getRotY()
-			x = Math.cos(ang-Math.PI)
-			y = Math.sin(ang-Math.PI)
-//			pdebug("x: " + x + "y: " + y + "ang: "+ (parseFloat(ang)-Math.PI),9)
-            this.setLocX(this.dragStartLocX - dx * x * 0.05)
-            this.setLocY(this.dragStartLocY - dx * y * 0.05)
-            this.setLocZ(this.dragStartLocZ - dy * 0.05)
+			if (document.input_editmode.R[1].checked) {
+				var ang = scene.camera.getRotY()
+				var x = Math.cos(ang - Math.PI)
+				var y = Math.sin(ang - Math.PI)
+				//			pdebug("x: " + x + "y: " + y + "ang: "+ (parseFloat(ang)-Math.PI),9)
+				this.setLocX(this.dragStartLocX - dx * x * 0.05)
+				this.setLocY(this.dragStartLocY - dx * y * 0.05)
+				this.setLocZ(this.dragStartLocZ - dy * 0.05)
+				pdebug("edit move X="+this.getLocX().toFixed(3)+" Y="+this.getLocY().toFixed(3)+" Z="+this.getLocZ().toFixed(3),4)
+			}
+			if (document.input_editmode.R[2].checked) {
+				this.setRotX(this.dragStartRotX + dy*.01)
+				show(this)
+			}
+			if (document.input_editmode.R[3].checked) {
+				this.setRotY(this.dragStartRotY + dy*.01)
+				show(this)
+			}
+			if (document.input_editmode.R[4].checked) {
+				this.setRotZ(this.dragStartRotZ + dx*.01)
+				show(this)
+			}
         })
 	}
     
@@ -209,11 +237,19 @@ doc.load("level.xml")
 </script>
 
 <button onclick = 'addPicture("input_tex1")' id="addPicture">add picture</button>
-<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"></input><br>
+<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
 <button onclick = 'addPicture("input_tex2")' id="addPicture">add picture</button>
-<input type="text" id="input_tex2" size="50" value="images/jais_test512x512b.jpg"></input><br>
+<input type="text" id="input_tex2" size="50" value="images/jais_test512x512b.jpg"/>><br>
 <button onclick = 'addPicture("input_tex3")' id="addPicture">add picture</button>
-<input type="text" id="input_tex3" size="50" value="http://danbmil.com/dan_headshot_small.JPG"></input><br>
+<input type="text" id="input_tex3" size="50" value="http://danbmil.com/dan_headshot_small.JPG"/><br>
+		  
+<form Name="input_editmode"
+	<input type="radio" Name="R" Checked="true"/>safe
+	<input type="radio" Name="R"/>move
+	<input type="radio" Name="R"/>rotate X
+	<input type="radio" Name="R"/>rotate Y
+	<input type="radio" Name="R"/>rotate Z
+</form>
 
 <div id="dbg0"></div>
 <div id="dbg1"></div>
