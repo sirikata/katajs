@@ -219,7 +219,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     var v = Vector.create([mx, my, -1, 1]) // camera points along -Z axis
     v = mat.x(v) // transform to camera matrix
     var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
-    var vP0 = Vector.create(P0)
+    var vP0 = new GLGE.Vec(P0)
     var P1 = [v.e(1), v.e(2), v.e(3)]
     var R = [P0, P1]
 //    pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
@@ -260,7 +260,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
 		return null
     }
     else {
-		return [minI.elements, mindist, minN]
+		return [minI.data, mindist, minN]
     }
 })
 

@@ -57,7 +57,6 @@ function ray_tri_intersect(R, T, N) {
     t = (uv * wu - uu * wv) / D;
     if (t < 0.0 || (s + t) > 1.0)  // I is outside T
         return null;
- 	v= Vector.create(I.data)
-    return v;                      // I is in T
+    return I;                      // I is in T
 }
 
