@@ -204,7 +204,7 @@ K3D.render = function (){
 K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     // create raycast from camera to mouse xy
     var cam = K3D.gameScene.camera
-    var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ())
+    var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ(), GLGE.ROT_XZY)
     var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
     var mat = mlo.x(mro) // camera matrix    
     var mousepos = K3D.gameScene.mouse.getMousePosition();
@@ -224,7 +224,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     var R = [P0, P1]
 //    pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
     // get wall matrix
-    mro = GLGE.rotateMatrix(this.getRotX(), this.getRotY(), this.getRotZ()) // our rotation matrix
+    mro = GLGE.rotateMatrix(this.getRotX(), this.getRotY(), this.getRotZ(), GLGE.ROT_XZY) // our rotation matrix
     mlo = GLGE.translateMatrix(this.getLocX(), this.getLocY(), this.getLocZ()) // our location matrix
     mat = mlo.x(mro) // our full matrix
     // scale wall vertices
