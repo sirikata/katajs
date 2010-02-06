@@ -72,7 +72,7 @@ dragWallUpdate = function(dx, dy){
     if (placeIndex) {
         var place = placeIndex[0]
         var over = g_dragOns[placeIndex[1]]
-        var norm = Vector.create(placeIndex[2])
+        var norm = new GLGE.Vec(placeIndex[2])
 		
 		// if we're on a floor or ceiling FIXME: we should still rotate so the picture orients to the camera
 		if (Math.abs(norm.e(3)) > 0.8) {
@@ -87,11 +87,11 @@ dragWallUpdate = function(dx, dy){
 		// if we're on a wall
 		else {
 			var nx = norm.cross([0, -1, 0])
-			var angZ = norm.angleFrom([0, -1, 0])
+			var angZ = norm.angle([0, -1, 0])
 			if (nx.e(3) > 0) 
 			angZ = -angZ /// assuming approximately vertical
 			pdebug("dragWallUpdate: " + this.id + " over: " + over + " place: " +
-				niceArray(place, 2) + " ang: " + angZ.toFixed(2) +" norm: " + niceArray(norm.elements, 2), 9)
+				niceArray(place, 2) + " ang: " + angZ.toFixed(2) +" norm: " + niceArray(norm.data, 2), 9)
 			over = scene.getObjectById(over)
 			this.setLocX(place[0])
 			this.setLocY(place[1])
