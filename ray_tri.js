@@ -13,6 +13,7 @@
 
 // R = ray T = triangle N = (optional) array to fill with normal
 function ray_tri_intersect(R, T, N) {
+//	console.log("ray_tri_i_..",R,T,N)
 	/*
 	for(var i=0; i<3; i++) {
 		for(var j=0; j<3; j++) {
@@ -28,12 +29,12 @@ function ray_tri_intersect(R, T, N) {
 	var u,v,n,uu,uv,vv
 	var dir,w0,w,wu,wv
 	var r,a,b,R0,I,D,s,t
-	u = Vector.create(T[1]).subtract(T[0])
-	v = Vector.create(T[2]).subtract(T[0])
+	u = new GLGE.Vec(T[1]).subtract(T[0])
+	v = new GLGE.Vec(T[2]).subtract(T[0])
 	n = u.cross(v)
-	if (N) N[0] = n.toUnitVector().elements
-	R0 = Vector.create(R[0])
-	dir = Vector.create(R[1]).subtract(R[0])
+	if (N) N[0] = n.toUnitVector().data
+	R0 = new GLGE.Vec(R[0])
+	dir = new GLGE.Vec(R[1]).subtract(R[0])
 	w0 = R0.subtract(T[0])
 	a = -n.dot(w0)
 	b = n.dot(dir)
@@ -56,7 +57,7 @@ function ray_tri_intersect(R, T, N) {
     t = (uv * wu - uu * wv) / D;
     if (t < 0.0 || (s + t) > 1.0)  // I is outside T
         return null;
-
-    return I;                      // I is in T
+ 	v= Vector.create(I.data)
+    return v;                      // I is in T
 }
 
