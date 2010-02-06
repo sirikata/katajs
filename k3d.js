@@ -204,8 +204,8 @@ K3D.render = function (){
 K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     // create raycast from camera to mouse xy
     var cam = K3D.gameScene.camera
-    var mro = Matrix.rotMat(cam.getRotX(), cam.getRotY(), cam.getRotZ())
-    var mlo = Matrix.transMat(cam.getLocX(), cam.getLocY(), cam.getLocZ())
+    var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ())
+    var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
     var mat = mlo.x(mro) // camera matrix    
     var mousepos = K3D.gameScene.mouse.getMousePosition();
     var w = 900.0
@@ -216,7 +216,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     mx = focal * (mx / w - 0.5)
     my = -focal * (h / w) * (my / h - 0.5)
 //    pdebug("mx: " + mx + " my: " + my)
-    var v = Vector.create([mx, my, -1, 1]) // camera points along -Z axis
+    var v = new GLGE.Vec([mx, my, -1, 1]) // camera points along -Z axis
     v = mat.x(v) // transform to camera matrix
     var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
     var vP0 = new GLGE.Vec(P0)
@@ -224,8 +224,8 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     var R = [P0, P1]
 //    pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
     // get wall matrix
-    mro = Matrix.rotMat(this.getRotX(), this.getRotY(), this.getRotZ()) // our rotation matrix
-    mlo = Matrix.transMat(this.getLocX(), this.getLocY(), this.getLocZ()) // our location matrix
+    mro = GLGE.rotateMatrix(this.getRotX(), this.getRotY(), this.getRotZ()) // our rotation matrix
+    mlo = GLGE.translateMatrix(this.getLocX(), this.getLocY(), this.getLocZ()) // our location matrix
     mat = mlo.x(mro) // our full matrix
     // scale wall vertices
     var sx = parseFloat(this.getScaleX())
@@ -237,13 +237,13 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
 	// get vertex coords
     var p = this.getPositions()
     for (var i = 0; i < p.length; i += 9) { // for each tri
-        var A = Vector.create([sx * p[i], sy * p[i + 1], sz * p[i + 2], 1]) // get vertex points for triangle ABC
-        var B = Vector.create([sx * p[i + 3], sy * p[i + 4], sz * p[i + 5], 1])
-        var C = Vector.create([sx * p[i + 6], sy * p[i + 7], sz * p[i + 8], 1])
+        var A = new GLGE.Vec([sx * p[i], sy * p[i + 1], sz * p[i + 2], 1]) // get vertex points for triangle ABC
+        var B = new GLGE.Vec([sx * p[i + 3], sy * p[i + 4], sz * p[i + 5], 1])
+        var C = new GLGE.Vec([sx * p[i + 6], sy * p[i + 7], sz * p[i + 8], 1])
         A = mat.x(A) // convert them to global coords
         B = mat.x(B)
         C = mat.x(C)
-        var T = [A.elements.slice(0, 3), B.elements.slice(0, 3), C.elements.slice(0, 3)]
+        var T = [A.data.slice(0, 3), B.data.slice(0, 3), C.data.slice(0, 3)]
         //		pdebug("T: " + T)
 		var N = []
         var I = ray_tri_intersect(R, T, N)
