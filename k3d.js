@@ -208,10 +208,10 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
     var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
     var mat = mlo.x(mro) // camera matrix    
     var mousepos = K3D.gameScene.mouse.getMousePosition();
-    var w = 900.0
-    var h = 500.0
     var mx = mousepos.x - document.getElementById("container").offsetLeft;
     var my = mousepos.y - document.getElementById("container").offsetTop;
+    var w = parseFloat(document.getElementById("container").getElementsByTagName("canvas")[0].width)
+    var h = parseFloat(document.getElementById("container").getElementsByTagName("canvas")[0].height)
     var focal = 1.1							// ad-hack; get from camera perspective matrix & things of that nature
     mx = focal * (mx / w - 0.5)
     my = -focal * (h / w) * (my / h - 0.5)
