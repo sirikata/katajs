@@ -322,11 +322,12 @@ K3D.getNearestObject = function (olist) {
 }
 
 // create a standard texture-mapped object with new material & texture; add to the scene
-K3D.createObjectAndAddToScene = function (id, mesh, texurl) {
+K3D.createObjectAndAddToScene = function (id, mesh, texurl, cb) {
 	var obj = new GLGE.Object()
 	obj.setId(id)
 	obj.setMesh(mesh)
-	var tx = new GLGE.Texture(texurl)
+	var tx = new GLGE.Texture(texurl, cb)
+//	inspectObject(tx.image)
 	var ml = new GLGE.MaterialLayer(0,GLGE.M_COLOR,GLGE.UV1,null,null)
 	ml.setTexture(tx)
 	var mat = new GLGE.Material()
@@ -342,3 +343,20 @@ K3D.createObjectAndAddToScene = function (id, mesh, texurl) {
 K3D.ms = function() {
 	return (new Date).getTime()		//	ech, it bugs me
 }
+
+// rewrite the Texture class (this may have to change -- should be incorporated into GLGE)
+GLGE.Texture=function(url, cb){
+	this.image=new Image();
+	this.image.texture=this;
+	this.cbOnLoad=cb
+	this.image.onload = function(){
+		this.texture.state=1;
+		if (this.texture.cbOnLoad) {
+			this.texture.cbOnLoad(this)
+		}
+	}
+	this.image.src=url;	
+	this.state=0;
+	this.glTexture=null;
+}
+

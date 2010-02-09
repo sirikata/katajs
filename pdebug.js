@@ -45,7 +45,7 @@ function pdebug_clear() {
 
 function inspectObject(o) {
 	pdebug_clear()
-	pdebug("inspectObject:" + o)
+	pdebug("------------------------inspectObject:" + o + "-------------------------")
 	for (i in o) {
 		pdebug("  " + i + "  :  " + o[i])
 	}

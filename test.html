@@ -154,6 +154,7 @@ doc.onLoad = function(){
 		while(v<-180) v+=360
 		return v.toFixed(1)
 	}
+
 	var show = function(self) {
 		pdebug("edit rotate X="+fix(self.getRotX())+" Y="+fix(self.getRotY())+" Z="+fix(self.getRotZ()),4)
 	}
@@ -210,16 +211,15 @@ doc.onLoad = function(){
 }
 
 addPicture = function(id){
-//	var pic = "images/jais_test512x512b.jpg"
-//	if (pixnum & 1) pic = "images/jais_test512x512.jpg"
 	var pic = document.getElementById(id).value
-    var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), pic)
+    var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), pic, function (tx) {
+	    obj.setScaleX(parseFloat(tx.width)*.01)
+	    obj.setScaleZ(parseFloat(tx.height)*.01)
+	})
 	obj.setLocX(2)
 	obj.setLocY(-20)
 	obj.setLocZ(2.5)
-    obj.setScaleX(1 + Math.random() * 4)
     obj.setScaleY(.25)
-    obj.setScaleZ(1 + Math.random() * 4)
 	obj.getMaterial().setSpecular(.4)
 	obj.getMaterial().setEmit(1)
     obj.makeDragable(dragWallStart, dragWallUpdate)
