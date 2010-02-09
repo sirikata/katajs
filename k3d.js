@@ -98,7 +98,8 @@ K3D.init = function (){
     K3D.oldLeftBtn = false
 	K3D.levelmap=new GLGE.HeightMap("images/map.png",120,120,-50,50,-50,50,0,50);
 	K3D.lasttime=0;
-	K3D.frameRateBuffer=60;
+	K3D.lasttimeFps=0;
+	K3D.frameRateBuffer=10;
 	K3D.cnt=0;
 	K3D.inc=0.2;
 	setInterval(K3D.render,15);
@@ -190,7 +191,8 @@ K3D.render = function (){
     var now=parseInt(new Date().getTime());
     K3D.cnt=(K3D.cnt+1)%10;
     if(K3D.cnt==0){
-	    K3D.frameRateBuffer=Math.round(((K3D.frameRateBuffer*9)+1000/(now-K3D.lasttime))/10);
+	    K3D.frameRateBuffer=(10000/(now-K3D.lasttimeFps)).toFixed(1);
+		K3D.lasttimeFps=now
 	    document.getElementById("debug").innerHTML="Frame Rate:"+K3D.frameRateBuffer;
     }
     K3D.lasttime=now;
@@ -304,4 +306,9 @@ K3D.createObjectAndAddToScene = function (id, mesh, texurl) {
 	obj.setMaterial(mat)
 	scene.addObject(obj)
 	return obj
+}
+
+// time in milliseconds
+K3D.ms = function() {
+	return (new Date).getTime()		//	ech, it bugs me
 }
