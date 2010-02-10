@@ -49,6 +49,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          gfx.send({msg:"Mesh",id:"12346",mesh:"http://example.com/bad.dae"});
          gfx.send({msg:"Mesh",id:"12346",mesh:"http://example.com/test.dae"});
          gfx.send({msg:"DestroyMesh",id:"12346"});
+
+         gfx.send({msg:"Create",id:"12347",pos:[300,150,5]});
+         gfx.send({msg:"Mesh",id:"12347",mesh:"http://example.com/bad.dae"});
+         gfx.send({msg:"DestroyMesh",id:"12347"});
+         gfx.send({msg:"IFrame",id:"12347",uri:"http://www.google.com/"});
+         gfx.send({msg:"IFrame",id:"12347",uri:"http://www.sirikata.com/"});
       }
     </script>
 
