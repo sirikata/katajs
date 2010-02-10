@@ -39,8 +39,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript">
       documentLoaded=function() {
          var gfx=new TextGraphics(function(obj){},document.body);
-         gfx.send({msg:"Create",id:"12345",pos:[1,2,3]})
-         gfx.send({msg:"Move",id:"12345",pos:[100,2,3]})
+         gfx.send({msg:"Create",id:"12345",pos:[1,2,4]});
+         gfx.send({msg:"Move",id:"12345",pos:[100,2,4]});
+         gfx.send({msg:"Mesh",id:"12345",mesh:"http://example.com/bad.dae"});
+         gfx.send({msg:"Mesh",id:"12345",mesh:"http://example.com/test.dae"});
+
+         gfx.send({msg:"Create",id:"12346",pos:[1,2,5]});
+         gfx.send({msg:"Move",id:"12346",pos:[0,256,2]});
+         gfx.send({msg:"Mesh",id:"12346",mesh:"http://example.com/bad.dae"});
+         gfx.send({msg:"Mesh",id:"12346",mesh:"http://example.com/test.dae"});
+         gfx.send({msg:"DestroyMesh",id:"12346"});
       }
     </script>
 
