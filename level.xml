@@ -75,7 +75,11 @@
 	
 	<material id="floor_08" specular="0.00">
 		<texture id="floort" src="images/floor_08_1024.jpg" />
+		<texture id="floornorm" src="images/floor_08_nrm.jpg" />
+		<texture id="floorspec" src="images/floor_08_spc.jpg" />
 		<material_layer texture="#floort" mapinput="UV1" mapto="M_COLOR" scale_x="1" scale_y="1"/>
+		<material_layer texture="#floornorm" mapinput="UV1" mapto="M_NOR" scale_x="1" scale_y="1" />
+		<material_layer texture="#floorspec" mapinput="UV1" mapto="M_SPECULAR" scale_x="1" scale_y="1" />
 	</material>
 	
 	<material id="box3" specular="0.1" emit="1.5">
