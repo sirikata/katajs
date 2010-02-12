@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         gfx.send({msg: "Create",id: "cam"});
         gfx.send({msg:"Camera",id:"cam",pos:[1,15,8],primary:true});
 		setTimeout( function () {
-	        gfx.send({msg:"Move",id:"box1",pos:[0,2,6]});
+	        gfx.send({msg:"Move",id:"box1",pos:[0,2,6], orient:[0,0,1]});
 			},
 			3000)
 		setTimeout( function () {
