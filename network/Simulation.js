@@ -35,9 +35,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
 
     // public abstract class Kata.Simulation
     /** @constructor */
-    Kata.Simulation = function () {}
-
-    Kata.Simulation.prototype.init = function (channel) {
+    Kata.Simulation = function (channel) {
         this.mChannel = channel;
         channel.registerListener(this);
     }

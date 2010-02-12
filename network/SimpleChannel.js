@@ -30,17 +30,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
     // public final class SimpleChannel extends Channel
     var SUPER = Kata.Channel.prototype;
     Kata.SimpleChannel = function (partner) {
+        SUPER.constructor.call(this);
         if (partner) {
             this.pair(partner);
         }
     };
-    Kata.SimpleChannel.prototype = new SUPER.constructor;
+    Kata.SimpleChannel.prototype = Kata.extend(SUPER);
 
     Kata.SimpleChannel.prototype.pair = function (otherChannel) {
         if (!(otherChannel instanceof Kata.SimpleChannel)) {

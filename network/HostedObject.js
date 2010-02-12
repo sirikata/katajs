@@ -1,5 +1,5 @@
-/*  Kata Javascript Utilities
- *  Channel.js
+/*  Kata Javascript Network Layer
+ *  HostedObject.js
  *
  *  Copyright (c) 2010, Patrick Reiter Horn
  *  All rights reserved.
@@ -31,18 +31,26 @@
  */
 
 (function() {
-    // public abstract class Channel
-    Kata.Channel = function () {}
 
-    Kata.Channel.prototype.registerListener = function (listener) {
-        this.mListener = listener;
+    // public class HostedObject
+    /** @constructor */
+    Kata.HostedObject = function (objectHost, id) {
+        this.mObjectHost = objectHost;
+        this.mID = id;
     };
-    Kata.Channel.prototype.callListeners = function (data) {
-        if (!this.mListener) {
-            Kata.error("Kata.Channel's mListener is not set");
-        }
-        this.mListener.receivedMessage(this, data);
+
+    Kata.HostedObject.prototype.getObjectHost = function () {
+        return this.mObjectHost;
     };
-    Kata.Channel.prototype.sendMessage = null;
+
+    Kata.HostedObject.prototype.getID = function () {
+        return this.mID;
+    };
+
+    Kata.HostedObject.prototype.messageFromSimulation = function (channel, data) {
+    };
+
+    Kata.HostedObject.prototype.receivedMessage = function (channel, data) {
+    };
 
 })();

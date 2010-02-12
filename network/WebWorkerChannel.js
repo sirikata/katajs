@@ -30,7 +30,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
     function getCallback(thus) {
@@ -43,10 +42,11 @@ if (typeof(Kata) == "undefined") {Kata = {};}
     var SUPER = Kata.Channel.prototype;
     /** @constructor */
     Kata.WebWorkerChannel = function (port) {
+        SUPER.constructor.call(this);
         this.mMessagePort = port;
         this.mMessagePort.onmessage = getCallback(this);
     }
-    Kata.WebWorkerChannel.prototype = new SUPER.constructor;
+    Kata.WebWorkerChannel.prototype = Kata.extend(SUPER);
 
     Kata.WebWorkerChannel.prototype.sendMessage = function (data) {
         this.mMessagePort.postMessage(data);

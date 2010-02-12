@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         }
     </script>
 
+    <script type="text/javascript" src="Core.js"></script>
     <script type="text/javascript" src="Channel.js"></script>
 
     <script type="text/javascript" src="../externals/protojs/protobuf.js"></script>
@@ -76,9 +77,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         function substreamListener(substream, data) {
             var header = new Sirikata.Protocol.Header;
-            header.ParseFromStream(new PROTO.Base64Stream(data.getString()));
+            header.ParseFromStream(new PROTO.Base64Stream(data));
             var body = new Sirikata.Protocol.MessageBody;
-            body.ParseFromStream(data);
+            body.ParseFromStream(new PROTO.Base64Stream(data));
             var name = '';
             for (var i = 0; i < body.message_arguments.length; i++) {
                 var arg = body.message_arguments[i];
@@ -91,17 +92,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     var proximate_object = prox.proximate_object;
                     if (prox.proximity_event==Sirikata.Protocol.ProxCall.ProximityEvent.ENTERED_PROXIMITY) {
                         window.divel.appendChild(document.createTextNode(
-                            "Got ProxCall: Entered "+PBJ.uuid.toString(proximate_object)));
+                            "Got ProxCall: Entered "+proximate_object));
                     }
                     else if (prox.proximity_event==Sirikata.Protocol.ProxCall.ProximityEvent.EXITED_PROXIMITY) {
                         window.divel.appendChild(document.createTextNode(
-                            "Got ProxCall: Exited "+PBJ.uuid.toString(proximate_object)));
+                            "Got ProxCall: Exited "+proximate_object));
                     }
                     displayParsedMessage(prox);
                 } else if (name == 'RetObj') {
                     var retobj = new Sirikata.Protocol.RetObj;
                     retobj.ParseFromStream(new PROTO.ByteArrayStream(arg));
-                    window.divel.appendChild(document.createTextNode("Got RetObj: "+PBJ.uuid.toString(retobj.object_reference)));
+                    window.divel.appendChild(document.createTextNode(
+                        "Got RetObj: "+retobj.object_reference+
+                        " at this local time: "+
+                        new Date(retobj.location.timestamp).toTimeString()));
                     displayParsedMessage(retobj);
 
                     var proxMessage = new PROTO.Base64Stream;

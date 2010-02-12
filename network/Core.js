@@ -1,5 +1,5 @@
 /*  Kata Javascript Utilities
- *  Channel.js
+ *  Kata.js
  *
  *  Copyright (c) 2010, Patrick Reiter Horn
  *  All rights reserved.
@@ -30,19 +30,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+if (typeof(Kata) == "undefined") {Kata = {};}
+
 (function() {
-    // public abstract class Channel
-    Kata.Channel = function () {}
-
-    Kata.Channel.prototype.registerListener = function (listener) {
-        this.mListener = listener;
-    };
-    Kata.Channel.prototype.callListeners = function (data) {
-        if (!this.mListener) {
-            Kata.error("Kata.Channel's mListener is not set");
+    /** Extends a prototype. 
+    */
+    Kata.extend = function(parent) {
+        /* Doesn't allow instanceof to work. If we want this, we would make
+           use "new parent.constructor" as our object. */
+        var ret = {}; // new parent;
+        for (var prop in parent.prototype) {
+            ret[prop] = parent.prototype[prop];
         }
-        this.mListener.receivedMessage(this, data);
-    };
-    Kata.Channel.prototype.sendMessage = null;
-
+        return ret;
+    }
+    Kata.log = console && console.log || function(msg) {
+        if (typeof(document)!="undefined" && typeof(window)!="undefined") {
+            document.body.appendChild(document.createElement("br"));
+            document.body.appendChild(document.createTextNode(msg));
+            window.status = msg;
+        }
+    }
+    Kata.error = function(error) {
+        if (typeof(console)!="undefined") {
+            console.error && console.error(error);
+            console.trace && console.trace();
+        }
+        throw error;
+    }
 })();

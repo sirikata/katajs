@@ -30,20 +30,112 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
-    // public final class ObjectHost
+    var NUM_STREAMS = 1; //FIXME: Test with more than one.
+
+    // public abstract class ObjectHost
     /** @constructor */
     Kata.ObjectHost = function () {
+        this.mProtocols = {};
+        this.mProtocols["sirikata"] = {
+            name: "sirikata",
+            default_port: 5943,
+            protocol_class: Kata.TCPSST,
+            object_class: Kata.SirikataHostedObject
+        };
         this.mSimulations = [];
+        this.mSimulationsByName = {};
+        this.mSpaceMap = {};
+        this.mSpaceConnections = {};
+        this.mObjects = {};
     }
 
     Kata.ObjectHost.prototype.registerSimulation = function (channel, name) {
         this.mSimulations.push(channel);
+        this.mSimulationsByName[name] = channel;
         channel.registerListener(this);
     };
+
+    /** FIXME DESCRIPTION
+    @param {object=} name  Simulation name (if ommitted, broadcast). */
+    Kata.ObjectHost.prototype.sendToSimulation = function (data, name) {
+        if (!name) {
+            for (name in this.mSimulationsByName) {
+                this.mSimulationsByName[name].sendMessage(data);
+            }
+        } else {
+            this.mSimulationsByName[name].sendMessage(data);
+        }
+    }
+
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
+        if (channel == this.mSimulationsByName["graphics"]) {
+            switch (data.msg) {
+            case "RegisterSpace":
+                this.registerSpace(data.spaceid, data.server);
+                return;
+            case "CreateObject":
+                this.createObject(data.spaceid, data.privid);
+                return;
+            default:
+                break;
+            }
+        }
+        if (data.id in this.mObjects) {
+            this.mObjects[data.id].messageFromSimulation(channel, data);
+        }
+    }
+
+    Kata.ObjectHost.prototype.registerSpace = function (spacename, server) {
+        var colon = server.indexOf("://");
+        if (colon == -1) {
+            Kata.error("registerSpace missing protocol for server "+server);
+        }
+        var proto = this.mProtocols[server.substr(0, colon)];
+        if (!proto) {
+            Kata.error("Protocol "+proto+" is not registered.");
+        }
+        var ProtoClass = proto.protocol_class;
+        server = server.substr(colon+3);
+        var slash = server.indexOf("/");
+        if (slash != -1) {
+            server = server.substr(0, slash);
+        }
+        colon = server.indexOf(":");
+        var host, port;
+        if (colon == -1) {
+            host = server;
+            port = proto.default_port;
+        } else {
+            host = server.substr(0, colon);
+            port = server.substr(colon+1);
+        }
+        this.mSpaceMap[spacename] = {protocol: proto, host: host, port: port};
+    }
+
+    Kata.ObjectHost.prototype.createObject = function(spacename, id) {
+        var HostedClass = this.mSpaceMap[spacename].protocol.object_class;
+        this.mObjects[id] = new HostedClass(this, id);
+        return this.mObjects[id];
+    }
+
+    /** FIXME
+    @param {object=} channel  An optional top-level stream already connected to this same space. */
+    Kata.ObjectHost.prototype.connectToSpace = function(spacename, channel) {
+        var topLevelStream = channel;
+        if (topLevelStream) {
+            this.mSpaceConnections[spacename] = channel;
+        } else {
+            topLevelStream = this.mSpaceConnections[spacename];
+        }
+        if (!topLevelStream) {
+            var server = this.mSpaceMap[spacename];
+            var ProtoClass = server.protocol.protocol_class;
+            topLevelStream = new ProtoClass(server.host, server.port, NUM_STREAMS);
+            this.mSpaceConnections[spacename] = topLevelStream;
+        }
+        return topLevelStream;
     }
 
 })();
