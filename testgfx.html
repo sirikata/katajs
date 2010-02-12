@@ -1,0 +1,99 @@
+<!-- kata3d Javascript Utilities
+ test.html
+
+ Copyright (c) 2010, Patrick Reiter Horn
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+ * Neither the name of kata3d nor the names of its contributors may
+   be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kata Network Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<script type="text/javascript" src="pdebug.js"></script> 
+	<script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
+	<script type="text/javascript" src="externals/GLGE/glge.js"></script> 
+	<script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
+	<script type="text/javascript" src="ray_tri.js"></script> 
+	<script type="text/javascript" src="k3d.js"></script> 
+    <script type="text/javascript" src="gfx/k3dgfx.js"></script>
+    <script type="text/javascript">
+	doc = new GLGE.Document();
+    doc.onLoad = function(){
+        scene = K3D.init()
+        var gfx=new Kata3DGraphics(function(obj){},document.body);
+        gfx.send({msg:"Create",id:"12345",pos:[-5,2,4]});
+		setTimeout( function () {
+	        gfx.send({msg:"Move",id:"12345",pos:[0,2,4]});
+			},
+			3000)
+		setTimeout( function () {
+	        gfx.send({msg:"Move",id:"12345",pos:[5,2,4]});
+			},
+			5000)
+		/*
+        gfx.send({msg:"Mesh",id:"12345",mesh:"http://example.com/bad.dae"});
+        gfx.send({msg:"Mesh",id:"12345",mesh:"http://example.com/test.dae"});
+
+        gfx.send({msg:"Create",id:"12346",pos:[1,2,5]});
+        gfx.send({msg:"Move",id:"12346",pos:[0,306,2]});
+        gfx.send({msg:"Mesh",id:"12346",mesh:"http://example.com/bad.dae"});
+        gfx.send({msg:"Mesh",id:"12346",mesh:"http://example.com/test.dae"});
+        gfx.send({msg:"DestroyMesh",id:"12346"});
+
+        gfx.send({msg:"Create",id:"12347",pos:[300,150,5]});
+        gfx.send({msg:"Mesh",id:"12347",mesh:"http://example.com/bad.dae"});
+        gfx.send({msg:"DestroyMesh",id:"12347"});
+        gfx.send({msg:"IFrame",id:"12347",uri:"http://www.google.com/"});
+        gfx.send({msg:"IFrame",id:"12347",uri:"http://www.sirikata.com/"});
+        */
+    }
+	doc.load("testgfx.xml")
+    </script>
+
+  </head>
+  
+  <body>
+	<div>
+	<div style="width:900px;margin:auto;position:relative" id="container">
+	katagfx test
+	<canvas id="canvas" width="900" height="500"></canvas>
+	<div id="debug"></div>
+	<div id="dbg0"></div>
+	<div id="dbg1"></div>
+	<div id="dbg2"></div>
+	<div id="dbg3"></div>
+	<div id="dbg4"></div>
+	<div id="dbg5"></div>
+	<div id="dbg6"></div>
+	<div id="dbg7"></div>
+	<div id="dbg8"></div>
+	<div id="dbg9"></div>
+	<div id="dbg"></div>
+  </body>
+</html>
