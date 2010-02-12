@@ -5,13 +5,13 @@ id2Obj = function(id){
     if (obj == null) {
         if (id != g_camera_id) {
             alert("k3dgfx error: unknown object " + id)
-            return
+            return null
         }
         else {
             obj = g_scene.camera
         }
     }
-	return obj
+    return obj
 }
 
 Kata3DGraphics=function(callbackFunction,parentElement) {
