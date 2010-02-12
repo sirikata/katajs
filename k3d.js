@@ -130,7 +130,7 @@ K3D.init = function (){
 	K3D.lasttimeFps=0;
 	K3D.frameRateBuffer=10;
 	K3D.cnt=0;
-	K3D.inc=0.2;
+	K3D.inc=0;
 	setInterval(K3D.render,15);
 	return K3D.gameScene
 }
@@ -237,6 +237,7 @@ K3D.checkkeys = function (){
 			camera.setLocY(camerapos.y + yinc);
 			camera.setLocX(camerapos.x + xinc);
 		}
+		console.log("camera rotX:",1.56 - trans[1] * K3D.inc)
 		camera.setRotX(1.56 - trans[1] * K3D.inc);
 		camera.setRotZ(-trans[0] * K3D.inc);
 	}
