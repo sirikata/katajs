@@ -96,8 +96,19 @@ K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) 
 
 // get position buffer
 K3D.addProtoSafely(GLGE.Object, "getPositions", function() {
+	var posbuf
 	for (i in this.mesh.buffers) {
 		if(this.mesh.buffers[i].name=="position") posbuf = this.mesh.buffers[i].data 
+	}
+	return posbuf
+})
+
+// get face buffer
+K3D.addProtoSafely(GLGE.Object, "getFaces", function() {
+	var posbuf
+	for (i in this.mesh.buffers) {
+		console.log("debug:",this.mesh.buffers[i].name)
+		if(this.mesh.buffers[i].name=="face") posbuf = this.mesh.buffers[i].data 
 	}
 	return posbuf
 })
@@ -295,6 +306,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
 	var minN = null
 	// get vertex coords
     var p = this.getPositions()
+	console.log("faces:",f)
     for (var i = 0; i < p.length; i += 9) { // for each tri
         var A = new GLGE.Vec([sx * p[i], sy * p[i + 1], sz * p[i + 2], 1]) // get vertex points for triangle ABC
         var B = new GLGE.Vec([sx * p[i + 3], sy * p[i + 4], sz * p[i + 5], 1])
