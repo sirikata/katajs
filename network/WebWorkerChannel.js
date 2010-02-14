@@ -35,7 +35,7 @@
     function getCallback(thus) {
         return function(ev) {
             thus.callListeners(ev.data);
-        }
+        };
     }
 
     // public final class SimpleChannel extends Channel
@@ -45,8 +45,8 @@
         SUPER.constructor.call(this);
         this.mMessagePort = port;
         this.mMessagePort.onmessage = getCallback(this);
-    }
-    Kata.WebWorkerChannel.prototype = Kata.extend(SUPER);
+    };
+    Kata.extend(Kata.WebWorkerChannel, SUPER);
 
     Kata.WebWorkerChannel.prototype.sendMessage = function (data) {
         this.mMessagePort.postMessage(data);

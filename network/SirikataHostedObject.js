@@ -59,7 +59,7 @@
         this.spaceConnections = {};
     };
 
-    Kata.SirikataHostedObject.prototype = Kata.extend(SUPER);
+    Kata.extend(Kata.SirikataHostedObject, SUPER);
 
     Kata.SirikataHostedObject.prototype.connectToSpace = function (space) {
         var topLevelConnection = this.mObjectHost.connectToSpace(space);
@@ -83,14 +83,14 @@
             loc.velocity = [0,0,0];
             var serialized = new PROTO.ByteArrayStream;
             newObj.SerializeToStream(serialized);
-            body.message_arguments.push(serialized);
-            var header = new Sirikata.Protocol.MessageHeader;
+            body.message_arguments.push(serialized.getArray());
+            var header = new Sirikata.Protocol.Header;
             header.destination_object = [];
             header.destination_port = Ports.REGISTRATION;
             var b64stream = new PROTO.Base64Stream();
-            header.serializeToStream(b64stream);
-            body.serializeToStream(b64stream);
-            substream.sendMessage(header, body);
+            header.SerializeToStream(b64stream);
+            body.SerializeToStream(b64stream);
+            substream.sendMessage(b64stream.getString());
         }
         return substream;
     };
@@ -98,14 +98,12 @@
     Kata.SirikataHostedObject.prototype._parseRPC = function (header, bodydata) {
         var body = new Sirikata.Protocol.MessageBody;
         body.ParseFromStream(new PROTO.Base64Stream(bodydata));
-        console.log("Received RPC from:");
-        console.log(header);
-        console.log("Body:");
-        console.log(body);
+        console.log("Received RPC from:",header,"Body:",body);
         if (body.message_names[0]=="RetObj") {
             var retObj = new Sirikata.Protocol.RetObj;
             retObj.ParseFromStream(new PROTO.ByteArrayStream(body.message_arguments[0]));
-            console.log("Got RetObj!");
+            console.log("Got RetObj!", retObj);
+            console.log("Object "+this.mID+" maps to "+retObj.object_reference);
             this.mObjectHost.sendToSimulation({
                 msg: "ConnectedToSpace",
                 spaceid: header.source_space,
@@ -132,7 +130,6 @@
     };
 
     Kata.SirikataHostedObject.prototype.sendMessage = function (header, body) {
-        // FIXME: PBJ uuids are arrays of ints, not strings!!!
         var destSpace = header.destination_space;
         var info = this.spaceConnections[destSpace];
         if (!info) {
@@ -158,17 +155,21 @@
                 break;
             }
         }
-        if (header.destPort in this.portHandlers) {
+        console.log("Object "+this.mID+" got message on port "+header.destination_port, header, data);
+        if (!header.destination_port) {
+            this.portHandlers[0].call(this, header, data);
+        } else if (header.destination_port in this.portHandlers) {
             this.portHandlers[channel].call(this, header, data);
         } else {
             SUPER.receivedMessage.call(this, header, data);
         }
     };
 
-    Kata.HostedObject.prototype.messageFromSimulation = function (channel, data) {
+    Kata.SirikataHostedObject.prototype.messageFromSimulation = function (channel, data) {
         if (data.msg == "ConnectToSpace") {
             if (data.spaceid) {
-                this.connectToSpace(data.spaceid);
+                console.log("Connecting "+this.mID+" to space "+data.spaceid);
+                this.connectToSpace(data.spaceid.toLowerCase());
             }
         }
     };

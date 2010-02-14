@@ -38,11 +38,11 @@
     Kata.GraphicsSimulation = function (channel, domElement) {
         SUPER.constructor.call(this, channel);
         this.mElement = domElement;
-    }
-    Kata.GraphicsSimulation.prototype = Kata.extend(SUPER);
+    };
+    Kata.extend(Kata.GraphicsSimulation, SUPER);
 
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
         SUPER.receivedMessage.apply(this, arguments);
-    }
+    };
 
 })();

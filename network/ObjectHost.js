@@ -49,7 +49,7 @@
         this.mSpaceMap = {};
         this.mSpaceConnections = {};
         this.mObjects = {};
-    }
+    };
 
     Kata.ObjectHost.prototype.registerSimulation = function (channel, name) {
         this.mSimulations.push(channel);
@@ -67,25 +67,29 @@
         } else {
             this.mSimulationsByName[name].sendMessage(data);
         }
-    }
-
+    };
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
+        console.log("Object Host received a message:", data);
         if (channel == this.mSimulationsByName["graphics"]) {
             switch (data.msg) {
             case "RegisterSpace":
-                this.registerSpace(data.spaceid, data.server);
+                this.registerSpace(data.spaceid.toLowerCase(), data.server);
                 return;
             case "CreateObject":
-                this.createObject(data.spaceid, data.privid);
+                this.createObject(data.spaceid.toLowerCase(), data.privid.toLowerCase());
                 return;
             default:
                 break;
             }
         }
-        if (data.id in this.mObjects) {
-            this.mObjects[data.id].messageFromSimulation(channel, data);
+        var privid = data.privid && data.privid.toLowerCase();
+        if (privid in this.mObjects) {
+            this.mObjects[privid].messageFromSimulation(channel, data);
+        } else {
+            console.log("ObjectHost message for unknown object ",privid);
+            console.log("List of known objects:",this.mObjects);
         }
-    }
+    };
 
     Kata.ObjectHost.prototype.registerSpace = function (spacename, server) {
         var colon = server.indexOf("://");
@@ -112,13 +116,13 @@
             port = server.substr(colon+1);
         }
         this.mSpaceMap[spacename] = {protocol: proto, host: host, port: port};
-    }
+    };
 
     Kata.ObjectHost.prototype.createObject = function(spacename, id) {
         var HostedClass = this.mSpaceMap[spacename].protocol.object_class;
         this.mObjects[id] = new HostedClass(this, id);
         return this.mObjects[id];
-    }
+    };
 
     /** FIXME
     @param {object=} channel  An optional top-level stream already connected to this same space. */
@@ -136,6 +140,6 @@
             this.mSpaceConnections[spacename] = topLevelStream;
         }
         return topLevelStream;
-    }
+    };
 
 })();

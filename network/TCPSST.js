@@ -35,19 +35,19 @@
     function getMessageCallback(thus, which) {
         return function(ev) {
             thus._onMessage(which, ev.data);
-        }
+        };
     }
 
     function getOpenCallback(thus, which) {
         return function(ev) {
             thus._onOpen(which);
-        }
+        };
     }
 
     function getCloseCallback(thus, which) {
         return function(ev) {
             thus._onClose(which);
-        }
+        };
     }
 
     if (typeof(WebSocket)!="undefined") {
@@ -104,7 +104,7 @@
             var percent = b64data.indexOf('%');
             var streamnumber = parseInt(b64data.substr(0,percent), 16);
             b64data = b64data.substr(percent+1);
-            console.log("Message to socket "+which+" stream "+streamnumber+": "+b64data);
+            console.log("Receive from socket "+which+" stream "+streamnumber+":",b64data);
 
             // FIXME: How do we detect a "close" message?
 
@@ -115,6 +115,7 @@
             this.mSubstreams[streamnumber].callListeners(b64data);
         };
         Kata.TCPSST.prototype.send = function (streamid, base64data) {
+            console.log("Send to socket stream "+streamid+":",base64data);
             var finalString = streamid.toString(16)+"%"+base64data;
 
             if (this.mConnected.length == 0) {
@@ -144,7 +145,7 @@
             this.mWhich = which;
             Kata.Channel.call(this);
         };
-        Kata.TCPSST.Substream.prototype = Kata.extend(Kata.Channel);
+        Kata.extend(Kata.TCPSST.Substream, Kata.Channel.prototype);
 
         Kata.TCPSST.Substream.prototype.sendMessage = function (data) {
             this.mOwner.send(this.mWhich, data);

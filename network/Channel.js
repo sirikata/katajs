@@ -32,7 +32,7 @@
 
 (function() {
     // public abstract class Channel
-    Kata.Channel = function () {}
+    Kata.Channel = function () {};
 
     Kata.Channel.prototype.registerListener = function (listener) {
         this.mListener = listener;

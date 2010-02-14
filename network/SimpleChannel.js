@@ -40,7 +40,7 @@
             this.pair(partner);
         }
     };
-    Kata.SimpleChannel.prototype = Kata.extend(SUPER);
+    Kata.extend(Kata.SimpleChannel, SUPER);
 
     Kata.SimpleChannel.prototype.pair = function (otherChannel) {
         if (!(otherChannel instanceof Kata.SimpleChannel)) {
@@ -49,9 +49,9 @@
         }
         otherChannel.mPartner = this;
         this.mPartner = otherChannel;
-    }
+    };
     Kata.SimpleChannel.prototype.sendMessage = function (data) {
         this.mPartner.callListeners(data);
-    }
+    };
 
 })();

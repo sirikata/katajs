@@ -31,31 +31,77 @@
  */
 
 if (typeof(Kata) == "undefined") {Kata = {};}
+if (typeof(console) == "undefined") {console = {};}
+if (typeof(JSON) == "undefined") {JSON = {};}
 
 (function() {
     /** Extends a prototype. 
     */
-    Kata.extend = function(parent) {
+    Kata.extend = function(child, parent) {
         /* Doesn't allow instanceof to work. If we want this, we would make
            use "new parent.constructor" as our object. */
-        var ret = {}; // new parent;
-        for (var prop in parent.prototype) {
-            ret[prop] = parent.prototype[prop];
+        for (var prop in parent) {
+            child.prototype[prop] = parent[prop];
         }
-        return ret;
-    }
-    Kata.log = console && console.log || function(msg) {
-        if (typeof(document)!="undefined" && typeof(window)!="undefined") {
-            document.body.appendChild(document.createElement("br"));
-            document.body.appendChild(document.createTextNode(msg));
-            window.status = msg;
-        }
+        child.prototype.constructor = child;
+    };
+    if (console.log&&0) {
+        /** Logs msg to the console, in addition to some json object.
+         @param var_args  Some optional JSON or string data to log. */
+        Kata.log = function(var_args) {
+            console.log.apply(console, arguments);
+        };
+    } else {
+        /** Logs msg to the console, in addition to some json object.
+         @param var_args  Some optional JSON or string data to log. */
+        Kata.log = console.log = function(var_args) {
+            if (typeof(document)=="undefined" || typeof(window)=="undefined") {
+                return;
+            }
+            window.status = ""+arguments[0];
+            var p = document.createElement("p");
+            p.style.border="1px solid black";
+            p.style.margin="0";
+            var marleft = "0";
+            for (var i = 0; i < arguments.length; i++) {
+                var msg = arguments[i];
+                var div;
+                if (typeof(msg) != "object" || msg.toString != Object.prototype.toString) {
+                    div = document.createElement("div");
+                    div.appendChild(document.createTextNode(msg));
+                } else {
+                    var datastr;
+                    try {
+                        datastr = JSON.stringify(msg, null, 4);
+                    } catch (e) {
+                        datastr = "{\n";
+                        for (var k in msg) {
+                            datastr += "    "+k+": "+msg[k]+",\n";
+                        }
+                        datastr += "}";
+                    }
+                    div = document.createElement("pre");
+                    div.appendChild(document.createTextNode(datastr));
+                }
+                div.style.margin="0";
+                div.style.padding="5px";
+                div.style.overflow="auto";
+                div.style.whiteSpace="pre";
+                div.style.border="1px solid #ccc";
+                div.style.marginLeft=marleft;
+                marleft = "30px";
+                p.appendChild(div);
+            }
+            document.body.appendChild(p);
+        };
     }
     Kata.error = function(error) {
-        if (typeof(console)!="undefined") {
+        console.log(error);
+        if (typeof(console.error)!="undefined") {
+            window.status = error;
             console.error && console.error(error);
             console.trace && console.trace();
         }
         throw error;
-    }
+    };
 })();
