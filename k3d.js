@@ -296,11 +296,14 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
 	var minN = null
 	// get vertex coords
     var p = this.getPositions()
-	var f = this.mesh.faces.data
-    for (var i = 0; i < p.length; i += 9) { // for each tri
-        var A = new GLGE.Vec([sx * p[i], sy * p[i + 1], sz * p[i + 2], 1]) // get vertex points for triangle ABC
-        var B = new GLGE.Vec([sx * p[i + 3], sy * p[i + 4], sz * p[i + 5], 1])
-        var C = new GLGE.Vec([sx * p[i + 6], sy * p[i + 7], sz * p[i + 8], 1])
+	var ff = this.mesh.faces.data
+	var f = []
+	for (i in ff) f[i] = parseInt(ff[i]);
+//	console.log(p,f)
+    for (var i = 0; i < f.length; i += 3) { // for each tri
+        var A = new GLGE.Vec([sx * p[f[i]*3], sy * p[f[i]*3 + 1], sz * p[f[i]*3 + 2], 1]) // get vertex points for triangle ABC
+        var B = new GLGE.Vec([sx * p[f[i+1]*3], sy * p[f[i+1]*3 + 1], sz * p[f[i+1]*3 + 2], 1])
+        var C = new GLGE.Vec([sx * p[f[i+2]*3], sy * p[f[i+2]*3 + 1], sz * p[f[i+2]*3 + 2], 1])
         A = mat.x(A) // convert them to global coords
         B = mat.x(B)
         C = mat.x(C)
