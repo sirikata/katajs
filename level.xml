@@ -108,7 +108,7 @@
 
 	<scene id="mainscene" camera="#maincamera" ambient_color="#666">
 		<object id="wallobject" mesh="#cube" scale_x="10" scale_y="10" scale_z="10" material="#wallmaterial" />
-		<object id="bornholm" mesh="#born_floor" scale_x="1" scale_y="1" scale_z="1" loc_x="-4.6" loc_y="2.3" loc_z="8" rot_y="-3.06" material="#floor_08" />
+		<object id="bornholm" mesh="#born_floor" scale_x="1" scale_y="1" scale_z="1" loc_x="8" loc_y="2" loc_z="7" material="#floor_08" />
 		<object id="crate" loc_y="0"  loc_x="-10" mesh="#cube2" scale_x="5" scale_y="1" scale_z="6" rot_Z="2.5" material="#box" />
 		<object id="crate2" loc_y="0"  loc_x="10" mesh="#cube2" scale_x="2" scale_y="2" scale_z="2" material="#box" />
 		<object id="crate4" loc_y="25"  loc_x="-10" mesh="#cube2" scale_x="2" scale_y="2" scale_z="2" material="#box" />
