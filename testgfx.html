@@ -45,33 +45,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript">
 	doc = new GLGE.Document();
     doc.onLoad = function(){
-        scene = K3D.init()
+        g_scene = K3D.init()
         var gfx=new Kata3DGraphics(function(obj){},document.body);
-        gfx.send({msg:"Create",id:"12345",pos:[-5,2,4]});
+        gfx.send({msg: "Create",id: "box1"});
+        gfx.send({msg:"Mesh",id:"box1",pos:[-5,2,6], mesh:"cube"});
+        gfx.send({msg: "Create",id: "cam"});
+        gfx.send({msg:"Camera",id:"cam",pos:[1,15,8],primary:true});
 		setTimeout( function () {
-	        gfx.send({msg:"Move",id:"12345",pos:[0,2,4]});
+	        gfx.send({msg:"Move",id:"box1",pos:[0,2,6], orient:[0,0,1]});
 			},
 			3000)
 		setTimeout( function () {
-	        gfx.send({msg:"Move",id:"12345",pos:[5,2,4]});
+	        gfx.send({msg:"Move",id:"cam",pos:[1,20,8]});
 			},
 			5000)
-		/*
-        gfx.send({msg:"Mesh",id:"12345",mesh:"http://example.com/bad.dae"});
-        gfx.send({msg:"Mesh",id:"12345",mesh:"http://example.com/test.dae"});
-
-        gfx.send({msg:"Create",id:"12346",pos:[1,2,5]});
-        gfx.send({msg:"Move",id:"12346",pos:[0,306,2]});
-        gfx.send({msg:"Mesh",id:"12346",mesh:"http://example.com/bad.dae"});
-        gfx.send({msg:"Mesh",id:"12346",mesh:"http://example.com/test.dae"});
-        gfx.send({msg:"DestroyMesh",id:"12346"});
-
-        gfx.send({msg:"Create",id:"12347",pos:[300,150,5]});
-        gfx.send({msg:"Mesh",id:"12347",mesh:"http://example.com/bad.dae"});
-        gfx.send({msg:"DestroyMesh",id:"12347"});
-        gfx.send({msg:"IFrame",id:"12347",uri:"http://www.google.com/"});
-        gfx.send({msg:"IFrame",id:"12347",uri:"http://www.sirikata.com/"});
-        */
     }
 	doc.load("testgfx.xml")
     </script>
@@ -79,7 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   </head>
   
   <body>
-	<div>
+	<div></div>
 	<div style="width:900px;margin:auto;position:relative" id="container">
 	katagfx test
 	<canvas id="canvas" width="900" height="500"></canvas>
@@ -95,5 +82,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<div id="dbg8"></div>
 	<div id="dbg9"></div>
 	<div id="dbg"></div>
+        </div>
   </body>
 </html>

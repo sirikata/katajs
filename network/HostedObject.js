@@ -1,5 +1,5 @@
-/*  Kata Javascript Utilities
- *  WebWorkerChannel.js
+/*  Kata Javascript Network Layer
+ *  HostedObject.js
  *
  *  Copyright (c) 2010, Patrick Reiter Horn
  *  All rights reserved.
@@ -32,24 +32,25 @@
 
 (function() {
 
-    function getCallback(thus) {
-        return function(ev) {
-            thus.callListeners(ev.data);
-        };
-    }
-
-    // public final class SimpleChannel extends Channel
-    var SUPER = Kata.Channel.prototype;
+    // public class HostedObject
     /** @constructor */
-    Kata.WebWorkerChannel = function (port) {
-        SUPER.constructor.call(this);
-        this.mMessagePort = port;
-        this.mMessagePort.onmessage = getCallback(this);
+    Kata.HostedObject = function (objectHost, id) {
+        this.mObjectHost = objectHost;
+        this.mID = id;
     };
-    Kata.extend(Kata.WebWorkerChannel, SUPER);
 
-    Kata.WebWorkerChannel.prototype.sendMessage = function (data) {
-        this.mMessagePort.postMessage(data);
+    Kata.HostedObject.prototype.getObjectHost = function () {
+        return this.mObjectHost;
+    };
+
+    Kata.HostedObject.prototype.getID = function () {
+        return this.mID;
+    };
+
+    Kata.HostedObject.prototype.messageFromSimulation = function (channel, data) {
+    };
+
+    Kata.HostedObject.prototype.receivedMessage = function (channel, data) {
     };
 
 })();

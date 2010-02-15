@@ -30,21 +30,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
-
     // public abstract class Channel
-    Kata.Channel = function () {}
+    Kata.Channel = function () {};
 
-    Kata.Channel.prototype.init = function () {
-    }
     Kata.Channel.prototype.registerListener = function (listener) {
         this.mListener = listener;
     };
     Kata.Channel.prototype.callListeners = function (data) {
         if (!this.mListener) {
-            Kata.Channel.listener.isNotSet(); // throw error.
-            //return;
+            Kata.error("Kata.Channel's mListener is not set");
         }
         this.mListener.receivedMessage(this, data);
     };

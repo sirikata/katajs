@@ -1,40 +1,39 @@
-addCube = function(id) {
-    var obj = K3D.createObjectAndAddToScene(id, doc.getElement("cube"), "images/crate.jpg")
-	return obj
+g_camera_id = null
+
+id2Obj = function(id){
+    obj = g_scene.getObjectById(id)
+    if (obj == null) {
+        if (id != g_camera_id) {
+            alert("k3dgfx error: unknown object " + id)
+            return null
+        }
+        else {
+            obj = g_scene.camera
+        }
+    }
+    return obj
 }
 
 Kata3DGraphics=function(callbackFunction,parentElement) {
     this.callback=callbackFunction;
     this.parent=parentElement;
     this.methodTable={}
-    var returnObjById=function( id )
-    {
-        if (document.getElementById)
-            var returnVar = document.getElementById(id);
-        else if (document.all)
-            var returnVar = document.all[id];
-        else if (document.layers)
-            var returnVar = document.layers[id];
-        return returnVar;
-    }
+
     this.methodTable["Create"]=function(msg) {
-		console.log("Create",msg)
-		obj = addCube(msg.id)
+		// FIXME: should keep track of position? do something?
+    }
+    this.methodTable["Move"]=function(msg) {
+		console.log("Move",msg)
+		obj = id2Obj(msg.id)
 		if (msg.pos) {
-			console.log("  Create pos:",msg.pos)
 			obj.setLocX(msg.pos[0])
 			obj.setLocY(msg.pos[1])
 			obj.setLocZ(msg.pos[2])
 		}
-    }
-    this.methodTable["Move"]=function(msg) {
-		console.log("Move",msg)
-		obj = scene.getObjectById(msg.id)
-		if (msg.pos) {
-			console.log("  Move pos:",msg.pos)
-			obj.setLocX(msg.pos[0])
-			obj.setLocY(msg.pos[1])
-			obj.setLocZ(msg.pos[2])
+		if (msg.orient) {
+			obj.setRotX(msg.orient[0])
+			obj.setRotY(msg.orient[1])
+			obj.setRotZ(msg.orient[2])
 		}
     }
     this.methodTable["Destroy"]=function(msg) {
@@ -45,6 +44,19 @@ Kata3DGraphics=function(callbackFunction,parentElement) {
     }
     this.methodTable["Mesh"]=function(msg) {
 		console.log("Mesh",msg)
+		var obj = new GLGE.Object()			// FIXME: not all k3d objects should be GLGE objects (the camera?)
+		obj.setId(msg.id)
+		obj.setMesh(doc.getElement(msg.mesh))
+		var tx = new GLGE.Texture("images/crate.jpg")
+		var ml = new GLGE.MaterialLayer(0,GLGE.M_COLOR,GLGE.UV1,null,null)
+		ml.setTexture(tx)
+		var mat = new GLGE.Material()
+		mat.id = msg.id + "_mat"
+		mat.addTexture(tx)
+		mat.addMaterialLayer(ml)
+		obj.setMaterial(mat)
+		g_scene.addObject(obj)
+		this["Move"](msg)
     }
     this.methodTable["DestroyMesh"]=function(msg) {
 		console.log("DestroyMesh",msg)
@@ -57,6 +69,10 @@ Kata3DGraphics=function(callbackFunction,parentElement) {
     }
     this.methodTable["Camera"]=function(msg) {
 		console.log("Camera",msg)
+		if (msg.primary) {
+			g_camera_id = msg.id		// FIXME: need to handle non-primary camera
+		}
+		this["Move"](msg)
     }
     this.methodTable["AttachCamera"]=function(msg) {
 		console.log("AttachCamera",msg)

@@ -46,14 +46,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         }
     </script>
 
+    <script type="text/javascript" src="Core.js"></script>
     <script type="text/javascript" src="Channel.js"></script>
     <script type="text/javascript" src="WebWorkerChannel.js"></script>
     <script type="text/javascript" src="SimpleChannel.js"></script>
     <script type="text/javascript" src="WebWorker.js"></script>
     <script type="text/javascript" src="Simulation.js"></script>
     <script type="text/javascript" src="GraphicsSimulation.js"></script>
+    <script type="text/javascript" src="HostedObject.js"></script>
     <script type="text/javascript" src="ObjectHost.js"></script>
     <script type="text/javascript" src="ObjectHostWorker.js"></script>
+    <script type="text/javascript" src="SirikataHostedObject.js"></script>
     <script type="text/javascript" src="Kata.js"></script>
 
     <script type="text/javascript" src="../externals/protojs/protobuf.js"></script>
@@ -73,18 +76,37 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     <script type="text/javascript">
         var kata, graphics;
+        var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
         function documentLoaded() {
             window.kata = new Kata.Main();
             graphics = new Kata.GraphicsSimulation(
                 window.kata.getChannel(),
                 document.getElementById("kata")
                 );
+            window.kata.getChannel().sendMessage({
+                msg: "RegisterSpace",
+                spaceid: defaultSpace,
+                server: "sirikata://localhost"
+                });
+            var testObj = Math.uuid();
+            // FIXME: We have two seemingly redundant messages.
+            window.kata.getChannel().sendMessage({
+                msg: "CreateObject",
+                spaceid: defaultSpace,
+                privid: testObj
+                });
+            window.kata.getChannel().sendMessage({
+                msg: "ConnectToSpace",
+                spaceid: defaultSpace,
+                privid: testObj
+                });
         }
     </script>
   </head>
   <body onload="documentLoaded();">
-    <h1>Under construction</h1>
-    <p>This test doesn't work yet. See <a href="sst_test.html">sst_test.html</a> for a simple test of SST over WebSockets.</p>
+    <h1>ObjectHost Test</h1>
+    <p>See <a href="sst_test.html">sst_test.html</a> for a simple test of SST over WebSockets.</p>
+    <p>Testing object host with one camera.</p>
     <canvas id="kata"></canvas>
   </body>
 </html>

@@ -30,17 +30,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
     // public final class SimpleChannel extends Channel
     var SUPER = Kata.Channel.prototype;
     Kata.SimpleChannel = function (partner) {
+        SUPER.constructor.call(this);
         if (partner) {
             this.pair(partner);
         }
     };
-    Kata.SimpleChannel.prototype = new SUPER.constructor;
+    Kata.extend(Kata.SimpleChannel, SUPER);
 
     Kata.SimpleChannel.prototype.pair = function (otherChannel) {
         if (!(otherChannel instanceof Kata.SimpleChannel)) {
@@ -49,9 +49,9 @@ if (typeof(Kata) == "undefined") {Kata = {};}
         }
         otherChannel.mPartner = this;
         this.mPartner = otherChannel;
-    }
+    };
     Kata.SimpleChannel.prototype.sendMessage = function (data) {
         this.mPartner.callListeners(data);
-    }
+    };
 
 })();

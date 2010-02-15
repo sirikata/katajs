@@ -30,13 +30,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
     // public final class ObjectHostWorker
     /** @constructor */
     Kata.ObjectHostWorker = function (graphicsChannel) {
-        this.mObjectHost = new Kata.ObjectHost(graphicsChannel);
+        this.mObjectHost = new Kata.ObjectHost();
 
         this.mObjectHost.registerSimulation(graphicsChannel, "graphics");
 

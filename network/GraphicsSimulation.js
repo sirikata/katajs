@@ -30,20 +30,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
     // public abstract class GraphicsSimulation extends Simulation
     var SUPER = Kata.Simulation.prototype;
     /** @constructor */
     Kata.GraphicsSimulation = function (channel, domElement) {
-        this.mChannel = channel;
+        SUPER.constructor.call(this, channel);
         this.mElement = domElement;
-    }
-    Kata.GraphicsSimulation.prototype = new SUPER.constructor;
+    };
+    Kata.extend(Kata.GraphicsSimulation, SUPER);
 
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
-        SUPER.apply(this, arguments);
-    }
+        SUPER.receivedMessage.apply(this, arguments);
+    };
 
 })();
