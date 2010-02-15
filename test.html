@@ -200,6 +200,7 @@ doc.onLoad = function(){
     
     scene.getObjectById("teapotobject").makeClickableCallback(function(x, y){
         alert("Would you have some tea?\nI no longer make pictures.\ntry 'add picture' lower left")
+//        window.open("popup1.html")
         document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
     })
 

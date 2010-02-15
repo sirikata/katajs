@@ -237,7 +237,6 @@ K3D.checkkeys = function (){
 			camera.setLocY(camerapos.y + yinc);
 			camera.setLocX(camerapos.x + xinc);
 		}
-		console.log("camera rotX:",1.56 - trans[1] * K3D.inc)
 		camera.setRotX(1.56 - trans[1] * K3D.inc);
 		camera.setRotZ(-trans[0] * K3D.inc);
 	}
