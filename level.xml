@@ -14,8 +14,8 @@
 </mesh>
 
 <mesh id="born_floor">
-<positions> -10.626743, -2.219000, 1.364871, -10.844894, -2.219000, 4.484485, -2.840446, -2.219000, 5.044211, -2.528120, -2.219000, 0.577745, -7.116062, -2.219000, 0.256924, -7.210244, -2.219000, 1.603776 </positions>
-<normals> 0.000000, 1.000000, -0.000000, 0.000000, 1.000000, -0.000000, 0.000000, 1.000000, -0.000000, 0.000000, 1.000000, -0.000000, 0.000000, 1.000000, -0.000000, 0.000000, 1.000000, -0.000000 </normals>
+<positions> -10.626743, -1.364871, -2.219000, -10.844894, -4.484485, -2.219000, -2.840446, -5.044211, -2.219000, -2.528120, -0.577745, -2.219000, -7.116062, -0.256924, -2.219000, -7.210244, -1.603776, -2.219000 </positions>
+<normals> 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 1.000000 </normals>
 <uv1> -1.835405, 0.233868, -1.835409, 2.128019, 3.024690, 2.128020, 3.024690, -0.583906, 0.239007, -0.583906, 0.239007, 0.233869 </uv1>
 <faces> 0, 1, 2, 3, 4, 5, 2, 3, 5, 0, 2, 5 </faces>
 </mesh>
@@ -108,7 +108,7 @@
 
 	<scene id="mainscene" camera="#maincamera" ambient_color="#666">
 		<object id="wallobject" mesh="#cube" scale_x="10" scale_y="10" scale_z="10" material="#wallmaterial" />
-		<object id="bornholm" mesh="#born_floor" scale_x="1" scale_y="1" scale_z="1" loc_x="8" loc_y="2" loc_z="7" material="#floor_08" />
+		<object id="bornholm" mesh="#born_floor" scale_x="4" scale_y="4" scale_z="4" loc_x="20" loc_y="0" loc_z="10" material="#floor_08" />
 		<object id="crate" loc_y="0"  loc_x="-10" mesh="#cube2" scale_x="5" scale_y="1" scale_z="6" rot_Z="2.5" material="#box" />
 		<object id="crate2" loc_y="0"  loc_x="10" mesh="#cube2" scale_x="2" scale_y="2" scale_z="2" material="#box" />
 		<object id="crate4" loc_y="25"  loc_x="-10" mesh="#cube2" scale_x="2" scale_y="2" scale_z="2" material="#box" />
