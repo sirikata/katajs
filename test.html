@@ -118,11 +118,11 @@ doc.onLoad = function(){
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    var hoverable = ["crate", "crate2", "crate4", "crate5", "monkeyobject", "teapotobject"]
-    var selectable = ["crate", "crate2", "crate5", "monkeyobject"]
-    var dragable = ["crate", "crate2", "crate4", "crate5", "bornholm"]
-	var dragWallable = ["monkeyobject"]
-    g_dragOns = ["wallobject", "crate", "crate4",	 "crate5","bornholm"]
+    var hoverable = []
+    var selectable = []
+    var dragable = []
+	var dragWallable = []
+    g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor"]
 
     // hover cyan
     for (i in hoverable) {
@@ -193,17 +193,6 @@ doc.onLoad = function(){
         })
 	}
     
-    //scene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
-    //	alert("MONKEY BIDNESS!")
-    //	document.getElementById("canvas").buttonState[0]=false			///	kluge to fix bug where alert() makes GLGE miss mouseUp
-    //})
-    
-    scene.getObjectById("teapotobject").makeClickableCallback(function(x, y){
-        alert("Would you have some tea?\nI no longer make pictures.\ntry 'add picture' lower left")
-//        window.open("popup1.html")
-        document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
-    })
-
     // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
 	for (i in dragWallable) {
 	    scene.getObjectById(dragWallable[i]).makeDragable(dragWallStart, dragWallUpdate)
