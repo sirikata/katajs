@@ -353,19 +353,21 @@ K3D.getNearestObject = function (olist) {
 }
 
 // create a standard texture-mapped object with new material & texture; add to the scene
+// if no texture, do not create material
 K3D.createObjectAndAddToScene = function (id, mesh, texurl, cb) {
 	var obj = new GLGE.Object()
 	obj.setId(id)
 	obj.setMesh(mesh)
-	var tx = new GLGE.Texture(texurl, cb)
-//	inspectObject(tx.image)
-	var ml = new GLGE.MaterialLayer(0,GLGE.M_COLOR,GLGE.UV1,null,null)
-	ml.setTexture(tx)
-	var mat = new GLGE.Material()
-	mat.id = id + "_mat"
-	mat.addTexture(tx)
-	mat.addMaterialLayer(ml)
-	obj.setMaterial(mat)
+	if (texurl) {
+		var ml = new GLGE.MaterialLayer(0,GLGE.M_COLOR,GLGE.UV1,null,null)
+		var mat = new GLGE.Material()
+		mat.id = id + "_mat"
+		var tx = new GLGE.Texture(texurl, cb)
+		ml.setTexture(tx)
+		mat.addTexture(tx)
+		mat.addMaterialLayer(ml)
+		obj.setMaterial(mat)
+	}
 	scene.addObject(obj)
 	return obj
 }
@@ -391,3 +393,12 @@ GLGE.Texture=function(url, cb){
 	this.glTexture=null;
 }
 
+// line segment of balls, used for editing
+// beg, end are GLGE.Vec
+K3D.lineSegOfBalls = function(beg, end, num, size, color){
+    console.log("lineSegOfBalls:", beg, end, num, size, color)
+    num -= 1
+    var div = 1.0 / num
+    var delta = [(end.e(1) - beg.e(1)) * div, (end.e(2) - beg.e(2)) * div, (end.e(3) - beg.e(3)) * div]
+    console.log("delta:", delta)
+}
