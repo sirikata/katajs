@@ -220,7 +220,8 @@ K3D.checkkeys = function (){
 		if (K3D.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {
 			camera.setRotY(camerarot.y - 0.025);
 		}
-		pdebug("K3D.levelmap: " + K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
+//		pdebug("K3D.levelmap: " + K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
+		/*
 		if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) 
 			xinc = 0;
 		if (K3D.levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) 
@@ -233,6 +234,7 @@ K3D.checkkeys = function (){
 		else {
 			camera.setLocZ(K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
 		}
+		*/
 		if (xinc != 0 || yinc != 0) {
 			camera.setLocY(camerapos.y + yinc);
 			camera.setLocX(camerapos.x + xinc);
