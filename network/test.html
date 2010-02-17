@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript" src="HostedObject.js"></script>
     <script type="text/javascript" src="ObjectHost.js"></script>
     <script type="text/javascript" src="ObjectHostWorker.js"></script>
+    <script type="text/javascript" src="TCPSST.js"></script>
     <script type="text/javascript" src="SirikataHostedObject.js"></script>
     <script type="text/javascript" src="Kata.js"></script>
 
@@ -99,6 +100,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 msg: "ConnectToSpace",
                 spaceid: defaultSpace,
                 privid: testObj
+                });
+            window.kata.getChannel().sendMessage({
+                msg: "Proximity",
+                spaceid: defaultSpace,
+                privid: testObj,
+                radius: 1.0e+8
                 });
         }
     </script>

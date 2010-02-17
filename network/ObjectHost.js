@@ -42,7 +42,7 @@
             name: "sirikata",
             default_port: 5943,
             protocol_class: Kata.TCPSST,
-            object_class: Kata.SirikataHostedObject
+            object_class: Sirikata.HostedObject
         };
         this.mSimulations = [];
         this.mSimulationsByName = {};
