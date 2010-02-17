@@ -107,7 +107,7 @@ K3D.addProtoSafely(GLGE.Object, "rayIntersect", function() {
 	
 })
 
-K3D.init = function (){
+K3D.init = function (map){
     //create the GLGE renderer.  
     K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
     K3D.gameScene = doc.getElement("mainscene");
@@ -125,7 +125,9 @@ K3D.init = function (){
     K3D.selectedObj = null
     K3D.hoverObj = null
     K3D.oldLeftBtn = false
-	K3D.levelmap=new GLGE.HeightMap("images/map.png",120,120,-50,50,-50,50,0,50);
+	if (map) {
+		K3D.levelmap = new GLGE.HeightMap(map.image, map.width, map.height, map.lowX, map.upX, map.lowY, map.upY, map.lowZ, map.upZ);
+	}
 	K3D.lasttime=0;
 	K3D.lasttimeFps=0;
 	K3D.frameRateBuffer=10;
@@ -221,20 +223,20 @@ K3D.checkkeys = function (){
 			camera.setRotY(camerarot.y - 0.025);
 		}
 //		pdebug("K3D.levelmap: " + K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
-		/*
-		if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) 
-			xinc = 0;
-		if (K3D.levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) 
-			yinc = 0;
-		
-		if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) {
-			yinc = 0;
-			xinc = 0;
+		if (K3D.levelmap) {
+			if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) 
+				xinc = 0;
+			if (K3D.levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) 
+				yinc = 0;
+			
+			if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) {
+				yinc = 0;
+				xinc = 0;
+			}
+			else {
+				camera.setLocZ(K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
+			}
 		}
-		else {
-			camera.setLocZ(K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
-		}
-		*/
 		if (xinc != 0 || yinc != 0) {
 			camera.setLocY(camerapos.y + yinc);
 			camera.setLocX(camerapos.x + xinc);

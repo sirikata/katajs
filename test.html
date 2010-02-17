@@ -113,7 +113,18 @@ shallowClone = function (obj) {
 pixnum=1
 
 doc.onLoad = function(){
-    scene = K3D.init()
+	heightmap={
+		image:"images/map.png",
+		width:120,
+		height:120,
+		lowX:-50,
+		upX:50,
+		lowY:-50,
+		upY:50,
+		lowZ:0,
+		upZ:50
+	}
+    scene = K3D.init(heightmap)
 	scene.setAmbientColor("#999999")
     
     var purple_mat = doc.getElement("purple");
