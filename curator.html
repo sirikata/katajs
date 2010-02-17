@@ -116,6 +116,7 @@ pixnum=1
 doc.onLoad = function(){
     scene = K3D.init()
 	scene.setAmbientColor("#999999")
+	scene.camera.setLocX(-100)
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
@@ -123,7 +124,8 @@ doc.onLoad = function(){
     var selectable = []
     var dragable = ["straightstair_smallgallery","straightstair_smallgallery_sub1","b7_firedoor_door","bornh_door_gallery_connector_01"]
 	var dragWallable = []
-    g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor"]
+    g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
+	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02", "bornh_bldg_08_wall_int_03",  ]
 
     // hover cyan
     for (i in hoverable) {
@@ -206,9 +208,9 @@ addPicture = function(id){
 	    obj.setScaleX(parseFloat(tx.width)*.01)
 	    obj.setScaleZ(parseFloat(tx.height)*.01)
 	})
-	obj.setLocX(2)
-	obj.setLocY(-20)
-	obj.setLocZ(2.5)
+	obj.setLocX(-100)
+	obj.setLocY(0)
+	obj.setLocZ(0)
     obj.setScaleY(.25)
 	obj.getMaterial().setSpecular(.4)
 	obj.getMaterial().setEmit(1)
