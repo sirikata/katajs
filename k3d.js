@@ -143,7 +143,7 @@ K3D.mouselook = function(){
         var leftbutton = K3D.gameScene.mouse.isButtonDown(0)
         mousepos.x = mousepos.x - document.getElementById("container").offsetLeft;
         mousepos.y = mousepos.y - document.getElementById("container").offsetTop;
-        pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
+//        pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
             var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
@@ -166,7 +166,7 @@ K3D.mouselook = function(){
 				if (K3D.hoverObj && K3D.hoverObj.hoverable) K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
                 K3D.hoverObj = obj;
 				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
-                pdebug("hovering over: " + K3D.hoverObj.id, 3)
+//                pdebug("hovering over: " + K3D.hoverObj.id, 3)
             }
         }
         K3D.oldLeftBtn = leftbutton
@@ -224,6 +224,8 @@ K3D.checkkeys = function (){
 		}
 //		pdebug("K3D.levelmap: " + K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
 		if (K3D.levelmap) {
+//			pdebug("camera: " + camerapos.x.toFixed(2) + ", " + camerapos.y.toFixed(2) + " height: " +
+//				K3D.levelmap.getHeightAt(camerapos.x, camerapos.y).toFixed(2) ,1)
 			if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) 
 				xinc = 0;
 			if (K3D.levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) 
