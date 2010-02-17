@@ -18,19 +18,20 @@ body{background-color: #000;color: #fff;font-family:arial}
 </head><body>
 
 <div>
-<div style="width:900px;margin:auto;position:relative" id="container">
-<canvas id="canvas" width="900" height="500"></canvas>
-<img src="images/glgelogo.png" alt="GLGElogo" style="position:absolute;top: 450px; left: 750px;" />
-<div id="framerate" style="position:absolute; left: 750px; top: 20px; background-color: #000; opacity: 0.5;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
-<div id="debug" style="padding: 5px"></div>
-</div>
-<div onclick = 'alert("2D Javascript element")' style="padding: 5px;position:absolute; left: 20px; top: 370px; background-color: #000; opacity: 0.7;height: 100px; width: 400px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
-<h2 style="margin:0;padding:0;padding-bottom: 5px;font-size: 20px">Extremely early Kata3D 'Demo'</h2>
-<p style="margin:0;padding:0;padding-bottom: 5px;">Hover==cyan; selected==purple; drag objects</p>
-<p style="margin:0;padding:0;padding-bottom: 5px;">arrow keys to move, U & J to pan camera</p>
-<p style="margin:0;padding:0;padding-bottom: 5px;">this box pops a msg, so does the teapot</p>
-</div>
-</div>
+	<div style="width:900px;margin:auto;position:relative" id="container">
+		<canvas id="canvas" width="900" height="500"></canvas>
+		<div id="framerate" style="position:absolute; left: 750px; top: 20px; background-color: #000; opacity: 0.5;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
+			<div id="debug" style="padding: 5px"></div>
+		</div>
+		<!--
+		<div onclick = 'alert("2D Javascript element")' style="padding: 5px;position:absolute; left: 20px; top: 370px; background-color: #000; opacity: 0.7;height: 100px; width: 400px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
+		<h2 style="margin:0;padding:0;padding-bottom: 5px;font-size: 20px">Extremely early Kata3D 'Demo'</h2>
+		<p style="margin:0;padding:0;padding-bottom: 5px;">Hover==cyan; selected==purple; drag objects</p>
+		<p style="margin:0;padding:0;padding-bottom: 5px;">arrow keys to move, U & J to pan camera</p>
+		<p style="margin:0;padding:0;padding-bottom: 5px;">this box pops a msg, so does the teapot</p>
+		</div>
+		-->
+	</div>
 </div>
 <div id="debug2"></div>
 <script type="text/javascript">
@@ -226,7 +227,7 @@ doc.load("level.xml")
 <button onclick = 'addPicture("input_tex1")' id="addPicture">add picture</button>
 <input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
 <button onclick = 'addPicture("input_tex2")' id="addPicture">add picture</button>
-<input type="text" id="input_tex2" size="50" value="images/jais_test512x512b.jpg"/>><br>
+<input type="text" id="input_tex2" size="50" value="images/jais_test512x512b.jpg"/><br>
 <button onclick = 'addPicture("input_tex3")' id="addPicture">add picture</button>
 <input type="text" id="input_tex3" size="50" value="http://danbmil.com/dan_headshot_small.JPG"/><br>
 		  
