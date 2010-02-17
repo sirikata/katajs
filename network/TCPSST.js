@@ -83,7 +83,7 @@
             console.log("Closed socket "+which);
             var index = this.mConnected.indexOf(which);
             if (index != -1) {
-                this.mConnected.remove(index);
+                this.mConnected.splice(index,1);
             }
             // FIXME: Shouldn't there be some transparent reconnect?
             // What do we do if only one of the streams closes (network error?)
