@@ -1,0 +1,263 @@
+<html><head> 
+ 
+ 
+<title>GLGE</title> 
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+ 
+ 
+<script type="text/javascript" src="pdebug.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
+<script type="text/javascript" src="ray_tri.js"></script> 
+<script type="text/javascript" src="k3d.js"></script> 
+
+<style>
+body{background-color: #000;color: #fff;font-family:arial}
+</style>
+</head><body>
+
+<div>
+<div style="width:900px;margin:auto;position:relative" id="container">
+<canvas id="canvas" width="900" height="500"></canvas>
+<img src="images/glgelogo.png" alt="GLGElogo" style="position:absolute;top: 450px; left: 750px;" />
+<div id="framerate" style="position:absolute; left: 750px; top: 20px; background-color: #000; opacity: 0.5;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
+<div id="debug" style="padding: 5px"></div>
+</div>
+<div onclick = 'alert("2D Javascript element")' style="padding: 5px;position:absolute; left: 20px; top: 370px; background-color: #000; opacity: 0.7;height: 100px; width: 400px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
+<h2 style="margin:0;padding:0;padding-bottom: 5px;font-size: 20px">Extremely early Kata3D 'Demo'</h2>
+<p style="margin:0;padding:0;padding-bottom: 5px;">Hover==cyan; selected==purple; drag objects</p>
+<p style="margin:0;padding:0;padding-bottom: 5px;">arrow keys to move, U & J to pan camera</p>
+<p style="margin:0;padding:0;padding-bottom: 5px;">this box pops a msg, so does the teapot</p>
+</div>
+</div>
+</div>
+<div id="debug2"></div>
+<script type="text/javascript">
+
+doc = new GLGE.Document();
+
+// function to safely set material and save original for highlighting (hover/select)
+setHighlightMaterial = function(obj, material){
+    if (material != obj.highlightMaterial) {
+        if (material == null) {
+            obj.setMaterial(obj.originalMaterial)
+        }
+        else {
+            if (obj.highlightMaterial == null) {
+                obj.originalMaterial = obj.getMaterial()
+            }
+            obj.setMaterial(material)
+        }
+        obj.highlightMaterial = material
+    }
+}
+
+dragWallStart = function(x, y){
+    pdebug("dragWallStart: " + this.id + " xy:" + x + "," + y, 7)
+}
+
+niceArray = function (v, places) {
+	r = []
+	for (i in v) {
+		r.push(v[i].toFixed(places))
+	}
+	return r
+}
+
+dragWallUpdate = function(dx, dy){
+    var placeIndex = K3D.getNearestObject(g_dragOns)
+    if (placeIndex) {
+        var place = placeIndex[0]
+        var over = g_dragOns[placeIndex[1]]
+        var norm = new GLGE.Vec(placeIndex[2])
+		
+		// if we're on a floor or ceiling FIXME: we should still rotate so the picture orients to the camera
+		if (Math.abs(norm.e(3)) > 0.8) {
+			this.setLocX(place[0])
+			this.setLocY(place[1] + parseFloat(this.getScaleZ() ) )
+			this.setLocZ(place[2])
+			this.setRotX(Math.PI * -0.5 * -norm.e(3))
+			this.setRotY(0)
+			this.setRotZ(0)
+		}
+		
+		// if we're on a wall
+		else {
+			var nx = norm.cross([0, -1, 0])
+			var angZ = norm.angle([0, -1, 0])
+			if (nx.e(3) > 0) 
+			angZ = -angZ /// assuming approximately vertical
+			pdebug("dragWallUpdate: " + this.id + " over: " + over + " place: " +
+				niceArray(place, 2) + " ang: " + angZ.toFixed(2) +" norm: " + niceArray(norm.data, 2), 9)
+			over = scene.getObjectById(over)
+			this.setLocX(place[0])
+			this.setLocY(place[1])
+			this.setLocZ(place[2] - parseFloat(this.getScaleZ() ) )
+			this.setRotX(over.getRotX())
+			this.setRotY(over.getRotY())
+			this.setRotZ(Math.PI + angZ)
+		}
+    }
+}
+
+// create a new object with same props as old
+shallowClone = function (obj) {
+	o2 = {}
+	for (i in obj) {
+		o2[i] = obj[i]
+	}
+	return o2
+}
+
+pixnum=1
+
+doc.onLoad = function(){
+    scene = K3D.init()
+	scene.setAmbientColor("#999999")
+    
+    var purple_mat = doc.getElement("purple");
+    var cyan_mat = doc.getElement("cyan");   
+    var hoverable = ["crate", "crate2", "crate4", "crate5", "monkeyobject", "teapotobject"]
+    var selectable = ["crate", "crate2", "crate5", "monkeyobject"]
+    var dragable = ["crate", "crate2", "crate4", "crate5", "bornholm"]
+	var dragWallable = ["monkeyobject"]
+    g_dragOns = ["wallobject", "crate", "crate4",	 "crate5","bornholm"]
+
+    // hover cyan
+    for (i in hoverable) {
+        obj = scene.getObjectById(hoverable[i])
+        obj.makeHoverable(function(){
+            if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, cyan_mat)
+        }, function(){
+            if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, null)
+        })
+        obj.highlightMaterial = null
+    }
+    
+    
+    // selected are purple
+    for (i in selectable) {
+        obj = scene.getObjectById(selectable[i])
+        scene.getObjectById(selectable[i]).makeSelectable(function(){
+            setHighlightMaterial(this, purple_mat)
+        }, function(){
+            if (this.highlightMaterial == purple_mat) setHighlightMaterial(this, null)
+        })
+        obj.highlightMaterial = null
+    }
+    
+	var fix = function(v) {
+		v = 57.2958*v
+		while(v>180) v-=360
+		while(v<-180) v+=360
+		return v.toFixed(1)
+	}
+
+	var show = function(self) {
+		pdebug("edit rotate X="+fix(self.getRotX())+" Y="+fix(self.getRotY())+" Z="+fix(self.getRotZ()),4)
+	}
+
+    // drag is modal: move, rotatex, rotatey, rotatez
+    for (i in dragable) {
+        scene.getObjectById(dragable[i]).makeDragable(function(){
+            this.dragStartLocX = parseFloat(this.getLocX()) ///	wtf? strings?
+            this.dragStartLocY = parseFloat(this.getLocY())
+            this.dragStartLocZ = parseFloat(this.getLocZ())
+            this.dragStartRotX = parseFloat(this.getRotX()) ///	wtf? strings?
+            this.dragStartRotY = parseFloat(this.getRotY())
+            this.dragStartRotZ = parseFloat(this.getRotZ())
+        }, function(dx, dy){
+			if (document.input_editmode.R[1].checked) {
+				var ang = scene.camera.getRotY()
+				var x = Math.cos(ang - Math.PI)
+				var y = Math.sin(ang - Math.PI)
+				//			pdebug("x: " + x + "y: " + y + "ang: "+ (parseFloat(ang)-Math.PI),9)
+				this.setLocX(this.dragStartLocX - dx * x * 0.05)
+				this.setLocY(this.dragStartLocY - dx * y * 0.05)
+				this.setLocZ(this.dragStartLocZ - dy * 0.05)
+				pdebug("edit move X="+this.getLocX().toFixed(3)+" Y="+this.getLocY().toFixed(3)+" Z="+this.getLocZ().toFixed(3),4)
+			}
+			if (document.input_editmode.R[2].checked) {
+				this.setRotX(this.dragStartRotX + dy*.01)
+				show(this)
+			}
+			if (document.input_editmode.R[3].checked) {
+				this.setRotY(this.dragStartRotY + dy*.01)
+				show(this)
+			}
+			if (document.input_editmode.R[4].checked) {
+				this.setRotZ(this.dragStartRotZ + dx*.01)
+				show(this)
+			}
+        })
+	}
+    
+    //scene.getObjectById("monkeyobject").makeClickableCallback(function(x,y) {
+    //	alert("MONKEY BIDNESS!")
+    //	document.getElementById("canvas").buttonState[0]=false			///	kluge to fix bug where alert() makes GLGE miss mouseUp
+    //})
+    
+    scene.getObjectById("teapotobject").makeClickableCallback(function(x, y){
+        alert("Would you have some tea?\nI no longer make pictures.\ntry 'add picture' lower left")
+//        window.open("popup1.html")
+        document.getElementById("canvas").buttonState[0] = false ///	kluge to fix bug where alert() makes GLGE miss mouseUp
+    })
+
+    // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
+	for (i in dragWallable) {
+	    scene.getObjectById(dragWallable[i]).makeDragable(dragWallStart, dragWallUpdate)
+	}
+}
+
+addPicture = function(id){
+	var pic = document.getElementById(id).value
+    var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("cube3"), pic, function (tx) {
+	    obj.setScaleX(parseFloat(tx.width)*.01)
+	    obj.setScaleZ(parseFloat(tx.height)*.01)
+	})
+	obj.setLocX(2)
+	obj.setLocY(-20)
+	obj.setLocZ(2.5)
+    obj.setScaleY(.25)
+	obj.getMaterial().setSpecular(.4)
+	obj.getMaterial().setEmit(1)
+    obj.makeDragable(dragWallStart, dragWallUpdate)
+    obj.makeHoverable(function(){
+		this.getMaterial().setEmit(3)
+    }, function(){
+		this.getMaterial().setEmit(1)
+    })
+}
+
+doc.load("level.xml")
+
+</script>
+
+<button onclick = 'addPicture("input_tex1")' id="addPicture">add picture</button>
+<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
+<button onclick = 'addPicture("input_tex2")' id="addPicture">add picture</button>
+<input type="text" id="input_tex2" size="50" value="images/jais_test512x512b.jpg"/>><br>
+<button onclick = 'addPicture("input_tex3")' id="addPicture">add picture</button>
+<input type="text" id="input_tex3" size="50" value="http://danbmil.com/dan_headshot_small.JPG"/><br>
+		  
+<form Name="input_editmode"
+	<input type="radio" Name="R" Checked="true"/>safe
+	<input type="radio" Name="R"/>move
+	<input type="radio" Name="R"/>rotate X
+	<input type="radio" Name="R"/>rotate Y
+	<input type="radio" Name="R"/>rotate Z
+</form>
+
+<div id="dbg0"></div>
+<div id="dbg1"></div>
+<div id="dbg2"></div>
+<div id="dbg3"></div>
+<div id="dbg4"></div>
+<div id="dbg5"></div>
+<div id="dbg6"></div>
+<div id="dbg7"></div>
+<div id="dbg8"></div>
+<div id="dbg9"></div>
+<div id="dbg"></div>
+</body></html>
