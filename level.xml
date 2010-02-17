@@ -209,6 +209,7 @@
 <camera id="maincamera" loc_y="20" loc_x="1" loc_z="8" rot_order="ROT_XZY" rot_y="3.14" rot_x="1.56" />
 
 <scene id="mainscene" camera="#maincamera" ambient_color="#666">
+    <object id="ball"                            mesh="#sphere"                                 material="#bornh_bldg_08_wall_int_02_mat" scale_x="1" scale_y="1" scale_z="1" loc_x="-110" loc_z="5" />
     <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" />
     <object id="bornh_bldg_08_floor"             mesh="#bornh_bldg_08_floor_mesh"               material="#bornh_bldg_08_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" />
     <object id="straightstair_smallgallery"      mesh="#straightstair_smallgallery_mesh"        material="#straightstair_smallgallery_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" />
@@ -223,7 +224,8 @@
     <object id="bornh_bldg_08_wall_int_02"       mesh="#bornh_bldg_08_wall_int_02_mesh"         material="#bornh_bldg_08_wall_int_02_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" />
     <object id="bornh_bldg_08_wall_int_02_sub1"  mesh="#bornh_bldg_08_wall_int_02_sub1_mesh"    material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" />
     <object id="bornh_bldg_08_wall_int_03"       mesh="#bornh_bldg_08_wall_int_03_mesh"         material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" />
-    <light id="mainlight" loc_x="0" loc_y="15" loc_z="20" rot_x="-1.3"  type="L_POINT" />
+    <light id="mainlight" loc_x="-121" loc_y="28" loc_z="22" rot_x="-1.3"  type="L_POINT" />
+    <light id="mainlight2" loc_x="-60" loc_y="-29" loc_z="17" rot_x="-1.3"  type="L_POINT" />
 </scene>
 
 </glge>
