@@ -35,13 +35,25 @@
     Kata.Channel = function () {};
 
     Kata.Channel.prototype.registerListener = function (listener) {
-        this.mListener = listener;
+        if (!this.mListener) {
+            this.mListener = listener;
+        } else if (this.mListener instanceof Array) {
+            this.mListener.push(listener);
+        } else {
+            this.mListener = [this.mListener, listener];
+        }
     };
     Kata.Channel.prototype.callListeners = function (data) {
         if (!this.mListener) {
             Kata.error("Kata.Channel's mListener is not set");
         }
-        this.mListener.receivedMessage(this, data);
+        if (this.mListener.receivedMessage) {
+            this.mListener.receivedMessage(this, data);
+        } else {
+            for (var i = 0; i < this.mListener.length; i++) {
+                this.mListener[i].receivedMessage(this, data);
+            }
+        }
     };
     Kata.Channel.prototype.sendMessage = null;
 

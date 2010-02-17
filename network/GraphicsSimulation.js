@@ -43,6 +43,7 @@
 
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
         SUPER.receivedMessage.apply(this, arguments);
+        console.log("Graphics received message from ObjectHost:", data);
     };
 
 })();

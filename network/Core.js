@@ -92,7 +92,9 @@ if (typeof(JSON) == "undefined") {JSON = {};}
                 marleft = "30px";
                 p.appendChild(div);
             }
-            document.body.appendChild(p);
+            if (document.body) {
+                document.body.appendChild(p);
+            }
         };
     }
     Kata.error = function(error) {
