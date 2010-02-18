@@ -184,6 +184,8 @@ K3D.checkkeys = function (){
 		var elapsed 		
 		var incAmt = K3D.elapsedTime / 1500.0
 		if(incAmt > 0.1) incAmt=0.1
+		var trans0 = trans.e(1)
+		var trans1 = trans.e(2)
 		trans[0] = trans.e(1)*incAmt*40 / mag;
 		trans[1] = trans.e(2)*incAmt*40 / mag;
 		var yinc = 0;
@@ -246,8 +248,8 @@ K3D.checkkeys = function (){
 			camera.setLocY(camerapos.y + yinc);
 			camera.setLocX(camerapos.x + xinc);
 		}
-		camera.setRotX(1.56 - trans[1] * K3D.inc);
-		camera.setRotZ(-trans[0] * K3D.inc);
+		camera.setRotX(1.56 - trans1 * K3D.inc);
+		camera.setRotZ(-trans0 * K3D.inc);
 	}
 }
 
