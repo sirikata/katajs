@@ -66,7 +66,7 @@ niceArray = function (v, places) {
 	return r
 }
 
-positionOnWall = function(obj, x, y){
+positionOnWall = function(obj, x, y){						// pass no x,y means use present mouse location
     var placeIndex = K3D.getNearestObject(g_dragOns,x,y)
     if (placeIndex) {
         var place = placeIndex[0]
@@ -224,10 +224,12 @@ addPicture = function(id){
 	    obj.setScaleX(parseFloat(tx.width)*.01)
 	    obj.setScaleZ(parseFloat(tx.height)*.01)
 	})
-	obj.setLocX(-100)
-	obj.setLocY(0)
-	obj.setLocZ(0)
+//	obj.setLocX(-100)
+//	obj.setLocY(0)
+//	obj.setLocZ(0)
 //    obj.setScaleY(.25)
+
+	positionOnWall(obj, 0, 0)
 	obj.getMaterial().setSpecular(.4)
 	obj.getMaterial().setEmit(1)
     obj.makeDragable(dragWallStart, dragWallUpdate)
