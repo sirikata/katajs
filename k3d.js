@@ -173,7 +173,6 @@ K3D.mouselook = function(){
     }
 }
 
-bugg=1
 K3D.checkkeys = function (){
     if (K3D.mouseovercanvas || K3D.forceMovement) {
 		var camera = K3D.gameScene.camera;
@@ -182,8 +181,11 @@ K3D.checkkeys = function (){
 		var mat = camera.getRotMatrix();
 		var trans = mat.x([0, 0, -1]);
 		var mag = Math.pow(Math.pow(trans.e(1), 2) + Math.pow(trans.e(2), 2), 0.5);
-		trans[0] = trans.e(1) / mag;
-		trans[1] = trans.e(2) / mag;
+		var elapsed 		
+		var incAmt = K3D.elapsedTime / 1500.0
+		if(incAmt > 0.1) incAmt=0.1
+		trans[0] = trans.e(1)*incAmt*40 / mag;
+		trans[1] = trans.e(2)*incAmt*40 / mag;
 		var yinc = 0;
 		var xinc = 0;
 		
@@ -212,16 +214,16 @@ K3D.checkkeys = function (){
 			xinc = xinc + parseFloat(trans[1]);
 		}
 		if (K3D.keys.isKeyPressed(GLGE.KI_U)) {
-			K3D.inc -= 0.025
+			K3D.inc -= incAmt
 		}
 		if (K3D.keys.isKeyPressed(GLGE.KI_J)) {
-			K3D.inc += 0.025
+			K3D.inc += incAmt
 		}
 		if (K3D.keys.isKeyPressed(GLGE.KI_LEFT_ARROW) || K3D.forceMovement=="left") {
-			camera.setRotY(camerarot.y + 0.025);
+			camera.setRotY(camerarot.y + incAmt);
 		}
 		if (K3D.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || K3D.forceMovement=="right") {
-			camera.setRotY(camerarot.y - 0.025);
+			camera.setRotY(camerarot.y - incAmt);
 		}
 //		pdebug("K3D.levelmap: " + K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
 		if (K3D.levelmap) {
@@ -252,6 +254,7 @@ K3D.checkkeys = function (){
 
 K3D.render = function (){
     var now=parseInt(new Date().getTime());
+	K3D.elapsedTime = now-K3D.lasttime
     K3D.cnt=(K3D.cnt+1)%10;
     if(K3D.cnt==0){
 	    K3D.frameRateBuffer=(10000/(now-K3D.lasttimeFps)).toFixed(1);
@@ -379,11 +382,6 @@ K3D.createObjectAndAddToScene = function (id, mesh, texurl, cb) {
 	}
 	scene.addObject(obj)
 	return obj
-}
-
-// time in milliseconds
-K3D.ms = function() {
-	return (new Date).getTime()		//	ech, it bugs me
 }
 
 // rewrite the Texture class (this may have to change -- should be incorporated into GLGE)
