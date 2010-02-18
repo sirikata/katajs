@@ -26,10 +26,10 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div style="padding: 5px;position:absolute; left: 20px; top: 400px; 
 		background-color: #000; opacity: 0.7;height: 77px; width: 105px; border-radius: 5px;	
 		-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
-			<button onMouseDown='movementButton("fwd")' onMouseUp='movementButtonUp("fwd")' style="position:absolute;left:40;top:3">/\</button>
-			<button onMouseDown='movementButton("back")' onMouseUp='movementButtonUp("back")' style="position:absolute;left:40;top:56">\/</button>
-			<button onMouseDown='movementButton("left")' onMouseUp='movementButtonUp("left")' style="position:absolute;left:5;top:30"><</button>
-			<button onMouseDown='movementButton("right")' onMouseUp='movementButtonUp("right")' style="position:absolute;left:75;top:30">></button>
+			<button onMouseDown='movementButton("fwd")' onMouseUp='movementButtonUp("fwd")' onMouseOut='movementButtonUp("fwd")' style="position:absolute;left:40;top:3">/\</button>
+			<button onMouseDown='movementButton("back")' onMouseUp='movementButtonUp("back")' onMouseOut='movementButtonUp("back")' style="position:absolute;left:40;top:56">\/</button>
+			<button onMouseDown='movementButton("left")' onMouseUp='movementButtonUp("left")' onMouseOut='movementButtonUp("left")' style="position:absolute;left:5;top:30"><</button>
+			<button onMouseDown='movementButton("right")' onMouseUp='movementButtonUp("right")' onMouseOut='movementButtonUp("right")' style="position:absolute;left:75;top:30">></button>
 		</div>
 	</div>
 </div>
@@ -55,7 +55,7 @@ setHighlightMaterial = function(obj, material){
 }
 
 dragWallStart = function(x, y){
-    pdebug("dragWallStart: " + this.id + " xy:" + x + "," + y, 7)
+    //pdebug("dragWallStart: " + this.id + " xy:" + x + "," + y, 7)
 }
 
 niceArray = function (v, places) {
@@ -89,8 +89,8 @@ positionOnWall = function(obj, x, y){						// pass no x,y means use present mous
 			var angZ = norm.angle([0, -1, 0])
 			if (nx.e(3) > 0) 
 			angZ = -angZ /// assuming approximately vertical
-			pdebug("dragWallUpdate: " + obj.id + " over: " + over + " place: " +
-				niceArray(place, 2) + " ang: " + angZ.toFixed(2) +" norm: " + niceArray(norm.data, 2), 9)
+			//pdebug("dragWallUpdate: " + obj.id + " over: " + over + " place: " +
+				//niceArray(place, 2) + " ang: " + angZ.toFixed(2) +" norm: " + niceArray(norm.data, 2), 9)
 			over = scene.getObjectById(over)
 			obj.setLocX(place[0]+norm.e(1)*0.1)
 			obj.setLocY(place[1]+norm.e(2)*0.1)
@@ -176,7 +176,7 @@ doc.onLoad = function(){
 	}
 
 	var show = function(self) {
-		pdebug("edit rotate X="+fix(self.getRotX())+" Y="+fix(self.getRotY())+" Z="+fix(self.getRotZ()),4)
+		//pdebug("edit rotate X="+fix(self.getRotX())+" Y="+fix(self.getRotY())+" Z="+fix(self.getRotZ()),4)
 	}
 
     // drag is modal: move, rotatex, rotatey, rotatez
