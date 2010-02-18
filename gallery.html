@@ -23,14 +23,14 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div id="framerate" style="position:absolute; left: 750px; top: 20px; background-color: #000; opacity: 0.5;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
 			<div id="debug" style="padding: 5px"></div>
 		</div>
-		<!--
-		<div onclick = 'alert("2D Javascript element")' style="padding: 5px;position:absolute; left: 20px; top: 370px; background-color: #000; opacity: 0.7;height: 100px; width: 400px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
-		<h2 style="margin:0;padding:0;padding-bottom: 5px;font-size: 20px">Extremely early Kata3D 'Demo'</h2>
-		<p style="margin:0;padding:0;padding-bottom: 5px;">Hover==cyan; selected==purple; drag objects</p>
-		<p style="margin:0;padding:0;padding-bottom: 5px;">arrow keys to move, U & J to pan camera</p>
-		<p style="margin:0;padding:0;padding-bottom: 5px;">this box pops a msg, so does the teapot</p>
+		<div style="padding: 5px;position:absolute; left: 20px; top: 400px; 
+		background-color: #000; opacity: 0.7;height: 80px; width: 145px; border-radius: 5px;	
+		-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
+			<button onMouseDown='movementButton("fwd")' onMouseUp='movementButtonUp("f")' style="position:absolute;left:40;top:3">forward</button>
+			<button onMouseDown='movementButton("back")' onMouseUp='movementButtonUp("b")' style="position:absolute;left:40;top:56">reverse</button>
+			<button onMouseDown='movementButton("left")' onMouseUp='movementButtonUp("l")' style="position:absolute;left:5;top:30">left</button>
+			<button onMouseDown='movementButton("right")' onMouseUp='movementButtonUp("r")' style="position:absolute;left:95;top:30">right</button>
 		</div>
-		-->
 	</div>
 </div>
 <div id="debug2"></div>
@@ -134,7 +134,7 @@ doc.onLoad = function(){
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
     var hoverable = ["ball"]
-    var selectable = []
+    var selectable = ["ball"]
     var dragable = ["ball"]
 	var dragWallable = []
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
@@ -146,6 +146,7 @@ doc.onLoad = function(){
     // hover cyan
     for (i in hoverable) {
         obj = scene.getObjectById(hoverable[i])
+		if (!obj) break
         obj.makeHoverable(function(){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, cyan_mat)
         }, function(){
@@ -158,7 +159,8 @@ doc.onLoad = function(){
     // selected are purple
     for (i in selectable) {
         obj = scene.getObjectById(selectable[i])
-        scene.getObjectById(selectable[i]).makeSelectable(function(){
+		if (!obj) break
+        obj.makeSelectable(function(){
             setHighlightMaterial(this, purple_mat)
         }, function(){
             if (this.highlightMaterial == purple_mat) setHighlightMaterial(this, null)
@@ -179,7 +181,9 @@ doc.onLoad = function(){
 
     // drag is modal: move, rotatex, rotatey, rotatez
     for (i in dragable) {
-        scene.getObjectById(dragable[i]).makeDragable(function(){
+        obj=scene.getObjectById(dragable[i])
+		if (!obj) break
+		obj.makeDragable(function(){
             this.dragStartLocX = parseFloat(this.getLocX()) ///	wtf? strings?
             this.dragStartLocY = parseFloat(this.getLocY())
             this.dragStartLocZ = parseFloat(this.getLocZ())
@@ -234,11 +238,21 @@ addPicture = function(id){
 	obj.getMaterial().setEmit(1)
     obj.makeDragable(dragWallStart, dragWallUpdate)
     obj.makeHoverable(function(){
-		this.getMaterial().setEmit(3)
+		this.getMaterial().setEmit(2.2)
     }, function(){
 		this.getMaterial().setEmit(1)
     })
 }
+
+movementButton = function(b) {
+	K3D.forceMovement=b
+	console.log("K3D:",K3D)
+}
+
+movementButtonUp = function(b) {
+	K3D.forceMovement=null
+}
+
 
 doc.load("bornholm_level.xml")
 

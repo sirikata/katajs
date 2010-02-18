@@ -173,8 +173,9 @@ K3D.mouselook = function(){
     }
 }
 
+bugg=1
 K3D.checkkeys = function (){
-    if (K3D.mouseovercanvas) {
+    if (K3D.mouseovercanvas || K3D.forceMovement) {
 		var camera = K3D.gameScene.camera;
 		camerapos = camera.getPosition();
 		camerarot = camera.getRotation();
@@ -190,7 +191,7 @@ K3D.checkkeys = function (){
 			yinc = yinc + parseFloat(trans[1]);
 			xinc = xinc + parseFloat(trans[0]);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+		if (K3D.keys.isKeyPressed(GLGE.KI_UP_ARROW) || K3D.forceMovement=="fwd") {
 			yinc = yinc + parseFloat(trans[1]);
 			xinc = xinc + parseFloat(trans[0]);
 		}
@@ -198,7 +199,7 @@ K3D.checkkeys = function (){
 			yinc = yinc - parseFloat(trans[1]);
 			xinc = xinc - parseFloat(trans[0]);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+		if (K3D.keys.isKeyPressed(GLGE.KI_DOWN_ARROW) || K3D.forceMovement=="back") {
 			yinc = yinc - parseFloat(trans[1]);
 			xinc = xinc - parseFloat(trans[0]);
 		}
@@ -216,10 +217,10 @@ K3D.checkkeys = function (){
 		if (K3D.keys.isKeyPressed(GLGE.KI_J)) {
 			K3D.inc += 0.025
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_LEFT_ARROW)) {
+		if (K3D.keys.isKeyPressed(GLGE.KI_LEFT_ARROW) || K3D.forceMovement=="left") {
 			camera.setRotY(camerarot.y + 0.025);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) {
+		if (K3D.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || K3D.forceMovement=="right") {
 			camera.setRotY(camerarot.y - 0.025);
 		}
 //		pdebug("K3D.levelmap: " + K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
