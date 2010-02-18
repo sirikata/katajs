@@ -265,21 +265,23 @@ K3D.render = function (){
 
 // return point at which mouse picks object + distance from camera, or null
 // also returns normal
-K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
+K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my){
     // create raycast from camera to mouse xy
     var cam = K3D.gameScene.camera
     var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ(), GLGE.ROT_XZY)
     var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
     var mat = mlo.x(mro) // camera matrix    
-    var mousepos = K3D.gameScene.mouse.getMousePosition();
-    var mx = mousepos.x - document.getElementById("container").offsetLeft;
-    var my = mousepos.y - document.getElementById("container").offsetTop;
-	var can = document.getElementById("container").getElementsByTagName("canvas")[0]
-    var w = parseFloat(can.width)
-    var h = parseFloat(can.height)
-    var focal = 1.1							// ad-hack; get from camera perspective matrix & things of that nature
-    mx = focal * (mx / w - 0.5)
-    my = -focal * (h / w) * (my / h - 0.5)
+    if (mx == null) {
+		var mousepos = K3D.gameScene.mouse.getMousePosition();
+		mx = mousepos.x - document.getElementById("container").offsetLeft;
+		my = mousepos.y - document.getElementById("container").offsetTop;
+		var can = document.getElementById("container").getElementsByTagName("canvas")[0]
+		var w = parseFloat(can.width)
+		var h = parseFloat(can.height)
+		var focal = 1.1 // ad-hack; get from camera perspective matrix & things of that nature
+		mx = focal * (mx / w - 0.5)
+		my = -focal * (h / w) * (my / h - 0.5)
+	}
 //    pdebug("mx: " + mx + " my: " + my)
     var v = new GLGE.Vec([mx, my, -1, 1]) // camera points along -Z axis
     v = mat.x(v) // transform to camera matrix
@@ -335,7 +337,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(){
 
 // return pick point of nearest object in olist under cursor, or null if none
 // list can include actual objects or string id's
-K3D.getNearestObject = function (olist) {
+K3D.getNearestObject = function (olist, x, y) {
     var dist = 9999999.9
     var place = null
 	var hit = null
@@ -343,7 +345,7 @@ K3D.getNearestObject = function (olist) {
     for (var i in olist) {
 		var obj = olist[i]
 		if (typeof(obj)=="string") obj = K3D.gameScene.getObjectById(obj)
-		var pdn = obj.getPickPoint()
+		var pdn = obj.getPickPoint(x,y)
         if (pdn) {
             if (pdn[1] < dist) {
                 place = pdn[0]
