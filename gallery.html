@@ -66,8 +66,8 @@ niceArray = function (v, places) {
 	return r
 }
 
-dragWallUpdate = function(dx, dy){
-    var placeIndex = K3D.getNearestObject(g_dragOns)
+positionOnWall = function(obj, x, y){
+    var placeIndex = K3D.getNearestObject(g_dragOns,x,y)
     if (placeIndex) {
         var place = placeIndex[0]
         var over = g_dragOns[placeIndex[1]]
@@ -75,12 +75,12 @@ dragWallUpdate = function(dx, dy){
 		
 		// if we're on a floor or ceiling FIXME: we should still rotate so the picture orients to the camera
 		if (Math.abs(norm.e(3)) > 0.8) {
-			this.setLocX(place[0])
-			this.setLocY(place[1])
-			this.setLocZ(place[2]+0.1*norm.e(3))
-			this.setRotX(Math.PI * -0.5 * -norm.e(3))
-			this.setRotY(0)
-			this.setRotZ(0)
+			obj.setLocX(place[0])
+			obj.setLocY(place[1])
+			obj.setLocZ(place[2]+0.1*norm.e(3))
+			obj.setRotX(Math.PI * -0.5 * -norm.e(3))
+			obj.setRotY(0)
+			obj.setRotZ(0)
 		}
 		
 		// if we're on a wall
@@ -89,18 +89,20 @@ dragWallUpdate = function(dx, dy){
 			var angZ = norm.angle([0, -1, 0])
 			if (nx.e(3) > 0) 
 			angZ = -angZ /// assuming approximately vertical
-			pdebug("dragWallUpdate: " + this.id + " over: " + over + " place: " +
+			pdebug("dragWallUpdate: " + obj.id + " over: " + over + " place: " +
 				niceArray(place, 2) + " ang: " + angZ.toFixed(2) +" norm: " + niceArray(norm.data, 2), 9)
 			over = scene.getObjectById(over)
-			this.setLocX(place[0]+norm.e(1)*0.1)
-			this.setLocY(place[1]+norm.e(2)*0.1)
-			this.setLocZ(place[2])
-			this.setRotX(over.getRotX())
-			this.setRotY(over.getRotY())
-			this.setRotZ(Math.PI + angZ)
+			obj.setLocX(place[0]+norm.e(1)*0.1)
+			obj.setLocY(place[1]+norm.e(2)*0.1)
+			obj.setLocZ(place[2])
+			obj.setRotX(over.getRotX())
+			obj.setRotY(over.getRotY())
+			obj.setRotZ(Math.PI + angZ)
 		}
     }
 }
+
+dragWallUpdate = function() {positionOnWall(this)}
 
 // create a new object with same props as old
 shallowClone = function (obj) {
