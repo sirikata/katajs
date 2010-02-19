@@ -266,12 +266,15 @@ K3D.checkkeys = function (){
 K3D.render = function (){
 	if (!K3D.initComplete) {
 		var c = K3D.gameScene.incompleteObjects()
-		console.log("complete:",c)
+//		console.log("complete:",c)
 		if (c == 0) {
 			K3D.initComplete = true
 			K3D.gameScene.computeBoundingSpheres()
 		}
-//		else return
+		else {
+		    K3D.gameRenderer.render();					// somehow this pumps a process that needs to occur
+			return			
+		}
 	}
 
     var now=parseInt(new Date().getTime());
@@ -426,11 +429,11 @@ GLGE.Texture=function(url, cb){
 // line segment of balls, used for editing
 // beg, end are GLGE.Vec
 K3D.lineSegOfBalls = function(beg, end, num, size, color){
-    console.log("lineSegOfBalls:", beg, end, num, size, color)
+//    console.log("lineSegOfBalls:", beg, end, num, size, color)
     num -= 1
     var div = 1.0 / num
     var delta = [(end.e(1) - beg.e(1)) * div, (end.e(2) - beg.e(2)) * div, (end.e(3) - beg.e(3)) * div]
-    console.log("delta:", delta)
+//    console.log("delta:", delta)
 }
 
 /// software-only pick function
@@ -470,7 +473,7 @@ K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
 K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 	for (var i in this.objects) {
 		this.objects[i].computeBoundingSphere()
-		console.log("object:", this.objects[i], this.objects[i].id, "radius:", this.objects[i].boundingRadius)
+	//	console.log("object:", this.objects[i], this.objects[i].id, "radius:", this.objects[i].boundingRadius)
 	}
 })
 
