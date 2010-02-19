@@ -146,7 +146,8 @@ K3D.mouselook = function(){
 //        pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
+//            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
+            var obj = K3D.gameScene.pickSoft();
         }
         if (leftbutton) {
             if (K3D.oldLeftBtn == false) {
@@ -411,3 +412,12 @@ K3D.lineSegOfBalls = function(beg, end, num, size, color){
     var delta = [(end.e(1) - beg.e(1)) * div, (end.e(2) - beg.e(2)) * div, (end.e(3) - beg.e(3)) * div]
     console.log("delta:", delta)
 }
+
+/// software-only pick function
+K3D.addProtoSafely(GLGE.Scene, "pickSoft", function() {
+	var place_hit_norm = K3D.getNearestObject(this.objects)
+	if (place_hit_norm) {
+		return this.objects[place_hit_norm[1]]
+	}
+	return null
+})
