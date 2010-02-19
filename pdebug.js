@@ -42,7 +42,7 @@ function pdebug(s, l){
 // works like console.log:
 function pdebug_log() {
 	var s = ""
-	for (i in pdebug_log.arguments) {
+	for (var i=0; i < pdebug_log.arguments.length; i++) {	// weird -- in FF, i in .arguments no worky
 		s += pdebug_log.arguments[i] + " "
 	}
 	document.getElementById("dbg").innerHTML += s + "<br>"
