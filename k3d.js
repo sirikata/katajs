@@ -94,6 +94,7 @@ K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) 
 })
 
 // get position buffer
+bugg=0
 K3D.addProtoSafely(GLGE.Object, "getPositions", function() {
 	var posbuf
 	if (this.mesh) {
@@ -103,7 +104,7 @@ K3D.addProtoSafely(GLGE.Object, "getPositions", function() {
 		}
 	}
 	else {
-		pdebug("meshless object:" + this.id,8)
+		pdebug("meshless object: " + this.id + " " + bugg++,8)
 	}
 	return posbuf
 })
@@ -113,6 +114,7 @@ K3D.addProtoSafely(GLGE.Object, "rayIntersect", function() {
 	
 })
 
+K3D.initComplete = false
 K3D.init = function (map){
     //create the GLGE renderer.  
     K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
@@ -139,6 +141,7 @@ K3D.init = function (map){
 	K3D.frameRateBuffer=10;
 	K3D.cnt=0;
 	K3D.inc=0;
+
 	setInterval(K3D.render,15);
 	return K3D.gameScene
 }
@@ -260,8 +263,17 @@ K3D.checkkeys = function (){
 	}
 }
 
-
 K3D.render = function (){
+	if (!K3D.initComplete) {
+		var c = K3D.gameScene.incompleteObjects()
+		console.log("complete:",c)
+		if (c == 0) {
+			K3D.initComplete = true
+			K3D.gameScene.computeBoundingSpheres()
+		}
+//		else return
+	}
+
     var now=parseInt(new Date().getTime());
 	K3D.elapsedTime = now-K3D.lasttime
     K3D.cnt=(K3D.cnt+1)%10;
@@ -460,4 +472,15 @@ K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 		this.objects[i].computeBoundingSphere()
 		console.log("object:", this.objects[i], this.objects[i].id, "radius:", this.objects[i].boundingRadius)
 	}
+})
+
+//	return count of objects not fully loaded
+K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
+	var count = 0
+	for (var i in this.objects) {
+		if (!this.objects[i].mesh) {
+			count ++	
+		}
+	}
+	return count
 })
