@@ -39,6 +39,15 @@ function pdebug(s, l){
 	}
 }
 
+// works like console.log:
+function pdebug_log() {
+	var s = ""
+	for (i in pdebug_log.arguments) {
+		s += pdebug_log.arguments[i] + " "
+	}
+	document.getElementById("dbg").innerHTML += s + "<br>"
+}
+
 function pdebug_clear() {
 	document.getElementById("dbg").innerHTML = ""
 }
