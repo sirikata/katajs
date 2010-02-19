@@ -295,10 +295,6 @@ K3D.render = function (){
 // also returns normal
 K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     // create raycast from camera to mouse xy
-    var cam = K3D.gameScene.camera
-    var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ(), GLGE.ROT_XZY)
-    var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
-    var mat = mlo.x(mro) // camera matrix    
     if (mx == null || coordType=="pixels") {
 		if (mx == null) {
 			var mousepos = K3D.gameScene.mouse.getMousePosition();
@@ -312,11 +308,19 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
 		mx = focal * (mx / w - 0.5)
 		my = -focal * (h / w) * (my / h - 0.5)
 	}
+    var cam = K3D.gameScene.camera
+    var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ(), GLGE.ROT_XZY)
+    var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
+    var mat = mlo.x(mro) // camera matrix    
 //    pdebug("mx: " + mx + " my: " + my)
     var v = new GLGE.Vec([mx, my, -1, 1]) // camera points along -Z axis
     v = mat.x(v) // transform to camera matrix
     var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
     var vP0 = new GLGE.Vec(P0)
+	if (!this.rayVsBoundingSphere(vP0, new GLGE.Vec([v.e(1), v.e(2), v.e(3)]) ) ) {
+//		console.log("rayVsBoundingSphere fails on", this.id)
+		return null
+	}
     var P1 = [v.e(1), v.e(2), v.e(3)]
     var R = [P0, P1]
 //    pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
@@ -486,4 +490,26 @@ K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 		}
 	}
 	return count
+})
+
+// test ray against our bounding sphere
+K3D.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
+	var S = this.boundingCenter
+	if (S == null) {
+		if (this.mesh) {
+			this.computeBoundingSphere()			// ech, gotta do it here due to async mesh load
+			S = this.boundingCenter
+		}
+		else {
+			return true // better safe than sorry?
+		}
+	}
+	var r = this.boundingRadius
+	var d = S.distanceFrom(RayBeg)					// distance from ray origin to sphere center
+	if (d < r) return true							// origin is inside sphere
+	var a = S.sub(RayBeg).angle(RayEnd.sub(RayBeg))	// angle between ray and center of sphere
+	if (a > 1.5708) return false					// sphere is behind us
+	var d2 = Math.sin(a)							// distance from sphere center to nearest point on ray
+	if (d2 < r) return true
+	return false
 })

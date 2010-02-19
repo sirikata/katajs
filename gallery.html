@@ -227,7 +227,6 @@ doc.onLoad = function(){
 }
 
 addPicture = function(id){
-	K3D.gameScene.computeBoundingSpheres()
 	var pic = document.getElementById(id).value
     var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("square"), pic, function (tx) {
 	    obj.setScaleX(parseFloat(tx.width)*.01)
