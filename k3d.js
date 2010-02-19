@@ -170,6 +170,7 @@ K3D.mouselook = function(){
         if (mousepos.x && mousepos.y) {
 //            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
             var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
+			if (obj==null && K3D.hoverObj && K3D.hoverObj.hoverable) K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
         }
         if (leftbutton) {
             if (K3D.oldLeftBtn == false) {
