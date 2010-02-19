@@ -49,6 +49,14 @@ K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 	return null
 })
 
+K3D.addPickable = function(obj) {
+	already = false
+	for (i in K3D.pickable) {
+		if (K3D.pickable[i].id == obj.id) already = true
+	}
+	if (!already) K3D.pickable.push(obj)
+}
+
 // add makeDragable to Object.
 
 K3D.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
@@ -63,6 +71,7 @@ K3D.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 	this.dragUpdate = function (mouse_x, mouse_y) {
 		this.dragUpdateCb(mouse_x-this.dragStartMouseX, mouse_y-this.dragStartMouseY)
 	}
+	K3D.addPickable(this)
 })
 
 // add makeHoverable to Object.
@@ -71,6 +80,7 @@ K3D.addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
 	this.hoverable = true
 	this.hoverStart = cbStart
 	this.hoverStop = cbEnd
+	K3D.addPickable(this)
 })
 
 // add makeSelectable to Object.
@@ -79,6 +89,7 @@ K3D.addProtoSafely(GLGE.Object, "makeSelectable", function(cbSelect, cbDeselect)
 	this.selectable = true
 	this.selectStart = cbSelect
 	this.selectStop = cbDeselect
+	K3D.addPickable(this)
 })
 
 K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
@@ -91,6 +102,7 @@ K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) 
 	this.clickUp = function (mouse_x, mouse_y) {
 		if (this.clickCallbackUp) this.clickCallbackUp(mouse_x, mouse_y)
 	}
+	K3D.addPickable(this)
 })
 
 // get position buffer
@@ -117,6 +129,7 @@ K3D.addProtoSafely(GLGE.Object, "rayIntersect", function() {
 K3D.initComplete = false
 K3D.init = function (map){
     //create the GLGE renderer.  
+	K3D.pickable = []
     K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
     K3D.gameScene = doc.getElement("mainscene");
     K3D.gameRenderer.setScene(K3D.gameScene);
@@ -130,7 +143,7 @@ K3D.init = function (map){
 	document.getElementById("canvas").onmousemove=function(e){K3D.mouseovercanvas=true;}
 	document.getElementById("canvas").onmouseout=function(e){K3D.mouseovercanvas=false;}
     
-    K3D.selectedObj = null
+    K3D.selectedObj = {}			// to avoid some null refs
     K3D.hoverObj = null
     K3D.oldLeftBtn = false
 	if (map) {
@@ -318,11 +331,8 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
     var vP0 = new GLGE.Vec(P0)
 	if (!this.rayVsBoundingSphere(vP0, new GLGE.Vec([v.e(1), v.e(2), v.e(3)]) ) ) {
-//		console.log("rayVsBoundingSphere fails on", this.id)
-		bugFail++
 		return null
 	}
-	bugPass++
     var P1 = [v.e(1), v.e(2), v.e(3)]
     var R = [P0, P1]
 //    pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
@@ -378,8 +388,6 @@ K3D.getNearestObject = function (olist, x, y, coordType) {
     var place = null
 	var hit = null
 	var norm = null
-	bugPass = 0
-	bugFail = 0
     for (var i in olist) {
 		var obj = olist[i]
 		if (typeof(obj)=="string") obj = K3D.gameScene.getObjectById(obj)
@@ -393,7 +401,6 @@ K3D.getNearestObject = function (olist, x, y, coordType) {
             }
         }
     }
-	pdebug("pass: " + bugPass + " fail: " + bugFail,6)
 	if (place)
 		return [place, hit, norm]
 	return null
@@ -447,9 +454,9 @@ K3D.lineSegOfBalls = function(beg, end, num, size, color){
 
 /// software-only pick function
 K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y) {
-	var place_hit_norm = K3D.getNearestObject(this.objects, x, y, "pixels")
+	var place_hit_norm = K3D.getNearestObject(K3D.pickable, x, y, "pixels")
 	if (place_hit_norm) {
-		return this.objects[place_hit_norm[1]]
+		return K3D.pickable[place_hit_norm[1]]
 	}
 	return null
 })
