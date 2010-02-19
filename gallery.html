@@ -58,10 +58,6 @@ setHighlightMaterial = function(obj, material){
     }
 }
 
-dragWallStart = function(x, y){
-    //pdebug("dragWallStart: " + this.id + " xy:" + x + "," + y, 7)
-}
-
 niceArray = function (v, places) {
 	r = []
 	for (i in v) {
@@ -106,7 +102,23 @@ positionOnWall = function(obj, x, y){						// pass no x,y means use present mous
     }
 }
 
-dragWallUpdate = function() {positionOnWall(this)}
+dragWallStart = function(x, y){
+	this.dragWallStartScale = [this.getScaleX(), this.getScaleY(), this.getScaleZ()]
+    //pdebug("dragWallStart: " + this.id + " xy:" + x + "," + y, 7)
+}
+
+dragWallUpdate = function(dx, dy){
+    if (document.input_editmode.R[1].checked) {
+        positionOnWall(this)
+    }
+    else 
+        if (document.input_editmode.R[2].checked) {
+			var scale = 1.0 + 0.01 * dx
+			pdebug("scale: " + dx + " " + scale,7)
+			this.setScaleX(this.dragWallStartScale[0]*scale)
+			this.setScaleZ(this.dragWallStartScale[2]*scale)
+        }
+}
 
 // create a new object with same props as old
 shallowClone = function (obj) {
@@ -265,8 +277,8 @@ doc.load("bornholm_level.xml")
 	<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
 </div>
 <form Name="input_editmode" align="center"
-	<input type="radio" Name="R" Checked="true"/>safe
-	<input type="radio" Name="R"/>move
+	<input type="radio" Name="R" />safe
+	<input type="radio" Name="R" Checked="true"/>move
 	<input type="radio" Name="R"/>resize
 </form>
 
