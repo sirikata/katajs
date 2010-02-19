@@ -29,7 +29,7 @@
 <mesh id="square">
 <positions> 1,0,1,  1,0,-1, -1,0,-1, -1,0,1 </positions>
 <normals>  0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0 </normals>
-<uv1> 1,1, 1,0, 0,0, 0,1</uv1>
+<uv1> 0,1, 0,0, 1,0, 1,1</uv1>
 <faces> 0,1,2,0,2,3</faces>
 </mesh>
 
