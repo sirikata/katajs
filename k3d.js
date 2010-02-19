@@ -147,7 +147,7 @@ K3D.mouselook = function(){
         
         if (mousepos.x && mousepos.y) {
 //            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
-            var obj = K3D.gameScene.pickSoft();
+            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
         }
         if (leftbutton) {
             if (K3D.oldLeftBtn == false) {
@@ -272,16 +272,18 @@ K3D.render = function (){
 
 // return point at which mouse picks object + distance from camera, or null
 // also returns normal
-K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my){
+K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     // create raycast from camera to mouse xy
     var cam = K3D.gameScene.camera
     var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ(), GLGE.ROT_XZY)
     var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
     var mat = mlo.x(mro) // camera matrix    
-    if (mx == null) {
-		var mousepos = K3D.gameScene.mouse.getMousePosition();
-		mx = mousepos.x - document.getElementById("container").offsetLeft;
-		my = mousepos.y - document.getElementById("container").offsetTop;
+    if (mx == null || coordType=="pixels") {
+		if (mx == null) {
+			var mousepos = K3D.gameScene.mouse.getMousePosition();
+			mx = mousepos.x - document.getElementById("container").offsetLeft;
+			my = mousepos.y - document.getElementById("container").offsetTop;
+		}
 		var can = document.getElementById("container").getElementsByTagName("canvas")[0]
 		var w = parseFloat(can.width)
 		var h = parseFloat(can.height)
@@ -344,7 +346,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my){
 
 // return pick point of nearest object in olist under cursor, or null if none
 // list can include actual objects or string id's
-K3D.getNearestObject = function (olist, x, y) {
+K3D.getNearestObject = function (olist, x, y, coordType) {
     var dist = 9999999.9
     var place = null
 	var hit = null
@@ -352,7 +354,7 @@ K3D.getNearestObject = function (olist, x, y) {
     for (var i in olist) {
 		var obj = olist[i]
 		if (typeof(obj)=="string") obj = K3D.gameScene.getObjectById(obj)
-		var pdn = obj.getPickPoint(x,y)
+		var pdn = obj.getPickPoint(x,y,coordType)
         if (pdn) {
             if (pdn[1] < dist) {
                 place = pdn[0]
@@ -414,8 +416,8 @@ K3D.lineSegOfBalls = function(beg, end, num, size, color){
 }
 
 /// software-only pick function
-K3D.addProtoSafely(GLGE.Scene, "pickSoft", function() {
-	var place_hit_norm = K3D.getNearestObject(this.objects)
+K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y) {
+	var place_hit_norm = K3D.getNearestObject(this.objects, x, y, "pixels")
 	if (place_hit_norm) {
 		return this.objects[place_hit_norm[1]]
 	}
