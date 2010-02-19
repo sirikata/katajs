@@ -231,6 +231,7 @@ addPicture = function(id){
     var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("square"), pic, function (tx) {
 	    obj.setScaleX(parseFloat(tx.width)*.01)
 	    obj.setScaleZ(parseFloat(tx.height)*.01)
+		obj.computeBoundingSphere()
 	})
 	obj.galleryInfo = "Image source: " + pic
 	positionOnWall(obj, 0, 0)
