@@ -473,7 +473,7 @@ K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
 K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 	for (var i in this.objects) {
 		this.objects[i].computeBoundingSphere()
-		pdebug_log("object:", this.objects[i], this.objects[i].id, "radius:", this.objects[i].boundingRadius)
+//		pdebug_log("object:", this.objects[i], this.objects[i].id, "radius:", this.objects[i].boundingRadius)
 	}
 })
 
