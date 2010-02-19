@@ -319,8 +319,10 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     var vP0 = new GLGE.Vec(P0)
 	if (!this.rayVsBoundingSphere(vP0, new GLGE.Vec([v.e(1), v.e(2), v.e(3)]) ) ) {
 //		console.log("rayVsBoundingSphere fails on", this.id)
+		bugFail++
 		return null
 	}
+	bugPass++
     var P1 = [v.e(1), v.e(2), v.e(3)]
     var R = [P0, P1]
 //    pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
@@ -376,6 +378,8 @@ K3D.getNearestObject = function (olist, x, y, coordType) {
     var place = null
 	var hit = null
 	var norm = null
+	bugPass = 0
+	bugFail = 0
     for (var i in olist) {
 		var obj = olist[i]
 		if (typeof(obj)=="string") obj = K3D.gameScene.getObjectById(obj)
@@ -389,6 +393,7 @@ K3D.getNearestObject = function (olist, x, y, coordType) {
             }
         }
     }
+	pdebug("pass: " + bugPass + " fail: " + bugFail,6)
 	if (place)
 		return [place, hit, norm]
 	return null
@@ -494,22 +499,21 @@ K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 
 // test ray against our bounding sphere
 K3D.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
-	var S = this.boundingCenter
-	if (S == null) {
+	if (this.boundingRadius == null) {
 		if (this.mesh) {
 			this.computeBoundingSphere()			// ech, gotta do it here due to async mesh load
-			S = this.boundingCenter
 		}
 		else {
-			return true // better safe than sorry?
+			return true 							// better safe than sorry!
 		}
 	}
+	var S = this.boundingCenter.add([this.getLocX(),this.getLocY(),this.getLocZ()])
 	var r = this.boundingRadius
 	var d = S.distanceFrom(RayBeg)					// distance from ray origin to sphere center
 	if (d < r) return true							// origin is inside sphere
 	var a = S.sub(RayBeg).angle(RayEnd.sub(RayBeg))	// angle between ray and center of sphere
 	if (a > 1.5708) return false					// sphere is behind us
-	var d2 = Math.sin(a)							// distance from sphere center to nearest point on ray
+	var d2 = Math.sin(a)*d							// distance from sphere center to nearest point on ray
 	if (d2 < r) return true
 	return false
 })
