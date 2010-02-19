@@ -254,8 +254,8 @@
 <!--
     <object id="ball"                            mesh="#sphere"                                 material="#bornh_bldg_08_wall_int_02_mat" scale_x="1" scale_y="1" scale_z="1" loc_x="-110" loc_z="10" />
 -->
-    <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_08_floor"             mesh="#bornh_bldg_08_floor_mesh"               material="#bornh_bldg_08_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
+    <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="straightstair_smallgallery"      mesh="#straightstair_smallgallery_mesh"        material="#straightstair_smallgallery_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="straightstair_smallgallery_sub1" mesh="#straightstair_smallgallery_sub1_mesh"   material="#straightstair_smallgallery_sub1_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_door_gallery_connector_01" mesh="#bornh_door_gallery_connector_01_mesh"   material="#bornh_door_gallery_connector_01_mat" scale_x="10" scale_y="10" scale_z="10"  loc_x="-142.029" loc_y="-29.276" loc_z="23.3" rot_z="-1.48" />

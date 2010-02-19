@@ -96,8 +96,14 @@ K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) 
 // get position buffer
 K3D.addProtoSafely(GLGE.Object, "getPositions", function() {
 	var posbuf
-	for (i in this.mesh.buffers) {
-		if(this.mesh.buffers[i].name=="position") posbuf = this.mesh.buffers[i].data 
+	if (this.mesh) {
+		for (i in this.mesh.buffers) {
+			if (this.mesh.buffers[i].name == "position") 
+				posbuf = this.mesh.buffers[i].data
+		}
+	}
+	else {
+		pdebug("meshless object:" + this.id,8)
 	}
 	return posbuf
 })
@@ -430,6 +436,7 @@ K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
     var sy = parseFloat(this.getScaleY())
     var sz = parseFloat(this.getScaleZ())
     var p = this.getPositions()
+	if (!p) return
     
     // first compute center
     var O = new GLGE.Vec([0, 0, 0])
@@ -438,7 +445,7 @@ K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
         O = O.add(V)
     }
     O = O.mul(3.0 / p.length)
-	this.boundingCenter = 0
+	this.boundingCenter = O
 	var r = 0
     for (var i = 0; i < p.length; i+=3) { // for each vertex
         var V = new GLGE.Vec([sx * p[i], sy * p[i+1], sz * p[i+2]])
