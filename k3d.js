@@ -314,7 +314,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     var p = this.getPositions()
 	var ff = this.mesh.faces.data
 	var f = []
-	for (i in ff) f[i] = parseInt(ff[i]);
+	for (i in ff) f[i] = parseInt(ff[i]);				///	FIXME: this is stupid -- shouldn't be strings!
 //	console.log(p,f)
     for (var i = 0; i < f.length; i += 3) { // for each tri
         var A = new GLGE.Vec([sx * p[f[i]*3], sy * p[f[i]*3 + 1], sz * p[f[i]*3 + 2], 1]) // get vertex points for triangle ABC
@@ -422,4 +422,35 @@ K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y) {
 		return this.objects[place_hit_norm[1]]
 	}
 	return null
+})
+
+/// compute bounding sphere, add boundingRadius, boundingCenter
+K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
+    var sx = parseFloat(this.getScaleX())
+    var sy = parseFloat(this.getScaleY())
+    var sz = parseFloat(this.getScaleZ())
+    var p = this.getPositions()
+    
+    // first compute center
+    var O = new GLGE.Vec([0, 0, 0])
+    for (var i = 0; i < p.length; i+=3) { // for each vertex
+        var V = new GLGE.Vec([sx * p[i], sy * p[i+1], sz * p[i+2]])
+        O = O.add(V)
+    }
+    O = O.mul(3.0 / p.length)
+	this.boundingCenter = 0
+	var r = 0
+    for (var i = 0; i < p.length; i+=3) { // for each vertex
+        var V = new GLGE.Vec([sx * p[i], sy * p[i+1], sz * p[i+2]])
+		var d = V.distanceFrom(O)
+		if (d > r) r = d
+    }
+	this.boundingRadius = r
+})
+
+K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
+	for (var i in this.objects) {
+		this.objects[i].computeBoundingSphere()
+		console.log("object:", this.objects[i], this.objects[i].id, "radius:", this.objects[i].boundingRadius)
+	}
 })
