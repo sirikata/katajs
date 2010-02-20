@@ -45,9 +45,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
 			</form>
 		</div>
-		<div id="galleryAnnotate" style="padding: 5px">
-			<button  onclick="setNote()" >comment:</button>
-			<input type="text" id="input_annotate" size="150" value="enter annotations here"/>
+		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
 		<div id="galleryInfo" style="padding: 5px">
 		</div>
@@ -119,9 +117,10 @@ positionOnWall = function(obj, x, y){						// pass no x,y means use present mous
 }
 
 setNote = function() {
-	console.log("setting",g_picToAnnotate,"galleryInfo:",document.getElementById("input_annotate").value)
-	if (g_picToAnnotate) g_picToAnnotate.galleryInfo = document.getElementById("input_annotate").value
-//	document.getElementById("galleryAnnotate").innerHTML = ""	
+	var newComment = document.getElementById("input_annotate").value
+	if (g_picToAnnotate) g_picToAnnotate.galleryInfo = newComment
+	document.getElementById("galleryInfo").innerHTML = newComment
+	document.getElementById("galleryAnnotate").innerHTML = ""	
 }
 
 g_picToAnnotate=null
@@ -130,10 +129,9 @@ dragWallStart = function(x, y){
 	// annotate
 	if (document.input_editmode.R[3].checked) {
 		g_picToAnnotate = this
-		console.log("setting picToAnnotate to", this.id)
-//		var html = '<input type="text" onclick="setNote()" id="input_annotate" size="150" value="enter annotations here"/>'
-//		document.getElementById("galleryInfo").innerHTML = ""
-//		document.getElementById("galleryAnnotate").innerHTML = html
+		var html = '<input type="text" id="input_annotate" size="150" value="type comment here"/><button  onclick="setNote()" >press here to enter comment</button>'
+		document.getElementById("galleryAnnotate").innerHTML = html
+		document.getElementById("galleryInfo").innerHTML = ""
 	}
 	// delete
 	if (document.input_editmode.R[4].checked) {
@@ -291,14 +289,10 @@ addPicture = function(id){
     obj.makeDragable(dragWallStart, dragWallUpdate)
     obj.makeHoverable(function(){
 		this.getMaterial().setEmit(2.2)
-//		if (!document.input_editmode.R[3].checked) {
 			document.getElementById("galleryInfo").innerHTML = this.galleryInfo
-//		}
     }, function(){
 		this.getMaterial().setEmit(1)        
-//        if (!document.input_editmode.R[3].checked) {
             document.getElementById("galleryInfo").innerHTML = ""
-//        }
     })
 	
 	// force edit mode to move (protect from delete)
