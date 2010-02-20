@@ -116,7 +116,7 @@ K3D.addProtoSafely(GLGE.Object, "getPositions", function() {
 		}
 	}
 	else {
-		pdebug("meshless object: " + this.id + " " + bugg++,8)
+//		pdebug("meshless object: " + this.id + " " + bugg++,8)
 	}
 	return posbuf
 })
@@ -159,6 +159,8 @@ K3D.init = function (map){
 	return K3D.gameScene
 }
 
+g_noselection = {}
+
 K3D.mouselook = function(){
     if (K3D.mouseovercanvas) {
         var mousepos = K3D.gameScene.mouse.getMousePosition();
@@ -177,6 +179,7 @@ K3D.mouselook = function(){
         }
         if (leftbutton) {
             if (K3D.oldLeftBtn == false) {
+				if (obj==null) K3D.selectedObj = g_noselection
 				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
                 if (obj && obj != K3D.selectedObj) {
 					if (K3D.selectedObj && K3D.selectedObj.selectable) K3D.selectedObj.selectStop(mousepos.x, mousepos.y)
