@@ -214,7 +214,7 @@ doc.onLoad = function(){
             this.dragStartRotY = parseFloat(this.getRotY())
             this.dragStartRotZ = parseFloat(this.getRotZ())
         }, function(dx, dy){
-			if (document.input_editmode.R[1].checked) {
+			if (document.input_dragmode.R[1].checked) {
 				var ang = scene.camera.getRotY()
 				var x = Math.cos(ang - Math.PI)
 				var y = Math.sin(ang - Math.PI)
@@ -224,15 +224,15 @@ doc.onLoad = function(){
 				this.setLocZ(this.dragStartLocZ - dy * 0.05)
 				pdebug("edit move X="+this.getLocX().toFixed(3)+" Y="+this.getLocY().toFixed(3)+" Z="+this.getLocZ().toFixed(3),4)
 			}
-			if (document.input_editmode.R[2].checked) {
+			if (document.input_dragmode.R[2].checked) {
 				this.setRotX(this.dragStartRotX + dy*.01)
 				show(this)
 			}
-			if (document.input_editmode.R[3].checked) {
+			if (document.input_dragmode.R[3].checked) {
 				this.setRotY(this.dragStartRotY + dy*.01)
 				show(this)
 			}
-			if (document.input_editmode.R[4].checked) {
+			if (document.input_dragmode.R[4].checked) {
 				this.setRotZ(this.dragStartRotZ + dx*.01)
 				show(this)
 			}
