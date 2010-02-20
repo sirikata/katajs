@@ -155,7 +155,7 @@ K3D.init = function (map, cb){
 	K3D.lasttimeFps=0;
 	K3D.frameRateBuffer=10;
 	K3D.cnt=0;
-	K3D.inc=0;
+	K3D.inc=-0.025;
 
 	setInterval(K3D.render,15);
 	return K3D.gameScene
@@ -326,7 +326,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
 		var can = document.getElementById("container").getElementsByTagName("canvas")[0]
 		var w = parseFloat(can.width)
 		var h = parseFloat(can.height)
-		var focal = 1.1 // ad-hack; get from camera perspective matrix & things of that nature
+		var focal = 1.03 // ad-hack; get from camera perspective matrix & things of that nature
 		mx = focal * (mx / w - 0.5)
 		my = -focal * (h / w) * (my / h - 0.5)
 	}
