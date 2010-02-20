@@ -20,11 +20,12 @@ body{background-color: #000;color: #fff;font-family:arial}
 <div>
 	<div style="width:900px;margin:auto;position:relative" id="container">
 		<canvas id="canvas" width="900" height="550"></canvas>
-		<div id="framerate" style="position:absolute; left: 762px; top: 510px; background-color: #000; opacity: 0.5;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
+		<div id="framerate" style="position:absolute; left: 762px; top: 510px; background-color: #000; 
+		opacity: 0.3;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
 			<div id="debug" style="padding: 5px"></div>
 		</div>
 		<div style="padding: 5px;position:absolute; left: 20px; top: 474px; 
-		background-color: #000; opacity: 0.4;height: 59px; width: 105px; border-radius: 5px;	
+		background-color: #000; opacity: 0.3;height: 59px; width: 105px; border-radius: 5px;	
 		-moz-border-radius:5px;-webkit-border-radius:5px;border: 1px solid #fff;">
 			<button onMouseDown='movementButton("fwd")' onMouseUp='movementButtonUp("fwd")' onMouseOut='movementButtonUp("fwd")' style="position:absolute;left:40;top:3">/\</button>
 			<button onMouseDown='movementButton("back")' onMouseUp='movementButtonUp("back")' onMouseOut='movementButtonUp("back")' style="position:absolute;left:40;top:40">\/</button>
@@ -38,8 +39,8 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div align="center">
 			<form Name="input_editmode">
 				<div id="editInfo" align="center">LOADING..LOADING..LOADING..LOADING..LOADING</div>
-				<input type="radio" Name="R" onClick = 'editMode("safe")'/>safe
-				<input type="radio" Name="R" onClick = 'editMode("move")' Checked="true"/>move
+				<input type="radio" Name="R" onClick = 'editMode("safe")' Checked="true"/>safe
+				<input type="radio" Name="R" onClick = 'editMode("move")'/>move
 				<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
 				<input type="radio" Name="R" onClick = 'editMode("annotate")'/>annotate
 				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
@@ -47,7 +48,10 @@ body{background-color: #000;color: #fff;font-family:arial}
 		</div>
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
-		<div id="galleryInfo" style="padding: 5px">
+		<div style="padding: 5px;position:absolute; left: 145px; top: 510px; 
+			background-color: #000; opacity: 0.45;height: 22px; width: 595px; border-radius: 5px;	
+			-moz-border-radius:5px;-webkit-border-radius:5px;border: 1px solid #fff;"
+			id="galleryInfo" style="padding: 5px" align="center">
 		</div>
 	</div>
 </div>
@@ -296,7 +300,7 @@ addPicture = function(id){
     })
 	
 	// force edit mode to move (protect from delete)
-	document.input_editmode.R[1].checked = true
+	document.input_editmode.R[0].checked = true
 	editMode("move")
 }
 
