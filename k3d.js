@@ -513,6 +513,33 @@ K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 	return count
 })
 
+// remove object from scene
+K3D.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
+	var j = null
+	var temp
+	for (var i in this.objects) {
+		if (this.objects[i].id == id) {
+			j = i
+			break
+		}
+	}
+	if (j != null) {
+		this.objects[i] = this.objects[this.objects.length-1]
+		this.objects.pop()
+	}
+	j = null
+	for (var i in K3D.pickable) {
+		if (K3D.pickable[i].id == id) {
+			j = i
+			break
+		}
+	}
+	if (j != null) {
+		K3D.pickable[i] = K3D.pickable[K3D.pickable.length-1]
+		K3D.pickable.pop()
+	}
+})
+
 // test ray against our bounding sphere
 K3D.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
 	if (this.boundingRadius == null) {

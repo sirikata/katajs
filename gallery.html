@@ -104,7 +104,9 @@ positionOnWall = function(obj, x, y){						// pass no x,y means use present mous
 
 dragWallStart = function(x, y){
 	this.dragWallStartScale = [this.getScaleX(), this.getScaleY(), this.getScaleZ()]
-    //pdebug("dragWallStart: " + this.id + " xy:" + x + "," + y, 7)
+	if (document.input_editmode.R[3].checked) {
+		K3D.gameScene.removeObjectById(this.id)
+	}
 }
 
 dragWallUpdate = function(dx, dy){
@@ -277,7 +279,8 @@ editMode = function(mode) {
 	switch (mode) {
 		case "safe": s = "safe mode: paintings cannot be moved or resized"; break
 		case "move": s = "move mode: click on a painting to drag along the wall"; break
-		case "resize": s = "resize mode: grab painting in upper right corner to resize"
+		case "resize": s = "resize mode: grab painting in upper right corner to resize"; break
+		case "delete": s = "delete mode: click on a painting to delete.  Careful, no undo!"; break
 	}
 	document.getElementById("editInfo").innerHTML = s
 }
@@ -295,6 +298,7 @@ doc.load("bornholm_level.xml")
 		<input type="radio" Name="R" onClick = 'editMode("safe")'/>safe
 		<input type="radio" Name="R" onClick = 'editMode("move")' Checked="true"/>move
 		<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
+		<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
 	</form>
 </div>
 <div id="dbg0"></div>
