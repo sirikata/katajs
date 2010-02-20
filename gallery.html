@@ -146,7 +146,9 @@ doc.onLoad = function(){
 		lowZ:-36,
 		upZ:46
 	}
-    scene = K3D.init(heightmap)
+    scene = K3D.init(heightmap, function () {
+		editMode("move")
+	})
 	scene.setAmbientColor("#999999")
 	scene.camera.setLocX(-100)
     
@@ -291,7 +293,7 @@ doc.load("bornholm_level.xml")
 	<input type="radio" Name="R" onClick = 'editMode("safe")'/>safe
 	<input type="radio" Name="R" onClick = 'editMode("move")' Checked="true"/>move
 	<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
-	<div id="editInfo" align="center">move mode: click on a painting to drag along the wall</div>
+	<div id="editInfo" align="center">LOADING..LOADING..LOADING..LOADING..LOADING..LOADING..LOADING</div>
 </form>
 
 <div id="dbg0"></div>
