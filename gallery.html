@@ -289,13 +289,14 @@ doc.load("bornholm_level.xml")
 	<button onclick = 'addPicture("input_tex1")'>new painting:</button>
 	<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
 </div>
-<form Name="input_editmode" align="center"
-	<input type="radio" Name="R" onClick = 'editMode("safe")'/>safe
-	<input type="radio" Name="R" onClick = 'editMode("move")' Checked="true"/>move
-	<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
-	<div id="editInfo" align="center">LOADING..LOADING..LOADING..LOADING..LOADING..LOADING..LOADING</div>
-</form>
-
+<div align="center">
+	<form Name="input_editmode">
+		<div id="editInfo" align="center">LOADING..LOADING..LOADING..LOADING..LOADING</div>
+		<input type="radio" Name="R" onClick = 'editMode("safe")'/>safe
+		<input type="radio" Name="R" onClick = 'editMode("move")' Checked="true"/>move
+		<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
+	</form>
+</div>
 <div id="dbg0"></div>
 <div id="dbg1"></div>
 <div id="dbg2"></div>
