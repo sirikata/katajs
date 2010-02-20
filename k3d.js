@@ -550,13 +550,37 @@ K3D.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
 			return true 							// better safe than sorry!
 		}
 	}
-	var S = this.boundingCenter.add([this.getLocX(),this.getLocY(),this.getLocZ()])
+	var ret;
+	var c;
+	
+	// gotta rotate boundingCenter by our matrix (FIXME: this is all crap!  Objects should be normed with proper centers)
+	if (this.getRotX() || this.getRotY() || this.getRotZ()) {
+		var mat = GLGE.rotateMatrix([this.getRotX(), this.getRotY(), this.getRotZ()], GLGE.ROT_XZY)
+		c = mat.cross(this.boundingCenter)
+		c = new GLGE.Vec([c.e(1), c.e(2), c.e(3)])		// make it length 3
+	}
+	else {
+		c = this.boundingCenter
+	}
+	var S = c.add([parseFloat(this.getLocX()),parseFloat(this.getLocY()),parseFloat(this.getLocZ())])
 	var r = this.boundingRadius
 	var d = S.distanceFrom(RayBeg)					// distance from ray origin to sphere center
-	if (d < r) return true							// origin is inside sphere
-	var a = S.sub(RayBeg).angle(RayEnd.sub(RayBeg))	// angle between ray and center of sphere
-	if (a > 1.5708) return false					// sphere is behind us
-	var d2 = Math.sin(a)*d							// distance from sphere center to nearest point on ray
-	if (d2 < r) return true
-	return false
+	if (d < r) 
+		ret = true // origin is inside sphere
+	else {
+		var a = S.sub(RayBeg).angle(RayEnd.sub(RayBeg)) // angle between ray and center of sphere
+		if (a > 1.5708) {
+			ret = false // sphere is behind us
+		}
+		else {
+			var d2 = Math.sin(a) * d // distance from sphere center to nearest point on ray
+			if (d2 < r) {
+				ret = true
+			}
+			else {
+				ret = false
+			}
+		}
+	}
+	return ret
 })
