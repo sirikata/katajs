@@ -264,6 +264,10 @@ addPicture = function(id){
 		this.getMaterial().setEmit(1)
 		document.getElementById("galleryInfo").innerHTML = ""
     })
+	
+	// force edit mode to move (protect from delete)
+	document.input_editmode.R[1].checked = true
+	editMode("move")
 }
 
 movementButton = function(b) {
@@ -295,10 +299,10 @@ doc.load("bornholm_level.xml")
 <div align="center">
 	<form Name="input_editmode">
 		<div id="editInfo" align="center">LOADING..LOADING..LOADING..LOADING..LOADING</div>
-		<input type="radio" Name="R" onClick = 'editMode("safe")'/>safe
-		<input type="radio" Name="R" onClick = 'editMode("move")' Checked="true"/>move
-		<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
-		<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
+		<input type="radio" Name="R" id = "Rsafe" onClick = 'editMode("safe")'/>safe
+		<input type="radio" Name="R" id = "Rmove" onClick = 'editMode("move")' Checked="true"/>move
+		<input type="radio" Name="R" id = "Rresize" onClick = 'editMode("resize")'/>resize
+		<input type="radio" Name="R" id = "Rdelete" onClick = 'editMode("delete")'/>delete
 	</form>
 </div>
 <div id="dbg0"></div>
