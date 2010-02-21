@@ -49,9 +49,12 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
 		<div style="padding: 5px;position:absolute; left: 145px; top: 510px; 
-			background-color: #000; opacity: 0.45;height: 22px; width: 595px; border-radius: 5px;	
+			background-color: #000; opacity: 0.5;height: 22px; width: 595px; border-radius: 5px;	
 			-moz-border-radius:5px;-webkit-border-radius:5px;border: 1px solid #fff;"
 			id="galleryInfo" style="padding: 5px" align="center">
+		</div>
+		<div id="save" style="position:absolute; left: 10px; top: 550px;">
+			<button onclick = 'saveGallery()'>save</button>
 		</div>
 	</div>
 </div>
@@ -133,7 +136,7 @@ dragWallStart = function(x, y){
 	// annotate
 	if (document.input_editmode.R[3].checked) {
 		g_picToAnnotate = this
-		var html = '<input type="text" id="input_annotate" size="150" value="type comment here"/><button  onclick="setNote()" >press here to enter comment</button>'
+		var html = '<input type="text" id="input_annotate" size="100" value="type comment here"/><br><button  onclick="setNote()" >press here to enter comment</button>'
 		document.getElementById("galleryAnnotate").innerHTML = html
 		document.getElementById("galleryInfo").innerHTML = ""
 	}
@@ -281,11 +284,12 @@ doc.onLoad = function(){
 
 addPicture = function(id){
 	var pic = document.getElementById(id).value
-    var obj = K3D.createObjectAndAddToScene("nupix" + pixnum++, doc.getElement("square"), pic, function (tx) {
+    var obj = K3D.createObjectAndAddToScene("galleryPix_" + pixnum++, doc.getElement("square"), pic, function (tx) {
 	    obj.setScaleX(parseFloat(tx.width)*.01)
 	    obj.setScaleZ(parseFloat(tx.height)*.01)
 		obj.computeBoundingSphere()
 	})
+	obj.gallerySource = pic
 	obj.galleryInfo = "Image source: " + pic
 	positionOnWall(obj, 0, 0)
 	obj.getMaterial().setSpecular(.4)
@@ -322,6 +326,23 @@ editMode = function(mode) {
 		case "delete": s = "delete mode: click on a painting to delete.  Careful, no undo!"; break
 	}
 	document.getElementById("editInfo").innerHTML = s
+}
+
+saveGallery = function() {
+	var prec = 3
+	var s = "copy text below to save gallery<br>GalleryBegin<br>"
+	for (var i in K3D.gameScene.objects) {
+		var o = K3D.gameScene.objects[i]
+		console.log(o.id)
+		if (o.id.slice(0,11) == "galleryPix_") {
+			s += o.gallerySource
+			s += "," + o.getLocX().toFixed(prec) + "," + o.getLocY().toFixed(prec) + "," + o.getLocZ().toFixed(prec)
+			s += "," + o.getRotX().toFixed(prec) + "," + o.getRotY().toFixed(prec) + "," + o.getRotZ().toFixed(prec)
+			s += "," + o.getScaleX().toFixed(prec)
+			s += "<br>"
+		}
+	}
+	pdebug(s,9)
 }
 
 doc.load("bornholm_level.xml")
