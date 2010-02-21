@@ -357,6 +357,7 @@ loadGallery = function() {
 
 loadGalleryLoad = function() {
 	var load = document.getElementById("input_load").value
+	document.getElementById("saveLoadGallery").innerHTML = ""
 	console.log("loadGalleryLoad:",load)
 	var i = load.indexOf("|GalleryBegin;") + 14
 	while (i < load.indexOf("|GalleryEnd;")) {
