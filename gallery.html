@@ -33,7 +33,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 			<button onMouseDown='movementButton("right")' onMouseUp='movementButtonUp("right")' onMouseOut='movementButtonUp("right")' style="position:absolute;left:75;top:20">></button>
 		</div>
 		<div align="center">
-			<button onclick = 'addPicture("input_tex1")'>new painting:</button>
+			<button onclick = 'addPicture(document.getElementById("input_tex1").value)'>new painting:</button>
 			<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
 		</div>
 		<div align="center">
@@ -286,8 +286,8 @@ doc.onLoad = function(){
 	}
 }
 
-addPicture = function(id){
-	var pic = document.getElementById(id).value
+addPicture = function(pic){
+//	var pic = document.getElementById(id).value
     var obj = K3D.createObjectAndAddToScene("galleryPix_" + pixnum++, doc.getElement("square"), pic, function (tx) {
 	    obj.setScaleX(parseFloat(tx.width)*.01)
 	    obj.setScaleZ(parseFloat(tx.height)*.01)
@@ -310,6 +310,7 @@ addPicture = function(id){
 	// force edit mode to move (protect from delete)
 	document.input_editmode.R[0].checked = true
 	editMode("move")
+	return obj
 }
 
 movementButton = function(b) {
@@ -367,6 +368,7 @@ loadGalleryLoad = function() {
 			i = j
 			var w = s.split(',')
 			console.log("load:", w)
+			var pic = addPicture(w[0])
 		}
 		else {
 			i++
