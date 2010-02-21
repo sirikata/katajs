@@ -56,9 +56,12 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div id="save" style="position:absolute; left: 10px; top: 550px;">
 			<button onclick = 'saveGallery()'>save</button>
 		</div>
+		<div id="load" style="position:absolute; right: 10px; top: 550px;">
+			<button onclick = 'loadGallery()'>load</button>
+		</div>
 	</div>
 </div>
-<div id="debug2"></div>
+<div id="saveLoadGallery"></div>
 <script type="text/javascript">
 
 doc = new GLGE.Document();
@@ -136,7 +139,8 @@ dragWallStart = function(x, y){
 	// annotate
 	if (document.input_editmode.R[3].checked) {
 		g_picToAnnotate = this
-		var html = '<input type="text" id="input_annotate" size="100" value="type comment here"/><br><button  onclick="setNote()" >press here to enter comment</button>'
+		var html = 
+		'<input type="text" id="input_annotate" size="100" value="type comment here"/><br><button  onclick="setNote()" >press here to enter comment</button>'
 		document.getElementById("galleryAnnotate").innerHTML = html
 		document.getElementById("galleryInfo").innerHTML = ""
 	}
@@ -318,6 +322,7 @@ movementButtonUp = function(b) {
 
 
 editMode = function(mode) {
+	var s
 	switch (mode) {
 		case "safe": s = "safe mode: paintings cannot be moved or resized"; break
 		case "move": s = "move mode: click on a painting to drag along the wall"; break
@@ -330,19 +335,41 @@ editMode = function(mode) {
 
 saveGallery = function() {
 	var prec = 3
-	var s = "copy text below to save gallery<br>GalleryBegin<br>"
+	var s = "copy text below to save gallery<br>|GalleryBegin;<br>"
 	for (var i in K3D.gameScene.objects) {
 		var o = K3D.gameScene.objects[i]
-		console.log(o.id)
 		if (o.id.slice(0,11) == "galleryPix_") {
-			s += o.gallerySource
+			s += "|" + o.gallerySource
 			s += "," + o.getLocX().toFixed(prec) + "," + o.getLocY().toFixed(prec) + "," + o.getLocZ().toFixed(prec)
 			s += "," + o.getRotX().toFixed(prec) + "," + o.getRotY().toFixed(prec) + "," + o.getRotZ().toFixed(prec)
 			s += "," + o.getScaleX().toFixed(prec)
-			s += "<br>"
+			s += ";<br>"
 		}
 	}
-	pdebug(s,9)
+	s += "|GalleryEnd;<br>"
+	document.getElementById("saveLoadGallery").innerHTML = s
+}
+
+loadGallery = function() {
+	document.getElementById("saveLoadGallery").innerHTML = 	
+	'<input type="text" id="input_load" size="100" value="copy data here"/><br><button  onclick="loadGalleryLoad()" >enter</button>'
+}
+
+loadGalleryLoad = function() {
+	var load = document.getElementById("input_load").value
+	console.log("loadGalleryLoad:",load)
+	var i = load.indexOf("|GalleryBegin;") + 14
+	while (i < load.indexOf("|GalleryEnd;")) {
+		if (load[i]=='|') {
+			var j = i + load.slice(i+1).indexOf(';') + 1
+			s = load.slice(i+1,j)
+			console.log("load line:", s)
+			i = j
+		}
+		else {
+			i++
+		}
+	}
 }
 
 doc.load("bornholm_level.xml")
