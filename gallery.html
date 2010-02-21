@@ -339,7 +339,7 @@ editMode = function(mode) {
 saveGallery = function() {
 	var prec = 3
 	var s = "copy text below to save gallery<br>"
- 	s += '<div style="border: 2px solid rgb(255, 255, 255); padding: 5px" align="left">'
+ 	s += '<div style="border: 2px solid rgb(255, 255, 255); padding: 5px; font-size: xx-small" align="center">'
 	s += "|GalleryBegin~<br>"
  	for (var i in K3D.gameScene.objects) {
 		var o = K3D.gameScene.objects[i]
@@ -349,10 +349,10 @@ saveGallery = function() {
 			s += "," + o.getRotX().toFixed(prec) + "," + o.getRotY().toFixed(prec) + "," + o.getRotZ().toFixed(prec)
 			s += "," + o.getScaleX() / o.txWidth
 			s += "," + o.galleryInfo
-			s += "~<br>"
+			s += "~"
 		}
 	}
-	s += "|GalleryEnd~<br></div>"
+	s += "<br>|GalleryEnd~<br></div>"
 	s += "<button onclick='saveGalleryDone()'>done</button>"
 	document.getElementById("saveLoadGallery").innerHTML = s
 }
@@ -375,7 +375,6 @@ loadGalleryLoad = function() {
 	}
 	var load = document.getElementById("input_load").value
 	document.getElementById("saveLoadGallery").innerHTML = ""
-	console.log("loadGalleryLoad:",load)
 	var i = load.indexOf("|GalleryBegin~") + 14
 	while (i < load.indexOf("|GalleryEnd~")) {
 		if (load[i]=='|') {
@@ -383,7 +382,6 @@ loadGalleryLoad = function() {
 			var s = load.slice(i+1,j)
 			i = j
 			var w = s.split(',')
-			console.log("load:", w)
 			var pic = addPicture(w[0], parseFloat(w[7]))
 			pic.setLocX(parseFloat(w[1]))
 			pic.setLocY(parseFloat(w[2]))
