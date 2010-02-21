@@ -59,9 +59,9 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div id="load" style="position:absolute; right: 10px; top: 550px;">
 			<button onclick = 'loadGallery()'>load</button>
 		</div>
+		<div id="saveLoadGallery" align="center"></div>
 	</div>
 </div>
-<div id="saveLoadGallery"></div>
 <script type="text/javascript">
 
 doc = new GLGE.Document();
@@ -338,8 +338,10 @@ editMode = function(mode) {
 
 saveGallery = function() {
 	var prec = 3
-	var s = "copy text below to save gallery<br>|GalleryBegin;<br>"
-	for (var i in K3D.gameScene.objects) {
+	var s = "copy text below to save gallery<br>"
+ 	s += '<div style="border: 2px solid rgb(255, 255, 255); padding: 5px" align="left">'
+	s += "|GalleryBegin;<br>"
+ 	for (var i in K3D.gameScene.objects) {
 		var o = K3D.gameScene.objects[i]
 		if (o.id.slice(0,11) == "galleryPix_") {
 			s += "|" + o.gallerySource
@@ -349,13 +351,18 @@ saveGallery = function() {
 			s += ";<br>"
 		}
 	}
-	s += "|GalleryEnd;<br>"
+	s += "|GalleryEnd;<br></div>"
+	s += "<button onclick='saveGalleryDone()'>done</button>"
 	document.getElementById("saveLoadGallery").innerHTML = s
+}
+
+saveGalleryDone = function() {
+	document.getElementById("saveLoadGallery").innerHTML = ""
 }
 
 loadGallery = function() {
 	document.getElementById("saveLoadGallery").innerHTML = 	
-	'<input type="text" id="input_load" size="100" value="copy data here"/><br><button  onclick="loadGalleryLoad()" >enter</button>'
+	'<input type="text" id="input_load" size="100" value="copy data here to load gallery"/><br><button  onclick="loadGalleryLoad()" >enter</button>'
 }
 
 loadGalleryLoad = function() {
