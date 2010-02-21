@@ -362,9 +362,10 @@ loadGalleryLoad = function() {
 	while (i < load.indexOf("|GalleryEnd;")) {
 		if (load[i]=='|') {
 			var j = i + load.slice(i+1).indexOf(';') + 1
-			s = load.slice(i+1,j)
-			console.log("load line:", s)
+			var s = load.slice(i+1,j)
 			i = j
+			var w = s.split(',')
+			console.log("load:", w)
 		}
 		else {
 			i++
