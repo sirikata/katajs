@@ -340,7 +340,7 @@ saveGallery = function() {
 	var prec = 3
 	var s = "copy text below to save gallery<br>"
  	s += '<div style="border: 2px solid rgb(255, 255, 255); padding: 5px" align="left">'
-	s += "|GalleryBegin;<br>"
+	s += "|GalleryBegin~<br>"
  	for (var i in K3D.gameScene.objects) {
 		var o = K3D.gameScene.objects[i]
 		if (o.id.slice(0,11) == "galleryPix_") {
@@ -348,10 +348,11 @@ saveGallery = function() {
 			s += "," + o.getLocX().toFixed(prec) + "," + o.getLocY().toFixed(prec) + "," + o.getLocZ().toFixed(prec)
 			s += "," + o.getRotX().toFixed(prec) + "," + o.getRotY().toFixed(prec) + "," + o.getRotZ().toFixed(prec)
 			s += "," + o.getScaleX() / o.txWidth
-			s += ";<br>"
+			s += "," + o.galleryInfo
+			s += "~<br>"
 		}
 	}
-	s += "|GalleryEnd;<br></div>"
+	s += "|GalleryEnd~<br></div>"
 	s += "<button onclick='saveGalleryDone()'>done</button>"
 	document.getElementById("saveLoadGallery").innerHTML = s
 }
@@ -362,21 +363,27 @@ saveGalleryDone = function() {
 
 loadGallery = function() {
 	document.getElementById("saveLoadGallery").innerHTML = 	
-	'<input type="text" id="input_load" size="100" value="copy data here to load gallery"/><br><button  onclick="loadGalleryLoad()" >enter</button>'
+	'<input type="text" id="input_load" size="100" value="copy data here to load gallery (will erase everything!)"/><br><button  onclick="loadGalleryLoad()" >OK</button><button  onclick="loadGalleryCancel()" >CANCEL</button>'
 }
 
 loadGalleryLoad = function() {
+ 	for (var i in K3D.gameScene.objects) {
+		var o = K3D.gameScene.objects[i]
+		if (o.id.slice(0,11) == "galleryPix_") {
+			K3D.gameScene.removeObjectById(o.id)
+		}
+	}
 	var load = document.getElementById("input_load").value
 	document.getElementById("saveLoadGallery").innerHTML = ""
-//	console.log("loadGalleryLoad:",load)
-	var i = load.indexOf("|GalleryBegin;") + 14
-	while (i < load.indexOf("|GalleryEnd;")) {
+	console.log("loadGalleryLoad:",load)
+	var i = load.indexOf("|GalleryBegin~") + 14
+	while (i < load.indexOf("|GalleryEnd~")) {
 		if (load[i]=='|') {
-			var j = i + load.slice(i+1).indexOf(';') + 1
+			var j = i + load.slice(i+1).indexOf('~') + 1
 			var s = load.slice(i+1,j)
 			i = j
 			var w = s.split(',')
-//			console.log("load:", w)
+			console.log("load:", w)
 			var pic = addPicture(w[0], parseFloat(w[7]))
 			pic.setLocX(parseFloat(w[1]))
 			pic.setLocY(parseFloat(w[2]))
@@ -384,11 +391,19 @@ loadGalleryLoad = function() {
 			pic.setRotX(parseFloat(w[4]))
 			pic.setRotY(parseFloat(w[5]))
 			pic.setRotZ(parseFloat(w[6]))
+			pic.galleryInfo = w[8]
+			for (var k=9; k < w.length; k++) {
+				pic.galleryInfo += w[k]
+			}
 		}
 		else {
 			i++
 		}
 	}
+}
+
+loadGalleryCancel = function() {
+	document.getElementById("saveLoadGallery").innerHTML = ""
 }
 
 doc.load("bornholm_level.xml")
