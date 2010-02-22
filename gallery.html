@@ -373,7 +373,7 @@ deCookify = function(s) {
 
 saveGallery = function() {
 	document.getElementById("saveLoadGallery").innerHTML = 	
-	'<input type="text" id="input_save" size="100" value="enter gallery name here"/><br><button  onclick="saveGalleryFinish()" >OK</button><button  onclick="saveGalleryCancel()" >CANCEL</button>'
+	'<input type="text" id="input_save" size="40" value="enter gallery name here"/><br><button  onclick="saveGalleryFinish()" >OK</button><button  onclick="saveGalleryCancel()" >CANCEL</button>'
 }
 
 saveGalleryFinish = function () {
@@ -402,17 +402,27 @@ saveGalleryCancel = function() {
 }
 
 loadGallery = function() {
+	document.getElementById("saveLoadGallery").innerHTML = 	
+	'<input type="text" id="input_load" size="40" value="enter gallery name here"/><br><button  onclick="loadGalleryFinish()" >OK</button><button  onclick="saveGalleryCancel()" >CANCEL</button>'
+}
+
+loadGalleryFinish = function(load) {
+	var fn = document.getElementById("input_load").value
+	pdebug_log("load as:", fn)
+	document.getElementById("saveLoadGallery").innerHTML = ""
+	// get load data from cookie
+	var load;
 	var w = document.cookie.split(";")
 	for (var i in w) {
 		var j = w[i].indexOf("gallery=")
 		if (j==0 || j==1) {
-			loadGalleryLoad(deCookify(w[i].slice(j+8)))
+			load = deCookify(w[i].slice(j+8))
 			break
 		}
 	}
-}
+	if (load==null) return
 
-loadGalleryLoad = function(load) {
+	// delete everything
 	var delList = []
  	for (var i=0; i<K3D.gameScene.objects.length; i++) {
 		var o = K3D.gameScene.objects[i]
@@ -423,10 +433,8 @@ loadGalleryLoad = function(load) {
 	for (i in delList) {
 		K3D.gameScene.removeObjectById(delList[i])
 	}
-	if (load==null) {
-		load = document.getElementById("input_load").value
-	}
-	document.getElementById("saveLoadGallery").innerHTML = ""
+
+	// load data
 	var i = load.indexOf("|GalleryBegin~") + 14
 	while (i < load.indexOf("|GalleryEnd~")) {
 		if (load[i]=='|') {
