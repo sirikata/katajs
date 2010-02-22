@@ -336,11 +336,46 @@ editMode = function(mode) {
 	document.getElementById("editInfo").innerHTML = s
 }
 
+cookify_goodchars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-+"
+cookify_tohex = "0123456789abcdef"
+cookify = function(s) {
+	var ret = ""
+	for (var i=0; i<s.length; i++) {
+		if (cookify_goodchars.indexOf(s[i])>=0) {
+			ret += s[i]
+		}
+		else {
+			var n = s[i].charCodeAt()
+			var lsn = n & 0x0f
+			var msn = n >> 4
+			ret += "_" + cookify_tohex[msn] + cookify_tohex[lsn]
+		}
+	}
+	return ret
+}
+
+deCookify = function(s) {
+	var ret = ""
+	for (var i=0; i<s.length; i++) {
+		if (cookify_goodchars.indexOf(s[i])>=0) {
+			ret += s[i]
+		}
+		else {
+			if (s[i] != "_") alert ("bad char in decookify")
+			i++
+			var msn = cookify_tohex.indexOf(s[i++])
+			var lsn = cookify_tohex.indexOf(s[i])
+			ret += String.fromCharCode((msn<<4) + lsn)
+		}
+	}
+	return ret
+}
+
 saveGallery = function() {
 	var prec = 3
-	var s = "copy text below to save gallery<br>"
- 	s += '<div style="border: 2px solid rgb(255, 255, 255); padding: 5px; font-size: xx-small" align="center">'
-	s += "|GalleryBegin~<br>"
+	var head = "copy text below to save gallery<br>"
+ 	head += '<div style="border: 2px solid rgb(255, 255, 255); padding: 5px; font-size: xx-small" align="center">'
+	var s = "|GalleryBegin~<br>"
  	for (var i in K3D.gameScene.objects) {
 		var o = K3D.gameScene.objects[i]
 		if (o.id.slice(0,11) == "galleryPix_") {
@@ -352,9 +387,10 @@ saveGallery = function() {
 			s += "~"
 		}
 	}
-	s += "<br>|GalleryEnd~<br></div>"
-	s += "<button onclick='saveGalleryDone()'>done</button>"
-	document.getElementById("saveLoadGallery").innerHTML = s
+	s += "<br>|GalleryEnd~<br>"
+	var tail = "</div><button onclick='saveGalleryDone()'>done</button>"
+	document.getElementById("saveLoadGallery").innerHTML = head + s + tail
+	document.cookie = "gallery=" + cookify(s)
 }
 
 saveGalleryDone = function() {
@@ -362,18 +398,32 @@ saveGalleryDone = function() {
 }
 
 loadGallery = function() {
-	document.getElementById("saveLoadGallery").innerHTML = 	
-	'<input type="text" id="input_load" size="100" value="copy data here to load gallery (will erase everything!)"/><br><button  onclick="loadGalleryLoad()" >OK</button><button  onclick="loadGalleryCancel()" >CANCEL</button>'
+//	document.getElementById("saveLoadGallery").innerHTML = 	
+//	'<input type="text" id="input_load" size="100" value="copy data here to load gallery (will erase everything!)"/><br><button  onclick="loadGalleryLoad()" >OK</button><button  onclick="loadGalleryCancel()" >CANCEL</button>'
+	//console.log("cookie raw:", document.cookie)
+	var w = document.cookie.split(";")
+	for (var i in w) {
+		//console.log("w:",w[i])
+		var j = w[i].indexOf("gallery=")
+		if (j==0 || j==1) {
+			//console.log("loading:", deCookify(w[i].slice(j+8)))
+			loadGalleryLoad(deCookify(w[i].slice(j+8)))
+			break
+		}
+	}
 }
 
-loadGalleryLoad = function() {
+loadGalleryLoad = function(load) {
  	for (var i in K3D.gameScene.objects) {
 		var o = K3D.gameScene.objects[i]
 		if (o.id.slice(0,11) == "galleryPix_") {
 			K3D.gameScene.removeObjectById(o.id)
 		}
 	}
-	var load = document.getElementById("input_load").value
+	if (load==null) {
+		load = document.getElementById("input_load").value
+	}
+	//console.log("loadGalleryLoad:", load)
 	document.getElementById("saveLoadGallery").innerHTML = ""
 	var i = load.indexOf("|GalleryBegin~") + 14
 	while (i < load.indexOf("|GalleryEnd~")) {
