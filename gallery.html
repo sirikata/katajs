@@ -406,8 +406,8 @@ loadGallery = function() {
 }
 
 loadGalleryFinish = function(load) {
-	var fn = document.getElementById("input_load").value
-	fn = "gallery_" + fn + "="
+	var gal = document.getElementById("input_load").value
+	var fn = "gallery_" + gal + "="
 	document.getElementById("saveLoadGallery").innerHTML = ""
 	// get load data from cookie
 	var load;
@@ -419,7 +419,10 @@ loadGalleryFinish = function(load) {
 			break
 		}
 	}
-	if (load==null) return
+	if (load==null) {
+		alert ("gallery " + gal + " not found!")
+		return
+	}
 
 	// delete everything
 	var delList = []
