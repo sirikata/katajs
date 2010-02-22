@@ -378,7 +378,6 @@ saveGallery = function() {
 
 saveGalleryFinish = function () {
 	var fn = document.getElementById("input_save").value
-	pdebug_log("save as:", fn)
 	var prec = 3
 	var s = "|GalleryBegin~<br>"
  	for (var i in K3D.gameScene.objects) {
@@ -393,7 +392,7 @@ saveGalleryFinish = function () {
 		}
 	}
 	s += "<br>|GalleryEnd~<br>"
-	document.cookie = "gallery=" + cookify(s) + ";expires=Thu, 31-Dec-3020 00:00:00 GMT."	// me love you long time
+	document.cookie = "gallery_" + fn + "=" + cookify(s) + ";expires=Thu, 31-Dec-3020 00:00:00 GMT."	// me love you long time
 	document.getElementById("saveLoadGallery").innerHTML = ""
 }
 
@@ -408,15 +407,15 @@ loadGallery = function() {
 
 loadGalleryFinish = function(load) {
 	var fn = document.getElementById("input_load").value
-	pdebug_log("load as:", fn)
+	fn = "gallery_" + fn + "="
 	document.getElementById("saveLoadGallery").innerHTML = ""
 	// get load data from cookie
 	var load;
 	var w = document.cookie.split(";")
 	for (var i in w) {
-		var j = w[i].indexOf("gallery=")
+		var j = w[i].indexOf(fn)
 		if (j==0 || j==1) {
-			load = deCookify(w[i].slice(j+8))
+			load = deCookify(w[i].slice(j+fn.length+1))
 			break
 		}
 	}
