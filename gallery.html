@@ -390,7 +390,7 @@ saveGallery = function() {
 	s += "<br>|GalleryEnd~<br>"
 	var tail = "</div><button onclick='saveGalleryDone()'>done</button>"
 	document.getElementById("saveLoadGallery").innerHTML = head + s + tail
-	document.cookie = "gallery=" + cookify(s)
+	document.cookie = "gallery=" + cookify(s) + ";expires=Thu, 31-Dec-3020 00:00:00 GMT."
 }
 
 saveGalleryDone = function() {
