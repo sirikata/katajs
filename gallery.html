@@ -45,6 +45,16 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" onClick = 'editMode("annotate")'/>annotate
 				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
 			</form>
+			<!--
+			<form Name="input_dragmode">
+				<div id="editInfo" align="center"></div>
+				<input type="radio" Name="R" />safe
+				<input type="radio" Name="R" Checked="true" />move
+				<input type="radio" Name="R" />rotX
+				<input type="radio" Name="R" />rotY
+				<input type="radio" Name="R" />rotZ
+			</form>
+			-->
 		</div>
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
@@ -203,7 +213,7 @@ doc.onLoad = function(){
 	var dragWallable = []
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
-	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02",
+	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
 	"bornh_bldg_08_wall_int_02_sub1","bornh_door_gallery_connector_01", 
 	"bornh_bldg_08_wall_int_03","bornh_bldg_07_walls_ext_02_sub1" ]
 
@@ -240,7 +250,7 @@ doc.onLoad = function(){
 	}
 
 	var show = function(self) {
-		//pdebug("edit rotate X="+fix(self.getRotX())+" Y="+fix(self.getRotY())+" Z="+fix(self.getRotZ()),4)
+		pdebug("edit rotate X="+fix(self.getRotX())+" Y="+fix(self.getRotY())+" Z="+fix(self.getRotZ()),4)
 	}
 
     // drag is modal: move, rotatex, rotatey, rotatez

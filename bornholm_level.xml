@@ -265,8 +265,8 @@
     <object id="bornh_bldg_07_walls_ext_02_sub1" mesh="#bornh_bldg_07_walls_ext_02_sub1_mesh"   material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_walls_int_02"      mesh="#bornh_bldg_07_walls_int_02_mesh"        material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_08_wall_int_01"       mesh="#bornh_bldg_08_wall_int_01_mesh"         material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
-    <object id="bornh_bldg_08_wall_int_02"       mesh="#bornh_bldg_08_wall_int_02_mesh"         material="#bornh_bldg_08_wall_int_02_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_08_wall_int_02_sub1"  mesh="#bornh_bldg_08_wall_int_02_sub1_mesh"    material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
+    <object id="bornh_bldg_08_wall_int_02b"      mesh="#bornh_bldg_08_wall_int_01_mesh"         material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_x="-77.169" loc_y="18.075" loc_z="30.750" rot_z="1.64061" />
     <object id="bornh_bldg_08_wall_int_03"       mesh="#bornh_bldg_08_wall_int_03_mesh"         material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_ceiling_drop"      mesh="#bornh_bldg_07_ceiling_drop_mesh"        material="#bornh_bldg_07_ceiling_drop_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_ceiling_drop_sub1" mesh="#bornh_bldg_07_ceiling_drop_sub1_mesh"   material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
