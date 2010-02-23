@@ -168,8 +168,8 @@ K3D.mouselook = function(){
 //        pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-//            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
-            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
+            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
+//            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
 			if (obj == null && K3D.hoverObj && K3D.hoverObj.hoverable) {
 				K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
 				K3D.hoverObj=null
@@ -475,6 +475,13 @@ K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
     var sz = parseFloat(this.getScaleZ())
     var p = this.getPositions()
 	if (!p) return
+	if (this.id=="ball") console.log("ball:", this)
+	if (this.id=="duck") {
+		console.log("duck positions:", p.length, "duck:",this)
+		this.boundingCenter = new GLGE.Vec([0,0,0])
+		this.boundingRadius = 200
+		return
+	}
     
     // first compute center
     var O = new GLGE.Vec([0, 0, 0])
@@ -579,6 +586,12 @@ K3D.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
 				ret = false
 			}
 		}
+	}
+	if (this.id=="ball") pdebug("bounding ball: " + ret,7)
+	if (this.id == "duck") {
+		pdebug("bounding duck: " + ret + " angle: " + a*57.2958 + " thisXYZ: " + 
+			this.getLocX()+" "+this.getLocY()+" "+this.getLocZ() , 8)
+		console.log("duck",S.data,RayBeg.data,RayEnd.sub(RayBeg).data,r,a,d,d2)
 	}
 	return ret
 })

@@ -200,6 +200,7 @@ doc.onLoad = function(){
 		lowZ: -36,
 		upZ: 46
 	}
+	heightmap=null
 	scene = K3D.init(heightmap, function(){
 		onLoadContinue()
 	})
@@ -269,6 +270,7 @@ onLoadContinue = function () {
             this.dragStartRotX = parseFloat(this.getRotX()) ///	wtf? strings?
             this.dragStartRotY = parseFloat(this.getRotY())
             this.dragStartRotZ = parseFloat(this.getRotZ())
+			pdebug("dragging: " + this.id + " from: " + this.dragStartLocX+" "+this.dragStartLocY+" "+this.dragStartLocZ,5)
         }, function(dx, dy){
 			if (document.input_dragmode.R[1].checked) {
 				var ang = scene.camera.getRotY()
@@ -302,6 +304,10 @@ onLoadContinue = function () {
 	
 	// turn off loading banner
 	editMode("safe")
+	
+	var o = K3D.gameScene.getObjectById("duck")
+	o.setLocX(-110/.03)
+	o.setLocZ(4/.03)
 }
 
 addPicture = function(pic, scale){
