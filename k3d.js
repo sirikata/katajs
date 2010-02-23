@@ -50,7 +50,7 @@ K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 })
 
 K3D.addProtoSafely(GLGE.Scene, "addPickable", function(id) {
-	if (this.pickable.indexOf(id)>=0) this.pickable.push(id)
+	if (this.pickable.indexOf(id)<0) this.pickable.push(id)
 })
 
 // add makeDragable to Object.
