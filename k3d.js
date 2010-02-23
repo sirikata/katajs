@@ -187,7 +187,7 @@ K3D.mouselook = function(){
 					if (K3D.selectedObj && K3D.selectedObj.selectable) K3D.selectedObj.selectStop(mousepos.x, mousepos.y)
                     if (obj.selectable) obj.selectStart(mousepos.x, mousepos.y)
                     K3D.selectedObj = obj;
-//                    pdebug("selected: " + K3D.selectedObj.id, 2)
+                    pdebug("selected: " + K3D.selectedObj.id, 2)
                 }
 				if (K3D.selectedObj.dragable) K3D.selectedObj.dragStart(mousepos.x, mousepos.y)
             }
@@ -198,7 +198,7 @@ K3D.mouselook = function(){
 				if (K3D.hoverObj && K3D.hoverObj.hoverable) K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
                 K3D.hoverObj = obj;
 				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
-//                pdebug("hovering over: " + K3D.hoverObj.id, 3)
+                pdebug("hovering over: " + K3D.hoverObj.id, 3)
             }
         }
         K3D.oldLeftBtn = leftbutton

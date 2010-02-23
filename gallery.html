@@ -9,6 +9,7 @@
 <script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
 <script type="text/javascript" src="externals/GLGE/glge.js"></script> 
 <script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_collada.js"></script> 
 <script type="text/javascript" src="ray_tri.js"></script> 
 <script type="text/javascript" src="k3d.js"></script> 
 
@@ -46,6 +47,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
 			</form>
 			<!--
+			-->
 			<form Name="input_dragmode">
 				<div id="editInfo" align="center"></div>
 				<input type="radio" Name="R" />safe
@@ -54,7 +56,6 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" />rotY
 				<input type="radio" Name="R" />rotZ
 			</form>
-			-->
 		</div>
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
@@ -207,9 +208,9 @@ doc.onLoad = function(){
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    var hoverable = ["ball"]
-    var selectable = ["ball"]
-    var dragable = ["ball"]
+    var hoverable = ["ball","duck"]
+    var selectable = ["ball","duck"]
+    var dragable = ["ball","duck"]
 	var dragWallable = []
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
