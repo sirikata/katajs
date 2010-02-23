@@ -20,10 +20,22 @@ body{background-color: #000;color: #fff;font-family:arial}
 <div>
 	<div style="width:900px;margin:auto;position:relative" id="container">
 		<canvas id="canvas" width="900" height="550"></canvas>
+
+        <div id="loading">
+            <div style="position:absolute; left: 150px; top: 100px; background-color: #000; 
+			         opacity: 0.8;height: 350px;  width: 600px;  
+					 border-radius: 5px; -moz-border-radius5px;-webkit-border-radius:5px;border: 1px  solid #fff;">
+                <div align="center" style="position:relative; top: 132px">
+                    <h1>LOADING...</h1>
+                </div>
+            </div>
+        </div>
+
 		<div id="framerate" style="position:absolute; left: 762px; top: 510px; background-color: #000; 
 		opacity: 0.3;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
 			<div id="debug" style="padding: 5px"></div>
 		</div>
+
 		<div style="padding: 5px;position:absolute; left: 20px; top: 474px; 
 		background-color: #000; opacity: 0.3;height: 59px; width: 105px; border-radius: 5px;	
 		-moz-border-radius:5px;-webkit-border-radius:5px;border: 1px solid #fff;">
@@ -201,6 +213,7 @@ doc.onLoad = function(){
 	}
     scene = K3D.init(heightmap, function () {
 		editMode("move")
+		document.getElementById("loading").innerHTML=""
 	})
 	scene.setAmbientColor("#999999")
 	scene.camera.setLocX(-100)
