@@ -189,20 +189,24 @@ shallowClone = function (obj) {
 pixnum=1
 
 doc.onLoad = function(){
-	var heightmap={
-		image:"images/gallerymap.png",
-		width:512,
-		height:512,
-		lowX:-256,
-		upX:256,
-		lowY:-256,
-		upY:256,
-		lowZ:-36,
-		upZ:46
+	var heightmap = {
+		image: "images/gallerymap.png",
+		width: 512,
+		height: 512,
+		lowX: -256,
+		upX: 256,
+		lowY: -256,
+		upY: 256,
+		lowZ: -36,
+		upZ: 46
 	}
-    scene = K3D.init(heightmap, function () {
-		editMode("move")
+	scene = K3D.init(heightmap, function(){
+		onLoadContinue()
 	})
+}
+
+// this occurs when all objects are loaded
+onLoadContinue = function () {
 	scene.setAmbientColor("#999999")
 	scene.camera.setLocX(-100)
     
@@ -295,6 +299,9 @@ doc.onLoad = function(){
 	for (i in dragWallable) {
 	    scene.getObjectById(dragWallable[i]).makeDragable(dragWallStart, dragWallUpdate)
 	}
+	
+	// turn off loading banner
+	editMode("safe")
 }
 
 addPicture = function(pic, scale){
@@ -322,7 +329,7 @@ addPicture = function(pic, scale){
 	
 	// force edit mode to move (protect from delete)
 	document.input_editmode.R[0].checked = true
-	editMode("move")
+	editMode("safe")
 	return obj
 }
 

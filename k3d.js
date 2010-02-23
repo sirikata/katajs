@@ -51,6 +51,7 @@ K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 
 K3D.addProtoSafely(GLGE.Scene, "addPickable", function(id) {
 	if (this.pickable.indexOf(id)<0) this.pickable.push(id)
+	console.log("addPickable:",id,this.pickable)
 })
 
 // add makeDragable to Object.
@@ -131,7 +132,6 @@ K3D.init = function (map, cb){
     K3D.gameScene = doc.getElement("mainscene");
 	K3D.gameScene.pickable = []
     K3D.gameRenderer.setScene(K3D.gameScene);
-    
     
 	if (K3D.gameScene.mouse) alert("uh oh, method name conflict K3D.gameScene.mouse!")
 	K3D.gameScene.mouse = new GLGE.MouseInput(document.getElementById('canvas'));
@@ -282,6 +282,7 @@ K3D.checkkeys = function (){
 }
 
 K3D.render = function (){
+	pdebug("# of objects: " + K3D.gameScene.objects.length,4)
 	if (!K3D.initComplete) {
 		var c = K3D.gameScene.incompleteObjects()
 		if (c == 0) {
