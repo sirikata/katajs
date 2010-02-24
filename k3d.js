@@ -511,7 +511,7 @@ K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 	var count = 0
 	for (var i in this.objects) {
-		if (!this.objects[i].mesh) {
+		if ( (!this.objects[i].mesh) || (!this.objects[i].id) ){
 			count ++	
 		}
 	}
