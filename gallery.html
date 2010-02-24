@@ -212,7 +212,8 @@ doc.onLoad = function(){
 		lowZ: -36,
 		upZ: 46
 	}
-	scene = K3D.init(heightmap, function(){
+	scene = K3D.init(heightmap, 19,  						// # of objects to load -- hacky way to force everything loaded 
+	function(){
 		onLoadContinue()
 	})
 }
