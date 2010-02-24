@@ -226,7 +226,7 @@ onLoadContinue = function () {
     // hover cyan
     for (i in hoverable) {
         obj = scene.getObjectById(hoverable[i])
-		if (!obj) break
+		if (!obj) continue
         obj.makeHoverable(function(){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, cyan_mat)
         }, function(){
@@ -299,7 +299,8 @@ onLoadContinue = function () {
     
     // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
 	for (i in dragWallable) {
-	    scene.getObjectById(dragWallable[i]).makeDragable(dragWallStart, dragWallUpdate)
+		var o = scene.getObjectById(dragWallable[i])
+		o && o.makeDragable(dragWallStart, dragWallUpdate)
 	}
 	
 	// turn off loading banner
