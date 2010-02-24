@@ -124,11 +124,12 @@ K3D.addProtoSafely(GLGE.Object, "rayIntersect", function() {
 
 K3D.initComplete = false
 K3D.onInitComplete = function () {}
-K3D.init = function (map, cb){
+K3D.init = function (map, objectcount, cb){
 	if (cb) K3D.onInitComplete = cb
     //create the GLGE renderer.  
     K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
     K3D.gameScene = doc.getElement("mainscene");
+	K3D.gameScene.objectsToLoad=objectcount
 	K3D.gameScene.pickable = []
     K3D.gameRenderer.setScene(K3D.gameScene);
     
@@ -501,6 +502,7 @@ K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 
 //	return count of objects not fully loaded
 K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
+	if (this.objects.length < this.objectsToLoad) return this.objectsToLoad-this.objects.length
 	var count = 0
 	for (var i in this.objects) {
 		if ( (!this.objects[i].mesh) || (!this.objects[i].id) ){
