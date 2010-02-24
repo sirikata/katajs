@@ -214,14 +214,14 @@ onLoadContinue = function () {
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
     var hoverable = ["ball","duck"]
-    var selectable = ["ball","duck"]
-    var dragable = ["ball","duck"]
-	var dragWallable = []
+    var selectable = []
+    var dragable = []
+	var dragWallable = ["ball", "duck"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
 	"bornh_bldg_08_wall_int_02_sub1","bornh_door_gallery_connector_01", 
-	"bornh_bldg_08_wall_int_03","bornh_bldg_07_walls_ext_02_sub1" ]
+	"bornh_bldg_08_wall_int_03","bornh_bldg_07_walls_ext_02_sub1"]
 
     // hover cyan
     for (i in hoverable) {
@@ -307,8 +307,9 @@ onLoadContinue = function () {
 	
 	// kluge until GLGE fixes
 	var o = K3D.gameScene.getObjectById("duck")
-//	o.setLocX(-110)
-//	o.setLocZ(4)
+	o.setLocX(-100)
+	o.setLocZ(5)
+	o.setRotX(1.57)
 }
 
 addPicture = function(pic, scale){
