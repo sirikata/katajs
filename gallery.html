@@ -316,6 +316,7 @@ onLoadContinue = function () {
 	
 	// turn off loading banner
 	editMode("safe")
+	document.getElementById("loading").innerHTML = ""
 	
 	// kluge until GLGE fixes
 	var o = K3D.gameScene.getObjectById("duck")
