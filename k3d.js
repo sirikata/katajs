@@ -49,13 +49,9 @@ K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 	return null
 })
 
-K3D.addPickable = function(obj) {
-	already = false
-	for (i in K3D.pickable) {
-		if (K3D.pickable[i].id == obj.id) already = true
-	}
-	if (!already) K3D.pickable.push(obj)
-}
+K3D.addProtoSafely(GLGE.Scene, "addPickable", function(id) {
+	if (this.pickable.indexOf(id)<0) this.pickable.push(id)
+})
 
 // add makeDragable to Object.
 
@@ -71,7 +67,7 @@ K3D.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 	this.dragUpdate = function (mouse_x, mouse_y) {
 		this.dragUpdateCb(mouse_x-this.dragStartMouseX, mouse_y-this.dragStartMouseY)
 	}
-	K3D.addPickable(this)
+	K3D.gameScene.addPickable(this.id)
 })
 
 // add makeHoverable to Object.
@@ -80,7 +76,7 @@ K3D.addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
 	this.hoverable = true
 	this.hoverStart = cbStart
 	this.hoverStop = cbEnd
-	K3D.addPickable(this)
+	K3D.gameScene.addPickable(this.id)
 })
 
 // add makeSelectable to Object.
@@ -89,7 +85,7 @@ K3D.addProtoSafely(GLGE.Object, "makeSelectable", function(cbSelect, cbDeselect)
 	this.selectable = true
 	this.selectStart = cbSelect
 	this.selectStop = cbDeselect
-	K3D.addPickable(this)
+	K3D.gameScene.addPickable(this.id)
 })
 
 K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
@@ -102,7 +98,7 @@ K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) 
 	this.clickUp = function (mouse_x, mouse_y) {
 		if (this.clickCallbackUp) this.clickCallbackUp(mouse_x, mouse_y)
 	}
-	K3D.addPickable(this)
+	K3D.gameScene.addPickable(this.id)
 })
 
 // get position buffer
@@ -131,11 +127,10 @@ K3D.onInitComplete = function () {}
 K3D.init = function (map, cb){
 	if (cb) K3D.onInitComplete = cb
     //create the GLGE renderer.  
-	K3D.pickable = []
     K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
     K3D.gameScene = doc.getElement("mainscene");
+	K3D.gameScene.pickable = []
     K3D.gameRenderer.setScene(K3D.gameScene);
-    
     
 	if (K3D.gameScene.mouse) alert("uh oh, method name conflict K3D.gameScene.mouse!")
 	K3D.gameScene.mouse = new GLGE.MouseInput(document.getElementById('canvas'));
@@ -172,8 +167,8 @@ K3D.mouselook = function(){
 //        pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-//            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
-            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
+            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
+//            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
 			if (obj == null && K3D.hoverObj && K3D.hoverObj.hoverable) {
 				K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
 				K3D.hoverObj=null
@@ -286,6 +281,7 @@ K3D.checkkeys = function (){
 }
 
 K3D.render = function (){
+	//pdebug("# of objects: " + K3D.gameScene.objects.length,4)
 	if (!K3D.initComplete) {
 		var c = K3D.gameScene.incompleteObjects()
 		if (c == 0) {
@@ -400,6 +396,7 @@ K3D.getNearestObject = function (olist, x, y, coordType) {
     for (var i in olist) {
 		var obj = olist[i]
 		if (typeof(obj)=="string") obj = K3D.gameScene.getObjectById(obj)
+//		console.log("getNearestObject check:", obj.id)
 		var pdn = obj.getPickPoint(x,y,coordType)
         if (pdn) {
             if (pdn[1] < dist) {
@@ -463,9 +460,9 @@ K3D.lineSegOfBalls = function(beg, end, num, size, color){
 
 /// software-only pick function
 K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y) {
-	var place_hit_norm = K3D.getNearestObject(K3D.pickable, x, y, "pixels")
+	var place_hit_norm = K3D.getNearestObject(this.pickable, x, y, "pixels")
 	if (place_hit_norm) {
-		return K3D.pickable[place_hit_norm[1]]
+		return this.getObjectById(this.pickable[place_hit_norm[1]])
 	}
 	return null
 })
@@ -506,7 +503,7 @@ K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 	var count = 0
 	for (var i in this.objects) {
-		if (!this.objects[i].mesh) {
+		if ( (!this.objects[i].mesh) || (!this.objects[i].id) ){
 			count ++	
 		}
 	}
@@ -528,8 +525,8 @@ K3D.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 		this.objects.pop()
 	}
 	j = null
-	for (var i in K3D.pickable) {
-		if (K3D.pickable[i].id == id) {
+	for (var i in this.pickable) {
+		if (K3D.pickable[i] == id) {
 			j = i
 			break
 		}

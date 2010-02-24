@@ -9,6 +9,7 @@
 <script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
 <script type="text/javascript" src="externals/GLGE/glge.js"></script> 
 <script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_collada.js"></script> 
 <script type="text/javascript" src="ray_tri.js"></script> 
 <script type="text/javascript" src="k3d.js"></script> 
 
@@ -200,40 +201,43 @@ shallowClone = function (obj) {
 pixnum=1
 
 doc.onLoad = function(){
-	var heightmap={
-		image:"images/gallerymap.png",
-		width:512,
-		height:512,
-		lowX:-256,
-		upX:256,
-		lowY:-256,
-		upY:256,
-		lowZ:-36,
-		upZ:46
+	var heightmap = {
+		image: "images/gallerymap.png",
+		width: 512,
+		height: 512,
+		lowX: -256,
+		upX: 256,
+		lowY: -256,
+		upY: 256,
+		lowZ: -36,
+		upZ: 46
 	}
-    scene = K3D.init(heightmap, function () {
-		editMode("move")
-		document.getElementById("loading").innerHTML=""
+	scene = K3D.init(heightmap, function(){
+		onLoadContinue()
 	})
+}
+
+// this occurs when all objects are loaded
+onLoadContinue = function () {
 	scene.setAmbientColor("#999999")
 	scene.camera.setLocX(-100)
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    var hoverable = ["ball"]
-    var selectable = ["ball"]
-    var dragable = ["ball"]
-	var dragWallable = []
+    var hoverable = ["ball","duck"]
+    var selectable = []
+    var dragable = []
+	var dragWallable = ["ball", "duck"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
 	"bornh_bldg_08_wall_int_02_sub1","bornh_door_gallery_connector_01", 
-	"bornh_bldg_08_wall_int_03","bornh_bldg_07_walls_ext_02_sub1" ]
+	"bornh_bldg_08_wall_int_03","bornh_bldg_07_walls_ext_02_sub1"]
 
     // hover cyan
     for (i in hoverable) {
         obj = scene.getObjectById(hoverable[i])
-		if (!obj) break
+		if (!obj) continue
         obj.makeHoverable(function(){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, cyan_mat)
         }, function(){
@@ -277,6 +281,7 @@ doc.onLoad = function(){
             this.dragStartRotX = parseFloat(this.getRotX()) ///	wtf? strings?
             this.dragStartRotY = parseFloat(this.getRotY())
             this.dragStartRotZ = parseFloat(this.getRotZ())
+//			pdebug("dragging: " + this.id + " from: " + this.dragStartLocX+" "+this.dragStartLocY+" "+this.dragStartLocZ,5)
         }, function(dx, dy){
 			if (document.input_dragmode.R[1].checked) {
 				var ang = scene.camera.getRotY()
@@ -305,8 +310,18 @@ doc.onLoad = function(){
     
     // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
 	for (i in dragWallable) {
-	    scene.getObjectById(dragWallable[i]).makeDragable(dragWallStart, dragWallUpdate)
+		var o = scene.getObjectById(dragWallable[i])
+		o && o.makeDragable(dragWallStart, dragWallUpdate)
 	}
+	
+	// turn off loading banner
+	editMode("safe")
+	
+	// kluge until GLGE fixes
+	var o = K3D.gameScene.getObjectById("duck")
+	o.setLocX(-100)
+	o.setLocZ(5)
+	o.setRotX(1.57)
 }
 
 addPicture = function(pic, scale){
@@ -334,7 +349,7 @@ addPicture = function(pic, scale){
 	
 	// force edit mode to move (protect from delete)
 	document.input_editmode.R[0].checked = true
-	editMode("move")
+	editMode("safe")
 	return obj
 }
 
