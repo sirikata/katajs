@@ -51,7 +51,6 @@ K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 
 K3D.addProtoSafely(GLGE.Scene, "addPickable", function(id) {
 	if (this.pickable.indexOf(id)<0) this.pickable.push(id)
-	console.log("addPickable:",id,this.pickable)
 })
 
 // add makeDragable to Object.
@@ -183,7 +182,7 @@ K3D.mouselook = function(){
 					if (K3D.selectedObj && K3D.selectedObj.selectable) K3D.selectedObj.selectStop(mousepos.x, mousepos.y)
                     if (obj.selectable) obj.selectStart(mousepos.x, mousepos.y)
                     K3D.selectedObj = obj;
-                    pdebug("selected: " + K3D.selectedObj.id, 2)
+//                    pdebug("selected: " + K3D.selectedObj.id, 2)
                 }
 				if (K3D.selectedObj.dragable) K3D.selectedObj.dragStart(mousepos.x, mousepos.y)
             }
@@ -194,7 +193,7 @@ K3D.mouselook = function(){
 				if (K3D.hoverObj && K3D.hoverObj.hoverable) K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
                 K3D.hoverObj = obj;
 				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
-                pdebug("hovering over: " + K3D.hoverObj.id, 3)
+//                pdebug("hovering over: " + K3D.hoverObj.id, 3)
             }
         }
         K3D.oldLeftBtn = leftbutton
@@ -282,7 +281,7 @@ K3D.checkkeys = function (){
 }
 
 K3D.render = function (){
-	pdebug("# of objects: " + K3D.gameScene.objects.length,4)
+	//pdebug("# of objects: " + K3D.gameScene.objects.length,4)
 	if (!K3D.initComplete) {
 		var c = K3D.gameScene.incompleteObjects()
 		if (c == 0) {
@@ -475,13 +474,6 @@ K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
     var sz = parseFloat(this.getScaleZ())
     var p = this.getPositions()
 	if (!p) return
-	if (this.id=="ball") console.log("ball:", this)
-	if (this.id=="duck") {
-		console.log("duck positions:", p.length, "duck:",this)
-		this.boundingCenter = new GLGE.Vec([0,0,0])
-		this.boundingRadius = 200
-		return
-	}
     
     // first compute center
     var O = new GLGE.Vec([0, 0, 0])
@@ -586,12 +578,6 @@ K3D.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
 				ret = false
 			}
 		}
-	}
-	if (this.id=="ball") pdebug("bounding ball: " + ret,7)
-	if (this.id == "duck") {
-		pdebug("bounding duck: " + ret + " angle: " + a*57.2958 + " thisXYZ: " + 
-			this.getLocX()+" "+this.getLocY()+" "+this.getLocZ() , 8)
-		console.log("duck",S.data,RayBeg.data,RayEnd.sub(RayBeg).data,r,a,d,d2)
 	}
 	return ret
 })

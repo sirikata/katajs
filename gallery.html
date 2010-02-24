@@ -269,7 +269,7 @@ onLoadContinue = function () {
             this.dragStartRotX = parseFloat(this.getRotX()) ///	wtf? strings?
             this.dragStartRotY = parseFloat(this.getRotY())
             this.dragStartRotZ = parseFloat(this.getRotZ())
-			pdebug("dragging: " + this.id + " from: " + this.dragStartLocX+" "+this.dragStartLocY+" "+this.dragStartLocZ,5)
+//			pdebug("dragging: " + this.id + " from: " + this.dragStartLocX+" "+this.dragStartLocY+" "+this.dragStartLocZ,5)
         }, function(dx, dy){
 			if (document.input_dragmode.R[1].checked) {
 				var ang = scene.camera.getRotY()
