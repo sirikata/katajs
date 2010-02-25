@@ -253,10 +253,10 @@
 </mesh>
 
 
-<animation_vector id="spin" frames="200">
+<animation_vector id="spin" frames="400">
     <animation_curve channel="RotZ">
         <linear_point>1,0</linear_point>
-        <linear_point>200,6.282</linear_point>
+        <linear_point>400,6.282</linear_point>
     </animation_curve>
 </animation_vector>
 

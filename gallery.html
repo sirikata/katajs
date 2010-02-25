@@ -125,7 +125,7 @@ positionOnWall = function(obj, x, y){						// pass no x,y means use present mous
 			obj.setLocX(place[0])
 			obj.setLocY(place[1])
 			obj.setLocZ(place[2]+0.1*norm.e(3))
-			obj.setRotX(Math.PI * -0.5 * -norm.e(3))
+//			obj.setRotX(Math.PI * -0.5 * -norm.e(3))	///	dbm -- remove for michelangelo; leave in for duck
 			obj.setRotY(0)
 			obj.setRotZ(0)
 		}
@@ -214,7 +214,7 @@ doc.onLoad = function(){
 		upZ: 46
 	}
 //	heightmap=null
-	scene = K3D.init(heightmap, 19,  						// # of objects to load -- hacky way to force everything loaded 
+	scene = K3D.init(heightmap, 24,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
 	})
