@@ -44,7 +44,7 @@ K3D.addProtoSafely = function (cls, proto, func){
 
 K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 	for(var i=0; i<this.objects.length; i++) {
-		if (this.objects[i].id==id) return this.objects[i]
+		if (this.objects[i].getRef()==id) return this.objects[i]
 	}
 	return null
 })
@@ -496,7 +496,7 @@ K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
 K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 	for (var i in this.objects) {
 		this.objects[i].computeBoundingSphere()
-//		pdebug_log("object:", this.objects[i], this.objects[i].id, "radius:", this.objects[i].boundingRadius)
+//		pdebug_log("object:", this.objects[i], this.objects[i].getRef(), "radius:", this.objects[i].boundingRadius)
 	}
 })
 
@@ -505,7 +505,7 @@ K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 	if (this.objects.length < this.objectsToLoad) return this.objectsToLoad-this.objects.length
 	var count = 0
 	for (var i in this.objects) {
-		if ( (!this.objects[i].mesh) || (!this.objects[i].id) ){
+		if ( (!this.objects[i].mesh) || (!this.objects[i].getRef()) ){
 			count ++	
 		}
 	}
@@ -517,7 +517,7 @@ K3D.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 	var j = null
 	var temp
 	for (var i in this.objects) {
-		if (this.objects[i].id == id) {
+		if (this.objects[i].getRef() == id) {
 			j = i
 			break
 		}

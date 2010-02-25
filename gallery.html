@@ -183,6 +183,7 @@ dragWallUpdate = function(dx, dy){
 			if (scale<0.1) scale = 0.1
 			//pdebug("scale: " + dx + " " + scale, 7)
 			this.setScaleX(this.dragWallStartScale[0] * scale)
+			this.setScaleY(this.dragWallStartScale[1] * scale)
 			this.setScaleZ(this.dragWallStartScale[2] * scale)
 			this.computeBoundingSphere()
 		}
@@ -340,13 +341,13 @@ addPicture = function(pic, scale){
 	obj.galleryInfo = "Image source: " + pic
 	positionOnWall(obj, 0, 0)
 	obj.getMaterial().setSpecular(.4)
-	obj.getMaterial().setEmit(1)
+	obj.getMaterial().setEmit(.5)
     obj.makeDragable(dragWallStart, dragWallUpdate)
     obj.makeHoverable(function(){
-		this.getMaterial().setEmit(2.2)
+		this.getMaterial().setEmit(1)
 			document.getElementById("galleryInfo").innerHTML = this.galleryInfo
     }, function(){
-		this.getMaterial().setEmit(1)        
+		this.getMaterial().setEmit(.5)        
             document.getElementById("galleryInfo").innerHTML = ""
     })
 	
@@ -439,6 +440,7 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
+	console.log("object:",K3D.gameScene.getObjects()[K3D.gameScene.getObjects().length-1].getRef())
 }
 
 loadGallery = function() {
