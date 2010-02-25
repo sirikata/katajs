@@ -45,7 +45,11 @@
 
 <material id="purple" color="#ff00ff">
 </material>
+
 <material id="cyan" color="#00ffff">
+</material>
+
+<material id="white"  specular="1.0" color="#ffffff">
 </material>
 
 <mesh id="bornh_bldg_07_floor_mesh">
@@ -249,12 +253,12 @@
 </mesh>
 
 
-	<animation_vector id="spin" frames="200">
-		<animation_curve channel="RotY">
-			<linear_point>1,0</linear_point>
-			<linear_point>200,6.282</linear_point>
-		</animation_curve>
-	</animation_vector>
+<animation_vector id="spin" frames="200">
+    <animation_curve channel="RotZ">
+        <linear_point>1,0</linear_point>
+        <linear_point>200,6.282</linear_point>
+    </animation_curve>
+</animation_vector>
 
 
 <camera id="maincamera" loc_y="20" loc_x="1" loc_z="8" rot_order="ROT_XZY" rot_y="3.14" rot_x="1.56" />
@@ -264,7 +268,7 @@
     <object id="ball"                            mesh="#sphere"                                 material="#bornh_bldg_08_wall_int_02_mat" scale_x="1" scale_y="1" scale_z="1" loc_x="-110" loc_z="10" />
     <collada id="duck"                           document="duck.dae"                            animation="#spin" scale="0.03" />
 -->
-    <collada id="duck"                           document="Unbenannt.dae"                            animation="#spin" scale="0.03" />
+    <collada id="duck"                           document="Unbenannt.dae"                            animation="#spin" scale="0.17" />
     <object id="bornh_bldg_08_floor"             mesh="#bornh_bldg_08_floor_mesh"               material="#bornh_bldg_08_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="straightstair_smallgallery"      mesh="#straightstair_smallgallery_mesh"        material="#straightstair_smallgallery_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />

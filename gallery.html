@@ -322,10 +322,14 @@ onLoadContinue = function () {
 	document.getElementById("loading").innerHTML = ""
 	
 	// kluge until GLGE fixes
-	var o = K3D.gameScene.getObjectById("duck")
-	o.setLocX(-100)
-	o.setLocZ(5)
-	o.setRotX(1.57)
+	var root = K3D.gameScene.getObjectById("duck")
+	var kids = K3D.gameScene.getObjectsById("duck")
+	root.setLocX(-100)
+	root.setLocZ(5)
+	for (i in kids) {
+		var o = kids[i]
+		o.setMaterial(doc.getElement("white"))
+	}
 }
 
 addPicture = function(pic, scale){
@@ -440,7 +444,9 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
-	console.log("object:",K3D.gameScene.getObjects()[K3D.gameScene.getObjects().length-1].getRef())
+	console.log("raw object count:",K3D.gameScene.getObjects().length)
+	var obs = K3D.gameScene.getObjectsById("duck")
+	console.log("objects with duck id:",obs)
 }
 
 loadGallery = function() {

@@ -49,6 +49,14 @@ K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 	return null
 })
 
+K3D.addProtoSafely(GLGE.Scene, "getObjectsById", function(id) {
+	var o = []
+	for(var i=0; i<this.objects.length; i++) {
+		if (this.objects[i].getRef()==id) o.push(this.objects[i])
+	}
+	return o
+})
+
 K3D.addProtoSafely(GLGE.Scene, "addPickable", function(id) {
 	if (this.pickable.indexOf(id)<0) this.pickable.push(id)
 })
