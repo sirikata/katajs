@@ -268,7 +268,7 @@
     <object id="ball"                            mesh="#sphere"                                 material="#bornh_bldg_08_wall_int_02_mat" scale_x="1" scale_y="1" scale_z="1" loc_x="-110" loc_z="10" />
     <collada id="duck"                           document="duck.dae"                            animation="#spin" scale="0.03" />
 -->
-    <collada id="duck"                           document="Unbenannt.dae"                            animation="#spin" scale="0.17" />
+    <collada id="duck"                           document="david.dae"                            animation="#spin" scale="0.17" />
     <object id="bornh_bldg_08_floor"             mesh="#bornh_bldg_08_floor_mesh"               material="#bornh_bldg_08_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="straightstair_smallgallery"      mesh="#straightstair_smallgallery_mesh"        material="#straightstair_smallgallery_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />

@@ -125,7 +125,7 @@ positionOnWall = function(obj, x, y){						// pass no x,y means use present mous
 			obj.setLocX(place[0])
 			obj.setLocY(place[1])
 			obj.setLocZ(place[2]+0.1*norm.e(3))
-//			obj.setRotX(Math.PI * -0.5 * -norm.e(3))	///	dbm -- remove for michelangelo; leave in for duck
+//			obj.setRotX(Math.PI * -0.5 * -norm.e(3))	///	dbm -- remove for michelangelo; leave in for david
 			obj.setRotY(0)
 			obj.setRotZ(0)
 		}
@@ -227,10 +227,10 @@ onLoadContinue = function () {
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    var hoverable = ["ball","duck"]
+    var hoverable = ["ball","david"]
     var selectable = []
     var dragable = []
-	var dragWallable = ["ball", "duck"]
+	var dragWallable = ["ball", "david"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
@@ -322,8 +322,8 @@ onLoadContinue = function () {
 	document.getElementById("loading").innerHTML = ""
 	
 	// kluge until GLGE fixes
-	var root = K3D.gameScene.getObjectById("duck")
-	var kids = K3D.gameScene.getObjectsById("duck")
+	var root = K3D.gameScene.getObjectById("david")
+	var kids = K3D.gameScene.getObjectsById("david")
 	root.setLocX(-100)
 	root.setLocZ(5)
 	for (i in kids) {
@@ -445,8 +445,8 @@ saveGalleryFinish = function () {
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
 	console.log("raw object count:",K3D.gameScene.getObjects().length)
-	var obs = K3D.gameScene.getObjectsById("duck")
-	console.log("objects with duck id:",obs)
+	var obs = K3D.gameScene.getObjectsById("david")
+	console.log("objects with david id:",obs)
 }
 
 loadGallery = function() {
