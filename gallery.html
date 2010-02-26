@@ -183,6 +183,7 @@ dragWallUpdate = function(dx, dy){
 			if (scale<0.1) scale = 0.1
 			//pdebug("scale: " + dx + " " + scale, 7)
 			this.setScaleX(this.dragWallStartScale[0] * scale)
+			this.setScaleY(this.dragWallStartScale[1] * scale)
 			this.setScaleZ(this.dragWallStartScale[2] * scale)
 			this.computeBoundingSphere()
 		}
