@@ -89,17 +89,26 @@ body{background-color: #000;color: #fff;font-family:arial}
 
 doc = new GLGE.Document();
 
+setMaterialAll = function(obj, mat) {
+	var obs = K3D.gameScene.getObjectsById(obj.getRef())
+	for (var i in obs) {
+		obs[i].setMaterial(mat)
+	}	
+}
+
 // function to safely set material and save original for highlighting (hover/select)
 setHighlightMaterial = function(obj, material){
     if (material != obj.highlightMaterial) {
         if (material == null) {
-            obj.setMaterial(obj.originalMaterial)
+//            obj.setMaterial(obj.originalMaterial)
+            setMaterialAll(obj, obj.originalMaterial)
         }
         else {
             if (obj.highlightMaterial == null) {
                 obj.originalMaterial = obj.getMaterial()
             }
-            obj.setMaterial(material)
+//            obj.setMaterial(material)
+            setMaterialAll(obj, material)
         }
         obj.highlightMaterial = material
     }
