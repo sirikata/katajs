@@ -536,14 +536,14 @@ K3D.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 	}
 	j = null
 	for (var i in this.pickable) {
-		if (K3D.pickable[i] == id) {
+		if (this.pickable[i] == id) {
 			j = i
 			break
 		}
 	}
 	if (j != null) {
-		K3D.pickable[i] = K3D.pickable[K3D.pickable.length-1]
-		K3D.pickable.pop()
+		this.pickable[i] = this.pickable[this.pickable.length-1]
+		this.pickable.pop()
 	}
 })
 
