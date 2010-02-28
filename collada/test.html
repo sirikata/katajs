@@ -1,0 +1,22 @@
+<html>
+<header>
+  <script src="../externals/jsXMLParser/xmlsax.js"></script>
+  <script src="../externals/jsXMLParser/xmldom.js"></script>
+  <script src="parser.js"></script>
+  <script> 
+
+var alertParsedDocument=function(dom, errlist) {
+   if (dom)     {
+       alert("parsed "+errlist);
+   }else {
+       alert("unparsed");
+   }
+};
+colladaParseURI("duck.dae",alertParsedDocument);
+</script>
+</header>
+
+<body>
+This is a test of parsing collada and building a dom on a separate worker thread
+</body>
+</html>
