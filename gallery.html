@@ -32,11 +32,12 @@ body{background-color: #000;color: #fff;font-family:arial}
             </div>
         </div>
 
-		<div id="framerate" style="position:absolute; left: 762px; top: 510px; background-color: #000; 
+		<div id="framerate" style="position:absolute; left: 762px; top: 7px; background-color: #000; 
 		opacity: 0.3;height: 30px; width: 130px; border-radius: 5px;	-moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
 			<div id="debug" style="padding: 5px"></div>
 		</div>
 
+		<!--
 		<div style="padding: 5px;position:absolute; left: 20px; top: 474px; 
 		background-color: #000; opacity: 0.3;height: 59px; width: 105px; border-radius: 5px;	
 		-moz-border-radius:5px;-webkit-border-radius:5px;border: 1px solid #fff;">
@@ -45,6 +46,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 			<button onMouseDown='movementButton("left")' onMouseUp='movementButtonUp("left")' onMouseOut='movementButtonUp("left")' style="position:absolute;left:5;top:20"><</button>
 			<button onMouseDown='movementButton("right")' onMouseUp='movementButtonUp("right")' onMouseOut='movementButtonUp("right")' style="position:absolute;left:75;top:20">></button>
 		</div>
+		-->
 		<div align="center">
 			<button onclick = 'addPicture(document.getElementById("input_tex1").value)'>new painting:</button>
 			<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
@@ -52,8 +54,8 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div align="center">
 			<form Name="input_editmode">
 				<div id="editInfo" align="center">LOADING..LOADING..LOADING..LOADING..LOADING</div>
-				<input type="radio" Name="R" onClick = 'editMode("safe")' Checked="true"/>safe
-				<input type="radio" Name="R" onClick = 'editMode("move")'/>move
+				<input type="radio" Name="R" onClick = 'editMode("safe")' />safe
+				<input type="radio" Name="R" onClick = 'editMode("move")'Checked="true" />move
 				<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
 				<input type="radio" Name="R" onClick = 'editMode("annotate")'/>annotate
 				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
@@ -71,9 +73,14 @@ body{background-color: #000;color: #fff;font-family:arial}
 		</div>
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
+		<!--
 		<div style="padding: 5px;position:absolute; left: 145px; top: 510px; 
 			background-color: #000; opacity: 0.5;height: 22px; width: 595px; border-radius: 5px;	
 			-moz-border-radius:5px;-webkit-border-radius:5px;border: 1px solid #fff;"
+			id="galleryInfo" style="padding: 5px" align="center">
+		-->
+		<div style="padding: 5px; position:absolute; left: 0px; top: 510px; 
+			height: 22px; width: 900px"
 			id="galleryInfo" style="padding: 5px" align="center">
 		</div>
 		<div id="save" style="position:absolute; left: 10px; top: 550px;">
@@ -327,7 +334,7 @@ onLoadContinue = function () {
 	}
 	
 	// turn off loading banner
-	editMode("safe")
+	editMode("move")
 	document.getElementById("loading").innerHTML = ""
 	
 	// kluge until GLGE fixes
@@ -365,8 +372,8 @@ addPicture = function(pic, scale){
     })
 	
 	// force edit mode to move (protect from delete)
-	document.input_editmode.R[0].checked = true
-	editMode("safe")
+	document.input_editmode.R[1].checked = true
+	editMode("move")
 	return obj
 }
 
