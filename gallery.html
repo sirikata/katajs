@@ -244,10 +244,10 @@ onLoadContinue = function () {
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    var hoverable = ["ball"]
-    var selectable = []
-    var dragable = []
-	var dragWallable = ["ball", "david"]
+    scene.hoverable = ["ball"]
+    scene.selectable = []
+    scene.dragable = []
+	scene.dragWallable = ["ball", "david"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
@@ -255,8 +255,8 @@ onLoadContinue = function () {
 	"bornh_bldg_08_wall_int_03","bornh_bldg_07_walls_ext_02_sub1"]
 
     // hover cyan
-    for (i in hoverable) {
-        obj = scene.getObjectById(hoverable[i])
+    for (i in scene.hoverable) {
+        obj = scene.getObjectById(scene.hoverable[i])
 		if (!obj) continue
         obj.makeHoverable(function(){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, cyan_mat)
@@ -268,8 +268,8 @@ onLoadContinue = function () {
     
     
     // selected are purple
-    for (i in selectable) {
-        obj = scene.getObjectById(selectable[i])
+    for (i in scene.selectable) {
+        obj = scene.getObjectById(scene.selectable[i])
 		if (!obj) break
         obj.makeSelectable(function(){
             setHighlightMaterial(this, purple_mat)
@@ -291,8 +291,8 @@ onLoadContinue = function () {
 	}
 
     // drag is modal: move, rotatex, rotatey, rotatez
-    for (i in dragable) {
-        obj=scene.getObjectById(dragable[i])
+    for (i in scene.dragable) {
+        obj=scene.getObjectById(scene.dragable[i])
 		if (!obj) break
 		obj.makeDragable(function(){
             this.dragStartLocX = parseFloat(this.getLocX()) ///	wtf? strings?
@@ -329,8 +329,8 @@ onLoadContinue = function () {
 	}
     
     // stop dragging my monkey around! (drag on wall & whatever else is under cursor)
-	for (i in dragWallable) {
-		var o = scene.getObjectById(dragWallable[i])
+	for (i in scene.dragWallable) {
+		var o = scene.getObjectById(scene.dragWallable[i])
 		o && o.makeDragable(dragWallStart, dragWallUpdate)
 	}
 	
