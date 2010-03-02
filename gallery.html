@@ -197,7 +197,7 @@ dragWallUpdate = function(dx, dy){
 	}
 	else {
 		if (document.input_editmode.R[2].checked) {
-			var scale = 1.0 + 0.01 * dx
+			var scale = 1.0 + 0.007 * dx - 0.003 * dy
 			if (scale<0.1) scale = 0.1
 			//pdebug("scale: " + dx + " " + scale, 7)
 			this.setScaleX(this.dragWallStartScale[0] * scale)
