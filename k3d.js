@@ -176,8 +176,8 @@ K3D.mouselook = function(){
 //        pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
-//            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
+//            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
+            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
 			if (obj == null && K3D.hoverObj && K3D.hoverObj.hoverable) {
 				K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
 				K3D.hoverObj=null
