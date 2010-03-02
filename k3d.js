@@ -177,7 +177,7 @@ K3D.mouselook = function(){
         
         if (mousepos.x && mousepos.y) {
 //            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
-            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y);
+            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y, this.pickable);
 			if (obj == null && K3D.hoverObj && K3D.hoverObj.hoverable) {
 				K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
 				K3D.hoverObj=null
@@ -468,10 +468,11 @@ K3D.lineSegOfBalls = function(beg, end, num, size, color){
 }
 
 /// software-only pick function
-K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y) {
-	var place_hit_norm = K3D.getNearestObject(this.pickable, x, y, "pixels")
+K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
+	if (objlist==null) objlist=this.pickable
+	var place_hit_norm = K3D.getNearestObject(objlist, x, y, "pixels")
 	if (place_hit_norm) {
-		return this.getObjectById(this.pickable[place_hit_norm[1]])
+		return this.getObjectById(objlist[place_hit_norm[1]])
 	}
 	return null
 })
