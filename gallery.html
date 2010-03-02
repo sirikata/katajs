@@ -376,6 +376,7 @@ addPicture = function(pic, scale){
 	// force edit mode to move (protect from delete)
 	document.input_editmode.R[1].checked = true
 	editMode("move")
+	scene.hoverable.push(obj.id)
 	return obj
 }
 
