@@ -448,11 +448,17 @@ saveGalleryFinish = function () {
 	var s = "|GalleryBegin~<br>"
  	for (var i in K3D.gameScene.objects) {
 		var o = K3D.gameScene.objects[i]
-		if (o.id.slice(0,11) == "galleryPix_") {
-			s += "|" + o.gallerySource
+		if (o.id=="david" || o.id.slice(0,11) == "galleryPix_") {
+			if (o.gallerySource)
+				s += "|" + o.gallerySource
+			else
+				s += "|" + o.id
 			s += "," + o.getLocX().toFixed(prec) + "," + o.getLocY().toFixed(prec) + "," + o.getLocZ().toFixed(prec)
 			s += "," + o.getRotX().toFixed(prec) + "," + o.getRotY().toFixed(prec) + "," + o.getRotZ().toFixed(prec)
-			s += "," + o.getScaleX() / o.txWidth
+			if (o.txWidth)
+				s += "," + o.getScaleX() / o.txWidth
+			else
+				s += "," + o.getScaleX()
 			s += "," + o.galleryInfo
 			s += "~"
 		}
@@ -513,16 +519,32 @@ loadGalleryFinish = function(load) {
 			var s = load.slice(i+1,j)
 			i = j
 			var w = s.split(',')
-			var pic = addPicture(w[0], parseFloat(w[7]))
-			pic.setLocX(parseFloat(w[1]))
-			pic.setLocY(parseFloat(w[2]))
-			pic.setLocZ(parseFloat(w[3]))
-			pic.setRotX(parseFloat(w[4]))
-			pic.setRotY(parseFloat(w[5]))
-			pic.setRotZ(parseFloat(w[6]))
-			pic.galleryInfo = w[8]
-			for (var k=9; k < w.length; k++) {
-				pic.galleryInfo += w[k]
+			console.log("pic:",w[0])
+			if (w[0] == "david") {
+				pic = scene.getObjectById("david")
+				pic.setLocX(parseFloat(w[1]))
+				pic.setLocY(parseFloat(w[2]))
+				pic.setLocZ(parseFloat(w[3]))
+				pic.setRotX(parseFloat(w[4]))
+				pic.setRotY(parseFloat(w[5]))
+				pic.setRotZ(parseFloat(w[6]))
+				var scale = parseFloat(w[7])
+				pic.setScaleX(scale)
+				pic.setScaleY(scale)
+				pic.setScaleZ(scale)
+			}
+			else {
+				var pic = addPicture(w[0], parseFloat(w[7]))
+				pic.setLocX(parseFloat(w[1]))
+				pic.setLocY(parseFloat(w[2]))
+				pic.setLocZ(parseFloat(w[3]))
+				pic.setRotX(parseFloat(w[4]))
+				pic.setRotY(parseFloat(w[5]))
+				pic.setRotZ(parseFloat(w[6]))
+				pic.galleryInfo = w[8]
+				for (var k = 9; k < w.length; k++) {
+					pic.galleryInfo += w[k]
+				}
 			}
 		}
 		else {
