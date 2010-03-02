@@ -185,6 +185,7 @@ K3D.mouselook = function(){
         }
         if (leftbutton) {
             if (K3D.oldLeftBtn == false) {
+	            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y, K3D.gameScene.pickable);
 				if (obj==null) K3D.selectedObj = g_noselection
 				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
                 if (obj && obj != K3D.selectedObj) {
@@ -472,9 +473,7 @@ K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
 //	objlist=null
 	if (objlist==null) objlist=this.pickable
 	var s= ""; for (i in objlist) s+=objlist[i]+" "
-	pdebug("pickSoft, list: " + s,4)
 	var place_hit_norm = K3D.getNearestObject(objlist, x, y, "pixels")
-	if(place_hit_norm) pdebug("hit: " + objlist[place_hit_norm[1]],6); else pdebug("hit: nothing",6)
 	if (place_hit_norm) {
 		return this.getObjectById(objlist[place_hit_norm[1]])
 	}
