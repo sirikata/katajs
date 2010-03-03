@@ -1,12 +1,15 @@
 var canvas = document.getElementById("canvas")
-console.log("canvas:",canvas)
 if (canvas) {
-	var gl = canvas.getContext("experimental-webgl", {});
-	if (!gl) {
-		alert("ach")
-	}
+    try {
+        var gl = canvas.getContext("experimental-webgl", {});
+        if (!gl) {
+            window.location = "noGL.html"
+        }
+    } 
+    catch (e) {
+        window.location = "noGL.html"
+    }
 }
 else {
-	alert("ech")
+    window.location = "noGL.html"
 }
-	

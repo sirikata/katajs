@@ -4,27 +4,6 @@
 <title>GLGE</title> 
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
  
-<script type="text/javascript">
-var canvas = document.getElementById("canvas")
-alert(canvas)
-if (canvas) {
-	var gl = canvas.getContext("experimental-webgl", {});
-	if (!gl) {
-		alert("ach1")
-	}
-}
-else {
-	alert("ech1")
-}
-</script> 
-<script type="text/javascript" src="pdebug.js"></script> 
-<script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
-<script type="text/javascript" src="externals/GLGE/glge.js"></script> 
-<script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
-<script type="text/javascript" src="externals/GLGE/glge_collada.js"></script> 
-<script type="text/javascript" src="ray_tri.js"></script> 
-<script type="text/javascript" src="k3d.js"></script> 
-
 <style>
 body{background-color: #000;color: #fff;font-family:arial}
 </style>
@@ -104,19 +83,17 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div id="saveLoadGallery" align="center"></div>
 	</div>
 </div>
+
+<script type="text/javascript" src="checkGL.js"></script> 
+<script type="text/javascript" src="pdebug.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
+<script type="text/javascript" src="externals/GLGE/glge_collada.js"></script> 
+<script type="text/javascript" src="ray_tri.js"></script> 
+<script type="text/javascript" src="k3d.js"></script> 
+
 <script type="text/javascript">
-var canvas = document.getElementById("canvas")
-alert(canvas)
-if (canvas) {
-	var gl = canvas.getContext("experimental-webgl", {});
-	if (!gl) {
-		alert("ach2")
-	}
-}
-else {
-	alert("ech2")
-}
-	
 doc = new GLGE.Document();
 
 setMaterialAll = function(obj, mat) {
