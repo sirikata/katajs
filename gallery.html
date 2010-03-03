@@ -49,7 +49,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" onClick = 'editMode("annotate")'/>annotate
 				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
 			</form>
-			<!--
+
 			<form Name="input_dragmode">
 				<div id="editInfo" align="center"></div>
 				<input type="radio" Name="R" />safe
@@ -58,7 +58,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" />rotY
 				<input type="radio" Name="R" />rotZ
 			</form>
-			-->
+
 		</div>
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
@@ -243,10 +243,10 @@ onLoadContinue = function () {
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    scene.hoverable = ["ball"]
-    scene.selectable = []
-    scene.dragable = []
-	scene.dragWallable = ["ball", "david"]
+    scene.hoverable = ["ball", "david"]
+    scene.selectable = ["ball", "david"]
+    scene.dragable = ["ball", "david"]
+	scene.dragWallable = []
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
