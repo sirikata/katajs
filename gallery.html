@@ -294,7 +294,7 @@ onLoadContinue = function () {
         obj=scene.getObjectById(scene.dragable[i])
 		if (!obj) break
 		obj.makeDragable(function(){
-			var root = this
+			var root = this.getRoot()
             root.dragStartLocX = parseFloat(root.getLocX()) ///	wtf? strings?
             root.dragStartLocY = parseFloat(root.getLocY())
             root.dragStartLocZ = parseFloat(root.getLocZ())
@@ -303,7 +303,7 @@ onLoadContinue = function () {
             root.dragStartRotZ = parseFloat(root.getRotZ())
 //			pdebug("dragging: " + root.id + " from: " + root.dragStartLocX+" "+root.dragStartLocY+" "+root.dragStartLocZ,5)
         }, function(dx, dy){
-			var root = this
+			var root = this.getRoot()
 			if (document.input_dragmode.R[1].checked) {
 				var ang = scene.camera.getRotY()
 				var x = Math.cos(ang - Math.PI)
