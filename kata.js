@@ -175,7 +175,9 @@ KJS.init = function (map, objectcount, cb){
 g_noselection = {}
 
 KJS.mouselook = function(){
-	var pick = KJS.gameScene.pick
+	KJS.gameScene.picker = KJS.gameScene.pick
+	//KJS.gameScene.picker = KJS.gameScene.pickSoft
+
     if (KJS.mouseovercanvas) {
         var mousepos = KJS.gameScene.mouse.getMousePosition();
         var leftbutton = KJS.gameScene.mouse.isButtonDown(0)
@@ -184,8 +186,7 @@ KJS.mouselook = function(){
 //        pdebug("KJS.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-            var obj = KJS.gameScene.pick(mousepos.x, mousepos.y);
-//            var obj = KJS.gameScene.pickSoft(mousepos.x, mousepos.y, KJS.gameScene.hoverable);
+            var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.hoverable);
 			if (obj == null && KJS.hoverObj && KJS.hoverObj.hoverable) {
 				KJS.hoverObj.hoverStop(mousepos.x, mousepos.y)
 				KJS.hoverObj=null
@@ -193,7 +194,7 @@ KJS.mouselook = function(){
         }
         if (leftbutton) {
             if (KJS.oldLeftBtn == false) {
-	            var obj = KJS.gameScene.pickSoft(mousepos.x, mousepos.y, KJS.gameScene.pickable);
+	            var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.pickable);
 				if (obj==null) KJS.selectedObj = g_noselection
 				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
                 if (obj && obj != KJS.selectedObj) {
