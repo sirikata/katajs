@@ -4,7 +4,19 @@
 <title>GLGE</title> 
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
  
- 
+<script type="text/javascript">
+var canvas = document.getElementById("canvas")
+alert(canvas)
+if (canvas) {
+	var gl = canvas.getContext("experimental-webgl", {});
+	if (!gl) {
+		alert("ach1")
+	}
+}
+else {
+	alert("ech1")
+}
+</script> 
 <script type="text/javascript" src="pdebug.js"></script> 
 <script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
 <script type="text/javascript" src="externals/GLGE/glge.js"></script> 
@@ -93,7 +105,18 @@ body{background-color: #000;color: #fff;font-family:arial}
 	</div>
 </div>
 <script type="text/javascript">
-
+var canvas = document.getElementById("canvas")
+alert(canvas)
+if (canvas) {
+	var gl = canvas.getContext("experimental-webgl", {});
+	if (!gl) {
+		alert("ach2")
+	}
+}
+else {
+	alert("ech2")
+}
+	
 doc = new GLGE.Document();
 
 setMaterialAll = function(obj, mat) {
