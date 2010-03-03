@@ -468,10 +468,7 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
-	//console.log("raw object count:",KJS.gameScene.getObjects().length)
 	var obs = KJS.gameScene.getObjectsById("david")
-	//console.log("objects with david id:",obs)
-	document.cookie = "test=cookie"
 }
 
 loadGallery = function() {
@@ -518,7 +515,6 @@ loadGalleryFinish = function(load) {
 			var s = load.slice(i+1,j)
 			i = j
 			var w = s.split(',')
-			console.log("pic:",w[0])
 			if (w[0] == "david") {
 				pic = scene.getObjectById("david")
 				pic.setLocX(parseFloat(w[1]))
