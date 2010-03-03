@@ -336,17 +336,10 @@ onLoadContinue = function () {
 	// turn off loading banner
 	editMode("move")
 	document.getElementById("loading").innerHTML = ""
-	
-	// kluge until GLGE fixes
-	var root = KJS.gameScene.getObjectById("david")
-	var kids = KJS.gameScene.getObjectsById("david")
-	root.setLocX(-80)
-	root.setLocY(-44)
-	root.setLocZ(-2.19)
-	for (i in kids) {
-		var o = kids[i]
-		o.setMaterial(doc.getElement("white"))
-	}
+
+	// statue comes up black!
+	var o = KJS.gameScene.getObjectById("david")
+	o.setMaterial(doc.getElement("white"))
 }
 
 addPicture = function(pic, scale){

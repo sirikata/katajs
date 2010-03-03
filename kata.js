@@ -49,6 +49,13 @@ KJS.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 	return null
 })
 
+KJS.addProtoSafely(GLGE.Scene, "getObjectRootById", function(id) {
+	for(var i=0; i<this.objects.length; i++) {
+		if (this.objects[i].getRef()==id) return this.objects[i].getRoot()
+	}
+	return null
+})
+
 KJS.addProtoSafely(GLGE.Scene, "getObjectsById", function(id) {
 	var o = []
 	for(var i=0; i<this.objects.length; i++) {
@@ -168,6 +175,7 @@ KJS.init = function (map, objectcount, cb){
 g_noselection = {}
 
 KJS.mouselook = function(){
+	var pick = KJS.gameScene.pick
     if (KJS.mouseovercanvas) {
         var mousepos = KJS.gameScene.mouse.getMousePosition();
         var leftbutton = KJS.gameScene.mouse.isButtonDown(0)
@@ -176,8 +184,8 @@ KJS.mouselook = function(){
 //        pdebug("KJS.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-//            var obj = KJS.gameScene.pick(mousepos.x, mousepos.y);
-            var obj = KJS.gameScene.pickSoft(mousepos.x, mousepos.y, KJS.gameScene.hoverable);
+            var obj = KJS.gameScene.pick(mousepos.x, mousepos.y);
+//            var obj = KJS.gameScene.pickSoft(mousepos.x, mousepos.y, KJS.gameScene.hoverable);
 			if (obj == null && KJS.hoverObj && KJS.hoverObj.hoverable) {
 				KJS.hoverObj.hoverStop(mousepos.x, mousepos.y)
 				KJS.hoverObj=null
