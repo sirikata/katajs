@@ -174,10 +174,11 @@ setNote = function() {
 
 g_picToAnnotate=null
 dragWallStart = function(x, y){
-	this.dragWallStartScale = [this.getScaleX(), this.getScaleY(), this.getScaleZ()]
+	var root = this.getRoot()
+	root.dragWallStartScale = [root.getScaleX(), root.getScaleY(), root.getScaleZ()]
 	// annotate
 	if (document.input_editmode.R[3].checked) {
-		g_picToAnnotate = this
+		g_picToAnnotate = root
 		var html = 
 		'<input type="text" id="input_annotate" size="100" value="type comment here"/><br><button  onclick="setNote()" >press here to enter comment</button>'
 		document.getElementById("galleryAnnotate").innerHTML = html
@@ -185,23 +186,24 @@ dragWallStart = function(x, y){
 	}
 	// delete
 	if (document.input_editmode.R[4].checked) {
-		KJS.gameScene.removeObjectById(this.id)
+		KJS.gameScene.removeObjectById(root.id)
 	}
 }
 
 dragWallUpdate = function(dx, dy){
+	var root = this.getRoot()
     if (document.input_editmode.R[1].checked) {
-		positionOnWall(this)
+		positionOnWall(root)
 	}
 	else {
 		if (document.input_editmode.R[2].checked) {
 			var scale = 1.0 + 0.007 * dx - 0.003 * dy
 			if (scale<0.1) scale = 0.1
 			//pdebug("scale: " + dx + " " + scale, 7)
-			this.setScaleX(this.dragWallStartScale[0] * scale)
-			this.setScaleY(this.dragWallStartScale[1] * scale)
-			this.setScaleZ(this.dragWallStartScale[2] * scale)
-			this.computeBoundingSphere()
+			root.setScaleX(root.dragWallStartScale[0] * scale)
+			root.setScaleY(root.dragWallStartScale[1] * scale)
+			root.setScaleZ(root.dragWallStartScale[2] * scale)
+			root.computeBoundingSphere()
 		}
 	}
 }
@@ -244,9 +246,9 @@ onLoadContinue = function () {
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
     scene.hoverable = ["ball", "david"]
-    scene.selectable = ["ball", "david"]
-    scene.dragable = ["ball", "david"]
-	scene.dragWallable = []
+    scene.selectable = []
+    scene.dragable = []
+	scene.dragWallable = ["ball", "david"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
