@@ -95,7 +95,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 doc = new GLGE.Document();
 
 setMaterialAll = function(obj, mat) {
-	var obs = K3D.gameScene.getObjectsById(obj.getRef())
+	var obs = KJS.gameScene.getObjectsById(obj.getRef())
 	for (var i in obs) {
 		obs[i].setMaterial(mat)
 	}	
@@ -128,7 +128,7 @@ niceArray = function (v, places) {
 }
 
 positionOnWall = function(obj, x, y){						// pass no x,y means use present mouse location
-    var placeIndex = K3D.getNearestObject(g_dragOns,x,y)
+    var placeIndex = KJS.getNearestObject(g_dragOns,x,y)
     if (placeIndex) {
         var place = placeIndex[0]
         var over = g_dragOns[placeIndex[1]]
@@ -185,7 +185,7 @@ dragWallStart = function(x, y){
 	}
 	// delete
 	if (document.input_editmode.R[4].checked) {
-		K3D.gameScene.removeObjectById(this.id)
+		KJS.gameScene.removeObjectById(this.id)
 	}
 }
 
@@ -230,7 +230,7 @@ doc.onLoad = function(){
 		upZ: 46
 	}
 //	heightmap=null
-	scene = K3D.init(heightmap, 19,  						// # of objects to load -- hacky way to force everything loaded 
+	scene = KJS.init(heightmap, 19,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
 	})
@@ -338,8 +338,8 @@ onLoadContinue = function () {
 	document.getElementById("loading").innerHTML = ""
 	
 	// kluge until GLGE fixes
-	var root = K3D.gameScene.getObjectById("david")
-	var kids = K3D.gameScene.getObjectsById("david")
+	var root = KJS.gameScene.getObjectById("david")
+	var kids = KJS.gameScene.getObjectsById("david")
 	root.setLocX(-80)
 	root.setLocY(-44)
 	root.setLocZ(-2.19)
@@ -351,7 +351,7 @@ onLoadContinue = function () {
 
 addPicture = function(pic, scale){
 	if (scale==null) scale = 0.01
-    var obj = K3D.createObjectAndAddToScene("galleryPix_" + pixnum++, doc.getElement("square"), pic, function (tx) {
+    var obj = KJS.createObjectAndAddToScene("galleryPix_" + pixnum++, doc.getElement("square"), pic, function (tx) {
 		obj.txWidth = tx.width
 		obj.txHeight = tx.height
 	    obj.setScaleX(parseFloat(tx.width) * scale)
@@ -380,11 +380,11 @@ addPicture = function(pic, scale){
 }
 
 movementButton = function(b) {
-	K3D.forceMovement=b
+	KJS.forceMovement=b
 }
 
 movementButtonUp = function(b) {
-	K3D.forceMovement=null
+	KJS.forceMovement=null
 }
 
 
@@ -444,8 +444,8 @@ saveGalleryFinish = function () {
 	var fn = document.getElementById("input_save").value
 	var prec = 3
 	var s = "|GalleryBegin~<br>"
- 	for (var i in K3D.gameScene.objects) {
-		var o = K3D.gameScene.objects[i]
+ 	for (var i in KJS.gameScene.objects) {
+		var o = KJS.gameScene.objects[i]
 		if (o.id=="david" || o.id.slice(0,11) == "galleryPix_") {
 			if (o.gallerySource)
 				s += "|" + o.gallerySource
@@ -468,9 +468,10 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
-	//console.log("raw object count:",K3D.gameScene.getObjects().length)
-	var obs = K3D.gameScene.getObjectsById("david")
+	//console.log("raw object count:",KJS.gameScene.getObjects().length)
+	var obs = KJS.gameScene.getObjectsById("david")
 	//console.log("objects with david id:",obs)
+	document.cookie = "test=cookie"
 }
 
 loadGallery = function() {
@@ -499,14 +500,14 @@ loadGalleryFinish = function(load) {
 
 	// delete everything
 	var delList = []
- 	for (var i=0; i<K3D.gameScene.objects.length; i++) {
-		var o = K3D.gameScene.objects[i]
+ 	for (var i=0; i<KJS.gameScene.objects.length; i++) {
+		var o = KJS.gameScene.objects[i]
 		if (o.id.slice(0,11) == "galleryPix_") {
 			delList.push(o.id)
 		}
 	}
 	for (i in delList) {
-		K3D.gameScene.removeObjectById(delList[i])
+		KJS.gameScene.removeObjectById(delList[i])
 	}
 
 	// load data

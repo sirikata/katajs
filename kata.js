@@ -1,5 +1,5 @@
 /*  Kata Javascript Graphics Layer
- *  k3d.js
+ *  kata.js
  *
  *  Copyright (c) 2010, katalabs, Inc.
  *
