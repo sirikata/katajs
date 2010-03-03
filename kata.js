@@ -29,9 +29,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-K3D = {}
+KJS = {}
 
-K3D.addProtoSafely = function (cls, proto, func){
+KJS.addProtoSafely = function (cls, proto, func){
     if (cls.prototype[proto] != null) {
         alert("oh no! This prototype already exists: " + proto)
     }
@@ -42,14 +42,14 @@ K3D.addProtoSafely = function (cls, proto, func){
 
 // add getObjectById method to Scene
 
-K3D.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
+KJS.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
 	for(var i=0; i<this.objects.length; i++) {
 		if (this.objects[i].getRef()==id) return this.objects[i]
 	}
 	return null
 })
 
-K3D.addProtoSafely(GLGE.Scene, "getObjectsById", function(id) {
+KJS.addProtoSafely(GLGE.Scene, "getObjectsById", function(id) {
 	var o = []
 	for(var i=0; i<this.objects.length; i++) {
 		if (this.objects[i].getRef()==id) o.push(this.objects[i])
@@ -57,13 +57,13 @@ K3D.addProtoSafely(GLGE.Scene, "getObjectsById", function(id) {
 	return o
 })
 
-K3D.addProtoSafely(GLGE.Scene, "addPickable", function(id) {
+KJS.addProtoSafely(GLGE.Scene, "addPickable", function(id) {
 	if (this.pickable.indexOf(id)<0) this.pickable.push(id)
 })
 
 // add makeDragable to Object.
 
-K3D.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
+KJS.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 	this.dragable = true
 	this.dragStartCb = cbStart
 	this.dragUpdateCb = cbUpdate
@@ -75,28 +75,28 @@ K3D.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 	this.dragUpdate = function (mouse_x, mouse_y) {
 		this.dragUpdateCb(mouse_x-this.dragStartMouseX, mouse_y-this.dragStartMouseY)
 	}
-	K3D.gameScene.addPickable(this.id)
+	KJS.gameScene.addPickable(this.id)
 })
 
 // add makeHoverable to Object.
 
-K3D.addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
+KJS.addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
 	this.hoverable = true
 	this.hoverStart = cbStart
 	this.hoverStop = cbEnd
-	K3D.gameScene.addPickable(this.id)
+	KJS.gameScene.addPickable(this.id)
 })
 
 // add makeSelectable to Object.
 
-K3D.addProtoSafely(GLGE.Object, "makeSelectable", function(cbSelect, cbDeselect) {
+KJS.addProtoSafely(GLGE.Object, "makeSelectable", function(cbSelect, cbDeselect) {
 	this.selectable = true
 	this.selectStart = cbSelect
 	this.selectStop = cbDeselect
-	K3D.gameScene.addPickable(this.id)
+	KJS.gameScene.addPickable(this.id)
 })
 
-K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
+KJS.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
 	this.clickable = true
 	this.clickCallbackDown = cbDown
 	this.clickCallbackUp = cbUp
@@ -106,12 +106,12 @@ K3D.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) 
 	this.clickUp = function (mouse_x, mouse_y) {
 		if (this.clickCallbackUp) this.clickCallbackUp(mouse_x, mouse_y)
 	}
-	K3D.gameScene.addPickable(this.id)
+	KJS.gameScene.addPickable(this.id)
 })
 
 // get position buffer
 bugg=0
-K3D.addProtoSafely(GLGE.Object, "getPositions", function() {
+KJS.addProtoSafely(GLGE.Object, "getPositions", function() {
 	var posbuf
 	if (this.mesh) {
 		for (i in this.mesh.buffers) {
@@ -126,100 +126,100 @@ K3D.addProtoSafely(GLGE.Object, "getPositions", function() {
 })
 
 // does a ray intersect this object? return null or point
-K3D.addProtoSafely(GLGE.Object, "rayIntersect", function() {
+KJS.addProtoSafely(GLGE.Object, "rayIntersect", function() {
 	
 })
 
-K3D.initComplete = false
-K3D.onInitComplete = function () {}
-K3D.init = function (map, objectcount, cb){
-	if (cb) K3D.onInitComplete = cb
+KJS.initComplete = false
+KJS.onInitComplete = function () {}
+KJS.init = function (map, objectcount, cb){
+	if (cb) KJS.onInitComplete = cb
     //create the GLGE renderer.  
-    K3D.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
-    K3D.gameScene = doc.getElement("mainscene");
-	K3D.gameScene.objectsToLoad=objectcount
-	K3D.gameScene.pickable = []
-    K3D.gameRenderer.setScene(K3D.gameScene);
+    KJS.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
+    KJS.gameScene = doc.getElement("mainscene");
+	KJS.gameScene.objectsToLoad=objectcount
+	KJS.gameScene.pickable = []
+    KJS.gameRenderer.setScene(KJS.gameScene);
     
-	if (K3D.gameScene.mouse) alert("uh oh, method name conflict K3D.gameScene.mouse!")
-	K3D.gameScene.mouse = new GLGE.MouseInput(document.getElementById('canvas'));
-    K3D.keys = new GLGE.KeyInput();
-	K3D.mouseovercanvas=false
-	document.getElementById("canvas").onmouseover=function(e){K3D.mouseovercanvas=true;}
-	document.getElementById("canvas").onmousemove=function(e){K3D.mouseovercanvas=true;}
-	document.getElementById("canvas").onmouseout=function(e){K3D.mouseovercanvas=false;}
+	if (KJS.gameScene.mouse) alert("uh oh, method name conflict KJS.gameScene.mouse!")
+	KJS.gameScene.mouse = new GLGE.MouseInput(document.getElementById('canvas'));
+    KJS.keys = new GLGE.KeyInput();
+	KJS.mouseovercanvas=false
+	document.getElementById("canvas").onmouseover=function(e){KJS.mouseovercanvas=true;}
+	document.getElementById("canvas").onmousemove=function(e){KJS.mouseovercanvas=true;}
+	document.getElementById("canvas").onmouseout=function(e){KJS.mouseovercanvas=false;}
     
-    K3D.selectedObj = {}			// to avoid some null refs
-    K3D.hoverObj = null
-    K3D.oldLeftBtn = false
+    KJS.selectedObj = {}			// to avoid some null refs
+    KJS.hoverObj = null
+    KJS.oldLeftBtn = false
 	if (map) {
-		K3D.levelmap = new GLGE.HeightMap(map.image, map.width, map.height, map.lowX, map.upX, map.lowY, map.upY, map.lowZ, map.upZ);
+		KJS.levelmap = new GLGE.HeightMap(map.image, map.width, map.height, map.lowX, map.upX, map.lowY, map.upY, map.lowZ, map.upZ);
 	}
-	K3D.lasttime=0;
-	K3D.lasttimeFps=0;
-	K3D.frameRateBuffer=10;
-	K3D.cnt=0;
-	K3D.inc=-0.025;
+	KJS.lasttime=0;
+	KJS.lasttimeFps=0;
+	KJS.frameRateBuffer=10;
+	KJS.cnt=0;
+	KJS.inc=-0.025;
 
-	setInterval(K3D.render,15);
-	return K3D.gameScene
+	setInterval(KJS.render,15);
+	return KJS.gameScene
 }
 
 g_noselection = {}
 
-K3D.mouselook = function(){
-    if (K3D.mouseovercanvas) {
-        var mousepos = K3D.gameScene.mouse.getMousePosition();
-        var leftbutton = K3D.gameScene.mouse.isButtonDown(0)
+KJS.mouselook = function(){
+    if (KJS.mouseovercanvas) {
+        var mousepos = KJS.gameScene.mouse.getMousePosition();
+        var leftbutton = KJS.gameScene.mouse.isButtonDown(0)
         mousepos.x = mousepos.x - document.getElementById("container").offsetLeft;
         mousepos.y = mousepos.y - document.getElementById("container").offsetTop;
-//        pdebug("K3D.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
+//        pdebug("KJS.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-//            var obj = K3D.gameScene.pick(mousepos.x, mousepos.y);
-            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y, K3D.gameScene.hoverable);
-			if (obj == null && K3D.hoverObj && K3D.hoverObj.hoverable) {
-				K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
-				K3D.hoverObj=null
+//            var obj = KJS.gameScene.pick(mousepos.x, mousepos.y);
+            var obj = KJS.gameScene.pickSoft(mousepos.x, mousepos.y, KJS.gameScene.hoverable);
+			if (obj == null && KJS.hoverObj && KJS.hoverObj.hoverable) {
+				KJS.hoverObj.hoverStop(mousepos.x, mousepos.y)
+				KJS.hoverObj=null
 			}
         }
         if (leftbutton) {
-            if (K3D.oldLeftBtn == false) {
-	            var obj = K3D.gameScene.pickSoft(mousepos.x, mousepos.y, K3D.gameScene.pickable);
-				if (obj==null) K3D.selectedObj = g_noselection
+            if (KJS.oldLeftBtn == false) {
+	            var obj = KJS.gameScene.pickSoft(mousepos.x, mousepos.y, KJS.gameScene.pickable);
+				if (obj==null) KJS.selectedObj = g_noselection
 				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
-                if (obj && obj != K3D.selectedObj) {
-					if (K3D.selectedObj && K3D.selectedObj.selectable) K3D.selectedObj.selectStop(mousepos.x, mousepos.y)
+                if (obj && obj != KJS.selectedObj) {
+					if (KJS.selectedObj && KJS.selectedObj.selectable) KJS.selectedObj.selectStop(mousepos.x, mousepos.y)
                     if (obj.selectable) obj.selectStart(mousepos.x, mousepos.y)
-                    K3D.selectedObj = obj;
-//                    pdebug("selected: " + K3D.selectedObj.id, 2)
+                    KJS.selectedObj = obj;
+//                    pdebug("selected: " + KJS.selectedObj.id, 2)
                 }
-				if (K3D.selectedObj.dragable) K3D.selectedObj.dragStart(mousepos.x, mousepos.y)
+				if (KJS.selectedObj.dragable) KJS.selectedObj.dragStart(mousepos.x, mousepos.y)
             }
-			if (K3D.selectedObj.dragable) K3D.selectedObj.dragUpdate(mousepos.x, mousepos.y)
+			if (KJS.selectedObj.dragable) KJS.selectedObj.dragUpdate(mousepos.x, mousepos.y)
         }
         else {            
-            if (obj && obj != K3D.hoverObj) {
-				if (K3D.hoverObj && K3D.hoverObj.hoverable) K3D.hoverObj.hoverStop(mousepos.x, mousepos.y)
-                K3D.hoverObj = obj;
+            if (obj && obj != KJS.hoverObj) {
+				if (KJS.hoverObj && KJS.hoverObj.hoverable) KJS.hoverObj.hoverStop(mousepos.x, mousepos.y)
+                KJS.hoverObj = obj;
 				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
-//                pdebug("hovering over: " + K3D.hoverObj.id, 3)
+//                pdebug("hovering over: " + KJS.hoverObj.id, 3)
             }
         }
-        K3D.oldLeftBtn = leftbutton
+        KJS.oldLeftBtn = leftbutton
     }
 }
 
-K3D.checkkeys = function (){
-    if (K3D.mouseovercanvas || K3D.forceMovement) {
-		var camera = K3D.gameScene.camera;
+KJS.checkkeys = function (){
+    if (KJS.mouseovercanvas || KJS.forceMovement) {
+		var camera = KJS.gameScene.camera;
 		camerapos = camera.getPosition();
 		camerarot = camera.getRotation();
 		var mat = camera.getRotMatrix();
 		var trans = mat.x([0, 0, -1]);
 		var mag = Math.pow(Math.pow(trans.e(1), 2) + Math.pow(trans.e(2), 2), 0.5);
 		var elapsed 		
-		var incAmt = K3D.elapsedTime / 1500.0
+		var incAmt = KJS.elapsedTime / 1500.0
 		if(incAmt > 0.1) incAmt=0.1
 		var trans0 = trans.e(1)
 		var trans1 = trans.e(2)
@@ -228,104 +228,104 @@ K3D.checkkeys = function (){
 		var yinc = 0;
 		var xinc = 0;
 		
-		if (K3D.keys.isKeyPressed(GLGE.KI_W)) {
+		if (KJS.keys.isKeyPressed(GLGE.KI_W)) {
 			yinc = yinc + parseFloat(trans[1]);
 			xinc = xinc + parseFloat(trans[0]);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_UP_ARROW) || K3D.forceMovement=="fwd") {
+		if (KJS.keys.isKeyPressed(GLGE.KI_UP_ARROW) || KJS.forceMovement=="fwd") {
 			yinc = yinc + parseFloat(trans[1]);
 			xinc = xinc + parseFloat(trans[0]);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_S)) {
+		if (KJS.keys.isKeyPressed(GLGE.KI_S)) {
 			yinc = yinc - parseFloat(trans[1]);
 			xinc = xinc - parseFloat(trans[0]);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_DOWN_ARROW) || K3D.forceMovement=="back") {
+		if (KJS.keys.isKeyPressed(GLGE.KI_DOWN_ARROW) || KJS.forceMovement=="back") {
 			yinc = yinc - parseFloat(trans[1]);
 			xinc = xinc - parseFloat(trans[0]);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_A)) {
+		if (KJS.keys.isKeyPressed(GLGE.KI_A)) {
 			yinc = yinc + parseFloat(trans[0]);
 			xinc = xinc - parseFloat(trans[1]);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_D)) {
+		if (KJS.keys.isKeyPressed(GLGE.KI_D)) {
 			yinc = yinc - parseFloat(trans[0]);
 			xinc = xinc + parseFloat(trans[1]);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_U)) {
-			K3D.inc -= incAmt
+		if (KJS.keys.isKeyPressed(GLGE.KI_U)) {
+			KJS.inc -= incAmt
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_J)) {
-			K3D.inc += incAmt
+		if (KJS.keys.isKeyPressed(GLGE.KI_J)) {
+			KJS.inc += incAmt
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_LEFT_ARROW) || K3D.forceMovement=="left") {
+		if (KJS.keys.isKeyPressed(GLGE.KI_LEFT_ARROW) || KJS.forceMovement=="left") {
 			camera.setRotY(camerarot.y + incAmt);
 		}
-		if (K3D.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || K3D.forceMovement=="right") {
+		if (KJS.keys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || KJS.forceMovement=="right") {
 			camera.setRotY(camerarot.y - incAmt);
 		}
-//		pdebug("K3D.levelmap: " + K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
-		if (K3D.levelmap) {
+//		pdebug("KJS.levelmap: " + KJS.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
+		if (KJS.levelmap) {
 //			pdebug("camera: " + camerapos.x.toFixed(2) + ", " + camerapos.y.toFixed(2) + " height: " +
-//				K3D.levelmap.getHeightAt(camerapos.x, camerapos.y).toFixed(2) ,1)
-			if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) 
+//				KJS.levelmap.getHeightAt(camerapos.x, camerapos.y).toFixed(2) ,1)
+			if (KJS.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) 
 				xinc = 0;
-			if (K3D.levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) 
+			if (KJS.levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) 
 				yinc = 0;
 			
-			if (K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) {
+			if (KJS.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) {
 				yinc = 0;
 				xinc = 0;
 			}
 			else {
-				camera.setLocZ(K3D.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
+				camera.setLocZ(KJS.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
 			}
 		}
 		if (xinc != 0 || yinc != 0) {
 			camera.setLocY(camerapos.y + yinc);
 			camera.setLocX(camerapos.x + xinc);
 		}
-		camera.setRotX(1.56 - trans1 * K3D.inc);
-		camera.setRotZ(-trans0 * K3D.inc);
+		camera.setRotX(1.56 - trans1 * KJS.inc);
+		camera.setRotZ(-trans0 * KJS.inc);
 	}
 }
 
-K3D.render = function (){
-	//pdebug("# of objects: " + K3D.gameScene.objects.length,4)
-	if (!K3D.initComplete) {
-		var c = K3D.gameScene.incompleteObjects()
+KJS.render = function (){
+	//pdebug("# of objects: " + KJS.gameScene.objects.length,4)
+	if (!KJS.initComplete) {
+		var c = KJS.gameScene.incompleteObjects()
 		if (c == 0) {
-			K3D.initComplete = true
-			K3D.gameScene.computeBoundingSpheres()
-			K3D.onInitComplete()
+			KJS.initComplete = true
+			KJS.gameScene.computeBoundingSpheres()
+			KJS.onInitComplete()
 		}
 		else {
-		    K3D.gameRenderer.render();					// somehow this pumps a process that needs to occur
+		    KJS.gameRenderer.render();					// somehow this pumps a process that needs to occur
 			return			
 		}
 	}
 
     var now=parseInt(new Date().getTime());
-	K3D.elapsedTime = now-K3D.lasttime
-    K3D.cnt=(K3D.cnt+1)%10;
-    if(K3D.cnt==0){
-	    K3D.frameRateBuffer=(10000/(now-K3D.lasttimeFps)).toFixed(1);
-		K3D.lasttimeFps=now
-	    document.getElementById("debug").innerHTML="Frame Rate:"+K3D.frameRateBuffer;
+	KJS.elapsedTime = now-KJS.lasttime
+    KJS.cnt=(KJS.cnt+1)%10;
+    if(KJS.cnt==0){
+	    KJS.frameRateBuffer=(10000/(now-KJS.lasttimeFps)).toFixed(1);
+		KJS.lasttimeFps=now
+	    document.getElementById("debug").innerHTML="Frame Rate:"+KJS.frameRateBuffer;
     }
-    K3D.lasttime=now;
-    K3D.mouselook();
-    K3D.checkkeys();
-    K3D.gameRenderer.render();
+    KJS.lasttime=now;
+    KJS.mouselook();
+    KJS.checkkeys();
+    KJS.gameRenderer.render();
 }
 
 // return point at which mouse picks object + distance from camera, or null
 // also returns normal
-K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
+KJS.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     // create raycast from camera to mouse xy
     if (mx == null || coordType=="pixels") {
 		if (mx == null) {
-			var mousepos = K3D.gameScene.mouse.getMousePosition();
+			var mousepos = KJS.gameScene.mouse.getMousePosition();
 			mx = mousepos.x - document.getElementById("container").offsetLeft;
 			my = mousepos.y - document.getElementById("container").offsetTop;
 		}
@@ -336,7 +336,7 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
 		mx = focal * (mx / w - 0.5)
 		my = -focal * (h / w) * (my / h - 0.5)
 	}
-    var cam = K3D.gameScene.camera
+    var cam = KJS.gameScene.camera
     var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ(), GLGE.ROT_XZY)
     var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
     var mat = mlo.x(mro) // camera matrix    
@@ -398,14 +398,14 @@ K3D.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
 
 // return pick point of nearest object in olist under cursor, or null if none
 // list can include actual objects or string id's
-K3D.getNearestObject = function (olist, x, y, coordType) {
+KJS.getNearestObject = function (olist, x, y, coordType) {
     var dist = 9999999.9
     var place = null
 	var hit = null
 	var norm = null
     for (var i in olist) {
 		var obj = olist[i]
-		if (typeof(obj)=="string") obj = K3D.gameScene.getObjectById(obj)
+		if (typeof(obj)=="string") obj = KJS.gameScene.getObjectById(obj)
 		if (!obj) continue
 		var pdn = obj.getPickPoint(x,y,coordType)
         if (pdn) {
@@ -424,7 +424,7 @@ K3D.getNearestObject = function (olist, x, y, coordType) {
 
 // create a standard texture-mapped object with new material & texture; add to the scene
 // if no texture, do not create material
-K3D.createObjectAndAddToScene = function (id, mesh, texurl, cb) {
+KJS.createObjectAndAddToScene = function (id, mesh, texurl, cb) {
 	var obj = new GLGE.Object()
 	obj.setId(id)
 	obj.setMesh(mesh)
@@ -460,7 +460,7 @@ GLGE.Texture=function(url, cb){
 
 // line segment of balls, used for editing
 // beg, end are GLGE.Vec
-K3D.lineSegOfBalls = function(beg, end, num, size, color){
+KJS.lineSegOfBalls = function(beg, end, num, size, color){
 //    console.log("lineSegOfBalls:", beg, end, num, size, color)
     num -= 1
     var div = 1.0 / num
@@ -469,11 +469,11 @@ K3D.lineSegOfBalls = function(beg, end, num, size, color){
 }
 
 /// software-only pick function
-K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
+KJS.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
 //	objlist=null
 	if (objlist==null) objlist=this.pickable
 	var s= ""; for (i in objlist) s+=objlist[i]+" "
-	var place_hit_norm = K3D.getNearestObject(objlist, x, y, "pixels")
+	var place_hit_norm = KJS.getNearestObject(objlist, x, y, "pixels")
 	if (place_hit_norm) {
 		return this.getObjectById(objlist[place_hit_norm[1]])
 	}
@@ -481,7 +481,7 @@ K3D.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
 })
 
 /// compute bounding sphere, add boundingRadius, boundingCenter
-K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
+KJS.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
     var sx = parseFloat(this.getScaleX())
     var sy = parseFloat(this.getScaleY())
     var sz = parseFloat(this.getScaleZ())
@@ -505,7 +505,7 @@ K3D.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
 	this.boundingRadius = r
 })
 
-K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
+KJS.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 	for (var i in this.objects) {
 		this.objects[i].computeBoundingSphere()
 //		pdebug_log("object:", this.objects[i], this.objects[i].getRef(), "radius:", this.objects[i].boundingRadius)
@@ -513,7 +513,7 @@ K3D.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 })
 
 //	return count of objects not fully loaded
-K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
+KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 	if (this.objects.length < this.objectsToLoad) return this.objectsToLoad-this.objects.length
 	var count = 0
 	for (var i in this.objects) {
@@ -525,7 +525,7 @@ K3D.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 })
 
 // remove object from scene
-K3D.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
+KJS.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 	var j = null
 	var temp
 	for (var i in this.objects) {
@@ -552,7 +552,7 @@ K3D.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 })
 
 // test ray against our bounding sphere
-K3D.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
+KJS.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
 	if (this.boundingRadius == null) {
 		if (this.mesh) {
 			this.computeBoundingSphere()			// ech, gotta do it here due to async mesh load
