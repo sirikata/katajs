@@ -294,35 +294,37 @@ onLoadContinue = function () {
         obj=scene.getObjectById(scene.dragable[i])
 		if (!obj) break
 		obj.makeDragable(function(){
-            this.dragStartLocX = parseFloat(this.getLocX()) ///	wtf? strings?
-            this.dragStartLocY = parseFloat(this.getLocY())
-            this.dragStartLocZ = parseFloat(this.getLocZ())
-            this.dragStartRotX = parseFloat(this.getRotX()) ///	wtf? strings?
-            this.dragStartRotY = parseFloat(this.getRotY())
-            this.dragStartRotZ = parseFloat(this.getRotZ())
-//			pdebug("dragging: " + this.id + " from: " + this.dragStartLocX+" "+this.dragStartLocY+" "+this.dragStartLocZ,5)
+			var root = this
+            root.dragStartLocX = parseFloat(root.getLocX()) ///	wtf? strings?
+            root.dragStartLocY = parseFloat(root.getLocY())
+            root.dragStartLocZ = parseFloat(root.getLocZ())
+            root.dragStartRotX = parseFloat(root.getRotX()) ///	wtf? strings?
+            root.dragStartRotY = parseFloat(root.getRotY())
+            root.dragStartRotZ = parseFloat(root.getRotZ())
+//			pdebug("dragging: " + root.id + " from: " + root.dragStartLocX+" "+root.dragStartLocY+" "+root.dragStartLocZ,5)
         }, function(dx, dy){
+			var root = this
 			if (document.input_dragmode.R[1].checked) {
 				var ang = scene.camera.getRotY()
 				var x = Math.cos(ang - Math.PI)
 				var y = Math.sin(ang - Math.PI)
 				//			pdebug("x: " + x + "y: " + y + "ang: "+ (parseFloat(ang)-Math.PI),9)
-				this.setLocX(this.dragStartLocX - dx * x * 0.05)
-				this.setLocY(this.dragStartLocY - dx * y * 0.05)
-				this.setLocZ(this.dragStartLocZ - dy * 0.05)
-				pdebug("edit move X="+this.getLocX().toFixed(3)+" Y="+this.getLocY().toFixed(3)+" Z="+this.getLocZ().toFixed(3),4)
+				root.setLocX(root.dragStartLocX - dx * x * 0.05)
+				root.setLocY(root.dragStartLocY - dx * y * 0.05)
+				root.setLocZ(root.dragStartLocZ - dy * 0.05)
+				pdebug("edit move X="+root.getLocX().toFixed(3)+" Y="+root.getLocY().toFixed(3)+" Z="+root.getLocZ().toFixed(3),4)
 			}
 			if (document.input_dragmode.R[2].checked) {
-				this.setRotX(this.dragStartRotX + dy*.01)
-				show(this)
+				root.setRotX(root.dragStartRotX + dy*.01)
+				show(root)
 			}
 			if (document.input_dragmode.R[3].checked) {
-				this.setRotY(this.dragStartRotY + dy*.01)
-				show(this)
+				root.setRotY(root.dragStartRotY + dy*.01)
+				show(root)
 			}
 			if (document.input_dragmode.R[4].checked) {
-				this.setRotZ(this.dragStartRotZ + dx*.01)
-				show(this)
+				root.setRotZ(root.dragStartRotZ + dx*.01)
+				show(root)
 			}
         })
 	}
