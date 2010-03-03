@@ -37,7 +37,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 			<button onMouseDown='movementButton("right")' onMouseUp='movementButtonUp("right")' onMouseOut='movementButtonUp("right")' style="position:absolute;left:75;top:20">></button>
 		</div>
 		<div align="center">
-			<button onclick = 'addPicture(document.getElementById("input_tex1").value)'>new painting:</button>
+			<button onclick = 'addPicture(document.getElementById("input_tex1").value)'>new image:</button>
 			<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
 		</div>
 		<div align="center">
@@ -391,11 +391,11 @@ movementButtonUp = function(b) {
 editMode = function(mode) {
 	var s
 	switch (mode) {
-		case "safe": s = "safe mode: paintings cannot be moved or resized"; break
-		case "move": s = "move mode: click on a painting to drag along the wall"; break
-		case "resize": s = "resize mode: grab painting in upper right corner to resize"; break
-		case "annotate": s = "annotate mode: click on a painting to add & edit comments"; break
-		case "delete": s = "delete mode: click on a painting to delete.  Careful, no undo!"; break
+		case "safe": s = "safe mode: imagess cannot be moved or resized"; break
+		case "move": s = "move mode: click on an object to drag along the wall or floor"; break
+		case "resize": s = "resize mode: grab object in upper right corner to resize"; break
+		case "annotate": s = "annotate mode: click on an object to add & edit comments"; break
+		case "delete": s = "delete mode: click on an object to delete.  Careful, no undo!"; break
 	}
 	document.getElementById("editInfo").innerHTML = s
 }
