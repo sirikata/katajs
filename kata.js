@@ -82,7 +82,7 @@ KJS.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 	this.dragUpdate = function (mouse_x, mouse_y) {
 		this.dragUpdateCb(mouse_x-this.dragStartMouseX, mouse_y-this.dragStartMouseY)
 	}
-	KJS.gameScene.addPickable(this.id)
+	KJS.gameScene.addPickable(this.getRef())
 })
 
 // add makeHoverable to Object.
@@ -91,7 +91,7 @@ KJS.addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
 	this.hoverable = true
 	this.hoverStart = cbStart
 	this.hoverStop = cbEnd
-	KJS.gameScene.addPickable(this.id)
+	KJS.gameScene.addPickable(this.getRef())
 })
 
 // add makeSelectable to Object.
@@ -100,7 +100,7 @@ KJS.addProtoSafely(GLGE.Object, "makeSelectable", function(cbSelect, cbDeselect)
 	this.selectable = true
 	this.selectStart = cbSelect
 	this.selectStop = cbDeselect
-	KJS.gameScene.addPickable(this.id)
+	KJS.gameScene.addPickable(this.getRef())
 })
 
 KJS.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
@@ -113,7 +113,7 @@ KJS.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) 
 	this.clickUp = function (mouse_x, mouse_y) {
 		if (this.clickCallbackUp) this.clickCallbackUp(mouse_x, mouse_y)
 	}
-	KJS.gameScene.addPickable(this.id)
+	KJS.gameScene.addPickable(this.getRef())
 })
 
 // get position buffer
@@ -127,7 +127,7 @@ KJS.addProtoSafely(GLGE.Object, "getPositions", function() {
 		}
 	}
 	else {
-//		pdebug("meshless object: " + this.id + " " + bugg++,8)
+//		pdebug("meshless object: " + this.getRef() + " " + bugg++,8)
 	}
 	return posbuf
 })
@@ -175,8 +175,8 @@ KJS.init = function (map, objectcount, cb){
 g_noselection = {}
 
 KJS.mouselook = function(){
-	KJS.gameScene.picker = KJS.gameScene.pick
-	//KJS.gameScene.picker = KJS.gameScene.pickSoft
+//	KJS.gameScene.picker = KJS.gameScene.pick
+	KJS.gameScene.picker = KJS.gameScene.pickSoft
 
     if (KJS.mouseovercanvas) {
         var mousepos = KJS.gameScene.mouse.getMousePosition();
@@ -194,7 +194,8 @@ KJS.mouselook = function(){
         }
         if (leftbutton) {
             if (KJS.oldLeftBtn == false) {
-	            var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.pickable);
+				console.log(KJS.gameScene.hoverable,KJS.gameScene.pickable)
+//	            var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.pickable);
 				if (obj==null) KJS.selectedObj = g_noselection
 				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
                 if (obj && obj != KJS.selectedObj) {
@@ -491,9 +492,10 @@ KJS.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
 
 /// compute bounding sphere, add boundingRadius, boundingCenter
 KJS.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
-    var sx = parseFloat(this.getScaleX())
-    var sy = parseFloat(this.getScaleY())
-    var sz = parseFloat(this.getScaleZ())
+	root = this.getRoot()								///	give all objects the bounding sphere of the group
+    var sx = parseFloat(root.getScaleX())
+    var sy = parseFloat(root.getScaleY())
+    var sz = parseFloat(root.getScaleZ())
     var p = this.getPositions()
 	if (!p) return
     

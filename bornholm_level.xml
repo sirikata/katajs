@@ -268,7 +268,7 @@
 <!--
     <collada id="duck"                           document="collada/duck.dae"                            animation="#spin" scale="0.03" />
 -->
-    <collada id="david"                          document="david.dae"                           loc_x="-80" loc_y="-44" loc_z="-2.19" animation="#spin" scale="0.17" />
+    <collada id="david"                          document="david.dae"                           animation="#spin" />
     <object id="bornh_bldg_08_floor"             mesh="#bornh_bldg_08_floor_mesh"               material="#bornh_bldg_08_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="straightstair_smallgallery"      mesh="#straightstair_smallgallery_mesh"        material="#straightstair_smallgallery_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
