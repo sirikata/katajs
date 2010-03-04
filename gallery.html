@@ -203,7 +203,7 @@ dragWallUpdate = function(dx, dy){
 			root.setScaleX(root.dragWallStartScale[0] * scale)
 			root.setScaleY(root.dragWallStartScale[1] * scale)
 			root.setScaleZ(root.dragWallStartScale[2] * scale)
-			root.computeBoundingSphere()
+			this.computeBoundingSphere()
 		}
 	}
 }
@@ -231,7 +231,7 @@ doc.onLoad = function(){
 		lowZ: -36,
 		upZ: 46
 	}
-	heightmap=null
+//	heightmap=null
 	scene = KJS.init(heightmap, 19,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
@@ -245,10 +245,10 @@ onLoadContinue = function () {
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    scene.hoverable = ["ball","david"]
-    scene.selectable = ["ball","david"]
-    scene.dragable = ["ball","david"]
-	scene.dragWallable = []
+    scene.hoverable = ["ball"]
+    scene.selectable = ["ball"]
+    scene.dragable = ["ball"]
+	scene.dragWallable = ["ball","david"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
@@ -258,7 +258,6 @@ onLoadContinue = function () {
     // hover cyan
     for (i in scene.hoverable) {
         obj = scene.getObjectById(scene.hoverable[i])
-		console.log("making hoverable:",scene.hoverable[i],obj,obj.id,obj.getRef())
 		if (!obj) continue
         obj.makeHoverable(function(){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, cyan_mat)
@@ -352,11 +351,9 @@ onLoadContinue = function () {
 	root.setScaleY(0.17)
 	root.setScaleZ(0.17)
 	o.computeBoundingSphere()
-	/*
 	root.setLocX(-80)
 	root.setLocY(-44)
 	root.setLocZ(-2.19)
-	*/
 }
 
 addPicture = function(pic, scale){

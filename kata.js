@@ -194,8 +194,7 @@ KJS.mouselook = function(){
         }
         if (leftbutton) {
             if (KJS.oldLeftBtn == false) {
-				console.log(KJS.gameScene.hoverable,KJS.gameScene.pickable)
-//	            var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.pickable);
+	            var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.pickable);
 				if (obj==null) KJS.selectedObj = g_noselection
 				if (obj && obj.clickable) obj.clickDown(mousepos.x, mousepos.y)
                 if (obj && obj != KJS.selectedObj) {
