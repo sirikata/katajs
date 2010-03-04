@@ -577,15 +577,16 @@ KJS.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
 	var c;
 	
 	// gotta rotate boundingCenter by our matrix (FIXME: this is all crap!  Objects should be normed with proper centers)
-	if (this.getRotX() || this.getRotY() || this.getRotZ()) {
-		var mat = GLGE.rotateMatrix([this.getRotX(), this.getRotY(), this.getRotZ()], GLGE.ROT_XZY)
+	var root = this.getRoot()
+	if (root.getRotX() || root.getRotY() || root.getRotZ()) {
+		var mat = GLGE.rotateMatrix([root.getRotX(), root.getRotY(), root.getRotZ()], GLGE.ROT_XZY)
 		c = mat.cross(this.boundingCenter)
 		c = new GLGE.Vec([c.e(1), c.e(2), c.e(3)])		// make it length 3
 	}
 	else {
 		c = this.boundingCenter
 	}
-	var S = c.add([parseFloat(this.getLocX()),parseFloat(this.getLocY()),parseFloat(this.getLocZ())])
+	var S = c.add([parseFloat(root.getLocX()),parseFloat(root.getLocY()),parseFloat(root.getLocZ())])
 	var r = this.boundingRadius
 	var d = S.distanceFrom(RayBeg)					// distance from ray origin to sphere center
 	if (d < r) 
