@@ -345,6 +345,12 @@ onLoadContinue = function () {
 	// statue comes up black!
 	var o = KJS.gameScene.getObjectById("david")
 	o.setMaterial(doc.getElement("white"))
+	var root = o.getRoot()
+	root.setScaleX(0.17)
+	root.setScaleY(0.17)
+	root.setScaleZ(0.17)
+	o.computeBoundingSphere()
+	//	loc_x="-80" loc_y="-44" loc_z="-2.19" animation="#spin" scale="0.17" 
 }
 
 addPicture = function(pic, scale){

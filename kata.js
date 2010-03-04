@@ -362,13 +362,14 @@ KJS.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     var R = [P0, P1]
 //    pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
     // get wall matrix
-    mro = GLGE.rotateMatrix(this.getRotX(), this.getRotY(), this.getRotZ(), GLGE.ROT_XZY) // our rotation matrix
-    mlo = GLGE.translateMatrix(this.getLocX(), this.getLocY(), this.getLocZ()) // our location matrix
+	var root = this.getRoot()
+    mro = GLGE.rotateMatrix(root.getRotX(), root.getRotY(), root.getRotZ(), GLGE.ROT_XZY) // our rotation matrix
+    mlo = GLGE.translateMatrix(root.getLocX(), root.getLocY(), root.getLocZ()) // our location matrix
     mat = mlo.x(mro) // our full matrix
     // scale wall vertices
-    var sx = parseFloat(this.getScaleX())
-    var sy = parseFloat(this.getScaleY())
-    var sz = parseFloat(this.getScaleZ())
+    var sx = parseFloat(root.getScaleX())
+    var sy = parseFloat(root.getScaleY())
+    var sz = parseFloat(root.getScaleZ())
     var minI = null
     var mindist = 999999.9
 	var minN = null
