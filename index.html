@@ -369,13 +369,13 @@ addPicture = function(pic, scale){
 	obj.galleryInfo = "Image source: " + pic
 	positionOnWall(obj, 0, 0)
 	obj.getMaterial().setSpecular(.4)
-	obj.getMaterial().setEmit(.5)
+	obj.getMaterial().setEmit(.1)
     obj.makeDragable(dragWallStart, dragWallUpdate)
     obj.makeHoverable(function(){
-		this.getMaterial().setEmit(1)
+		this.getMaterial().setEmit(.5)
 			document.getElementById("galleryInfo").innerHTML = this.galleryInfo
     }, function(){
-		this.getMaterial().setEmit(.5)        
+		this.getMaterial().setEmit(.1)        
             document.getElementById("galleryInfo").innerHTML = ""
     })
 	
