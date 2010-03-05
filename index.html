@@ -50,6 +50,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
 			</form>
 			<!--
+			-->
 			<form Name="input_dragmode">
 				<div id="editInfo" align="center"></div>
 				<input type="radio" Name="R" />safe
@@ -58,7 +59,6 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" />rotY
 				<input type="radio" Name="R" />rotZ
 			</form>
-			-->
 		</div>
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
@@ -245,10 +245,10 @@ onLoadContinue = function () {
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    scene.hoverable = ["ball"]
-    scene.selectable = ["ball"]
-    scene.dragable = ["ball"]
-	scene.dragWallable = ["ball","david"]
+    scene.hoverable = ["daman"]
+    scene.selectable = []
+    scene.dragable = []
+	scene.dragWallable = ["daman", "david"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
@@ -354,6 +354,20 @@ onLoadContinue = function () {
 	root.setLocX(-80)
 	root.setLocY(-44)
 	root.setLocZ(-2.19)
+
+	// character logic for Da Man!
+	var o = KJS.gameScene.getObjectById("daman")
+	o.script_vel=3
+	o.frameScript = function (elapsed) {
+		if (elapsed>500) elapsed=500
+		var fact = elapsed / 1000.0
+		var x = parseFloat(this.getLocX())
+		if(x>-90) this.script_vel = -3
+		if(x<-110) this.script_vel = 3
+		this.setLocX(x + this.script_vel * fact)
+		console.log("script run for", this.id, "time elapsed:", elapsed, "x:", x, "vel:",this.script_vel)
+	}
+	KJS.gameScene.scriptedObjects.push(o)
 }
 
 addPicture = function(pic, scale){

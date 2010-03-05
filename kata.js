@@ -146,6 +146,7 @@ KJS.init = function (map, objectcount, cb){
     KJS.gameScene = doc.getElement("mainscene");
 	KJS.gameScene.objectsToLoad=objectcount
 	KJS.gameScene.pickable = []
+	KJS.gameScene.scriptedObjects = []
     KJS.gameRenderer.setScene(KJS.gameScene);
     
 	if (KJS.gameScene.mouse) alert("uh oh, method name conflict KJS.gameScene.mouse!")
@@ -227,7 +228,6 @@ KJS.checkkeys = function (){
 		var mat = camera.getRotMatrix();
 		var trans = mat.x([0, 0, -1]);
 		var mag = Math.pow(Math.pow(trans.e(1), 2) + Math.pow(trans.e(2), 2), 0.5);
-		var elapsed 		
 		var incAmt = KJS.elapsedTime / 1500.0
 		if(incAmt > 0.1) incAmt=0.1
 		var trans0 = trans.e(1)
@@ -299,6 +299,12 @@ KJS.checkkeys = function (){
 	}
 }
 
+KJS.runScripts = function () {
+	for (var i in KJS.gameScene.scriptedObjects) {
+		KJS.gameScene.scriptedObjects[i].frameScript(KJS.elapsedTime)
+	}
+}
+
 KJS.render = function (){
 	//pdebug("# of objects: " + KJS.gameScene.objects.length,4)
 	if (!KJS.initComplete) {
@@ -325,6 +331,7 @@ KJS.render = function (){
     KJS.lasttime=now;
     KJS.mouselook();
     KJS.checkkeys();
+	KJS.runScripts();
     KJS.gameRenderer.render();
 }
 
