@@ -245,10 +245,10 @@ onLoadContinue = function () {
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    scene.hoverable = ["daman"]
+    scene.hoverable = []
     scene.selectable = []
     scene.dragable = []
-	scene.dragWallable = ["daman", "david"]
+	scene.dragWallable = ["david"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
@@ -362,8 +362,14 @@ onLoadContinue = function () {
 		if (elapsed>500) elapsed=500
 		var fact = elapsed / 1000.0
 		var x = parseFloat(this.getLocX())
-		if(x>-90) this.script_vel = -3
-		if(x<-110) this.script_vel = 3
+		if (x > -90) {
+			this.script_vel = -3
+			this.setRotZ(3.14)
+		}
+		if (x < -110) {
+			this.script_vel = 3
+			this.setRotZ(0)
+		}
 		this.setLocX(x + this.script_vel * fact)
 		console.log("script run for", this.id, "time elapsed:", elapsed, "x:", x, "vel:",this.script_vel)
 	}
