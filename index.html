@@ -357,24 +357,27 @@ onLoadContinue = function () {
 
 	// character logic for Da Man!
 	var o = KJS.gameScene.getObjectById("daman")
-	o.script_vel=3
-	o.frameScript = function (elapsed) {
-		if (elapsed>500) elapsed=500
-		var fact = elapsed / 1000.0
-		var x = parseFloat(this.getLocX())
-		if (x > -90) {
-			this.script_vel = -3
-			this.setRotZ(3.14)
+	if (o) {
+		o.script_vel = 3
+		o.frameScript = function(elapsed){
+			if (elapsed > 500) 
+				elapsed = 500
+			var fact = elapsed / 1000.0
+			var x = parseFloat(this.getLocX())
+			if (x > -90) {
+				this.script_vel = -3
+				this.setRotZ(3.14)
+			}
+			if (x < -110) {
+				this.script_vel = 3
+				this.setRotZ(0)
+			}
+			this.setLocX(x + this.script_vel * fact)
+		//		console.log("script run for", this.id, "time elapsed:", elapsed, "x:", x, "vel:",this.script_vel)
 		}
-		if (x < -110) {
-			this.script_vel = 3
-			this.setRotZ(0)
-		}
-		this.setLocX(x + this.script_vel * fact)
-//		console.log("script run for", this.id, "time elapsed:", elapsed, "x:", x, "vel:",this.script_vel)
+		KJS.gameScene.scriptedObjects.push(o)
 	}
-	KJS.gameScene.scriptedObjects.push(o)
-}
+g}
 
 addPicture = function(pic, scale){
 	if (scale==null) scale = 0.01
@@ -497,7 +500,6 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
-	var obs = KJS.gameScene.getObjectsById("david")
 }
 
 loadGallery = function() {
