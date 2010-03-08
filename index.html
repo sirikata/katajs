@@ -473,11 +473,13 @@ saveGalleryFinish = function () {
 	var s = "|GalleryBegin~<br>"
  	for (var i in KJS.gameScene.objects) {
 		var o = KJS.gameScene.objects[i]
-		if (o.id=="david" || o.id.slice(0,11) == "galleryPix_") {
+		var id = o.getRef()
+		o = o.getRoot()
+		if (id=="david" || id.slice(0,11) == "galleryPix_") {
 			if (o.gallerySource)
 				s += "|" + o.gallerySource
 			else
-				s += "|" + o.id
+				s += "|" + id
 			s += "," + o.getLocX().toFixed(prec) + "," + o.getLocY().toFixed(prec) + "," + o.getLocZ().toFixed(prec)
 			s += "," + o.getRotX().toFixed(prec) + "," + o.getRotY().toFixed(prec) + "," + o.getRotZ().toFixed(prec)
 			if (o.txWidth)
