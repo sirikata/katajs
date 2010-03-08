@@ -194,6 +194,9 @@ dragWallUpdate = function(dx, dy){
 	var root = this.getRoot()
     if (document.input_editmode.R[1].checked) {
 		positionOnWall(root)
+		if (this.id.slice(0,11) == "galleryPix_") {
+			positionOnWall(closeWidget)
+		}
 	}
 	else {
 		if (document.input_editmode.R[2].checked) {
@@ -357,23 +360,28 @@ onLoadContinue = function () {
 
 	// character logic for Da Man!
 	var o = KJS.gameScene.getObjectById("daman")
-	o.script_vel=3
-	o.frameScript = function (elapsed) {
-		if (elapsed>500) elapsed=500
-		var fact = elapsed / 1000.0
-		var x = parseFloat(this.getLocX())
-		if (x > -90) {
-			this.script_vel = -3
-			this.setRotZ(3.14)
+	if (o) {
+		o.script_vel = 3
+		o.frameScript = function(elapsed){
+			if (elapsed > 500) 
+				elapsed = 500
+			var fact = elapsed / 1000.0
+			var x = parseFloat(this.getLocX())
+			if (x > -90) {
+				this.script_vel = -3
+				this.setRotZ(3.14)
+			}
+			if (x < -110) {
+				this.script_vel = 3
+				this.setRotZ(0)
+			}
+			this.setLocX(x + this.script_vel * fact)
+		//		console.log("script run for", this.id, "time elapsed:", elapsed, "x:", x, "vel:",this.script_vel)
 		}
-		if (x < -110) {
-			this.script_vel = 3
-			this.setRotZ(0)
-		}
-		this.setLocX(x + this.script_vel * fact)
-//		console.log("script run for", this.id, "time elapsed:", elapsed, "x:", x, "vel:",this.script_vel)
+		KJS.gameScene.scriptedObjects.push(o)
 	}
-	KJS.gameScene.scriptedObjects.push(o)
+	
+	closeWidget = KJS.gameScene.getObjectById("closeWidget")
 }
 
 addPicture = function(pic, scale){
@@ -497,7 +505,14 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
-	var obs = KJS.gameScene.getObjectsById("david")
+	for (i=0; i<KJS.gameScene.groups.length; i++) {
+		KJS.gameScene.groups[i].group_bugg=i
+	}
+	for (i=0; i<KJS.gameScene.objects.length; i++) {
+		KJS.gameScene.objects[i].object_bugg=i
+	}
+	console.log("groups:",KJS.gameScene.groups)	
+	console.log("objects:",KJS.gameScene.objects)	
 }
 
 loadGallery = function() {

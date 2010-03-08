@@ -275,9 +275,13 @@
 <!--
     <object id="ball"                            mesh="#sphere"                                 material="#bornh_bldg_08_wall_int_02_mat" scale_x="1" scale_y="1" scale_z="1" loc_x="-110" loc_z="10" />
     <collada id="duck"                           document="collada/duck.dae"                            animation="#spin" scale="0.03" />
+    <object id="daman"                           mesh="#man" skeleton="#Armature" action="#Walk" material="#manmaterial" loc_x="-110" loc_z="2" />
 -->
-    <object id="daman"                       mesh="#man" skeleton="#Armature" action="#Walk" material="#manmaterial" loc_x="-110" loc_z="2" />
     <collada id="david"                          document="david.dae"                           animation="#spin" />
+
+    <object id="resizeWidget"                    mesh="#cube3"                                  material="#gold" scale_x="0.2" scale_y="0.1" scale_z="0.2" loc_x="-110" loc_z="10" />
+    <object id="closeWidget"                     mesh="#cube3"                                  material="#purple" scale_x="0.2" scale_y="0.1" scale_z="0.2" loc_x="-110" loc_z="10" />
+
     <object id="bornh_bldg_08_floor"             mesh="#bornh_bldg_08_floor_mesh"               material="#bornh_bldg_08_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="straightstair_smallgallery"      mesh="#straightstair_smallgallery_mesh"        material="#straightstair_smallgallery_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
@@ -296,6 +300,7 @@
     <object id="bornh_bldg_07_ceiling_drop_sub1" mesh="#bornh_bldg_07_ceiling_drop_sub1_mesh"   material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_08_ceiling_drop"      mesh="#bornh_bldg_08_ceiling_drop_mesh"        material="#bornh_bldg_07_ceiling_drop_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_08_ceiling_drop_sub1" mesh="#bornh_bldg_08_ceiling_drop_sub1_mesh"   material="#bornh_bldg_07_walls_int_01_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
+
     <light id="mainlight" loc_x="-121" loc_y="28" loc_z="22" rot_x="-1.3"  type="L_POINT" />
     <light id="mainlight2" loc_x="-60" loc_y="-29" loc_z="17" rot_x="-1.3"  type="L_POINT" />
 </scene>
