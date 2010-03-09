@@ -195,7 +195,24 @@ dragWallUpdate = function(dx, dy){
     if (document.input_editmode.R[1].checked) {
 		positionOnWall(root)
 		if (this.id.slice(0,11) == "galleryPix_") {
-			positionOnWall(closeWidget)
+			var x = root.getLocX()
+			var y = root.getLocY()
+			var z = root.getLocZ()
+			var rx = root.getRotX()
+			var ry = root.getRotY()
+			var rz = root.getRotZ()
+			resizeWidget.setLocX(x)
+			resizeWidget.setLocY(y)
+			resizeWidget.setLocZ(z+1)
+			resizeWidget.setRotX(rx)
+			resizeWidget.setRotY(ry)
+			resizeWidget.setRotZ(rz)
+			closeWidget.setLocX(x)
+			closeWidget.setLocY(y)
+			closeWidget.setLocZ(z-1)
+			closeWidget.setRotX(rx)
+			closeWidget.setRotY(ry)
+			closeWidget.setRotZ(rz)
 		}
 	}
 	else {
@@ -382,6 +399,7 @@ onLoadContinue = function () {
 	}
 	
 	closeWidget = KJS.gameScene.getObjectById("closeWidget")
+	resizeWidget = KJS.gameScene.getObjectById("resizeWidget")
 }
 
 addPicture = function(pic, scale){

@@ -279,8 +279,8 @@
 -->
     <collada id="david"                          document="david.dae"                           animation="#spin" />
 
-    <object id="resizeWidget"                    mesh="#cube3"                                  material="#gold" scale_x="0.2" scale_y="0.1" scale_z="0.2" loc_x="-110" loc_z="10" />
-    <object id="closeWidget"                     mesh="#cube3"                                  material="#purple" scale_x="0.2" scale_y="0.1" scale_z="0.2" loc_x="-110" loc_z="10" />
+    <object id="resizeWidget"                    mesh="#cube3"                                  material="#gold" scale_x="0.2" scale_y="0.1" scale_z="0.2" />
+    <object id="closeWidget"                     mesh="#cube3"                                  material="#purple" scale_x="0.2" scale_y="0.1" scale_z="0.2" />
 
     <object id="bornh_bldg_08_floor"             mesh="#bornh_bldg_08_floor_mesh"               material="#bornh_bldg_08_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
