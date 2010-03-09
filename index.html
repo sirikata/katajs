@@ -190,29 +190,34 @@ dragWallStart = function(x, y){
 	}
 }
 
+setWidgets = function(obj) {
+			var mat = obj.getModelMatrix()
+			var rx = obj.getRotX()
+			var ry = obj.getRotY()
+			var rz = obj.getRotZ()
+			var place = new GLGE.Vec([-1,0,1])
+			place = mat.x(place)
+			resizeWidget.setLocX(place.e(1))
+			resizeWidget.setLocY(place.e(2))
+			resizeWidget.setLocZ(place.e(3))
+			resizeWidget.setRotX(rx)
+			resizeWidget.setRotY(ry)
+			resizeWidget.setRotZ(rz)
+			place = new GLGE.Vec([-1,0,-1])
+			place = mat.x(place)
+			closeWidget.setLocX(place.e(1))
+			closeWidget.setLocY(place.e(2))
+			closeWidget.setLocZ(place.e(3))
+			closeWidget.setRotX(rx)
+			closeWidget.setRotY(ry)
+			closeWidget.setRotZ(rz)
+}
 dragWallUpdate = function(dx, dy){
 	var root = this.getRoot()
     if (document.input_editmode.R[1].checked) {
 		positionOnWall(root)
 		if (this.id.slice(0,11) == "galleryPix_") {
-			var x = root.getLocX()
-			var y = root.getLocY()
-			var z = root.getLocZ()
-			var rx = root.getRotX()
-			var ry = root.getRotY()
-			var rz = root.getRotZ()
-			resizeWidget.setLocX(x)
-			resizeWidget.setLocY(y)
-			resizeWidget.setLocZ(z+1)
-			resizeWidget.setRotX(rx)
-			resizeWidget.setRotY(ry)
-			resizeWidget.setRotZ(rz)
-			closeWidget.setLocX(x)
-			closeWidget.setLocY(y)
-			closeWidget.setLocZ(z-1)
-			closeWidget.setRotX(rx)
-			closeWidget.setRotY(ry)
-			closeWidget.setRotZ(rz)
+			setWidgets(root)
 		}
 	}
 	else {
@@ -223,6 +228,7 @@ dragWallUpdate = function(dx, dy){
 			root.setScaleX(root.dragWallStartScale[0] * scale)
 			root.setScaleY(root.dragWallStartScale[1] * scale)
 			root.setScaleZ(root.dragWallStartScale[2] * scale)
+			setWidgets(root)
 			this.computeBoundingSphere()
 		}
 	}
