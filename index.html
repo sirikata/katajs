@@ -258,7 +258,7 @@ doc.onLoad = function(){
 		upZ: 46
 	}
 //	heightmap=null
-	scene = KJS.init(heightmap, 20,  						// # of objects to load -- hacky way to force everything loaded 
+	scene = KJS.init(heightmap, 19,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
 	})
@@ -529,14 +529,6 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
-	for (i=0; i<KJS.gameScene.groups.length; i++) {
-		KJS.gameScene.groups[i].group_bugg=i
-	}
-	for (i=0; i<KJS.gameScene.objects.length; i++) {
-		KJS.gameScene.objects[i].object_bugg=i
-	}
-	console.log("groups:",KJS.gameScene.groups)	
-	console.log("objects:",KJS.gameScene.objects)	
 }
 
 loadGallery = function() {
