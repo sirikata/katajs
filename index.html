@@ -223,8 +223,12 @@ dragWallStart = function(x, y){
 	}
 	else {
 		if (g_selectedPic && this.id == "resizeWidget") {
-			root.resizeWidgetStart = [g_selectedPic.getLocX(),g_selectedPic.getLocY(),g_selectedPic.getLocZ()]
-			root.resizeDistStart = new GLGE.Vec([root.getLocX(),root.getLocY(),root.getLocZ()]).distanceFrom(root.resizeWidgetStart)
+			var mat = g_selectedPic.getModelMatrix()
+			var ul = new GLGE.Vec([1, 0, 1])
+			ul = mat.x(ul)									// upper left corner of pic
+			root.resizeWidgetUL = [ul.e(1), ul.e(2), ul.e(3)]
+			root.resizeWidgetCenter = [g_selectedPic.getLocX(), g_selectedPic.getLocY(), g_selectedPic.getLocZ()]
+			root.resizeDistStart = new GLGE.Vec([root.getLocX(),root.getLocY(),root.getLocZ()]).distanceFrom(root.resizeWidgetUL)
 			root.dragWallStartScale = [g_selectedPic.getScaleX(),g_selectedPic.getScaleY(),g_selectedPic.getScaleZ()]
 		}
 		else {
@@ -249,11 +253,20 @@ dragWallUpdate = function(dx, dy){
 	if (this.id == "closeWidget") return
 	if (this.id == "resizeWidget") {
 		positionOnWall(root)
-		var dist = new GLGE.Vec([root.getLocX(), root.getLocY(), root.getLocZ()]).distanceFrom(root.resizeWidgetStart)
+		var dist = new GLGE.Vec([root.getLocX(), root.getLocY(), root.getLocZ()]).distanceFrom(root.resizeWidgetUL)
 		var scale = dist / root.resizeDistStart
+		if (scale<0.1) scale=0.1
 		g_selectedPic.setScaleX(root.dragWallStartScale[0] * scale)
 		g_selectedPic.setScaleY(root.dragWallStartScale[1] * scale)
 		g_selectedPic.setScaleZ(root.dragWallStartScale[2] * scale)
+		
+		var delta = new GLGE.Vec(root.resizeWidgetUL).sub(root.resizeWidgetCenter)
+		delta = delta.mul(1.0-scale)
+
+		g_selectedPic.setLocX(root.resizeWidgetCenter[0] + delta.e(1))
+		g_selectedPic.setLocY(root.resizeWidgetCenter[1] + delta.e(2))
+		g_selectedPic.setLocZ(root.resizeWidgetCenter[2] + delta.e(3))
+		
 		setWidgets(g_selectedPic)
 		g_selectedPic.computeBoundingSphere()
 	}
