@@ -40,30 +40,6 @@ body{background-color: #000;color: #fff;font-family:arial}
 			<button onclick = 'addPicture(document.getElementById("input_tex1").value)'>new image:</button>
 			<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
 		</div>
-		<div align="center">
-			<form Name="input_editmode">
-				<div id="editInfoMove" align="center"></div>
-				<div id="editInfoResize" align="center"></div>
-				<div id="editInfoDelete" align="center"></div>
-				<!--
-				<input type="radio" Name="R" onClick = 'editMode("safe")' />safe
-				<input type="radio" Name="R" onClick = 'editMode("move")'Checked="true" />move
-				<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
-				<input type="radio" Name="R" onClick = 'editMode("annotate")'/>annotate
-				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
-				-->
-			</form>
-			<!--
-			<form Name="input_dragmode">
-				<div id="editInfo" align="center"></div>
-				<input type="radio" Name="R" />safe
-				<input type="radio" Name="R" Checked="true" />move
-				<input type="radio" Name="R" />rotX
-				<input type="radio" Name="R" />rotY
-				<input type="radio" Name="R" />rotZ
-			</form>
-			-->
-		</div>
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
 		<!--
@@ -83,6 +59,31 @@ body{background-color: #000;color: #fff;font-family:arial}
 			<button onclick = 'loadGallery()'>load</button>
 		</div>
 		<div id="saveLoadGallery" align="center"></div>
+		<div align="center">
+			<form Name="input_editmode">
+				<div id="editInfoMove" align="center"></div>
+				<div id="editInfoResize" align="center"></div>
+				<div id="editInfoDelete" align="center"></div>
+				<div id="editInfoAnnotate" align="center"></div>
+				<!--
+				<input type="radio" Name="R" onClick = 'editMode("safe")' />safe
+				<input type="radio" Name="R" onClick = 'editMode("move")'Checked="true" />move
+				<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
+				<input type="radio" Name="R" onClick = 'editMode("annotate")'/>annotate
+				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
+				-->
+			</form>
+			<!--
+			<form Name="input_dragmode">
+				<div id="editInfo" align="center"></div>
+				<input type="radio" Name="R" />safe
+				<input type="radio" Name="R" Checked="true" />move
+				<input type="radio" Name="R" />rotX
+				<input type="radio" Name="R" />rotY
+				<input type="radio" Name="R" />rotZ
+			</form>
+			-->
+		</div>
 	</div>
 </div>
 
@@ -172,7 +173,7 @@ positionOnWall = function(obj, x, y){						// pass no x,y means use present mous
 
 setNote = function() {
 	var newComment = document.getElementById("input_annotate").value
-	if (g_selectedPic) g_selectedPic.galleryInfo = newComment
+	if (g_picToAnnotate) g_picToAnnotate.galleryInfo = newComment
 	document.getElementById("galleryInfo").innerHTML = newComment
 	document.getElementById("galleryAnnotate").innerHTML = ""	
 }
@@ -185,6 +186,7 @@ setWidgets = function(obj){
 	var rx = obj.getRotX()
 	var ry = obj.getRotY()
 	var rz = obj.getRotZ()
+
 	var place = new GLGE.Vec([-1, 0, -1])
 	place = mat.x(place)
 	resizeWidget.setLocX(place.e(1))
@@ -193,6 +195,7 @@ setWidgets = function(obj){
 	resizeWidget.setRotX(rx)
 	resizeWidget.setRotY(ry)
 	resizeWidget.setRotZ(rz)
+
 	place = new GLGE.Vec([-1, 0, 1])
 	place = mat.x(place)
 	closeWidget.setLocX(place.e(1))
@@ -201,9 +204,19 @@ setWidgets = function(obj){
 	closeWidget.setRotX(rx)
 	closeWidget.setRotY(ry)
 	closeWidget.setRotZ(rz)
+
+	place = new GLGE.Vec([1, 0, 1])
+	place = mat.x(place)
+	noteWidget.setLocX(place.e(1))
+	noteWidget.setLocY(place.e(2))
+	noteWidget.setLocZ(place.e(3))
+	noteWidget.setRotX(rx)
+	noteWidget.setRotY(ry)
+	noteWidget.setRotZ(rz)
 }
 
 g_selectedPic=null
+g_picToAnnotate=null
 g_widgetHover=false
 
 nullSelectedPic = function() {
@@ -211,6 +224,7 @@ nullSelectedPic = function() {
 		g_selectedPic.getMaterial().setEmit(.1)
 		resizeWidget.setLocX(0)
 		closeWidget.setLocX(0)
+		noteWidget.setLocX(0)
 		g_selectedPic = null
 	}	
 }
@@ -229,32 +243,29 @@ dragWallStart = function(x, y){
 		if (g_selectedPic && this.id == "resizeWidget") {
 			var mat = g_selectedPic.getModelMatrix()
 			var ul = new GLGE.Vec([1, 0, 1])
-			ul = mat.x(ul)									// upper left corner of pic
+			ul = mat.x(ul) // upper left corner of pic
 			root.resizeWidgetUL = [ul.e(1), ul.e(2), ul.e(3)]
 			root.resizeWidgetCenter = [g_selectedPic.getLocX(), g_selectedPic.getLocY(), g_selectedPic.getLocZ()]
-			root.resizeDistStart = new GLGE.Vec([root.getLocX(),root.getLocY(),root.getLocZ()]).distanceFrom(root.resizeWidgetUL)
-			root.dragWallStartScale = [g_selectedPic.getScaleX(),g_selectedPic.getScaleY(),g_selectedPic.getScaleZ()]
+			root.resizeDistStart = new GLGE.Vec([root.getLocX(), root.getLocY(), root.getLocZ()]).distanceFrom(root.resizeWidgetUL)
+			root.dragWallStartScale = [g_selectedPic.getScaleX(), g_selectedPic.getScaleY(), g_selectedPic.getScaleZ()]
 		}
 		else {
-			nullSelectedPic()
+			if (g_selectedPic && this.id == "noteWidget") {
+				g_picToAnnotate = g_selectedPic
+				var html = '<input type="text" id="input_annotate" size="100" value="type info here"/><br><button  onclick="setNote()" >press here to enter info</button>'
+				document.getElementById("galleryAnnotate").innerHTML = html
+				document.getElementById("galleryInfo").innerHTML = ""
+			}
+			else {
+				nullSelectedPic()
+			}
 		}
-	}
-	// annotate
-	if (document.input_editmode.R && document.input_editmode.R[3].checked) {
-		var html = 
-		'<input type="text" id="input_annotate" size="100" value="type comment here"/><br><button  onclick="setNote()" >press here to enter comment</button>'
-		document.getElementById("galleryAnnotate").innerHTML = html
-		document.getElementById("galleryInfo").innerHTML = ""
-	}
-	// delete
-	if (document.input_editmode.R && document.input_editmode.R[4].checked) {
-		KJS.gameScene.removeObjectById(root.id)
 	}
 }
 
 dragWallUpdate = function(dx, dy){
 	var root = this.getRoot()
-	if (this.id == "closeWidget") return
+	if (this.id == "closeWidget" || this.id == "noteWidget") return
 	if (this.id == "resizeWidget") {
 		positionOnWall(root)
 		var dist = new GLGE.Vec([root.getLocX(), root.getLocY(), root.getLocZ()]).distanceFrom(root.resizeWidgetUL)
@@ -306,7 +317,7 @@ doc.onLoad = function(){
 		upZ: 46
 	}
 //	heightmap=null
-	scene = KJS.init(heightmap, 21,  						// # of objects to load -- hacky way to force everything loaded 
+	scene = KJS.init(heightmap, 22,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
 	})
@@ -319,10 +330,10 @@ onLoadContinue = function () {
     
     var purple_mat = doc.getElement("purple");
     var cyan_mat = doc.getElement("cyan");   
-    scene.hoverable = ["closeWidget", "resizeWidget"]
+    scene.hoverable = ["closeWidget", "resizeWidget", "noteWidget"]
     scene.selectable = []
     scene.dragable = []
-	scene.dragWallable = ["david","resizeWidget","closeWidget"]
+	scene.dragWallable = ["david","resizeWidget","closeWidget","noteWidget"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
@@ -339,19 +350,23 @@ onLoadContinue = function () {
 				editMode("resize")
 				g_widgetHover = true
 			}
-			else {
-				if (this.id=="closeWidget") {
-					editMode("delete")
-					g_widgetHover = true
-				}
-				else {
-					g_widgetHover = false
-				}
+			else if (this.id=="closeWidget") {
+				editMode("delete")
+				g_widgetHover = true
 			}
+			else if (this.id=="noteWidget") {
+				editMode("annotate")
+				g_widgetHover = true
+			}
+			else {
+				g_widgetHover = false
+			}
+			
         }, function(x, y, next){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, null)
 			editMode("resize",false)
 			editMode("delete",false)
+			editMode("annotate",false)
 			g_widgetHover = false
 			if (next != g_selectedPic) {
 				nullSelectedPic()
@@ -472,6 +487,7 @@ onLoadContinue = function () {
 	
 	closeWidget = KJS.gameScene.getObjectById("closeWidget")
 	resizeWidget = KJS.gameScene.getObjectById("resizeWidget")
+	noteWidget = KJS.gameScene.getObjectById("noteWidget")
 }
 
 addPicture = function(pic, scale){
@@ -525,7 +541,7 @@ editMode = function(mode, state) {
 				s = ""
 			}
 			else {
-				s = "move mode: click on an object to drag along the wall or floor";
+				s = "move me around along the walls";
 			}
 			document.getElementById("editInfoMove").innerHTML = s
 			break
@@ -546,6 +562,15 @@ editMode = function(mode, state) {
 				s = "click here to delete the image.  Careful, no undo!";
 			}
 			document.getElementById("editInfoDelete").innerHTML = s
+			break
+		case "annotate":
+			if (state == false) {
+				s = ""
+			}
+			else {
+				s = "click here to edit this image's information";
+			}
+			document.getElementById("editInfoAnnotate").innerHTML = s
 			break
 	}
 }
