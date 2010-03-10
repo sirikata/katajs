@@ -179,7 +179,6 @@ setNote = function() {
 
 setWidgets = function(obj){
 	if (resizeWidget == null) {
-		pdebug_log("resizeWidget still null")
 		return
 	}
 	var mat = obj.getModelMatrix()
@@ -473,7 +472,6 @@ onLoadContinue = function () {
 	
 	closeWidget = KJS.gameScene.getObjectById("closeWidget")
 	resizeWidget = KJS.gameScene.getObjectById("resizeWidget")
-	pdebug_log ("got resizeWidget:",resizeWidget)
 }
 
 addPicture = function(pic, scale){
@@ -536,7 +534,7 @@ editMode = function(mode, state) {
 				s = ""
 			}
 			else {
-				s = "grab this widget to resize the image";
+				s = "grab here to resize the image";
 			}
 			document.getElementById("editInfoResize").innerHTML = s
 			break
@@ -545,7 +543,7 @@ editMode = function(mode, state) {
 				s = ""
 			}
 			else {
-				s = "click this widget to delete the image.  Careful, no undo!";
+				s = "click here to delete the image.  Careful, no undo!";
 			}
 			document.getElementById("editInfoDelete").innerHTML = s
 			break
