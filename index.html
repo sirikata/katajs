@@ -42,7 +42,9 @@ body{background-color: #000;color: #fff;font-family:arial}
 		</div>
 		<div align="center">
 			<form Name="input_editmode">
-				<div id="editInfo" align="center"></div>
+				<div id="editInfoMove" align="center"></div>
+				<div id="editInfoResize" align="center"></div>
+				<div id="editInfoDelete" align="center"></div>
 				<!--
 				<input type="radio" Name="R" onClick = 'editMode("safe")' />safe
 				<input type="radio" Name="R" onClick = 'editMode("move")'Checked="true" />move
@@ -326,10 +328,14 @@ onLoadContinue = function () {
 					g_widgetHover = false
 				}
 			}
-        }, function(){
+        }, function(x, y, next){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, null)
-			editMode("safe")
+			editMode("resize",false)
+			editMode("delete",false)
 			g_widgetHover = false
+			if (next != g_selectedPic) {
+				nullSelectedPic()
+			}
         })
         obj.highlightMaterial = null
     }
@@ -405,7 +411,6 @@ onLoadContinue = function () {
 	}
 	
 	// turn off loading banner
-	editMode("safe")
 	document.getElementById("loading").innerHTML = ""
 
 	// hardcoded statue stuff until we get things working
@@ -469,20 +474,17 @@ addPicture = function(pic, scale){
 		document.getElementById("galleryInfo").innerHTML = this.galleryInfo
 		setWidgets(this)
 		g_selectedPic=this
-		g_widgetHover = true
 		editMode("move")
 	}, function(){
 		this.getMaterial().setEmit(.1)
 		document.getElementById("galleryInfo").innerHTML = ""
-		editMode("safe")
+		editMode("move",false)
 		if (!g_widgetHover) {
 			nullSelectedPic()
 		}
 	})
 	
-	// force edit mode to move (protect from delete)
 //	document.input_editmode.R && document.input_editmode.R[1].checked = true
-	editMode("safe")
 	scene.hoverable.push(obj.id)
 	return obj
 }
@@ -496,16 +498,37 @@ movementButtonUp = function(b) {
 }
 
 
-editMode = function(mode) {
+editMode = function(mode, state) {
 	var s
 	switch (mode) {
-		case "safe": s = ""; break
-		case "move": s = "move mode: click on an object to drag along the wall or floor"; break
-		case "resize": s = "grab this widget to resize the image"; break
-		case "annotate": s = "annotate mode: click on an object to add & edit comments"; break
-		case "delete": s = "click this widget to delete the image.  Careful, no undo!"; break
+		case "move":
+			if (state == false) {
+				s = ""
+			}
+			else {
+				s = "move mode: click on an object to drag along the wall or floor";
+			}
+			document.getElementById("editInfoMove").innerHTML = s
+			break
+		case "resize":
+			if (state == false) {
+				s = ""
+			}
+			else {
+				s = "grab this widget to resize the image";
+			}
+			document.getElementById("editInfoResize").innerHTML = s
+			break
+		case "delete":
+			if (state == false) {
+				s = ""
+			}
+			else {
+				s = "click this widget to delete the image.  Careful, no undo!";
+			}
+			document.getElementById("editInfoDelete").innerHTML = s
+			break
 	}
-	document.getElementById("editInfo").innerHTML = s
 }
 
 cookify_goodchars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-+"

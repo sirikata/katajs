@@ -187,11 +187,7 @@ KJS.mouselook = function(){
 //        pdebug("KJS.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
-            var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.hoverable);
-			if (obj == null && KJS.hoverObj && KJS.hoverObj.hoverable) {
-				KJS.hoverObj.hoverStop(mousepos.x, mousepos.y)
-				KJS.hoverObj=null
-			}
+            var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.hoverable);			
         }
         if (leftbutton) {
             if (KJS.oldLeftBtn == false) {
@@ -208,13 +204,17 @@ KJS.mouselook = function(){
             }
 			if (KJS.selectedObj.dragable) KJS.selectedObj.dragUpdate(mousepos.x, mousepos.y)
         }
-        else {            
+        else {
             if (obj && obj != KJS.hoverObj) {
-				if (KJS.hoverObj && KJS.hoverObj.hoverable) KJS.hoverObj.hoverStop(mousepos.x, mousepos.y)
-                KJS.hoverObj = obj;
 				if (obj.hoverable) obj.hoverStart(mousepos.x, mousepos.y)
+				if (KJS.hoverObj && KJS.hoverObj.hoverable) KJS.hoverObj.hoverStop(mousepos.x, mousepos.y, obj)
+                KJS.hoverObj = obj;
 //                pdebug("hovering over: " + KJS.hoverObj.id, 3)
             }
+			if (obj == null && KJS.hoverObj && KJS.hoverObj.hoverable) {
+				KJS.hoverObj.hoverStop(mousepos.x, mousepos.y)
+				KJS.hoverObj=null
+			}
         }
         KJS.oldLeftBtn = leftbutton
     }
