@@ -172,11 +172,45 @@ setNote = function() {
 	document.getElementById("galleryAnnotate").innerHTML = ""	
 }
 
+setWidgets = function(obj){
+	var mat = obj.getModelMatrix()
+	var rx = obj.getRotX()
+	var ry = obj.getRotY()
+	var rz = obj.getRotZ()
+	var place = new GLGE.Vec([-1, 0, -1])
+	place = mat.x(place)
+	resizeWidget.setLocX(place.e(1))
+	resizeWidget.setLocY(place.e(2))
+	resizeWidget.setLocZ(place.e(3))
+	resizeWidget.setRotX(rx)
+	resizeWidget.setRotY(ry)
+	resizeWidget.setRotZ(rz)
+	place = new GLGE.Vec([-1, 0, 1])
+	place = mat.x(place)
+	closeWidget.setLocX(place.e(1))
+	closeWidget.setLocY(place.e(2))
+	closeWidget.setLocZ(place.e(3))
+	closeWidget.setRotX(rx)
+	closeWidget.setRotY(ry)
+	closeWidget.setRotZ(rz)
+}
+
 g_selectedPic=null
 dragWallStart = function(x, y){
 	var root = this.getRoot()
-	g_selectedPic = root
-	root.dragWallStartScale = [root.getScaleX(), root.getScaleY(), root.getScaleZ()]
+	if (this.id.slice(0, 11) == "galleryPix_") {
+		g_selectedPic = root
+	}
+	else {
+		if (g_selectedPic && this.id == "resizeWidget") {
+			root.resizeWidgetStart = [g_selectedPic.getLocX(),g_selectedPic.getLocY(),g_selectedPic.getLocZ()]
+			root.resizeDistStart = new GLGE.Vec([root.getLocX(),root.getLocY(),root.getLocZ()]).distanceFrom(root.resizeWidgetStart)
+			root.dragWallStartScale = [g_selectedPic.getScaleX(),g_selectedPic.getScaleY(),g_selectedPic.getScaleZ()]
+		}
+		else {
+			g_selectedPic = null
+		}
+	}
 	// annotate
 	if (document.input_editmode.R[3].checked) {
 		var html = 
@@ -190,51 +224,23 @@ dragWallStart = function(x, y){
 	}
 }
 
-setWidgets = function(obj) {
-			var mat = obj.getModelMatrix()
-			var rx = obj.getRotX()
-			var ry = obj.getRotY()
-			var rz = obj.getRotZ()
-			var place = new GLGE.Vec([-1,0,-1])
-			place = mat.x(place)
-			resizeWidget.setLocX(place.e(1))
-			resizeWidget.setLocY(place.e(2))
-			resizeWidget.setLocZ(place.e(3))
-			resizeWidget.setRotX(rx)
-			resizeWidget.setRotY(ry)
-			resizeWidget.setRotZ(rz)
-			place = new GLGE.Vec([-1,0,1])
-			place = mat.x(place)
-			closeWidget.setLocX(place.e(1))
-			closeWidget.setLocY(place.e(2))
-			closeWidget.setLocZ(place.e(3))
-			closeWidget.setRotX(rx)
-			closeWidget.setRotY(ry)
-			closeWidget.setRotZ(rz)
-}
 dragWallUpdate = function(dx, dy){
 	var root = this.getRoot()
 	if (this.id == "resizeWidget") {
 		positionOnWall(root)
+		var dist = new GLGE.Vec([root.getLocX(), root.getLocY(), root.getLocZ()]).distanceFrom(root.resizeWidgetStart)
+		var scale = dist / root.resizeDistStart
+		g_selectedPic.setScaleX(root.dragWallStartScale[0] * scale)
+		g_selectedPic.setScaleY(root.dragWallStartScale[1] * scale)
+		g_selectedPic.setScaleZ(root.dragWallStartScale[2] * scale)
+		pdebug("resize: " + scale + " " + root.dragWallStartScale[0], 3)
+		g_selectedPic.computeBoundingSphere()
 	}
 	else {
 		if (document.input_editmode.R[1].checked) {
 			positionOnWall(root)
 			if (this.id.slice(0, 11) == "galleryPix_") {
 				setWidgets(root)
-			}
-		}
-		else {
-			if (document.input_editmode.R[2].checked) {
-				var scale = 1.0 + 0.007 * dx - 0.003 * dy
-				if (scale < 0.1) 
-					scale = 0.1
-				//pdebug("scale: " + dx + " " + scale, 7)
-				root.setScaleX(root.dragWallStartScale[0] * scale)
-				root.setScaleY(root.dragWallStartScale[1] * scale)
-				root.setScaleZ(root.dragWallStartScale[2] * scale)
-				setWidgets(root)
-				this.computeBoundingSphere()
 			}
 		}
 	}
