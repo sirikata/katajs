@@ -203,9 +203,12 @@ g_selectedPic=null
 g_widgetHover=false
 
 nullSelectedPic = function() {
-	g_selectedPic=null
-	resizeWidget.setLocX(0)	
-	closeWidget.setLocX(0)	
+	if (g_selectedPic) {
+		g_selectedPic.getMaterial().setEmit(.1)
+		resizeWidget.setLocX(0)
+		closeWidget.setLocX(0)
+		g_selectedPic = null
+	}	
 }
 
 dragWallStart = function(x, y){
@@ -476,7 +479,6 @@ addPicture = function(pic, scale){
 		g_selectedPic=this
 		editMode("move")
 	}, function(){
-		this.getMaterial().setEmit(.1)
 		document.getElementById("galleryInfo").innerHTML = ""
 		editMode("move",false)
 		if (!g_widgetHover) {
