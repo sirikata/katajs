@@ -214,22 +214,28 @@ setWidgets = function(obj) {
 }
 dragWallUpdate = function(dx, dy){
 	var root = this.getRoot()
-    if (document.input_editmode.R[1].checked) {
+	if (this.id == "resizeWidget") {
 		positionOnWall(root)
-		if (this.id.slice(0,11) == "galleryPix_") {
-			setWidgets(root)
-		}
 	}
 	else {
-		if (document.input_editmode.R[2].checked) {
-			var scale = 1.0 + 0.007 * dx - 0.003 * dy
-			if (scale<0.1) scale = 0.1
-			//pdebug("scale: " + dx + " " + scale, 7)
-			root.setScaleX(root.dragWallStartScale[0] * scale)
-			root.setScaleY(root.dragWallStartScale[1] * scale)
-			root.setScaleZ(root.dragWallStartScale[2] * scale)
-			setWidgets(root)
-			this.computeBoundingSphere()
+		if (document.input_editmode.R[1].checked) {
+			positionOnWall(root)
+			if (this.id.slice(0, 11) == "galleryPix_") {
+				setWidgets(root)
+			}
+		}
+		else {
+			if (document.input_editmode.R[2].checked) {
+				var scale = 1.0 + 0.007 * dx - 0.003 * dy
+				if (scale < 0.1) 
+					scale = 0.1
+				//pdebug("scale: " + dx + " " + scale, 7)
+				root.setScaleX(root.dragWallStartScale[0] * scale)
+				root.setScaleY(root.dragWallStartScale[1] * scale)
+				root.setScaleZ(root.dragWallStartScale[2] * scale)
+				setWidgets(root)
+				this.computeBoundingSphere()
+			}
 		}
 	}
 }
@@ -274,7 +280,7 @@ onLoadContinue = function () {
     scene.hoverable = ["closeWidget", "resizeWidget"]
     scene.selectable = []
     scene.dragable = []
-	scene.dragWallable = ["david"]
+	scene.dragWallable = ["david","resizeWidget"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
