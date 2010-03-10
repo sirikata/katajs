@@ -167,18 +167,18 @@ positionOnWall = function(obj, x, y){						// pass no x,y means use present mous
 
 setNote = function() {
 	var newComment = document.getElementById("input_annotate").value
-	if (g_picToAnnotate) g_picToAnnotate.galleryInfo = newComment
+	if (g_selectedPic) g_selectedPic.galleryInfo = newComment
 	document.getElementById("galleryInfo").innerHTML = newComment
 	document.getElementById("galleryAnnotate").innerHTML = ""	
 }
 
-g_picToAnnotate=null
+g_selectedPic=null
 dragWallStart = function(x, y){
 	var root = this.getRoot()
+	g_selectedPic = root
 	root.dragWallStartScale = [root.getScaleX(), root.getScaleY(), root.getScaleZ()]
 	// annotate
 	if (document.input_editmode.R[3].checked) {
-		g_picToAnnotate = root
 		var html = 
 		'<input type="text" id="input_annotate" size="100" value="type comment here"/><br><button  onclick="setNote()" >press here to enter comment</button>'
 		document.getElementById("galleryAnnotate").innerHTML = html
