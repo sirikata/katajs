@@ -42,7 +42,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 		</div>
 		<div align="center">
 			<form Name="input_editmode">
-				<div id="editInfo" align="center">LOADING..LOADING..LOADING..LOADING..LOADING</div>
+				<div id="editInfo" align="center"></div>
 				<!--
 				<input type="radio" Name="R" onClick = 'editMode("safe")' />safe
 				<input type="radio" Name="R" onClick = 'editMode("move")'Checked="true" />move
@@ -405,7 +405,7 @@ onLoadContinue = function () {
 	}
 	
 	// turn off loading banner
-	editMode("move")
+	editMode("safe")
 	document.getElementById("loading").innerHTML = ""
 
 	// hardcoded statue stuff until we get things working
@@ -482,7 +482,7 @@ addPicture = function(pic, scale){
 	
 	// force edit mode to move (protect from delete)
 //	document.input_editmode.R && document.input_editmode.R[1].checked = true
-	editMode("move")
+	editMode("safe")
 	scene.hoverable.push(obj.id)
 	return obj
 }
