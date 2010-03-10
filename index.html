@@ -233,6 +233,7 @@ dragWallUpdate = function(dx, dy){
 		g_selectedPic.setScaleX(root.dragWallStartScale[0] * scale)
 		g_selectedPic.setScaleY(root.dragWallStartScale[1] * scale)
 		g_selectedPic.setScaleZ(root.dragWallStartScale[2] * scale)
+		setWidgets(g_selectedPic)
 		pdebug("resize: " + scale + " " + root.dragWallStartScale[0], 3)
 		g_selectedPic.computeBoundingSphere()
 	}
