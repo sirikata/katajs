@@ -96,6 +96,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 <script type="text/javascript" src="kata.js"></script> 
 
 <script type="text/javascript">
+resizeWidget = null
 doc = new GLGE.Document();
 
 setMaterialAll = function(obj, mat) {
@@ -177,6 +178,10 @@ setNote = function() {
 }
 
 setWidgets = function(obj){
+	if (resizeWidget == null) {
+		pdebug_log("resizeWidget still null")
+		return
+	}
 	var mat = obj.getModelMatrix()
 	var rx = obj.getRotX()
 	var ry = obj.getRotY()
@@ -203,7 +208,7 @@ g_selectedPic=null
 g_widgetHover=false
 
 nullSelectedPic = function() {
-	if (g_selectedPic) {
+	if (g_selectedPic && resizeWidget != null) {
 		g_selectedPic.getMaterial().setEmit(.1)
 		resizeWidget.setLocX(0)
 		closeWidget.setLocX(0)
@@ -302,7 +307,7 @@ doc.onLoad = function(){
 		upZ: 46
 	}
 //	heightmap=null
-	scene = KJS.init(heightmap, 19,  						// # of objects to load -- hacky way to force everything loaded 
+	scene = KJS.init(heightmap, 21,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
 	})
@@ -468,6 +473,7 @@ onLoadContinue = function () {
 	
 	closeWidget = KJS.gameScene.getObjectById("closeWidget")
 	resizeWidget = KJS.gameScene.getObjectById("resizeWidget")
+	pdebug_log ("got resizeWidget:",resizeWidget)
 }
 
 addPicture = function(pic, scale){
