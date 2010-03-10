@@ -196,8 +196,21 @@ setWidgets = function(obj){
 }
 
 g_selectedPic=null
+
+nullSelectedPic = function() {
+	g_selectedPic=null
+	resizeWidget.setLocX(0)	
+	closeWidget.setLocX(0)	
+}
+
 dragWallStart = function(x, y){
 	var root = this.getRoot()
+	if (this.id == "closeWidget") {
+		pdebug("close: " + g_selectedPic.id)
+		KJS.gameScene.removeObjectById(g_selectedPic.id)
+		nullSelectedPic()
+		return
+	}
 	if (this.id.slice(0, 11) == "galleryPix_") {
 		g_selectedPic = root
 	}
@@ -208,7 +221,7 @@ dragWallStart = function(x, y){
 			root.dragWallStartScale = [g_selectedPic.getScaleX(),g_selectedPic.getScaleY(),g_selectedPic.getScaleZ()]
 		}
 		else {
-			g_selectedPic = null
+			nullSelectedPic()
 		}
 	}
 	// annotate
@@ -226,6 +239,7 @@ dragWallStart = function(x, y){
 
 dragWallUpdate = function(dx, dy){
 	var root = this.getRoot()
+	if (this.id == "closeWidget") return
 	if (this.id == "resizeWidget") {
 		positionOnWall(root)
 		var dist = new GLGE.Vec([root.getLocX(), root.getLocY(), root.getLocZ()]).distanceFrom(root.resizeWidgetStart)
@@ -287,7 +301,7 @@ onLoadContinue = function () {
     scene.hoverable = ["closeWidget", "resizeWidget"]
     scene.selectable = []
     scene.dragable = []
-	scene.dragWallable = ["david","resizeWidget"]
+	scene.dragWallable = ["david","resizeWidget","closeWidget"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
