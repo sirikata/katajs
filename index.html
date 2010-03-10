@@ -314,8 +314,11 @@ onLoadContinue = function () {
 		if (!obj) continue
         obj.makeHoverable(function(){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, cyan_mat)
+			if (this.id=="resizeWidget") editMode("resize")
+			if (this.id=="closeWidget") editMode("delete")
         }, function(){
             if (this.highlightMaterial != purple_mat) setHighlightMaterial(this, null)
+			editMode("safe")
         })
         obj.highlightMaterial = null
     }
@@ -479,9 +482,9 @@ editMode = function(mode) {
 	switch (mode) {
 		case "safe": s = "safe mode: images cannot be moved or resized"; break
 		case "move": s = "move mode: click on an object to drag along the wall or floor"; break
-		case "resize": s = "resize mode: grab object in upper right corner to resize"; break
+		case "resize": s = "grab this widget to resize the image"; break
 		case "annotate": s = "annotate mode: click on an object to add & edit comments"; break
-		case "delete": s = "delete mode: click on an object to delete.  Careful, no undo!"; break
+		case "delete": s = "click this widget to delete the image.  Careful, no undo!"; break
 	}
 	document.getElementById("editInfo").innerHTML = s
 }
