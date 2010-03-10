@@ -34,10 +34,10 @@
 </mesh>
 
 <mesh id="resizeMesh">
-<positions> -.25,1,-.25,  -.25,1,1, 1,1,1, 1,1,-.25 </positions>
-<normals>  0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0 </normals>
-<uv1> 0,1, 0,0, 1,0, 1,1</uv1>
-<faces> 0,1,2,0,2,3</faces>
+<positions>  1,1,-.25, -.25,1,1, -.25,1,-.25 </positions>
+<normals>  0,-1,0, 0,-1,0, 0,-1,0 </normals>
+<uv1> 0,1, 0,0, 1,0</uv1>
+<faces> 0,1,2</faces>
 </mesh>
 
 <mesh id="closeMesh">
@@ -294,7 +294,7 @@
     <collada id="david"                          document="david.dae"                           animation="#spin" />
 
     <object id="resizeWidget"                    mesh="#resizeMesh"                              material="#gold" scale_x="0.5" scale_y="0.1" scale_z="0.5" />
-    <object id="closeWidget"                     mesh="#closeMesh"                              material="#cyan" scale_x="0.5" scale_y="0.1" scale_z="0.5" />
+    <object id="closeWidget"                     mesh="#closeMesh"                              material="#gold" scale_x="0.5" scale_y="0.1" scale_z="0.5" />
 
     <object id="bornh_bldg_08_floor"             mesh="#bornh_bldg_08_floor_mesh"               material="#bornh_bldg_08_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
     <object id="bornh_bldg_07_floor"             mesh="#bornh_bldg_07_floor_mesh"               material="#bornh_bldg_07_floor_mat" scale_x="10" scale_y="10" scale_z="10" loc_z="20" rot_z="0.069813" />
