@@ -38,12 +38,15 @@
     Kata.GraphicsSimulation = function (channel, domElement) {
         SUPER.constructor.call(this, channel);
         this.mElement = domElement;
+        this.mGFX = new TextGraphics(function(obj){},domElement.parentNode);
+        //this.mGFX = new Kata3DGraphics(function(obj){},document.body);
     };
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
         SUPER.receivedMessage.apply(this, arguments);
         console.log("Graphics received message from ObjectHost:", data);
+        this.mGFX.send(data);
     };
 
 })();
