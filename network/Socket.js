@@ -35,7 +35,7 @@
     var SUPER = Kata.Port.prototype;
     Kata.Socket = function (port) {
         SUPER.constructor.call(this, port);
-        this.mParentReceiver = Kata.bind(this, this.receivedMessage);
+        this.mParentReceiver = Kata.bind(this.receivedMessage, this);
         // mService is a Port or another Socket instance.
         this.mService.addReceiver(this.mParentReceiver);
     };

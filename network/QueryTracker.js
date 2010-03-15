@@ -56,15 +56,17 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     };
 
     Sirikata.QueryTracker.prototype.receivedMessage = function (header, body) {
-        var replyId = 0+header.reply_id;
+        var replyId = header.reply_id.toNumber();
         var message = this.mPendingMessages[replyId];
+        //console.log("QueryTracker recieved message, replyID is "+replyId+", header is ",header,"body",body);
         var sentHeader = message.header();
-        if ((sentHeader.destination_space != header.source_space ||
+        if ((//sentHeader.destination_space != header.source_space ||
              sentHeader.destination_object != header.source_object ||
              sentHeader.destination_port != header.source_port)) {
+            console.log("QueryTracker is ignoring message from wrong sender, sentHeader:", sentHeader, "headeris:", header);
             return; // Ignore reply from wrong object.
         }
-        if (!message.recievedMessage(header, body)) {
+        if (!message.receivedMessage(header, body)) {
             delete this.mPendingMessages[replyId];
         }
     };
@@ -90,7 +92,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     };
     // Returns true if message is to stay in map.
     Sirikata.QueryTracker.Message.prototype.receivedMessage = function(header, body) {
-        if (this.header) {
+        if (this.mCallback && header) {
             return this.mCallback(header, body);
         }
     };

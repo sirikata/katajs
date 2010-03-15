@@ -45,7 +45,7 @@
     };
 
     Kata.Main.prototype.receivedMessage = function(channel, data) {
-        console.log("Kata.Main received ObjectHost message:",data);
+        //console.log("Kata.Main received ObjectHost message:",data);
     };
 
 })();
