@@ -44,6 +44,12 @@
             protocol_class: Kata.TCPSST,
             object_class: Sirikata.HostedObject
         };
+        this.mProtocols["skloop"] = {
+            name: "skloop",
+            default_port: 0,
+            protocol_class: Sirikata.Loopback,
+            object_class: Sirikata.HostedObject
+        };
         this.mSimulations = [];
         this.mSimulationsByName = {};
         this.mSpaceMap = {};

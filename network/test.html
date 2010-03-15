@@ -62,6 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript" src="SstService.js"></script>
     <script type="text/javascript" src="Socket.js"></script>
     <script type="text/javascript" src="QueryTracker.js"></script>
+    <script type="text/javascript" src="SirikataLoopback.js"></script>
     <script type="text/javascript" src="SirikataHostedObject.js"></script>
     <script type="text/javascript" src="Kata.js"></script>
 
@@ -89,28 +90,59 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 window.kata.getChannel(),
                 document.getElementById("kata")
                 );
+            // Use a real space server.
+            /*
             window.kata.getChannel().sendMessage({
                 msg: "RegisterSpace",
                 spaceid: defaultSpace,
                 server: "sirikata://localhost"
                 });
-            var testObj = Math.uuid();
+            */
+            // LOOPBACK FTW!
+            window.kata.getChannel().sendMessage({
+                msg: "RegisterSpace",
+                spaceid: defaultSpace,
+                server: "skloop://"
+                });
+            var testObj0 = Math.uuid();
+            var testObj1 = Math.uuid();
+            var testObj2 = Math.uuid();
             // FIXME: We have two seemingly redundant messages.
             window.kata.getChannel().sendMessage({
                 msg: "CreateObject",
                 spaceid: defaultSpace,
-                privid: testObj
+                privid: testObj0
                 });
             window.kata.getChannel().sendMessage({
                 msg: "ConnectToSpace",
                 spaceid: defaultSpace,
-                privid: testObj
+                privid: testObj0
+                });
+            window.kata.getChannel().sendMessage({
+                msg: "CreateObject",
+                spaceid: defaultSpace,
+                privid: testObj1
+                });
+            window.kata.getChannel().sendMessage({
+                msg: "ConnectToSpace",
+                spaceid: defaultSpace,
+                privid: testObj1
                 });
             window.kata.getChannel().sendMessage({
                 msg: "Proximity",
                 spaceid: defaultSpace,
-                privid: testObj,
+                privid: testObj1,
                 radius: 1.0e+8
+                });
+            window.kata.getChannel().sendMessage({
+                msg: "CreateObject",
+                spaceid: defaultSpace,
+                privid: testObj2
+                });
+            window.kata.getChannel().sendMessage({
+                msg: "ConnectToSpace",
+                spaceid: defaultSpace,
+                privid: testObj2
                 });
         }
     </script>

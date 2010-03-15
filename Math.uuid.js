@@ -33,7 +33,7 @@ Dual licensed under the MIT and GPL licenses.
  */
 Math.uuid = (function() {
   // Private array of chars to use
-  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(''); 
+  var CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''); 
 
   return function (len, radix) {
     var chars = CHARS, uuid = [];
