@@ -53,7 +53,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     function sendPersistenceMessage(querytracker, message, callback) {
         var sentBody = message.body();
         message.setCallback(function(respHeader, respBytes) {
-            var respBody = new Sirikata.Protocol.Persistence;
+            var respBody = new Sirikata.Persistence.Protocol.ReadWriteSet;
             respBody.ParseFromStream(new PROTO.Base64Stream(respBytes));
             var index = 0;
             for (var i = 0; i < respBody.reads.length; i++) {
@@ -150,7 +150,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                                             });
     }
     Sirikata.ProxyObject.prototype.askForProperties = function() {
-        var sentBody = new Sirikata.Protocol.Persistence;
+        var sentBody = new Sirikata.Persistence.Protocol.ReadWriteSet;
         // check that MeshScale is capped at the object's bounding sphere.
         sentBody.reads.push().field_name = "MeshScale";
         sentBody.reads.push().field_name = "MeshURI";
@@ -306,7 +306,10 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             loc.orientation = [0,0,0,1];
             loc.velocity = [0,0,0];
             body.message_arguments.push(newObj);
-            spaceconn.rpcPort.send("",Ports.REGISTRATION,body);
+            var header = new Sirikata.Protocol.Header;
+            header.destination_port = Ports.REGISTRATION;
+            header.destination_object = "";
+            spaceconn.rpcPort.send(header,body);
         }
         return substream;
     };
@@ -352,17 +355,19 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 } else if (proxCall.proximity_event == Sirikata.Protocol.ProxCall.ProximityEvent.ENTERED_PROXIMITY) {
                     var obj = this.mObjects[proximate_object];
                     if (!obj) {
-                        obj = new ProxyObject(this.mService, this.mObjectHost, header.source_space, proximate_object);
+                        obj = new Sirikata.ProxyObject(spaceConn.service, this.mObjectHost, header.source_space, proximate_object);
                         obj.askForProperties();
                         obj.askForPosition();
                     }
-                    obj.mRequests[sourceObj.getID()].mRefCount++; // in case this object has multiple queries.
+                    obj.mRefCount++; // in case this object has multiple queries.
                     console.log("Entered:",proxCall.proximate_object);
                 } else {
                     var obj = this.mObjects[proximate_object];
                     if (obj) {
-                        obj.destroy();
-                        delete this.mObjects[proximate_object];
+                        if(--obj.mRefCount==0) {
+                            obj.destroy();
+                            delete this.mObjects[proximate_object];
+                        }
                     }
                     console.log("Exited:",proxCall.proximate_object);
                 }

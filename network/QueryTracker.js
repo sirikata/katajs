@@ -48,14 +48,16 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
     Sirikata.QueryTracker.prototype.send = function (message) {
         var header = message.header();
-        header.id = this.mNextId;
+        var id = this.mNextId;
+        header.id = PROTO.I64.fromNumber(id);
         this.mNextId++;
-        this.mPendingMessages[header.id] = message;
+        this.mPendingMessages[id] = message;
         SUPER.send.call(this, header, message.body());
     };
 
     Sirikata.QueryTracker.prototype.receivedMessage = function (header, body) {
-        var message = this.mPendingMessages[header.reply_id];
+        var replyId = 0+header.reply_id;
+        var message = this.mPendingMessages[replyId];
         var sentHeader = message.header();
         if ((sentHeader.destination_space != header.source_space ||
              sentHeader.destination_object != header.source_object ||
@@ -63,7 +65,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             return; // Ignore reply from wrong object.
         }
         if (!message.recievedMessage(header, body)) {
-            delete this.mPendingMessages[header.reply_id];
+            delete this.mPendingMessages[replyId];
         }
     };
     Sirikata.QueryTracker.prototype.destroy = function() {

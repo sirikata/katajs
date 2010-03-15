@@ -79,11 +79,14 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
     Kata.extend(Sirikata.SstService.Port, SUPER);
 
-    Sirikata.SstService.Port.prototype.send = function(destobj, destport, bodyunser) {
-        var header = new Sirikata.Protocol.Header;
+    Sirikata.SstService.Port.prototype.send = function(header, bodyunser) {
         header.source_port = this.mPortId;
-        header.destination_port = destport;
-        header.destination_object = destobj;
+        if (!header.destination_port) {
+            header.destination_port = undefined;
+        }
+        if (!header.destination_object) {
+            Kata.error("Unspecified destination object for message:\n"+bodyunser);
+        }
         this.mService.send(header, bodyunser);
     };
     

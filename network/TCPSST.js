@@ -115,7 +115,7 @@
             this.mSubstreams[streamnumber].callListeners(b64data);
         };
         Kata.TCPSST.prototype.send = function (streamid, base64data) {
-            console.log("Send to socket stream "+streamid+":",base64data);
+            //console.log("Send to socket stream "+streamid+":",base64data);
             var finalString = streamid.toString(16)+"%"+base64data;
 
             if (this.mConnected.length == 0) {
