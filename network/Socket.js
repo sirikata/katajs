@@ -1,5 +1,5 @@
 /*  Kata Javascript Utilities
- *  Channel.js
+ *  Socket.js
  *
  *  Copyright (c) 2010, Patrick Reiter Horn
  *  All rights reserved.
@@ -31,30 +31,20 @@
  */
 
 (function() {
-    // public abstract class Channel
-    Kata.Channel = function () {};
 
-    Kata.Channel.prototype.registerListener = function (listener) {
-        if (!this.mListener) {
-            this.mListener = listener;
-        } else if (this.mListener instanceof Array) {
-            this.mListener.push(listener);
-        } else {
-            this.mListener = [this.mListener, listener];
-        }
+    var SUPER = Kata.Port.prototype;
+    Kata.Socket = function (port) {
+        SUPER.constructor.call(this, port);
+        this.mParentReceiver = Kata.bind(this, this.receivedMessage);
+        // mService is a Port or another Socket instance.
+        this.mService.addReceiver(this.mParentReceiver);
     };
-    Kata.Channel.prototype.callListeners = function (data) {
-        if (!this.mListener) {
-            Kata.error("Kata.Channel's mListener is not set");
-        }
-        if (this.mListener.call) {
-            this.mListener(this, data);
-        } else {
-            for (var i = 0; i < this.mListener.length; i++) {
-                this.mListener[i](this, data);
-            }
-        }
-    };
-    Kata.Channel.prototype.sendMessage = null;
+    Kata.extend(Kata.Socket, SUPER);
+
+    Kata.Socket.prototype.destroy = function () {
+        this.mService.removeReceiver(this.mParentReceiver);
+        delete this.mService;
+        delete this.mParentReceiver;
+    }
 
 })();

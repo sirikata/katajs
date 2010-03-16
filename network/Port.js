@@ -1,9 +1,9 @@
-/*  Kata Javascript Utilities
- *  Channel.js
- *
+/*  kata3d Javascript Utilities
+ *  TCPSST.js
+ * 
  *  Copyright (c) 2010, Patrick Reiter Horn
  *  All rights reserved.
- *
+ * 
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
  *  met:
@@ -13,10 +13,10 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- *  * Neither the name of Sirikata nor the names of its contributors may
+ *  * Neither the name of kata3d nor the names of its contributors may
  *    be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -31,30 +31,30 @@
  */
 
 (function() {
-    // public abstract class Channel
-    Kata.Channel = function () {};
-
-    Kata.Channel.prototype.registerListener = function (listener) {
-        if (!this.mListener) {
-            this.mListener = listener;
-        } else if (this.mListener instanceof Array) {
-            this.mListener.push(listener);
-        } else {
-            this.mListener = [this.mListener, listener];
-        }
+    Kata.Port=function (service) {
+        this.mReceivers = [];
+        this.mService = serv;
     };
-    Kata.Channel.prototype.callListeners = function (data) {
-        if (!this.mListener) {
-            Kata.error("Kata.Channel's mListener is not set");
-        }
-        if (this.mListener.call) {
-            this.mListener(this, data);
-        } else {
-            for (var i = 0; i < this.mListener.length; i++) {
-                this.mListener[i](this, data);
+
+    Kata.Port.prototype.addReceiver = function(func) {
+        this.mReceivers.push(func);
+    };
+    Kata.Port.prototype.removeReceiver = function(func) {
+        for (var i = 0; i < this.mReceivers.length; i++) {
+            if (this.mReceivers[i] == func) {
+                this.mReceivers.splice(i,1);
             }
         }
     };
-    Kata.Channel.prototype.sendMessage = null;
+    Kata.Port.prototype.send = function() {
+        this.mService.send.apply(this.mService, arguments);
+    };
+    Kata.Port.prototype.deliver = function(args) {
+        for (var i = 0; i < this.mReceivers.length; i++) {
+            if (this.mReceivers[i].apply(this, args)) {
+                break;
+            }
+        }
+    };
 
 })();

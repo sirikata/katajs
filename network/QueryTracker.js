@@ -1,5 +1,5 @@
 /*  Kata Javascript Utilities
- *  Channel.js
+ *  QueryTracker.js
  *
  *  Copyright (c) 2010, Patrick Reiter Horn
  *  All rights reserved.
@@ -31,30 +31,28 @@
  */
 
 (function() {
-    // public abstract class Channel
-    Kata.Channel = function () {};
 
-    Kata.Channel.prototype.registerListener = function (listener) {
-        if (!this.mListener) {
-            this.mListener = listener;
-        } else if (this.mListener instanceof Array) {
-            this.mListener.push(listener);
-        } else {
-            this.mListener = [this.mListener, listener];
-        }
+// Multiplexer on header.id from one socket to several.
+// Does this concept even make sense?
+// Why not use unique ports for this purpose?
+
+    var SUPER = Kata.Socket.prototype;
+    Kata.QueryTracker = function (port) {
+        SUPER.constructor.call(this, port);
+        this.mNextId = 0;
+        this.mPendingMessages = {};
     };
-    Kata.Channel.prototype.callListeners = function (data) {
-        if (!this.mListener) {
-            Kata.error("Kata.Channel's mListener is not set");
-        }
-        if (this.mListener.call) {
-            this.mListener(this, data);
-        } else {
-            for (var i = 0; i < this.mListener.length; i++) {
-                this.mListener[i](this, data);
-            }
-        }
-    };
-    Kata.Channel.prototype.sendMessage = null;
+    Kata.extend(Kata.QueryTracker, SUPER);
+
+    Kata.QueryTracker.prototype.send = function (header, body) {
+        header.id = this.mNextId;
+        this.mNextId++;
+        this.mPendingMessages[header.id] = {
+            header: header,
+            body: body,
+            callback: how_do_we_pass_this_in
+        };
+        SUPER.send.call(this, header, body);
+    }
 
 })();

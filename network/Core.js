@@ -45,6 +45,11 @@ if (typeof(JSON) == "undefined") {JSON = {};}
         }
         child.prototype.constructor = child;
     };
+    Kata.bind = function(func, object) {
+        return function() {
+            return func.apply(object, arguments);
+        };
+    };
     if (console.log&&0) {
         /** Logs msg to the console, in addition to some json object.
          @param var_args  Some optional JSON or string data to log. */
