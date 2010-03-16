@@ -30,14 +30,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+if (typeof Sirikata == "undefined") { Sirikata = {}; }
+
 (function() {
     var SUPER = Kata.Service.prototype;
     Sirikata.SstService=function (sst_substream, spaceid) {
         SUPER.constructor.call(this);
+        sst_substream.registerListener(Kata.bind(this.receivedMessage, this));
         this.mSubstream=sst_substream;
         this.mSpaceId = spaceid;
     };
-    Kata.extend(Sirikata.HostedObject, SUPER);
+    Kata.extend(Sirikata.SstService, SUPER);
 
     Sirikata.SstService.prototype.setObjectReference = function(objectref) {
         this.mSubstream.objectReference = objectref;
@@ -48,10 +51,10 @@
     };
 
     Sirikata.SstService.prototype.send = function(header, bodyunser) {
-        var b64stream = new Sirikata.Protocol.Base64Stream;
+        var b64stream = new PROTO.Base64Stream;
         header.SerializeToStream(b64stream);
         bodyunser.SerializeToStream(b64stream);
-        this.mSubstream.send(b64stream.getString());
+        this.mSubstream.sendMessage(b64stream.getString());
     };
 
     Sirikata.SstService.prototype.receivedMessage = function(sender, data) {
@@ -74,14 +77,14 @@
         SUPER.constructor.call(this, service);
     };
 
-    Kata.extend(Sirikata.SstService, SUPER);
+    Kata.extend(Sirikata.SstService.Port, SUPER);
 
     Sirikata.SstService.Port.prototype.send = function(destobj, destport, bodyunser) {
-        var header = new Sirikata.Protocol.MessageHeader;
+        var header = new Sirikata.Protocol.Header;
         header.source_port = this.mPortId;
         header.destination_port = destport;
         header.destination_object = destobj;
-        this.mService.send(header, bodydata);
+        this.mService.send(header, bodyunser);
     };
     
 })();

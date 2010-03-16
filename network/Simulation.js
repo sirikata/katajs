@@ -37,7 +37,7 @@ if (typeof(Kata) == "undefined") {Kata = {};}
     /** @constructor */
     Kata.Simulation = function (channel) {
         this.mChannel = channel;
-        channel.registerListener(this);
+        channel.registerListener(Kata.bind(this.receivedMessage, this));
     }
     Kata.Simulation.prototype.receivedMessage = function (channel, data) {
     }

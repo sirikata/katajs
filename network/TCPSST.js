@@ -104,7 +104,7 @@
             var percent = b64data.indexOf('%');
             var streamnumber = parseInt(b64data.substr(0,percent), 16);
             b64data = b64data.substr(percent+1);
-            console.log("Receive from socket "+which+" stream "+streamnumber+":",b64data);
+            //console.log("Receive from socket "+which+" stream "+streamnumber+":",b64data);
 
             // FIXME: How do we detect a "close" message?
 

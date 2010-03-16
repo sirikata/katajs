@@ -35,6 +35,11 @@
     Kata.Channel = function () {};
 
     Kata.Channel.prototype.registerListener = function (listener) {
+        if (!listener.call) {
+            console.log("Listener call type is ",typeof(listener));
+            console.log("Listener constructor type is ",listener.constructor);
+            throw "Error in registerListener: not a function";
+        }
         if (!this.mListener) {
             this.mListener = listener;
         } else if (this.mListener instanceof Array) {

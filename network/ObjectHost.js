@@ -49,12 +49,13 @@
         this.mSpaceMap = {};
         this.mSpaceConnections = {};
         this.mObjects = {};
+        console.log("ObjectHosted!");
     };
 
     Kata.ObjectHost.prototype.registerSimulation = function (channel, name) {
         this.mSimulations.push(channel);
         this.mSimulationsByName[name] = channel;
-        channel.registerListener(this);
+        channel.registerListener(Kata.bind(this.receivedMessage, this));
     };
 
     /** FIXME DESCRIPTION
@@ -119,6 +120,7 @@
     };
 
     Kata.ObjectHost.prototype.createObject = function(spacename, id) {
+        console.log("Creating Object "+id+" for space "+spacename+"!");
         var HostedClass = this.mSpaceMap[spacename].protocol.object_class;
         this.mObjects[id] = new HostedClass(this, id);
         return this.mObjects[id];

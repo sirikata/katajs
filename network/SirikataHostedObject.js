@@ -47,39 +47,217 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         BROADCAST:10
     };
 
-    function ProxyObject(id) {
+    var MIN_TTL = 1; // subscription messages.
+    var SPACE_OBJECT = "";
+
+    function sendPersistenceMessage(querytracker, message, callback) {
+        var sentBody = message.body();
+        message.setCallback(function(respHeader, respBytes) {
+            var respBody = new Sirikata.Protocol.Persistence;
+            respBody.ParseFromStream(new PROTO.Base64Stream(respBytes));
+            var index = 0;
+            for (var i = 0; i < respBody.reads.length; i++) {
+                if (respBody.reads[i].index !== undefined) {
+                    index = respBody.reads[i].index;
+                }
+                if (index < sentBody.reads.length && index >= 0) {
+                    if (respBody.reads[i].return_status !== undefined) {
+                        sentBody.reads[index].return_status =
+                            respBody.reads[i].return_status;
+                    } else if (respBody.reads[index].data !== undefined) {
+                        sentBody.reads[index].data = respBody.reads[i].data;
+                        if (respBody.reads[i].subscription_id !== undefined) {
+                            sentBody.reads[index].subscription_id =
+                                respBody.reads[i].subscription_id;
+                            sentBody.reads[index].ttl = respBody.reads[index].ttl;
+                        }
+                    }
+                }
+                index++;
+            }
+            for (var i = 0; i < sentBody.reads.length; i++) {
+                if (sentBody.reads[i].return_status === undefined &&
+                    sentBody.reads[i].data === undefined) {
+                    return true;
+                }
+            }
+            callback();
+            return false;
+        });
+        querytracker.send(message);
+    }
+
+    Sirikata.ProxyObject = function(service, objectHost, space, id) {
+        this.mObjectHost = objectHost;
         this.mRequests = {};
         this.mSubscriptions = [];
         this.mRefCount = 0;
         this.mID = id;
-        this.mSerialNum = 1;
+        this.mSpace = space;
+        this.mLocationPendingRequests=[]
+        this.mQueryTracker = new Sirikata.QueryTracker(service.newPort());
     };
 
-    ProxyObject.prototype.generateHeader = function(space, port) {
+    Sirikata.ProxyObject.prototype.destroy = function() {
+        for (var propname in this.subscriptions) {
+            var subinfo = this.subscriptions[propname];
+            var subMsg = new Sirikata.Protocol.Subscribe;
+            subMsg.object = this.mID;
+            subMsg.broadcast_name = subscription.subid;
+            // ommitted ttl = unsubscribe.
+            var header = new Sirikata.Protocol.Header;
+            header.destination_object = SPACE_OBJECT;
+            header.destination_port = Ports.SUBSCRIPTION;
+            var message = new Sirikata.QueryTracker.Message(header, msg);
+            this.mQueryTracker.send(message);
+            delete this.mQueryTracker;
+            if (this.mLocationPendingRequests===undefined) {
+                thus.mObjectHost.sendToSimulation({msg:"Destroy",
+                                                   id:this.mID
+                                                   });
+            }
+            this.mDestroyed=true;
+        }
+    };
+    Sirikata.ProxyObject.prototype.generateMessage = function(portnum,msg) {
         var header = new Sirikata.Protocol.Header;
         header.destination_object = this.mID;
-        header.destination_space = space;
-        header.destination_port = port;
-        header.id = this.mSerialNum++;
+        //header.destination_space = this.mSpace;
+        header.destination_port = portnum;
+        return new Sirikata.QueryTracker.Message(header, msg);
     };
-
-    ProxyObject.prototype.askForProperties = function() {
-        var persistence = new Sirikata.Protocol.Persistence;
-        var header = this.generateHeader(space, Ports.LOC);
-        var b64stream = new PROTO.Base64Stream;
-        msg.SerializeToStream(b64stream);
-        this.mRequests[header.id] = msg;
+    Sirikata.ProxyObject.prototype.subscribeToProperty = function(propname, subid, ttl) {
+        if (!ttl || ttl < MIN_TTL) {
+            ttl = MIN_TTL;
+        }
+        var subMsg = new Sirikata.Protocol.Subscribe;
+        subMsg.object = this.mID;
+        subMsg.broadcast_name = subid;
+        subMsg.update_period = ttl;
+        var header = new Sirikata.Protocol.Header;
+        header.destination_object = SPACE_OBJECT;
+        header.destination_port = Ports.SUBSCRIPTION;
+        var message = new Sirikata.QueryTracker.Message(header, msg);
+        this.mQueryTracker.send(message);
     };
+    Sirikata.ProxyObject.prototype.setLightProperty = function(lightProp) {
+       this.mObjectHost.sendToSimulation({msg:"Mesh",
+                                          id:this.mID,
+                                          diffuse_color:lightProp.diffuse_color,
+                                          specular_color:lightProp.specular_color,
+                                          ambient_color:lightProp.ambient_color,
+                                          power:lightProp.power
+                                            });
+    }
+    Sirikata.ProxyObject.prototype.askForProperties = function() {
+        var sentBody = new Sirikata.Protocol.Persistence;
+        // check that MeshScale is capped at the object's bounding sphere.
+        sentBody.reads.push().field_name = "MeshScale";
+        sentBody.reads.push().field_name = "MeshURI";
+        sentBody.reads.push().field_name = "WebViewURL";
+        sentBody.reads.push().field_name = "LightInfo";
+        sentBody.reads.push().field_name = "PhysicalParameters";
+        sentBody.reads.push().field_name = "Parent";
+        sentBody.reads.push().field_name = "Name";
+        // Ports.LOC
+        var message = this.generateMessage(Ports.PERSISTENCE, sentBody);
+        var thus = this;
+        sendPersistenceMessage(this.mQueryTracker, message, function() {
+            var deferUntilPositionResponse=function() {
+                var fields = {};
+                for (var i = 0; i < sentBody.reads.length; i++) {
+                    if (sentBody.reads[i].return_status !== undefined) {
+                        var propname = fields[sentBody.reads[i].field_name];
+                        var propval = {data: sentBody.reads[i].data,
+                             ttl: sentBody.reads[i].ttl,
+                             subid: sentbody.reads[i].subscription_id};
+                        fields[propname] = propval;
+                        if (propval.subid !== undefined) {
+                            thus.subscribeToProperty(propname, propval.subid, propval.ttl);
+                        }
+                    }
+                }
+                var type = 'node';
+                var isWebView = false;
+                if (fields["MeshURI"]) {//these are data coming from the network in PBJ string form, not fields in a js struct
+                    type = 'mesh';
+                } else if (fields["LightInfo"]) {
+                    type = 'light';
+                }
+                if (fields["WebViewURL"]) {
+                    isWebView = true;
+                }
+                if (isWebView) { // && type != 'mesh'
+                    type = 'webview';
+                }
+                switch (type) {
+                case 'mesh':{
+                   meshURI=Sirikata.Protocol.StringProperty;
+                   meshURI.ParseFromStream(new PROTO.ByteArrayStream(fields["MeshURI"].data));
+                   //FIXME: test for parse failure
+                   if (meshURI.value===undefined) {
+                       alert("Property parse failure");
+                   }else {
+                   //send item to graphics system
+                       thus.mObjectHost.sendToSimulation({msg:"Mesh",
+                                                      id:this.mID,
+                                                      mesh:meshURI.value
+                                                      });
+                   }
+                   }break;
+                case 'light':{
+                    lightProp=new Sirikata.Protocol.LightInfoProperty;
+                    lightProp.ParseFromStream(new PROTO.ByteArrayStream(fields["LightInfo"].data));
+                    thus.setLightProperty(lightProp);
+                }break;
+                default:break;
+                }
+            };
+            if (this.mLocationPendingRequests!==undefined) {
+                deferUntilPositionResponse();
+            }else {
+                this.mLocationPendingRequests[this.mLocationPendingRequests.length]=deferUntilPositionResponse;
+            }
 
-    ProxyObject.prototype.askForPosition = function(space) {
+        });
+    };
+    Sirikata.ProxyObject.prototype.askForPosition = function() {
         var loc = new Sirikata.Protocol.LocRequest;
-        var header = this.generateHeader(space, Ports.LOC);
+        var object_reference=this.mID;
+        loc.object=object_reference;
         var msg = new Sirikata.Protocol.MessageBody;
         msg.message_names.push("LocRequest");
         msg.message_arguments.push(loc);
-        var b64stream = new PROTO.Base64Stream;
-        msg.SerializeToStream(b64stream);
-        this.mRequests[header.id] = msg;
+        var header = new Sirikata.Protocol.Header;
+        header.destination_object = SPACE_OBJECT;
+        header.destination_port = Ports.LOC;
+        var message = new Sirikata.QueryTracker.Message(header, msg);
+        var thus=this;
+        message.setCallback(function(respHeader, respBody) {
+            if (!this.mDestroyed) {
+                objLoc=new Sirikata.Protocol.ObjLoc;
+                objLoc.ParseFromStream(new PROTO.ByteArrayStream(respBody));
+                thus.mObjectHost.sendToSimulation({
+                    msg: "Create",
+                    id: object_reference,//private ID for gfx (we can narrow it)
+                    time:retObj.location.timestamp,
+                    pos:retObj.location.position,
+                    vel:retObj.location.velocity,
+                    rotaxis:retObj.location.rotational_axis,
+                    rotvel:retObj.location.angular_speed
+                    });
+                deferredLength=thus.mLocationPendingRequests.length;
+                for (var index=0;index<deferredLength;index+=1) {
+                    thus.mLocationPendingRequests[index]();
+                }
+                delete thus.mLocationPendingRequests;
+                if (objLoc.subscription_id!==undefined) {
+                    
+                   thus.subscribeToProperty("ObjLoc", objLoc.subscription_id, respBody.ttl);
+                }
+            }
+        });
+        this.mQueryTracker.send(message);
     };
 
     // public class SirikataHostedObject
@@ -97,19 +275,23 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     Sirikata.HostedObject.prototype.connectToSpace = function (space) {
         var topLevelConnection = this.mObjectHost.connectToSpace(space);
         var substream = topLevelConnection.clone();
-        substream.registerListener(this);
         var spaceconn = {
             objectID: null,
             proximity: {},
             service: null,
-            rpcPort: null
+            rpcPort: null,
+            queryTracker: null
         };
         this.mSpaceConnectionMap[space] = spaceconn;
-        spaceconn.service = new SstService(substream, space);
+        spaceconn.service = new Sirikata.SstService(substream, space);
+        spaceconn.queryTracker = new Sirikata.QueryTracker(spaceconn.service.newPort());
         spaceconn.rpcPort = spaceconn.service.getPort(Ports.RPC);
-        spaceconn.service.bindPort(Ports.RPC, this._parseRPC, this);
-        spaceconn.service.bindPort(Ports.PERSISTENCE, this._parsePersistence, this);
-        spaceconn.service.bindPort(Ports.BROADCAST, this._parseBroadcast, this);
+        spaceconn.service.getPort(Ports.RPC).addReceiver(
+            Kata.bind(this._parseRPC, this));
+        spaceconn.service.getPort(Ports.PERSISTENCE).addReceiver(
+            Kata.bind(this._parsePersistence, this));
+        spaceconn.service.getPort(Ports.BROADCAST).addReceiver(
+            Kata.bind(this._parseBroadcast, this));
 
         // send introductory NewObj message.
         {
@@ -150,10 +332,13 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 spaceConn.objectID = retObj.object_reference;
                 spaceConn.service.setObjectReference(spaceConn.objectID);
                 this.mObjectHost.sendToSimulation({
-                    msg: "ConnectedToSpace",
-                    spaceid: header.source_space,
-                    privid: this.mID,
-                    id: retObj.object_reference
+                    msg: "Create",
+                    id: this.mID,//private ID for gfx (we can narrow it)
+                    time:retObj.location.timestamp,
+                    pos:retObj.location.position,
+                    vel:retObj.location.velocity,
+                    rotaxis:retObj.location.rotational_axis,
+                    rotvel:retObj.location.angular_speed
                 });
                 for (var queryid in spaceConn.proximity) {
                     this._sendNewProxQuery(spaceConn.proximity[queryid]);
@@ -167,16 +352,17 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 } else if (proxCall.proximity_event == Sirikata.Protocol.ProxCall.ProximityEvent.ENTERED_PROXIMITY) {
                     var obj = this.mObjects[proximate_object];
                     if (!obj) {
-                        obj = new ProxyObject;
-                        obj.askForProperties(this);
-                        obj.askForPosition(this);
+                        obj = new ProxyObject(this.mService, this.mObjectHost, header.source_space, proximate_object);
+                        obj.askForProperties();
+                        obj.askForPosition();
                     }
                     obj.mRequests[sourceObj.getID()].mRefCount++; // in case this object has multiple queries.
                     console.log("Entered:",proxCall.proximate_object);
                 } else {
                     var obj = this.mObjects[proximate_object];
                     if (obj) {
-
+                        obj.destroy();
+                        delete this.mObjects[proximate_object];
                     }
                     console.log("Exited:",proxCall.proximate_object);
                 }
@@ -201,21 +387,16 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         console.log(body);
     };
 
-    Sirikata.HostedObject.prototype.sendMessage = function (header, body) {
-        var destSpace = header.destination_space;
+    Sirikata.HostedObject.prototype.sendMessage = function (destSpace, header, body) {
         var info = this.mSpaceConnectionMap[destSpace];
         if (!info) {
             Kata.error("Trying to send message to not-connected space "+destSpace);
         }
-        header.destination_space = undefined;
-        header.source_object = undefined;
-        var b64stream = new PROTO.Base64Stream();
-        header.SerializeToStream(b64stream);
-        body.SerializeToStream(b64stream);
-        info.stream.sendMessage(b64stream.getString());
+        info.rpcPort.send(header, body);
     };
 
     Sirikata.HostedObject.prototype.receivedMessage = function (channel, data) {
+        /*
         var header = new Sirikata.Protocol.Header;
         var info, spaceid;
         header.ParseFromStream(new PROTO.Base64Stream(data));
@@ -235,6 +416,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         } else {
             SUPER.receivedMessage.call(this, header, data);
         }
+        */
     };
     Sirikata.HostedObject.prototype._sendNewProxQuery = function(data) {
         console.log("Sending NewProxQuery", data);
@@ -249,8 +431,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             var header = new Sirikata.Protocol.Header;
             header.destination_object = [];
             header.destination_port = Ports.GEOM;
-            header.destination_space = data.spaceid;
-            this.sendMessage(header, body);
+            this.sendMessage(data.spaceid, header, body);
         } else {
             Kata.error("Not enough information to send new prox query", data);
         }

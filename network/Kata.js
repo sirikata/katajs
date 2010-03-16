@@ -37,7 +37,7 @@
     Kata.Main = function () {
         this.mObjectHostWorker = new Kata.WebWorker("ObjectHostWorker.js", "ObjectHostWorker");
         this.mObjectHostChannel = this.mObjectHostWorker.getChannel();
-        this.mObjectHostChannel.registerListener(this);
+        this.mObjectHostChannel.registerListener(Kata.bind(this.receivedMessage, this));
     };
 
     Kata.Main.prototype.getChannel = function() {

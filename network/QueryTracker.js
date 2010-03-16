@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+if (typeof Sirikata == "undefined") { Sirikata = {}; }
+
 (function() {
 
 // Multiplexer on header.id from one socket to several.
@@ -37,22 +39,58 @@
 // Why not use unique ports for this purpose?
 
     var SUPER = Kata.Socket.prototype;
-    Kata.QueryTracker = function (port) {
-        SUPER.constructor.call(this, port);
+    Sirikata.QueryTracker = function (socket) {
+        SUPER.constructor.call(this, socket);
         this.mNextId = 0;
         this.mPendingMessages = {};
     };
-    Kata.extend(Kata.QueryTracker, SUPER);
+    Kata.extend(Sirikata.QueryTracker, SUPER);
 
-    Kata.QueryTracker.prototype.send = function (header, body) {
+    Sirikata.QueryTracker.prototype.send = function (message) {
+        var header = message.header();
         header.id = this.mNextId;
         this.mNextId++;
-        this.mPendingMessages[header.id] = {
-            header: header,
-            body: body,
-            callback: how_do_we_pass_this_in
-        };
-        SUPER.send.call(this, header, body);
+        this.mPendingMessages[header.id] = message;
+        SUPER.send.call(this, header, message.body());
+    };
+
+    Sirikata.QueryTracker.prototype.receivedMessage = function (header, body) {
+        var message = this.mPendingMessages[header.reply_id];
+        var sentHeader = message.header();
+        if ((sentHeader.destination_space != header.source_space ||
+             sentHeader.destination_object != header.source_object ||
+             sentHeader.destination_port != header.source_port)) {
+            return; // Ignore reply from wrong object.
+        }
+        if (!message.recievedMessage(header, body)) {
+            delete this.mPendingMessages[header.reply_id];
+        }
+    };
+    Sirikata.QueryTracker.prototype.destroy = function() {
+        SUPER.destroy.call(this);
+        delete this.mPendingMessages;
     }
+
+    Sirikata.QueryTracker.Message = function(header, body, callback) {
+        this.mHeader = header;
+        this.mBody = body;
+        this.mCallback = callback;
+    };
+
+    Sirikata.QueryTracker.Message.prototype.setCallback = function(callback) {
+        this.mCallback = callback;
+    };
+    Sirikata.QueryTracker.Message.prototype.header = function() {
+        return this.mHeader;
+    };
+    Sirikata.QueryTracker.Message.prototype.body = function() {
+        return this.mBody;
+    };
+    // Returns true if message is to stay in map.
+    Sirikata.QueryTracker.Message.prototype.receivedMessage = function(header, body) {
+        if (this.header) {
+            return this.mCallback(header, body);
+        }
+    };
 
 })();

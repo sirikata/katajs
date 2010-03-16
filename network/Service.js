@@ -36,13 +36,6 @@
         this.mNextPortId = 16384;
     };
 
-    Kata.Service.prototype.bindPort = function(portid,func,obj) {
-        if (obj) {
-            func = Kata.bind(func, obj);
-        }
-        this.getPort(portid).addReceiver(func);
-    };
-
     Kata.Service.prototype.getPort = function(portid) {
         var port = this.mPorts[portid];
         if (!port) {
@@ -62,7 +55,7 @@
     };
 
     Kata.Service.prototype.deliver = function(portid, args) {
-        var listener = this.mPorts[port];
+        var listener = this.mPorts[portid];
         if (!listener) {
             Kata.error("Kata.Channel's mListener is not set");
         }

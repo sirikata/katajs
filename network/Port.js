@@ -33,7 +33,7 @@
 (function() {
     Kata.Port=function (service) {
         this.mReceivers = [];
-        this.mService = serv;
+        this.mService = service;
     };
 
     Kata.Port.prototype.addReceiver = function(func) {
