@@ -697,17 +697,18 @@ saveGalleryCancel = function(){
     var kata, graphics;
     var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
     function testNetwork(){
+		console.log("new kata------------------------------------------------------------------------------------------")
         window.kata = new Kata.Main();
+		console.log("new sim------------------------------------------------------------------------------------------")
         graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("kata"));
         // Use a real space server.
-        /*
-         window.kata.getChannel().sendMessage({
-         msg: "RegisterSpace",
-         spaceid: defaultSpace,
-         server: "sirikata://localhost"
-         });
-         */
+//        window.kata.getChannel().sendMessage({
+//         msg: "RegisterSpace",
+//         spaceid: defaultSpace,
+//         server: "sirikata://localhost"
+//         });
         // LOOPBACK FTW!
+		console.log("register space------------------------------------------------------------------------------------------")
         window.kata.getChannel().sendMessage({
             msg: "RegisterSpace",
             spaceid: defaultSpace,
@@ -717,16 +718,19 @@ saveGalleryCancel = function(){
         var testObj1 = Math.uuid();
         var testObj2 = Math.uuid();
         // FIXME: We have two seemingly redundant messages.
+		console.log("CreateObject------------------------------------------------------------------------------------------")
         window.kata.getChannel().sendMessage({
             msg: "CreateObject",
             spaceid: defaultSpace,
             privid: testObj0
         });
+		console.log("Connect it------------------------------------------------------------------------------------------")
         window.kata.getChannel().sendMessage({
             msg: "ConnectToSpace",
             spaceid: defaultSpace,
             privid: testObj0
         });
+		/*
         window.kata.getChannel().sendMessage({
             msg: "CreateObject",
             spaceid: defaultSpace,
@@ -737,12 +741,15 @@ saveGalleryCancel = function(){
             spaceid: defaultSpace,
             privid: testObj1
         });
+        */
+		console.log("prox------------------------------------------------------------------------------------------")
         window.kata.getChannel().sendMessage({
             msg: "Proximity",
             spaceid: defaultSpace,
-            privid: testObj1,
+            privid: testObj0,
             radius: 1.0e+8
         });
+		/*
         window.kata.getChannel().sendMessage({
             msg: "CreateObject",
             spaceid: defaultSpace,
@@ -753,6 +760,8 @@ saveGalleryCancel = function(){
             spaceid: defaultSpace,
             privid: testObj2
         });
+		*/
+		console.log("end------------------------------------------------------------------------------------------")
     }
 	testNetwork()
 }
