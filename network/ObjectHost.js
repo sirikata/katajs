@@ -63,6 +63,14 @@
         this.mSimulationsByName[name] = channel;
         channel.registerListener(Kata.bind(this.receivedMessage, this));
     };
+    Kata.ObjectHost.prototype.getSimulationName = function (channel) {
+        for (var name in this.mSimulationsByName) {
+            if (this.mSimulationsByName[name] == channel) {
+                return name;
+            }
+        }
+        return null;
+    }
 
     /** FIXME DESCRIPTION
     @param {object=} name  Simulation name (if ommitted, broadcast). */
@@ -76,24 +84,26 @@
         }
     };
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
-        console.log("Object Host received a message:", data);
+        console.log("ObjectHost received a message from "+this.getSimulationName(channel)+":", data);
+        var privid = data.id;
         if (channel == this.mSimulationsByName["graphics"]) {
+            var spaceid = data.spaceid;
             switch (data.msg) {
             case "RegisterSpace":
-                this.registerSpace(data.spaceid.toLowerCase(), data.server);
+                this.registerSpace(spaceid, data.server);
                 return;
-            case "CreateObject":
-                this.createObject(data.spaceid.toLowerCase(), data.privid.toLowerCase());
+            case "Create":
+                this.createObject(spaceid, privid, data);
+                // Don't send "ConnectToSpace" until you have set all the object properties.
                 return;
             default:
                 break;
             }
         }
-        var privid = data.privid && data.privid.toLowerCase();
         if (privid in this.mObjects) {
             this.mObjects[privid].messageFromSimulation(channel, data);
         } else {
-            console.log("ObjectHost message for unknown object ",privid);
+            console.log("ObjectHost message for unknown object: "+privid);
             console.log("List of known objects:",this.mObjects);
         }
     };
@@ -125,10 +135,10 @@
         this.mSpaceMap[spacename] = {protocol: proto, host: host, port: port};
     };
 
-    Kata.ObjectHost.prototype.createObject = function(spacename, id) {
+    Kata.ObjectHost.prototype.createObject = function(spacename, id, msg) {
         console.log("Creating Object "+id+" for space "+spacename+"!");
         var HostedClass = this.mSpaceMap[spacename].protocol.object_class;
-        this.mObjects[id] = new HostedClass(this, id);
+        this.mObjects[id] = new HostedClass(this, id, msg);
         return this.mObjects[id];
     };
 

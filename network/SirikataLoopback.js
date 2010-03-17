@@ -57,7 +57,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         var base64stream = new PROTO.Base64Stream(base64data);
         header.ParseFromStream(base64stream);
         header.source_object = objectref;
-        console.log("Sending to Sirikata Loopback:",header,base64data);
+        //console.log("Sending to Sirikata Loopback:",header,base64data);
         var destobj = header.destination_object;
         if (destobj !== undefined) {
             if (this.mObjects[destobj]) {
@@ -113,6 +113,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 var messname;
                 var argstream;
                 for (var i = 0; i < messageBody.message_arguments.length; i++) {
+                    var addReply = false;
                     messname = messageBody.message_names[i] || messname;
                     argstream = new PROTO.ByteArrayStream(messageBody.message_arguments[i]);
                     if (messname == "NewObj" && dport == Ports.REGISTRATION) {
@@ -127,7 +128,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                         for (var i = 0; i < this.mProxQueries.length; i++) {
                             this._sendProxCall(this.mProxQueries[i], header.source_object, true);
                         }
-                        sendReply = true;
+                        sendReply = addReply = true;
                     } else if (messname == "DelObj" && dport == Ports.REGISTRATION) {
                         delete this.mObjects[header.source_object];
                         for (var i = 0; i < this.mProxQueries.length; i++) {
@@ -147,6 +148,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                             object: header.source_object,
                             port: header.source_port||0,
                             query_id: npq.query_id};
+                        console.log("Adding prox query:",newQuery);
                         this.mProxQueries.push(newQuery);
                         for (var i = 0; i < proxqueryoldlen; i++) {
                             this._sendProxCall(newQuery, this.mProxQueries[i].object, true);
@@ -164,7 +166,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                         }
                     }
                     console.log("Loopback space RPC message "+messname);
-                    if (!sendReply) {
+                    if (!addReply) {
                         outMsg.message_arguments.push([]);
                     }
                 }
@@ -173,6 +175,10 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                     header.source_object = SPACE_OBJECT;
                     header.destination_port = header.source_port;
                     header.source_port = dport;
+                    if (header.id !== undefined) {
+                        header.reply_id = header.id;
+                        header.id = undefined;
+                    }
                     var outb64 = new PROTO.Base64Stream;
                     header.SerializeToStream(outb64);
                     outMsg.SerializeToStream(outb64);

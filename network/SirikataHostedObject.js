@@ -274,13 +274,83 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     var SUPER = Kata.HostedObject.prototype;
 
     /** @constructor */
-    Sirikata.HostedObject = function (objectHost, uuid) {
+    Sirikata.HostedObject = function (objectHost, uuid, createMsg) {
         SUPER.constructor.call(this, objectHost, uuid);
         this.mSpaceConnectionMap = {};
         this.mObjects = {};
+        this.mProperties = {};
+        this.mScale = [1,1,1];
+        this.mPosition = [0,0,0];
+        this.mOrientation = [0,0,0,1];
+        this.mVelocity = [0,0,0];
+        this.mRotAxis = [0,0,1];
+        this.mRotSpeed = 0;
+        this.mParentObject = null;
+        this.mBoundingSphere = 0;
+        this._parseMoveMessage(createMsg, true);
     };
 
     Kata.extend(Sirikata.HostedObject, SUPER);
+
+    Sirikata.HostedObject.prototype._parseMoveMessage = function(msg, initialization) {
+        if (msg.scale) {
+            var meshScale = new Sirikata.Protocol.Vector3fProperty;
+            var scaleX = msg.scale[0], scaleY = msg.scale[1], scaleZ = msg.scale[2];
+            meshScale.value.push(scaleX);
+            meshScale.value.push(scaleY);
+            meshScale.value.push(scaleZ);
+            this.setProperty("MeshScale", meshScale);
+            if (initialization) {
+                this.mBoundingSphere = Math.sqrt(scaleX*scaleX+scaleY*scaleY+scaleZ*scaleZ);
+            }
+        }
+        if (msg.pos) {
+            this.mPosition = msg.pos;
+        }
+        if (msg.vel) {
+            this.mVelocity = msg.vel;
+        }
+        if (msg.orient) {
+            this.mOrientation = msg.orient;
+        }
+        if (msg.rotvel) {
+            this.mRotSpeed = msg.rotvel;
+        }
+        if (msg.rotaxis) {
+            this.mRotAxis = msg.rotaxis;
+        } else if (initialization) {
+            this.mRotSpeed = 0;
+        }
+        if (msg.parent) {
+            this.mParentObject = msg.parent;
+            if (msg.parent != null) {
+                var parentProp = new Sirikata.Protocol.ParentProperty;
+                parentProp.value = msg.parent;
+                this.setProperty("Parent", msg.parent);
+            } else {
+                this.unsetProperty("Parent");
+            }
+        }
+        // attachment_point or parentbone not implemented
+    }
+    Sirikata.HostedObject.prototype.setProperty = function(propname, propval) {
+        var byteArrStream = new PROTO.ByteArrayStream;
+        propval.SerializeToStream(byteArrStream);
+        this.mProperties[propname] = byteArrStream.getArray();
+    }
+    Sirikata.HostedObject.prototype.unsetProperty = function(propname) {
+        delete this.mProperties[propname];
+    }
+
+    Sirikata.HostedObject.prototype._fillObjLoc = function(loc) {
+        // Takes ObjLoc message and fills out fields.
+        loc.timestamp = PROTO.I64.fromNumber(new Date().getTime()*1000);
+        loc.position = this.mPosition;
+        loc.orientation = this.mOrientation;
+        loc.velocity = this.mVelocity;
+        loc.angular_velocity = this.mRotVel;
+        loc.angular_speed = this.mRotSpeed;
+    }
 
     Sirikata.HostedObject.prototype.connectToSpace = function (space) {
         var topLevelConnection = this.mObjectHost.connectToSpace(space);
@@ -309,12 +379,8 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             body.message_names.push("NewObj");
             var newObj = new Sirikata.Protocol.NewObj;
             newObj.object_uuid_evidence = this.mID;
-            newObj.bounding_sphere = [0,0,0,1];
-            var loc = newObj.requested_object_loc;
-            loc.timestamp = PROTO.I64.fromNumber(new Date().getTime()*1000);
-            loc.position = [0,0,0];
-            loc.orientation = [0,0,0,1];
-            loc.velocity = [0,0,0];
+            newObj.bounding_sphere = [0,0,0,this.mBoundingSphere];
+            this._fillObjLoc(newObj.requested_object_loc);
             body.message_arguments.push(newObj);
             var header = new Sirikata.Protocol.Header;
             header.destination_port = Ports.REGISTRATION;
@@ -331,12 +397,21 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         var spaceConn = this.mSpaceConnectionMap[header.source_space];
         var message_name = '';
         var message = null;
+        var outMsg = new Sirikata.Protocol.MessageBody;
+        var sendReply = false;
         for (var i = 0; i < body.message_arguments.length; i++) {
+            var addReply = false;
             if (body.message_names[i]) {
                 message_name = body.message_names[i];
             }
             message = body.message_arguments[i];
             switch (message_name) {
+            case "LocRequest":
+                var objLoc = new Sirikata.Protocol.ObjLoc;
+                this._fillObjLoc(objLoc);
+                outMsg.message_arguments.push(objLoc)
+                sendReply = addReply = true;
+                break;
             case "RetObj":
                 var retObj = new Sirikata.Protocol.RetObj;
                 retObj.ParseFromStream(new PROTO.ByteArrayStream(message));
@@ -353,6 +428,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                     rotaxis:retObj.location.rotational_axis,
                     rotvel:retObj.location.angular_speed
                 });
+                // FIXME: Send my own type, in addition to the "Create" message!!!
                 for (var queryid in spaceConn.proximity) {
                     this._sendNewProxQuery(spaceConn.proximity[queryid]);
                 }
@@ -362,6 +438,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 proxCall.ParseFromStream(new PROTO.ByteArrayStream(message));
                 var proximate_object = proxCall.proximate_object;
                 if (proximate_object == spaceConn.objectID) {
+                    //FIXME: Maybe also check for other objects on this same ObjectHost?
                 } else if (proxCall.proximity_event == Sirikata.Protocol.ProxCall.ProximityEvent.ENTERED_PROXIMITY) {
                     var obj = this.mObjects[proximate_object];
                     if (!obj) {
@@ -383,12 +460,54 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 }
                 break;
             }
+            if (!addReply) {
+                outMsg.message_arguments.push([]);
+            }
+        }
+        if (sendReply && header.id !== undefined) {
+            header.reply_id = header.id;
+            header.destination_object = header.source_object;
+            header.destination_port = header.source_port;
+            header.id = undefined;
+            header.source_port = undefined;
+            header.source_object = undefined;
+            this.mSpaceConnectionMap[header.source_space].service.getPort(Ports.RPC)
+                .send(header, outMsg);
         }
     };
     Sirikata.HostedObject.prototype._parsePersistence = function (header, bodydata) {
         var body = new Sirikata.Persistence.Protocol.ReadWriteSet;
         body.ParseFromStream(new PROTO.Base64Stream(bodydata));
         console.log("Received Persistence from:",header,"Body:",body);
+        console.log("My properties are:",this.mProperties);
+        var respBody = new Sirikata.Persistence.Protocol.Response;
+        var returnNames = (body.options & Sirikata.Persistence.Protocol.ReadWriteSet
+            .ReadWriteSetOptions.RETURN_READ_NAMES) != 0;
+        for (var i = 0; i < body.reads.length; i++) {
+            var fname = body.reads[i].field_name;
+            var outRead = respBody.reads.push();
+            if (body.reads[i].index) {
+                outRead.index = body.reads[i].index;
+            }
+            if (this.mProperties[fname] !== undefined) {
+                outRead.data = this.mProperties[fname];
+                // ttl?
+                // subscription_id???
+            } else {
+                outRead.return_status = "KEY_MISSING";
+            }
+            if (returnNames) {
+                outRead.field_name = fname;
+            }
+        }
+        header.reply_id = header.id;
+        header.destination_object = header.source_object;
+        header.destination_port = header.source_port;
+        header.id = undefined;
+        header.source_port = undefined;
+        header.source_object = undefined;
+        this.mSpaceConnectionMap[header.source_space].service.getPort(Ports.PERSISTENCE)
+            .send(header, respBody);
     };
     Sirikata.HostedObject.prototype._parseBroadcast = function (header, bodydata) {
         var body = new Sirikata.Protocol.Broadcast;
@@ -428,17 +547,16 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         */
     };
     Sirikata.HostedObject.prototype._sendNewProxQuery = function(data) {
-        console.log("Sending NewProxQuery", data);
         if (data.spaceid && data.radius) {
             var prox = new Sirikata.Protocol.NewProxQuery;
-            prox.query_id = data.id || 0;
+            prox.query_id = data.query_id || 0;
             prox.max_radius = data.radius;
             prox.min_solid_angle = data.min_angle || 0;
             var body = new Sirikata.Protocol.MessageBody;
             body.message_names.push("NewProxQuery");
             body.message_arguments.push(prox);
             var header = new Sirikata.Protocol.Header;
-            header.destination_object = [];
+            header.destination_object = SPACE_OBJECT;
             header.destination_port = Ports.GEOM;
             this.sendMessage(data.spaceid, header, body);
         } else {
@@ -454,10 +572,63 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 this.connectToSpace(data.spaceid.toLowerCase());
             }
             break;
+        case "DisconnectFromSpace":
+            this.destroy(); //????
+            break;
+        case "Destroy":
+            this.destroy(); //
+            break;
+        case "Move":
+            this._parseMoveMessage(data,false);
+            break;
+        case "Mesh":
+            {
+                console.log("MESHED!");
+                var meshURI = new Sirikata.Protocol.StringProperty;
+                meshURI.value = data.mesh;
+                this.setProperty("MeshURI", meshURI);
+            }
+            break;
+        case "DestroyMesh":
+            // Sirikata protocol does not support this.
+            this.unsetProperty("MeshURI");
+            break;
+        case "Light":
+            {
+                var lightInfo = new Sirikata.Protocol.LightInfoProperty;
+                //lightInfo.
+                /*
+  diffuse_color:[.25,.5,1],
+  specular_color: [.2,1,.5],
+  power=1.0: //exponent on the light
+  ambient_color: [0,0,0],
+  light_range: 1.0e5
+  constant_falloff: 0.5,
+  linear_falloff: 0.2,
+  quadratic_falloff: 0.1,
+  cone_inner_radians: 0,
+  cone_outer_radians: 0,
+  cone_falloff: 0.5,
+  type: "POINT",//options include "SPOTLIGHT" or "DIRECTIONAL"
+  casts_shadow: true
+                 */
+                this.setProperty("LightInfo", lightInfo);
+            }
+            break;
+        case "DestroyLight":
+            // Sirikata protocol does not support this after connecting to a space.
+            this.unsetProperty("LightInfo");
+            break;
+        case "SetPhysical":
+            {
+                var physParams = new Sirikata.Protocol.PhysicalParameters;
+                this.setProperty("PhysicalParameters", physParams);
+            }
+            break;
         case "Proximity":
             if (data.spaceid) {
-                data.id = data.id || 0;
-                this.mSpaceConnectionMap[data.spaceid].proximity[data.id] = data;
+                data.queryid = data.queryid || 0;
+                this.mSpaceConnectionMap[data.spaceid].proximity[data.queryid] = data;
                 if (this.mSpaceConnectionMap[data.spaceid].objectID) {
                     this._sendNewProxQuery(data);
                 }
