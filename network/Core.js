@@ -50,7 +50,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             return func.apply(object, arguments);
         };
     };
-    if (console.log&&0) {
+    if (console.log) {
         /** Logs msg to the console, in addition to some json object.
          @param var_args  Some optional JSON or string data to log. */
         Kata.log = function(var_args) {
