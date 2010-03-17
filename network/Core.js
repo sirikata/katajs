@@ -31,7 +31,13 @@
  */
 
 if (typeof(Kata) == "undefined") {Kata = {};}
-if (typeof(console) == "undefined") {console = {};}
+if (""+console.log==""+function () {}) {
+	console = {};
+	debug_console = false
+}
+else {
+	debug_console = true
+}
 if (typeof(JSON) == "undefined") {JSON = {};}
 
 (function() {
@@ -50,7 +56,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             return func.apply(object, arguments);
         };
     };
-    if (console.log) {
+    if (console.log && debug_console) {
         /** Logs msg to the console, in addition to some json object.
          @param var_args  Some optional JSON or string data to log. */
         Kata.log = function(var_args) {
