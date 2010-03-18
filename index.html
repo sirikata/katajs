@@ -697,63 +697,73 @@ saveGalleryCancel = function(){
     var kata, graphics;
     var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
     function testNetwork(){
-        window.kata = new Kata.Main();
-        graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("kata"));
-        // Use a real space server.
-        /*
-         window.kata.getChannel().sendMessage({
-         msg: "RegisterSpace",
-         spaceid: defaultSpace,
-         server: "sirikata://localhost"
-         });
-         */
-        // LOOPBACK FTW!
-        window.kata.getChannel().sendMessage({
-            msg: "RegisterSpace",
-            spaceid: defaultSpace,
-            server: "skloop://"
-        });
-        var testObj0 = Math.uuid();
-        var testObj1 = Math.uuid();
-        var testObj2 = Math.uuid();
-        // FIXME: We have two seemingly redundant messages.
-        window.kata.getChannel().sendMessage({
-            msg: "CreateObject",
-            spaceid: defaultSpace,
-            privid: testObj0
-        });
-        window.kata.getChannel().sendMessage({
-            msg: "ConnectToSpace",
-            spaceid: defaultSpace,
-            privid: testObj0
-        });
-        window.kata.getChannel().sendMessage({
-            msg: "CreateObject",
-            spaceid: defaultSpace,
-            privid: testObj1
-        });
-        window.kata.getChannel().sendMessage({
-            msg: "ConnectToSpace",
-            spaceid: defaultSpace,
-            privid: testObj1
-        });
-        window.kata.getChannel().sendMessage({
-            msg: "Proximity",
-            spaceid: defaultSpace,
-            privid: testObj1,
-            radius: 1.0e+8
-        });
-        window.kata.getChannel().sendMessage({
-            msg: "CreateObject",
-            spaceid: defaultSpace,
-            privid: testObj2
-        });
-        window.kata.getChannel().sendMessage({
-            msg: "ConnectToSpace",
-            spaceid: defaultSpace,
-            privid: testObj2
-        });
-    }
+		window.kata = new Kata.Main();
+		graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("kata"));
+		// Use a real space server.
+		/*
+	 window.kata.getChannel().sendMessage({
+	 msg: "RegisterSpace",
+	 spaceid: defaultSpace,
+	 server: "sirikata://localhost" // Remote space
+	 });
+	 */
+		window.kata.getChannel().sendMessage({
+			msg: "RegisterSpace",
+			spaceid: defaultSpace,
+			server: "skloop://" // Loopback space
+		});
+		var testObj0 = Math.uuid();
+		var testObj1 = Math.uuid();
+		var testObj2 = Math.uuid();
+		window.kata.getChannel().sendMessage({
+			msg: "Create",
+			spaceid: defaultSpace,
+			id: testObj1
+		});
+		window.kata.getChannel().sendMessage({
+			msg: "ConnectToSpace",
+			spaceid: defaultSpace,
+			id: testObj1
+		});
+		window.kata.getChannel().sendMessage({
+			msg: "Proximity",
+			spaceid: defaultSpace,
+			id: testObj1,
+			radius: 1.0e+8
+		});
+		
+		window.kata.getChannel().sendMessage({
+			msg: "Create",
+			spaceid: defaultSpace,
+			id: testObj0
+		});
+		window.kata.getChannel().sendMessage({
+			msg: "Mesh",
+			mesh: "http://www.sirikata.com/content/assets/cube.dae",
+			id: testObj0
+		});
+		window.kata.getChannel().sendMessage({
+			msg: "ConnectToSpace",
+			spaceid: defaultSpace,
+			id: testObj0
+		});
+		
+		window.kata.getChannel().sendMessage({
+			msg: "Create",
+			spaceid: defaultSpace,
+			id: testObj2
+		});
+		window.kata.getChannel().sendMessage({
+			msg: "Light",
+			diffuse_color: [1, 1, 1],
+			id: testObj2
+		});
+		window.kata.getChannel().sendMessage({
+			msg: "ConnectToSpace",
+			spaceid: defaultSpace,
+			id: testObj2
+		});
+	}
 	testNetwork()
 }
 
