@@ -40,17 +40,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<script type="text/javascript" src="externals/GLGE/glge.js"></script> 
 	<script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
 	<script type="text/javascript" src="ray_tri.js"></script> 
-	<script type="text/javascript" src="k3d.js"></script> 
+	<script type="text/javascript" src="kata.js"></script> 
     <script type="text/javascript" src="gfx/k3dgfx.js"></script>
     <script type="text/javascript">
 	doc = new GLGE.Document();
     doc.onLoad = function(){
-        g_scene = K3D.init()
+        g_scene = KJS.init()
         var gfx=new Kata3DGraphics(function(obj){},document.body);
         gfx.send({msg: "Create",id: "box1"});
-        gfx.send({msg:"Mesh",id:"box1",pos:[-5,2,6], mesh:"cube"});
+        gfx.send({msg: "Mesh",id:"box1",pos:[-5,2,6], mesh:"cube"});
         gfx.send({msg: "Create",id: "cam"});
-        gfx.send({msg:"Camera",id:"cam",pos:[1,15,8],primary:true});
+        gfx.send({msg: "Camera",id:"cam",pos:[1,15,8],primary:true});
 		setTimeout( function () {
 	        gfx.send({msg:"Move",id:"box1",pos:[0,2,6], orient:[0,0,1]});
 			},
