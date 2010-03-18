@@ -143,6 +143,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 id: testObj1
             });
             window.kata.getChannel().sendMessage({
+                msg: "Mesh",
+//                mesh: "http://www.sirikata.com/content/assets/cube.dae",
+                mesh: "cube",
+                id: testObj1
+            });
+            window.kata.getChannel().sendMessage({
                 msg: "Proximity",
                 spaceid: defaultSpace,
                 id: testObj1,
@@ -187,6 +193,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 					pos: [4, 2, 3],
 					spaceid: defaultSpace,
 					id: testObj0
+				});
+				window.kata.getChannel().sendMessage({
+					msg: "Move",
+					pos: [-4, 2, 3],
+					spaceid: defaultSpace,
+					id: testObj1
 				});
 			},5000)
         }
