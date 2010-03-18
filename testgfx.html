@@ -130,24 +130,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 server: "skloop://" // Loopback space
             });
             var testObj0 = "tst0" //Math.uuid();
-//            var testObj1 = "tst1" //Math.uuid();
+            var testObj1 = "tst1" //Math.uuid();
 //            var testObj2 = "tst2" //Math.uuid();
-//            window.kata.getChannel().sendMessage({
-//                msg: "Create",
-//                spaceid: defaultSpace,
-//                id: testObj1
-//            });
-//            window.kata.getChannel().sendMessage({
-//                msg: "ConnectToSpace",
-//                spaceid: defaultSpace,
-//                id: testObj1
-//            });
-//            window.kata.getChannel().sendMessage({
-//                msg: "Proximity",
-//                spaceid: defaultSpace,
-//                id: testObj1,
-//                radius: 1.0e+8
-//            });
+            window.kata.getChannel().sendMessage({
+                msg: "Create",
+                spaceid: defaultSpace,
+                id: testObj1
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "ConnectToSpace",
+                spaceid: defaultSpace,
+                id: testObj1
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "Proximity",
+                spaceid: defaultSpace,
+                id: testObj1,
+                radius: 1.0e+8
+            });
             
             window.kata.getChannel().sendMessage({
                 msg: "Create",
@@ -181,12 +181,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //                spaceid: defaultSpace,
 //                id: testObj2
 //            });
-            window.kata.getChannel().sendMessage({
-                msg: "Move",
-                pos: [1, 2, 3],
-                spaceid: defaultSpace,
-                id: testObj0
-            });
+            setTimeout( function(){
+				window.kata.getChannel().sendMessage({
+					msg: "Move",
+					pos: [4, 2, 3],
+					spaceid: defaultSpace,
+					id: testObj0
+				});
+			},5000)
         }
         
         doc.load("testgfx.xml")

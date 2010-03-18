@@ -13,10 +13,9 @@
     <material_layer texture="#cratet" mapinput="UV1" mapto="M_COLOR" />
 </material>
 
-<camera id="maincamera" loc_y="20" loc_x="1" loc_z="8" rot_order="ROT_XZY" rot_y="3.14" rot_x="1.56" />
+<camera id="maincamera" loc_y="20" loc_x="1" loc_z="3" rot_order="ROT_XZY" rot_y="3.14" rot_x="1.56" />
 
 <scene id="mainscene" camera="#maincamera" ambient_color="#666">
-<!--    <object id="crate" loc_y="0"  loc_x="0" mesh="#cube" scale_x="1" scale_y="1" scale_z="1" material="#box" /> -->
 </scene>
 
 </glge>
