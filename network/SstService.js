@@ -51,6 +51,8 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     };
 
     Sirikata.SstService.prototype.send = function(header, bodyunser) {
+        console.log("SstService for object "+this.mSubstream.objectReference,
+                    "sending header:",header,"body:",bodyunser);
         var b64stream = new PROTO.Base64Stream;
         header.SerializeToStream(b64stream);
         bodyunser.SerializeToStream(b64stream);

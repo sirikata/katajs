@@ -62,7 +62,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         var sentHeader = message.header();
         if ((//sentHeader.destination_space != header.source_space ||
              sentHeader.destination_object != header.source_object ||
-             sentHeader.destination_port != header.source_port)) {
+             (sentHeader.destination_port||0) != (header.source_port||0))) {
             console.log("QueryTracker is ignoring message from wrong sender, sentHeader:", sentHeader, "headeris:", header);
             return; // Ignore reply from wrong object.
         }
