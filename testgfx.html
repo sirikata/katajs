@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     doc.onLoad = function(){
         g_scene = KJS.init()
         var gfx=new Kata3DGraphics(function(obj){},document.body);
+		/*
         gfx.send({msg: "Create",id: "box1"});
         gfx.send({msg: "Mesh",id:"box1",pos:[-5,2,6], mesh:"cube"});
         gfx.send({msg: "Create",id: "cam"});
@@ -59,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	        gfx.send({msg:"Move",id:"cam",pos:[1,20,8]});
 			},
 			5000)
+		*/
     }
 	doc.load("testgfx.xml")
     </script>

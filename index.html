@@ -763,6 +763,12 @@ saveGalleryCancel = function(){
 			spaceid: defaultSpace,
 			id: testObj2
 		});
+		window.kata.getChannel().sendMessage({
+			msg: "Move",
+			pos: [1,2,3],
+			spaceid: defaultSpace,
+			id: testObj2
+		});
 	}
 	testNetwork()
 }
