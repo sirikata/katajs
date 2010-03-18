@@ -129,25 +129,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 spaceid: defaultSpace,
                 server: "skloop://" // Loopback space
             });
-            var testObj0 = Math.uuid();
-            var testObj1 = Math.uuid();
-            var testObj2 = Math.uuid();
-            window.kata.getChannel().sendMessage({
-                msg: "Create",
-                spaceid: defaultSpace,
-                id: testObj1
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "ConnectToSpace",
-                spaceid: defaultSpace,
-                id: testObj1
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "Proximity",
-                spaceid: defaultSpace,
-                id: testObj1,
-                radius: 1.0e+8
-            });
+            var testObj0 = "tst0" //Math.uuid();
+//            var testObj1 = "tst1" //Math.uuid();
+//            var testObj2 = "tst2" //Math.uuid();
+//            window.kata.getChannel().sendMessage({
+//                msg: "Create",
+//                spaceid: defaultSpace,
+//                id: testObj1
+//            });
+//            window.kata.getChannel().sendMessage({
+//                msg: "ConnectToSpace",
+//                spaceid: defaultSpace,
+//                id: testObj1
+//            });
+//            window.kata.getChannel().sendMessage({
+//                msg: "Proximity",
+//                spaceid: defaultSpace,
+//                id: testObj1,
+//                radius: 1.0e+8
+//            });
             
             window.kata.getChannel().sendMessage({
                 msg: "Create",
@@ -166,21 +166,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 id: testObj0
             });
             
-            window.kata.getChannel().sendMessage({
-                msg: "Create",
-                spaceid: defaultSpace,
-                id: testObj2
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "Light",
-                diffuse_color: [1, 1, 1],
-                id: testObj2
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "ConnectToSpace",
-                spaceid: defaultSpace,
-                id: testObj2
-            });
+//            window.kata.getChannel().sendMessage({
+//                msg: "Create",
+//                spaceid: defaultSpace,
+//                id: testObj2
+//            });
+//            window.kata.getChannel().sendMessage({
+//                msg: "Light",
+//                diffuse_color: [1, 1, 1],
+//                id: testObj2
+//            });
+//            window.kata.getChannel().sendMessage({
+//                msg: "ConnectToSpace",
+//                spaceid: defaultSpace,
+//                id: testObj2
+//            });
             window.kata.getChannel().sendMessage({
                 msg: "Move",
                 pos: [1, 2, 3],
