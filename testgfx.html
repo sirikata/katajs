@@ -35,34 +35,160 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <title>Kata Network Test</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
+	<script type="text/javascript" src="externals/web-socket-js/FABridge.js"></script>
+	<script type="text/javascript" src="externals/web-socket-js/swfobject.js"></script>
+	<script type="text/javascript" src="externals/web-socket-js/web_socket.js"></script>
+	<script type="text/javascript">
+	    try {
+	        WebSocket.__swfLocation = "../externals/web-socket-js/WebSocketMain.swf";
+	    } catch (e) {
+	        alert(""+e);
+	    }
+	</script>
+	
+	<script type="text/javascript" src="network/Core.js"></script>
+	<script type="text/javascript" src="network/Channel.js"></script>
+	<script type="text/javascript" src="network/WebWorkerChannel.js"></script>
+	<script type="text/javascript" src="network/SimpleChannel.js"></script>
+	<script type="text/javascript" src="network/WebWorker.js"></script>
+	<script type="text/javascript" src="network/Simulation.js"></script>
+	<script type="text/javascript" src="network/GraphicsSimulation.js"></script>
+	<script type="text/javascript" src="network/HostedObject.js"></script>
+	<script type="text/javascript" src="network/ObjectHost.js"></script>
+	<script type="text/javascript" src="network/ObjectHostWorker.js"></script>
+	<script type="text/javascript" src="network/TCPSST.js"></script>
+	<script type="text/javascript" src="network/Service.js"></script>
+	<script type="text/javascript" src="network/Port.js"></script>
+	<script type="text/javascript" src="network/SstService.js"></script>
+	<script type="text/javascript" src="network/Socket.js"></script>
+	<script type="text/javascript" src="network/QueryTracker.js"></script>
+	<script type="text/javascript" src="network/SirikataLoopback.js"></script>
+	<script type="text/javascript" src="network/SirikataHostedObject.js"></script>
+	<script type="text/javascript" src="network/Kata.js"></script>
+	
+	<script type="text/javascript" src="externals/protojs/protobuf.js"></script>
+	<script type="text/javascript" src="externals/protojs/pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/Creation.pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/MessageHeader.pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/ObjectHost.pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/Persistence.pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/Physics.pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/Sirikata.pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/Subscription.pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/Test.pbj.js"></script>
+	<script type="text/javascript" src="externals/protojs/output/Time.pbj.js"></script>
+	<script type="text/javascript" src="gfx/TextGraphics.js"></script>
+	
+	<script type="text/javascript" src="Math.uuid.js"></script>
+	<script type="text/javascript" src="network/TCPSST.js"></script>
+	
+	
 	<script type="text/javascript" src="pdebug.js"></script> 
 	<script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
 	<script type="text/javascript" src="externals/GLGE/glge.js"></script> 
 	<script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
+	<script type="text/javascript" src="externals/GLGE/glge_collada.js"></script> 
 	<script type="text/javascript" src="ray_tri.js"></script> 
 	<script type="text/javascript" src="kata.js"></script> 
-    <script type="text/javascript" src="gfx/k3dgfx.js"></script>
+	<script type="text/javascript" src="gfx/k3dgfx.js"></script>
+
     <script type="text/javascript">
-	doc = new GLGE.Document();
-    doc.onLoad = function(){
-        g_scene = KJS.init()
-        var gfx=new Kata3DGraphics(function(obj){},document.body);
-		/*
-        gfx.send({msg: "Create",id: "box1"});
-        gfx.send({msg: "Mesh",id:"box1",pos:[-5,2,6], mesh:"cube"});
-        gfx.send({msg: "Create",id: "cam"});
-        gfx.send({msg: "Camera",id:"cam",pos:[1,15,8],primary:true});
-		setTimeout( function () {
-	        gfx.send({msg:"Move",id:"box1",pos:[0,2,6], orient:[0,0,1]});
-			},
-			3000)
-		setTimeout( function () {
-	        gfx.send({msg:"Move",id:"cam",pos:[1,20,8]});
-			},
-			5000)
-		*/
-    }
-	doc.load("testgfx.xml")
+        doc = new GLGE.Document();
+        var kata, graphics;
+        var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
+        doc.onLoad = function(){
+            g_scene = KJS.init()
+            var gfx = new Kata3DGraphics(function(obj){
+            }, document.body);
+            /*
+             gfx.send({msg: "Create",id: "box1"});
+             gfx.send({msg: "Mesh",id:"box1",pos:[-5,2,6], mesh:"cube"});
+             gfx.send({msg: "Create",id: "cam"});
+             gfx.send({msg: "Camera",id:"cam",pos:[1,15,8],primary:true});
+             setTimeout( function () {
+             gfx.send({msg:"Move",id:"box1",pos:[0,2,6], orient:[0,0,1]});
+             },
+             3000)
+             setTimeout( function () {
+             gfx.send({msg:"Move",id:"cam",pos:[1,20,8]});
+             },
+             5000)
+             */
+            window.kata = new Kata.Main();
+            graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("kata"));
+            // Use a real space server.
+            /*
+             window.kata.getChannel().sendMessage({
+             msg: "RegisterSpace",
+             spaceid: defaultSpace,
+             server: "sirikata://localhost" // Remote space
+             });
+             */
+            window.kata.getChannel().sendMessage({
+                msg: "RegisterSpace",
+                spaceid: defaultSpace,
+                server: "skloop://" // Loopback space
+            });
+            var testObj0 = Math.uuid();
+            var testObj1 = Math.uuid();
+            var testObj2 = Math.uuid();
+            window.kata.getChannel().sendMessage({
+                msg: "Create",
+                spaceid: defaultSpace,
+                id: testObj1
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "ConnectToSpace",
+                spaceid: defaultSpace,
+                id: testObj1
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "Proximity",
+                spaceid: defaultSpace,
+                id: testObj1,
+                radius: 1.0e+8
+            });
+            
+            window.kata.getChannel().sendMessage({
+                msg: "Create",
+                spaceid: defaultSpace,
+                id: testObj0
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "Mesh",
+                mesh: "http://www.sirikata.com/content/assets/cube.dae",
+                id: testObj0
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "ConnectToSpace",
+                spaceid: defaultSpace,
+                id: testObj0
+            });
+            
+            window.kata.getChannel().sendMessage({
+                msg: "Create",
+                spaceid: defaultSpace,
+                id: testObj2
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "Light",
+                diffuse_color: [1, 1, 1],
+                id: testObj2
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "ConnectToSpace",
+                spaceid: defaultSpace,
+                id: testObj2
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "Move",
+                pos: [1, 2, 3],
+                spaceid: defaultSpace,
+                id: testObj2
+            });
+        }
+        
+        doc.load("testgfx.xml")
     </script>
 
   </head>
