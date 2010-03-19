@@ -331,7 +331,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 this.unsetProperty("Parent");
             }
         }
-		if (msg.msg != "Create") {
+		if (msg.msg == "Move") {
 			this.mObjectHost.sendToSimulation(msg);
 		}
         // attachment_point or parentbone not implemented
