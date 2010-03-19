@@ -32,9 +32,15 @@ Kata3DGraphics=function(callbackFunction,parentElement) {
 			obj.setLocZ(msg.pos[2])
 		}
 		if (msg.orient) {
-			obj.setRotX(msg.orient[0])
-			obj.setRotY(msg.orient[1])
-			obj.setRotZ(msg.orient[2])
+			if (msg.orient.length == 3) {			///	Euler angles
+				obj.setRotX(msg.orient[0])
+				obj.setRotY(msg.orient[1])
+				obj.setRotZ(msg.orient[2])
+			}
+			else {									/// Quaternion
+				console.log("setQuat:", msg.orient)
+				obj.setQuat(msg.orient[0],msg.orient[1],msg.orient[2],msg.orient[3])
+			}
 		}
     }
     this.methodTable["Destroy"]=function(msg) {
