@@ -331,6 +331,9 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 this.unsetProperty("Parent");
             }
         }
+		if (msg.msg == "Move") {
+			this.mObjectHost.sendToSimulation(msg);
+		}
         // attachment_point or parentbone not implemented
     }
     Sirikata.HostedObject.prototype.setProperty = function(propname, propval) {
@@ -579,6 +582,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             this.destroy(); //
             break;
         case "Move":
+			console.log("dbm data:", data)
             this._parseMoveMessage(data,false);
             break;
         case "Mesh":
@@ -587,6 +591,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 var meshURI = new Sirikata.Protocol.StringProperty;
                 meshURI.value = data.mesh;
                 this.setProperty("MeshURI", meshURI);
+				this.mObjectHost.sendToSimulation(data);
             }
             break;
         case "DestroyMesh":

@@ -306,7 +306,6 @@ KJS.runScripts = function () {
 }
 
 KJS.render = function (){
-	//pdebug("# of objects: " + KJS.gameScene.objects.length,4)
 	if (!KJS.initComplete) {
 		var c = KJS.gameScene.incompleteObjects()
 		if (c == 0) {

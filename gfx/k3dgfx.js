@@ -20,10 +20,11 @@ Kata3DGraphics=function(callbackFunction,parentElement) {
     this.methodTable={}
 
     this.methodTable["Create"]=function(msg) {
+		console.log("***Create",msg)
 		// FIXME: should keep track of position? do something?
     }
     this.methodTable["Move"]=function(msg) {
-		console.log("Move",msg)
+		console.log("***Move",msg)
 		obj = id2Obj(msg.id)
 		if (msg.pos) {
 			obj.setLocX(msg.pos[0])
@@ -31,19 +32,25 @@ Kata3DGraphics=function(callbackFunction,parentElement) {
 			obj.setLocZ(msg.pos[2])
 		}
 		if (msg.orient) {
-			obj.setRotX(msg.orient[0])
-			obj.setRotY(msg.orient[1])
-			obj.setRotZ(msg.orient[2])
+			if (msg.orient.length == 3) {			///	Euler angles
+				obj.setRotX(msg.orient[0])
+				obj.setRotY(msg.orient[1])
+				obj.setRotZ(msg.orient[2])
+			}
+			else {									/// Quaternion
+				console.log("setQuat:", msg.orient)
+				obj.setQuat(msg.orient[0],msg.orient[1],msg.orient[2],msg.orient[3])
+			}
 		}
     }
     this.methodTable["Destroy"]=function(msg) {
-		console.log("Destroy",msg)
+		console.log("***Destroy",msg)
     }
     this.methodTable["MeshShaderUniform"]=function(msg) {
-		console.log("MeshShaderUniform",msg)
+		console.log("***MeshShaderUniform",msg)
     }
     this.methodTable["Mesh"]=function(msg) {
-		console.log("Mesh",msg)
+		console.log("***Mesh",msg)
 		var obj = new GLGE.Object()			// FIXME: not all k3d objects should be GLGE objects (the camera?)
 		obj.setId(msg.id)
 		obj.setMesh(doc.getElement(msg.mesh))
