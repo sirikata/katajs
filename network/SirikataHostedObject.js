@@ -99,10 +99,11 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         this.mRefCount = 0;
         this.mID = id;
         this.mSpace = space;
-        this.mLocationPendingRequests=[]
+        this.mLocationPendingRequests=[];
         this.mQueryTracker = new Sirikata.QueryTracker(service.newPort());
-
-
+        this.mBroadcastPort = service.newPort();
+        this.mBroadcastPort.addReceiver(Kata.bind(this.receivedBroadcast, this));
+        this.mBroadcastIds = {};
     };
 
     Sirikata.ProxyObject.prototype.destroy = function() {
@@ -133,29 +134,105 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         header.destination_port = portnum;
         return new Sirikata.QueryTracker.Message(header, msg);
     };
-    Sirikata.ProxyObject.prototype.subscribeToProperty = function(propname, subid, ttl) {
+    Sirikata.ProxyObject.prototype.subscribeToProperty = function(subid, ttl, func) {
+        if (subid === undefined) {
+            Kata.log("No subscription for property "+func);
+            return;
+        }
         if (!ttl || ttl < MIN_TTL) {
             ttl = MIN_TTL;
         }
-        var subMsg = new Sirikata.Protocol.Subscribe;
+        var subMsg = new Sirikata.Protocol.Broadcast;
         subMsg.object = this.mID;
         subMsg.broadcast_name = subid;
         subMsg.update_period = ttl;
         var header = new Sirikata.Protocol.Header;
         header.destination_object = SPACE_OBJECT;
         header.destination_port = Ports.SUBSCRIPTION;
-        var message = new Sirikata.QueryTracker.Message(header, msg);
-        this.mQueryTracker.send(message);
+        this.mBroadcastIds[subid] = propname;
+        this.mBroadcastPort.send(header, subMsg);
     };
-    Sirikata.ProxyObject.prototype.setLightProperty = function(lightProp) {
-       this.mObjectHost.sendToSimulation({msg:"Light",
-                                          id:this.mID,
-                                          diffuse_color:lightProp.diffuse_color,
-                                          specular_color:lightProp.specular_color,
-                                          ambient_color:lightProp.ambient_color,
-                                          power:lightProp.power
+    Sirikata.ProxyObject.prototype.receivedBroadcast = function(header, body) {
+        var bcast = new Sirikata.Protocol.Broadcast;
+        if (bcast.data!==undefined && bcast.broadcast_name!==undefined) {
+            var bfunc = this.mBroadcastIds[bcast.broadcast_name];
+            bfunc.call(this, bcast.data);
+        }
+    };
+    Sirikata.ProxyObject.prototype._setMeshScale = function(newdata) {
+        var meshScale = new Sirikata.Protocol.Vector3fProperty;
+        meshScale.ParseFromStream(new PROTO.ByteArrayStream(newdata));
+        if (meshScale.value) {
+            this.mObjectHost.sendToSimulation({msg: "Move",
+                                               id: this.mID,
+                                               time: new Date,
+                                               scale: meshScale.value
+                                              });
+        }
+    };
+    Sirikata.ProxyObject.prototype._setMeshURI = function(newdata) {
+        var meshURI=new Sirikata.Protocol.StringProperty;
+        meshURI.ParseFromStream(new PROTO.ByteArrayStream(newdata));
+        if (meshURI.value===undefined) {
+            console.log("MeshURI Property parse failure",newdata);
+        }else {
+            //send item to graphics system
+            this.mObjectHost.sendToSimulation({msg:"Mesh",
+                                               id:this.mID,
+                                               mesh:meshURI.value
+                                              });
+        }
+    };
+    Sirikata.ProxyObject.prototype._setWebViewURL = function(newdata) {
+        var meshURI=new Sirikata.Protocol.StringProperty;
+        meshURI.ParseFromStream(new PROTO.ByteArrayStream(newdata));
+        if (meshURI.value===undefined) {
+            console.log("WebViewURL Property parse failure",newdata);
+        }else {
+            this.mObjectHost.sendToSimulation({msg:"IFrame",
+                                               id:this.mID,
+                                               mesh:webURI.value
+                                              });
+        }
+    };
+    Sirikata.ProxyObject.prototype._setLightInfo = function(newdata) {
+        var lightProp=new Sirikata.Protocol.LightInfoProperty;
+        lightProp.ParseFromStream(new PROTO.ByteArrayStream(newdata));
+        this.mObjectHost.sendToSimulation({msg:"Light",
+                                           id:this.mID,
+                                           diffuse_color:lightProp.diffuse_color,
+                                           specular_color:lightProp.specular_color,
+                                           ambient_color:lightProp.ambient_color,
+                                           power:lightProp.power
                                             });
-    }
+    };
+    Sirikata.ProxyObject.prototype._setPhysical = function(newdata) {
+        
+    };
+    Sirikata.ProxyObject.prototype._setParent = function(newdata) {
+        
+    };
+    Sirikata.ProxyObject.prototype._setLocation = function(newdata) {
+        var oloc = new Sirikata.Protocol.ObjLoc;
+        oloc.ParseFromStream(new PROTO.ByteArrayStream(newdata));
+        var movemsg = {msg: "Move",
+                       id: this.mID,
+                       time: oloc.timestamp||new Date};
+        if (oloc.position) {
+            movemsg.pos = oloc.position;
+        }
+        if (oloc.orientation) {
+            movemsg.pos = oloc.orientation;
+        }
+        if (oloc.velocity) {
+            movemsg.vel = oloc.velocity;
+        }
+        if (oloc.angular_speed || oloc.axis_of_rotation) {
+            movemsg.rotvel = oloc.angular_speed;
+            movemsg.rotaxis = oloc.axis_of_rotation;
+        }
+        this.mObjectHost.sendToSimulation(movemsg);
+    };
     Sirikata.ProxyObject.prototype.askForProperties = function() {
         var sentBody = new Sirikata.Persistence.Protocol.ReadWriteSet;
         // check that MeshScale is capped at the object's bounding sphere.
@@ -165,7 +242,14 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         sentBody.reads.push().field_name = "LightInfo";
         sentBody.reads.push().field_name = "PhysicalParameters";
         sentBody.reads.push().field_name = "Parent";
-        sentBody.reads.push().field_name = "Name";
+        var funcs = {};
+        funcs["Parent"] = this._setParent;
+        funcs["PhysicalParameters"] = this._setPhysical;
+        funcs["LightInfo"] = this._setLightInfo;
+        funcs["WebViewURL"] = this._setWebViewURL;
+        funcs["MeshURI"] = this._setMeshURI;
+        funcs["MeshScale"] = this._setMeshScale;
+        //sentBody.reads.push().field_name = "Name";
         // Ports.LOC
         var message = this.generateMessage(Ports.PERSISTENCE, sentBody);
         var thus = this;
@@ -180,45 +264,49 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                              ttl: read.ttl,
                              subid: read.subscription_id};
                         fields[propname] = propval;
-                        if (propval.subid !== undefined) {
-                            thus.subscribeToProperty(propname, propval.subid, propval.ttl);
-                        }
                     }
                 }
                 var type = 'node';
-                var isWebView = false;
                 if (fields["MeshURI"]) {//these are data coming from the network in PBJ string form, not fields in a js struct
                     type = 'mesh';
                 } else if (fields["LightInfo"]) {
                     type = 'light';
                 }
-                if (fields["WebViewURL"]) {
-                    isWebView = true;
-                }
-                if (isWebView) { // && type != 'mesh'
+                if (fields["WebViewURL"]) { // && type != 'mesh') {
                     type = 'webview';
                 }
                 switch (type) {
                 case 'mesh':{
-                    var meshURI=new Sirikata.Protocol.StringProperty;
-                    meshURI.ParseFromStream(new PROTO.ByteArrayStream(fields["MeshURI"].data));
-                   //FIXME: test for parse failure
-                   if (meshURI.value===undefined) {
-                       console.log("Property parse failure",fields["MeshURI"].data);
-                   }else {
-                   //send item to graphics system
-                       thus.mObjectHost.sendToSimulation({msg:"Mesh",
-                                                      id:thus.mID,
-                                                      mesh:meshURI.value
-                                                      });
-                   }
-                   }break;
+                    var propval = fields["MeshURI"];
+                    thus._setMeshURI(propval.data, true);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["MeshURI"]);
+                    if (fields["MeshScale"]) {
+                        propval = fields["MeshScale"];
+                        thus._setMeshScale(propval.data);
+                        thus.subscribeToProperty(propval.subid, propval.ttl, funcs["MeshScale"]);
+                    }
+                }break;
                 case 'light':{
-                    lightProp=new Sirikata.Protocol.LightInfoProperty;
-                    lightProp.ParseFromStream(new PROTO.ByteArrayStream(fields["LightInfo"].data));
-                    thus.setLightProperty(lightProp);
+                    var propval = fields["LightInfo"];
+                    thus._setLightInfo(propval.data, true);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["LightInfo"]);
+                }break;
+                case 'webview':{
+                    var propval = fields["WebViewURL"];
+                    thus._setWebViewURL(propval.data, true);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["WebViewURL"]);
                 }break;
                 default:break;
+                }
+                if (fields["PhysicalParameters"]) {
+                    var propval = fields["PhysicalParameters"];
+                    thus._setPhysical(propval.data);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["PhysicalParameters"]);
+                }
+                if (fields["Parent"]) {
+                    var propval = fields["Parent"];
+                    thus._setParent(propval.data);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["Parent"]);
                 }
             };
             if (thus.mLocationPendingRequests!==undefined) {
@@ -229,7 +317,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
         });
     };
-    Sirikata.ProxyObject.prototype.askForPosition = function() {
+    Sirikata.ProxyObject.prototype.askForPosition__old = function() {
         var loc = new Sirikata.Protocol.LocRequest;
         var object_reference=this.mID;
         loc.object=object_reference;
@@ -242,7 +330,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         var message = new Sirikata.QueryTracker.Message(header, msg);
         var thus=this;
         message.setCallback(function(respHeader, respBody) {
-            if (!this.mDestroyed) {
+            if (!thus.mDestroyed) {
                 // FIXME: Error checking
                 var msgBody = new Sirikata.Protocol.MessageBody;
                 msgBody.ParseFromStream(new PROTO.Base64Stream(respBody));
@@ -254,6 +342,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                     time:objLoc.timestamp,
                     pos:objLoc.position,
                     vel:objLoc.velocity,
+                    orient:objLoc.orientation,
                     rotaxis:objLoc.rotational_axis,
                     rotvel:objLoc.angular_speed
                     });
@@ -269,6 +358,76 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         });
         this.mQueryTracker.send(message);
     };
+
+    Sirikata.ProxyObject.prototype.askForPosition = function() {
+        var sentBody = new Sirikata.Persistence.Protocol.ReadWriteSet;
+        var object_reference=this.mID;
+        var r;
+        // check that MeshScale is capped at the object's bounding sphere.
+        r = sentBody.reads.push();
+        r.field_name = "Position";
+        r.object = this.mID;
+        r = sentBody.reads.push();
+        r.field_name = "Orientation";
+        r.object = this.mID;
+        r = sentBody.reads.push();
+        r.field_name = "Velocity";
+        r.object = this.mID;
+        r = sentBody.reads.push();
+        r.field_name = "AngVel";
+        r.object = this.mID;
+        // Ports.LOC
+        var header = new Sirikata.Protocol.Header;
+        header.destination_object = SPACE_OBJECT;
+        //header.destination_space = this.mSpace;
+        header.destination_port = Ports.LOC;
+        var message = Sirikata.QueryTracker.Message(header, msg);
+        var thus = this;
+        sendPersistenceMessage(this.mQueryTracker, message, function() {
+            if (!thus.mDestroyed) {
+                var createMsg = {
+                    msg: "Create",
+                    id: object_reference,//private ID for gfx (we can narrow it)
+                    time:new Date,
+                    pos:[0,0,0],
+                    vel:[0,0,0],
+                    orient:[1,0,0,0],
+                    rotaxis:[1,0,0],
+                    rotvel:0
+                    };
+                var subscriptions = [];
+                for (var i = 0; i < sentBody.reads.length; i++) {
+                    r = sentBody.reads[i];
+                    if (!r.return_status) {
+                        var objloc = new Sirikata.Protocol.ObjLoc;
+                        objloc.ParseFromStream(new ByteArrayStream(r.data));
+                        if (r.field_name == "Position") {
+                            createMsg.pos = objloc.position;
+                            createMsg.time = objloc.timestamp; // FIXME: Each property has own timestamp
+                        } else if (r.field_name == "Orientation") {
+                            createMsg.orient = objLoc.orientation;
+                        } else if (r.field_name == "Velocity") {
+                            createMsg.vel = objLoc.velocity;
+                        } else if (r.field_name == "AngVel") {
+                            createMsg.rotaxi = objLoc.axis_of_rotation;
+                            createMsg.rotvel = objLoc.angular_speed;
+                        }
+                        if (r.subscription_name) {
+                            thus.subscribeToProperty(r.subscription_name, r.ttl, thus._setLocation);
+                        }
+                    }
+                }
+                thus.mObjectHost.sendToSimulation(createMsg);
+                var deferredLength=thus.mLocationPendingRequests.length;
+                for (var index=0;index<deferredLength;index+=1) {
+                    thus.mLocationPendingRequests[index]();
+                }
+                delete thus.mLocationPendingRequests;
+            }
+        });
+        this.mQueryTracker.send(message);
+    };
+
 
     // public class SirikataHostedObject
     var SUPER = Kata.HostedObject.prototype;

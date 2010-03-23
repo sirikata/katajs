@@ -43,14 +43,19 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         PERSISTENCE:5,
         PHYSICS:6,
         TIMESYNC:7,
-        SUBSCRIPTION:9,
         BROADCAST:10
     };
     var SPACE_OBJECT = "";
 
+    var POSITION_SUBSCRIPTION = -1;
+    var VELOCITY_SUBSCRIPTION = -1;
+    var ORIENTATION_SUBSCRIPTION = -1;
+    var ANGVEL_SUBSCRIPTION = -1;
+
     Sirikata.Loopback = function() {
         this.mObjects = {};
         this.mProxQueries = [];
+        this.mBroadcasts = {};
     };
     Sirikata.Loopback.prototype.send = function (objectref, base64data) {
         var header = new Sirikata.Protocol.Header;
@@ -94,13 +99,164 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         header.SerializeToStream(b64stream);
         messageBody.SerializeToStream(b64stream);
         this.send(SPACE_OBJECT,b64stream.getString());
-    }
+    };
+    Sirikata.Loopback.prototype._broadcast = function(object, fid, data) {
+        var key = this._broadcastkey[object+"_"+fid];
+        var bcastinfo = this.mSubscriptions[key];
+        var msg = new Sirikata.Protocol.Broadcast;
+        msg.data = data;
+        msg.object = object;
+        msg.broadcast_name = fid;
+        var header = new Sirikata.Protocol.Header;
+        header.source_object = SPACE_OBJECT;
+        header.source_port = Ports.BROADCAST;
+        if (bcastinfo) {
+            for (var subscriber in bcastinfo) {
+                var subinfo = bcastinfo[subscriber];
+                header.destination_port = subinfo.port;
+                header.destination_object = subinfo.subscriber;
+                var outb64 = new PROTO.Base64Stream;
+                header.SerializeToStream(outb64);
+                msg.SerializeToStream(outb64);
+                this.send(SPACE_OBJECT,outb64.getString());
+            }
+        }
+    };
+    Sirikata.Loopback.prototype._subscribe = function(key, subscriber, port, period) {
+        var bcastinfo = this.mSubscriptions[key];
+        if (period !== undefined) {
+            // Subscribe
+            bcastinfo.subscribers[subscriber+":"+port] = {
+                subscriber:subscriber,
+                port: port,
+                update_period: period
+            };
+        } else {
+            // Unsubscribe
+            delete bcastinfo.subscribers[subscriber+":"+port];
+        }
+    };
     Sirikata.Loopback.prototype._spaceMessage = function (header, base64data) {
         var dport = header.destination_port || Ports.RPC;
         switch (dport) {
-        case Ports.SUBSCRIPTION:
+        case Ports.BROADCAST:
+            var bcastmsg = new Sirikata.Protocol.Broadcast;
+            var fid = bcastmsg.broadcast_name;
+            if (bcastmsg.data !== undefined) {
+                // Broadcast message
+                var object = header.source_object;
+
+                if (fid > 0 || !object) {
+                    if (!object) {
+                        object = bcastmsg.object;
+                    }
+                    this._broadcast(object,fid,bcastmsg.data);
+                }
+            } else {
+                // Subscription message
+                var subscriber = header.source_object;
+                var port = header.source_port;
+                var object = bcastmsg.object;
+                var updateper = bcastmsg.update_period;
+                var key = this._broadcastkey[object+"_"+fid];
+                this._subscribe(key, subscriber, port, updateper);
+            }
             break;
         case Ports.LOC:
+            {
+                var rws = new Sirikata.Protocol.Persistence.ReadWriteSet;
+                var object = header.source_object;
+                for (var i = 0; i < rws.writes.length; i++) {
+                    var w = rws.writes[i];
+                    if (w.field_name == "Position" || w.field_name == "Orientation" ||
+                       w.field_name == "AngVel" || w.field_name == "Velocity") {
+                        var oloc = new Sirikata.Protocol.ObjLoc;
+                        oloc.ParseFromStream(new ByteArrayStream(w.data));
+                        var objToSet = this.mObjects[object];
+                        if (oloc.position !== undefined) {
+                            objToSet.mPos.position = oloc.position;
+                            objToSet.mPos.timestamp = oloc.timestamp || new Date;
+                            this._broadcast(object,POSITION_SUBSCRIPTION,bcastmsg.objToSet.mPos);
+                        }
+                        if (oloc.velocity !== undefined) {
+                            objToSet.mVel.velocity = oloc.velocity;
+                            objToSet.mVel.timestamp = oloc.timestamp || new Date;
+                            this._broadcast(object,VELOCITY_SUBSCRIPTION,bcastmsg.objToSet.mVel);
+                        }
+                        if (oloc.orientation !== undefined) {
+                            objToSet.mOrient.orientation = oloc.orientation;
+                            objToSet.mOrient.timestamp = oloc.timestamp || new Date;
+                            this._broadcast(object,ORIENTATION_SUBSCRIPTION,bcastmsg.objToSet.mOrient);
+                        }
+                        var setangspd = false;
+                        if (oloc.angular_speed !== undefined) {
+                            objToSet.mRot.angular_speed = oloc.angular_speed;
+                            if (objToSet.mRot.axis_of_rotation === undefined) {
+                                objToSet.mRot.axis_of_rotation = [1,0,0];
+                            }
+                            objToSet.mRot.timestamp = oloc.timestamp || new Date;
+                            setangspd = true;
+                        }
+                        if (oloc.axis_of_rotation !== undefined) {
+                            objToSet.mRot.axis_of_rotation = oloc.axis_of_rotation;
+                            objToSet.mRot.timestamp = oloc.timestamp || new Date;
+                            setangspd = true;
+                        }
+                        if (!(objToSet.mRot.angular_speed > 0)) {
+                            objToSet.mRot.angular_speed = 0;
+                            objToSet.mRot.axis_of_rotation = [1,0,0];
+                        }
+                        if (setangspd) {
+                            this._broadcast(object,ANGVEL_SUBSCRIPTION,bcastmsg.objToSet.mRot);
+                        }
+                    }
+                }
+                var retMsg = new Sirikata.Protocol.Persistence.Response;
+                for (var i = 0; i < rws.reads.length; i++) {
+                    var r = rws.reads[i];
+                    var ret = retMsg.reads.push();
+                    var oloc = new Sirikata.Protocol.ObjLoc;
+                    var thisObj = this.mObjects[r.object || header.source_object];
+                    if (r.field_name == "Position") {
+                        oloc.position = thisObj.mPos.position;
+                        oloc.timestamp = thisObj.mPos.timestamp;
+                        ret.subscription_name = POSITION_SUBSCRIPTION;
+                    } else if (r.field_name == "Orientation") {
+                        oloc.orientation = thisObj.mOrient.orientation;
+                        oloc.timestamp = thisObj.mOrient.timestamp;
+                        ret.subscription_name = ORIENTATION_SUBSCRIPTION;
+                    } else if (r.field_name == "AngVel") {
+                        oloc.angular_speed = thisObj.mRot.angular_speed;
+                        oloc.axis_of_rotation = thisObj.mRot.axis_of_rotation;
+                        oloc.timestamp = thisObj.mRot.timestamp;
+                        ret.subscription_name = ANGVEL_SUBSCRIPTION;
+                    } else if (r.field_name == "Velocity" ) {
+                        oloc.velocity = thisObj.mVel.velocity;
+                        oloc.timestamp = thisObj.mVel.timestamp;
+                        ret.subscription_name = VELOCITY_SUBSCRIPTION;
+                    }
+                    if (oloc.IsInitialized()) {
+                        ret.data = oloc;
+                    } else {
+                        ret.return_status = Sirikata.Persistence.Protocol.
+                            StorageElement.ReturnStatus.KEY_MISSING;
+                    }
+                }
+                if (retMsg.reads.length) {
+                    header.destination_object = header.source_object;
+                    header.source_object = SPACE_OBJECT;
+                    header.destination_port = header.source_port;
+                    header.source_port = dport;
+                    if (header.id !== undefined) {
+                        header.reply_id = header.id;
+                        header.id = undefined;
+                    }
+                    var outb64 = new PROTO.Base64Stream;
+                    header.SerializeToStream(outb64);
+                    outMsg.SerializeToStream(outb64);
+                    this.send(SPACE_OBJECT,outb64.getString());
+                }
+            }
             break;
         case Ports.GEOM:
         case Ports.RPC:
@@ -119,24 +275,25 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                     if (messname == "NewObj" && dport == Ports.REGISTRATION) {
                         var newObj = new Sirikata.Protocol.NewObj;
                         newObj.ParseFromStream(argstream);
+                        this.mObjects[header.source_object].mLoc = newObj.requested_object_loc;
                         var outRetObj = new Sirikata.Protocol.RetObj;
                         outRetObj.bounding_sphere = newObj.bounding_sphere;
                         outRetObj.location = newObj.requested_object_loc;
                         outRetObj.object_reference = header.source_object;
                         outMsg.message_names.push("RetObj");
                         outMsg.message_arguments.push(outRetObj);
-                        for (var i = 0; i < this.mProxQueries.length; i++) {
-                            this._sendProxCall(this.mProxQueries[i], header.source_object, true);
+                        for (var j = 0; j < this.mProxQueries.length; j++) {
+                            this._sendProxCall(this.mProxQueries[j], header.source_object, true);
                         }
                         sendReply = addReply = true;
                     } else if (messname == "DelObj" && dport == Ports.REGISTRATION) {
                         delete this.mObjects[header.source_object];
-                        for (var i = 0; i < this.mProxQueries.length; i++) {
-                            if (this.mProxQueries[i].object == header.source_object) {
-                                this.mProxQueries.splice(i,1);
+                        for (var j = 0; j < this.mProxQueries.length; j++) {
+                            if (this.mProxQueries[j].object == header.source_object) {
+                                this.mProxQueries.splice(j,1);
                                 i--;
                             } else {
-                                this._sendProxCall(this.mProxQueries[i], header.source_object, false);
+                                this._sendProxCall(this.mProxQueries[j], header.source_object, false);
                             }
                         }
                         return;
@@ -150,17 +307,17 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                             query_id: npq.query_id};
                         console.log("Adding prox query:",newQuery);
                         this.mProxQueries.push(newQuery);
-                        for (var i = 0; i < proxqueryoldlen; i++) {
-                            this._sendProxCall(newQuery, this.mProxQueries[i].object, true);
+                        for (var j = 0; j < proxqueryoldlen; j++) {
+                            this._sendProxCall(newQuery, this.mProxQueries[j].object, true);
                         }
                     } else if (messname == "DelProxQuery" && dport == Ports.GEOM) {
                         var dpq = new Sirikata.Protocol.DelProxQuery;
                         dpq.ParseFromStream(argstream);
-                        for (var i = 0; i < this.mProxQueries.length; i++) {
-                            if (this.mProxQueries[i].object == header.source_object &&
-                                this.mProxQueries[i].port == (header.source_port||0) &&
-                                this.mProxQueries[i].query_id == dpq.query_id) {
-                                this.mProxQueries.splice(i,1);
+                        for (var j = 0; j < this.mProxQueries.length; j++) {
+                            if (this.mProxQueries[j].object == header.source_object &&
+                                this.mProxQueries[j].port == (header.source_port||0) &&
+                                this.mProxQueries[j].query_id == dpq.query_id) {
+                                this.mProxQueries.splice(j,1);
                                 break;
                             }
                         }
@@ -197,6 +354,10 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     Sirikata.Loopback.Substream = function (tcpsst, objectReference) {
         this.mOwner = tcpsst;
         this.mWhich = objectReference;
+        this.mPos = new Sirikata.Protocol.ObjLoc;
+        this.mOrient = new Sirikata.Protocol.ObjLoc;
+        this.mVel = new Sirikata.Protocol.ObjLoc;
+        this.mRot = new Sirikata.Protocol.ObjLoc;
         Kata.Channel.call(this);
     };
     Kata.extend(Sirikata.Loopback.Substream, Kata.Channel.prototype);
