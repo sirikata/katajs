@@ -1,10 +1,11 @@
 g_camera_id = null
 
 id2Obj = function(id){
-    obj = g_scene.getObjectById(id)
+	console.log("id2obj:",id)
+    var obj = g_scene.getObjectById(id)
     if (obj == null) {
         if (id != g_camera_id) {
-            alert("k3dgfx error: unknown object " + id)
+//            alert("k3dgfx error: unknown object " + id)
             return null
         }
         else {
@@ -95,6 +96,7 @@ Kata3DGraphics=function(callbackFunction,parentElement) {
     }
     
     this.send=function(obj) {
+		console.log("k3dgfx msg sent:", obj)
         return this.methodTable[obj.msg](obj);
     }
     this.destroy=function(){}
