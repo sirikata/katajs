@@ -381,7 +381,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         header.destination_object = SPACE_OBJECT;
         //header.destination_space = this.mSpace;
         header.destination_port = Ports.LOC;
-        var message = Sirikata.QueryTracker.Message(header, msg);
+        var message = new Sirikata.QueryTracker.Message(header, sentBody);
         var thus = this;
         sendPersistenceMessage(this.mQueryTracker, message, function() {
             if (!thus.mDestroyed) {
@@ -438,6 +438,8 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         this.mSpaceConnectionMap = {};
         this.mObjects = {};
         this.mProperties = {};
+        this.mBroadcasts = {};
+        this.mNextBroadcastId = 0;
         this.mScale = [1,1,1];
         this.mPosition = [0,0,0];
         this.mOrientation = [0,0,0,1];
@@ -463,22 +465,46 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 this.mBoundingSphere = Math.sqrt(scaleX*scaleX+scaleY*scaleY+scaleZ*scaleZ);
             }
         }
+        var locMessage = new Sirikata.Persistence.Protocol.ReadWriteSet;
         if (msg.pos) {
+            var w = locMessage.writes.push();
+            var oloc = new Sirikata.Protocol.ObjLoc;
+            oloc.position = msg.pos;
             this.mPosition = msg.pos;
+            w.data = oloc;
+            w.field_name = "Position";
         }
         if (msg.vel) {
+            var w = locMessage.writes.push();
+            var oloc = new Sirikata.Protocol.ObjLoc;
+            oloc.velocity = msg.vel;
             this.mVelocity = msg.vel;
+            w.data = oloc;
+            w.field_name = "Velocity";
         }
         if (msg.orient) {
-            this.mOrientation = msg.orient;
+            var w = locMessage.writes.push();
+            var oloc = new Sirikata.Protocol.ObjLoc;
+            oloc.orientation = msg.orient;
+            this.mOrient = msg.orient;
+            w.data = oloc;
+            w.field_name = "Orientation";
         }
-        if (msg.rotvel) {
-            this.mRotSpeed = msg.rotvel;
-        }
-        if (msg.rotaxis) {
-            this.mRotAxis = msg.rotaxis;
-        } else if (initialization) {
-            this.mRotSpeed = 0;
+        if (msg.rotvel || msg.rotaxis) {
+            var w = locMessage.writes.push();
+            var oloc = new Sirikata.Protocol.ObjLoc;
+            if (msg.rotvel) {
+                oloc.angular_speed = msg.rotvel;
+                this.mRotSpeed = msg.rotvel;
+            }
+            if (msg.rotaxis) {
+                oloc.angular_speed = msg.rotvel;
+                this.mRotAxis = msg.rotaxis;
+            } else if (initialization) {
+                this.mRotSpeed = 0;
+            }
+            w.data = oloc;
+            w.field_name = "AngVel";
         }
         if (msg.parent) {
             this.mParentObject = msg.parent;
@@ -490,19 +516,43 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 this.unsetProperty("Parent");
             }
         }
-		if (msg.msg == "Move") {
-			this.mObjectHost.sendToSimulation(msg);
+		if (!initialization) {
+            var header = new Sirikata.Protocol.Header;
+            header.destination_object = SPACE_OBJECT;
+            header.destination_port = Ports.LOC;
+            this.sendMessage(msg.spaceid, header, locMessage);
 		}
         // attachment_point or parentbone not implemented
-    }
+    };
     Sirikata.HostedObject.prototype.setProperty = function(propname, propval) {
         var byteArrStream = new PROTO.ByteArrayStream;
         propval.SerializeToStream(byteArrStream);
         this.mProperties[propname] = byteArrStream.getArray();
-    }
+        if (this.mBroadcasts[propname] === undefined) {
+            this.mBroadcasts[propname] = this.mNextBroadcastId++;
+        }
+        var bcastmsg = new Sirikata.Protocol.Broadcast;
+        bcastmsg.broadcast_name = this.mBroadcasts[propname];
+        bcastmsg.data = this.mProperties[propname];
+        var header = new Sirikata.Protocol.Header;
+        header.destination_object = SPACE_OBJECT;
+        header.destination_port = Ports.BROADCAST;
+        for (var spaceid in this.mSpaceConnectionMap) {
+            this.sendMessage(spaceid, header, bcastmsg);
+        }
+    };
     Sirikata.HostedObject.prototype.unsetProperty = function(propname) {
         delete this.mProperties[propname];
-    }
+        var bcastmsg = new Sirikata.Protocol.Broadcast;
+        bcastmsg.broadcast_name = this.mBroadcasts[propname];
+        // null bcastmsg.data means deleted.
+        var header = new Sirikata.Protocol.Header;
+        header.destination_object = SPACE_OBJECT;
+        header.destination_port = Ports.BROADCAST;
+        for (var spaceid in this.mSpaceConnectionMap) {
+            this.sendMessage(spaceid, header, bcastmsg);
+        }
+    };
 
     Sirikata.HostedObject.prototype._fillObjLoc = function(loc) {
         // Takes ObjLoc message and fills out fields.
@@ -512,7 +562,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         loc.velocity = this.mVelocity;
         loc.angular_velocity = this.mRotVel;
         loc.angular_speed = this.mRotSpeed;
-    }
+    };
 
     Sirikata.HostedObject.prototype.connectToSpace = function (space) {
         var topLevelConnection = this.mObjectHost.connectToSpace(space);
@@ -581,6 +631,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 console.log("Object "+this.mID+" maps to "+retObj.object_reference);
                 spaceConn.objectID = retObj.object_reference;
                 spaceConn.service.setObjectReference(spaceConn.objectID);
+/*
                 this.mObjectHost.sendToSimulation({
                     msg: "Create",
                     id: this.mID,//private ID for gfx (we can narrow it)
@@ -590,6 +641,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                     rotaxis:retObj.location.rotational_axis,
                     rotvel:retObj.location.angular_speed
                 });
+*/
                 // FIXME: Send my own type, in addition to the "Create" message!!!
                 for (var queryid in spaceConn.proximity) {
                     this._sendNewProxQuery(spaceConn.proximity[queryid]);

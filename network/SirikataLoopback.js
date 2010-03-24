@@ -141,6 +141,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         switch (dport) {
         case Ports.BROADCAST:
             var bcastmsg = new Sirikata.Protocol.Broadcast;
+            bcastmsg.ParseFromStream(new PROTO.Base64Stream(base64data));
             var fid = bcastmsg.broadcast_name;
             if (bcastmsg.data !== undefined) {
                 // Broadcast message
@@ -164,7 +165,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             break;
         case Ports.LOC:
             {
-                var rws = new Sirikata.Protocol.Persistence.ReadWriteSet;
+                var rws = new Sirikata.Persistence.Protocol.ReadWriteSet;
                 var object = header.source_object;
                 for (var i = 0; i < rws.writes.length; i++) {
                     var w = rws.writes[i];
@@ -211,7 +212,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                         }
                     }
                 }
-                var retMsg = new Sirikata.Protocol.Persistence.Response;
+                var retMsg = new Sirikata.Persistence.Protocol.Response;
                 for (var i = 0; i < rws.reads.length; i++) {
                     var r = rws.reads[i];
                     var ret = retMsg.reads.push();
