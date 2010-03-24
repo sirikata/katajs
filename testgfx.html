@@ -59,28 +59,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<script type="text/javascript" src="network/TCPSST.js"></script>
 	<script type="text/javascript" src="network/Service.js"></script>
 	<script type="text/javascript" src="network/Port.js"></script>
-	<script type="text/javascript" src="network/SstService.js"></script>
 	<script type="text/javascript" src="network/Socket.js"></script>
-	<script type="text/javascript" src="network/QueryTracker.js"></script>
-	<script type="text/javascript" src="network/SirikataLoopback.js"></script>
-	<script type="text/javascript" src="network/SirikataHostedObject.js"></script>
-	<script type="text/javascript" src="network/Kata.js"></script>
+	<script type="text/javascript" src="network/sirikata/SstService.js"></script>
+	<script type="text/javascript" src="network/sirikata/QueryTracker.js"></script>
+	<script type="text/javascript" src="network/sirikata/SirikataLoopback.js"></script>
+	<script type="text/javascript" src="network/sirikata/SirikataHostedObject.js"></script>
+	<script type="text/javascript" src="network/MainThread.js"></script>
 	
 	<script type="text/javascript" src="externals/protojs/protobuf.js"></script>
 	<script type="text/javascript" src="externals/protojs/pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/Creation.pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/MessageHeader.pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/ObjectHost.pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/Persistence.pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/Physics.pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/Sirikata.pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/Subscription.pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/Test.pbj.js"></script>
-	<script type="text/javascript" src="externals/protojs/output/Time.pbj.js"></script>
+	<script type="text/javascript" src="network/sirikata/protocol/MessageHeader.pbj.js"></script>
+	<script type="text/javascript" src="network/sirikata/protocol/Persistence.pbj.js"></script>
+	<script type="text/javascript" src="network/sirikata/protocol/Physics.pbj.js"></script>
+	<script type="text/javascript" src="network/sirikata/protocol/Sirikata.pbj.js"></script>
+	<script type="text/javascript" src="network/sirikata/protocol/Subscription.pbj.js"></script>
+	<script type="text/javascript" src="network/sirikata/protocol/Time.pbj.js"></script>
 	<script type="text/javascript" src="gfx/TextGraphics.js"></script>
 	
 	<script type="text/javascript" src="Math.uuid.js"></script>
-	<script type="text/javascript" src="network/TCPSST.js"></script>
 	
 	
 	<script type="text/javascript" src="pdebug.js"></script> 
@@ -100,7 +96,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             g_scene = KJS.init()
             var gfx = new Kata3DGraphics(function(obj){
             }, document.body);
-            window.kata = new Kata.Main();
+            window.kata = new Kata.MainThread();
             graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("kata"));
             // Use a real space server.
             /*

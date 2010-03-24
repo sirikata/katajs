@@ -1,5 +1,5 @@
 /*  Kata Javascript Network Layer
- *  Kata.js
+ *  MainThread.js
  *
  *  Copyright (c) 2010, Patrick Reiter Horn
  *  All rights reserved.
@@ -34,18 +34,18 @@
 
     // public final class Main
     /** @constructor */
-    Kata.Main = function () {
+    Kata.MainThread = function () {
         this.mObjectHostWorker = new Kata.WebWorker("ObjectHostWorker.js", "ObjectHostWorker");
         this.mObjectHostChannel = this.mObjectHostWorker.getChannel();
         this.mObjectHostChannel.registerListener(Kata.bind(this.receivedMessage, this));
     };
 
-    Kata.Main.prototype.getChannel = function() {
+    Kata.MainThread.prototype.getChannel = function() {
         return this.mObjectHostChannel;
     };
 
-    Kata.Main.prototype.receivedMessage = function(channel, data) {
-        //console.log("Kata.Main received ObjectHost message:",data);
+    Kata.MainThread.prototype.receivedMessage = function(channel, data) {
+        //console.log("Kata.MainThread received ObjectHost message:",data);
     };
 
 })();
