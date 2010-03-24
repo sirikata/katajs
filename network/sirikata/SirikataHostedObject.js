@@ -213,6 +213,11 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     Sirikata.ProxyObject.prototype._setParent = function(newdata) {
         
     };
+    Sirikata.ProxyObject.prototype._setCamera = function(newdata) {
+        this.mObjectHost.sendToSimulation({msg:"Camera",
+                                           id:this.mID
+                                          });
+    };
     Sirikata.ProxyObject.prototype._setLocation = function(newdata) {
         var oloc = new Sirikata.Protocol.ObjLoc;
         oloc.ParseFromStream(new PROTO.ByteArrayStream(newdata));
@@ -243,13 +248,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         sentBody.reads.push().field_name = "LightInfo";
         sentBody.reads.push().field_name = "PhysicalParameters";
         sentBody.reads.push().field_name = "Parent";
-        var funcs = {};
-        funcs["Parent"] = this._setParent;
-        funcs["PhysicalParameters"] = this._setPhysical;
-        funcs["LightInfo"] = this._setLightInfo;
-        funcs["WebViewURL"] = this._setWebViewURL;
-        funcs["MeshURI"] = this._setMeshURI;
-        funcs["MeshScale"] = this._setMeshScale;
+        sentBody.reads.push().field_name = "IsCamera";
         //sentBody.reads.push().field_name = "Name";
         // Ports.LOC
         var message = this.generateMessage(Ports.PERSISTENCE, sentBody);
@@ -267,11 +266,14 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                         fields[propname] = propval;
                     }
                 }
+                console.log(fields);
                 var type = 'node';
                 if (fields["MeshURI"]) {//these are data coming from the network in PBJ string form, not fields in a js struct
                     type = 'mesh';
                 } else if (fields["LightInfo"]) {
                     type = 'light';
+                } else if (fields["IsCamera"]) {
+                    type = 'camera';
                 }
                 if (fields["WebViewURL"]) { // && type != 'mesh') {
                     type = 'webview';
@@ -280,34 +282,39 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 case 'mesh':{
                     var propval = fields["MeshURI"];
                     thus._setMeshURI(propval.data, true);
-                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["MeshURI"]);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, this._setMeshURI);
                     if (fields["MeshScale"]) {
                         propval = fields["MeshScale"];
                         thus._setMeshScale(propval.data);
-                        thus.subscribeToProperty(propval.subid, propval.ttl, funcs["MeshScale"]);
+                        thus.subscribeToProperty(propval.subid, propval.ttl, this._setMeshScale);
                     }
                 }break;
                 case 'light':{
                     var propval = fields["LightInfo"];
                     thus._setLightInfo(propval.data, true);
-                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["LightInfo"]);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, this._setLightInfo);
                 }break;
                 case 'webview':{
                     var propval = fields["WebViewURL"];
                     thus._setWebViewURL(propval.data, true);
-                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["WebViewURL"]);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, this._setWebViewURL);
+                }break;
+                case 'camera':{
+                    var propval = fields["IsCamera"];
+                    thus._setCamera(propval.data, true);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, this._setCamera);
                 }break;
                 default:break;
                 }
                 if (fields["PhysicalParameters"]) {
                     var propval = fields["PhysicalParameters"];
                     thus._setPhysical(propval.data);
-                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["PhysicalParameters"]);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, this._setPhysical);
                 }
                 if (fields["Parent"]) {
                     var propval = fields["Parent"];
                     thus._setParent(propval.data);
-                    thus.subscribeToProperty(propval.subid, propval.ttl, funcs["Parent"]);
+                    thus.subscribeToProperty(propval.subid, propval.ttl, this._setParent);
                 }
             };
             if (thus.mLocationPendingRequests!==undefined) {
@@ -653,7 +660,6 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         var body = new Sirikata.Persistence.Protocol.ReadWriteSet;
         body.ParseFromStream(new PROTO.Base64Stream(bodydata));
         console.log("Received Persistence from:",header,"Body:",body);
-        console.log("My properties are:",this.mProperties);
         var respBody = new Sirikata.Persistence.Protocol.Response;
         var returnNames = (body.options & Sirikata.Persistence.Protocol.ReadWriteSet
             .ReadWriteSetOptions.RETURN_READ_NAMES) != 0;
@@ -794,6 +800,17 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         case "DestroyLight":
             // Sirikata protocol does not support this after connecting to a space.
             this.unsetProperty("LightInfo");
+            break;
+        case "Camera":
+            {
+                var camProp = new Sirikata.Protocol.StringProperty;
+                // Sirikata protocol does not support this after connecting to a space.
+                this.setProperty("IsCamera",camProp);    
+            }
+            break;
+        case "DestroyCamera":
+            // Sirikata protocol does not support this after connecting to a space.
+            this.unsetProperty("IsCamera");
             break;
         case "SetPhysical":
             {
