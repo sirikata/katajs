@@ -100,20 +100,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             g_scene = KJS.init()
             var gfx = new Kata3DGraphics(function(obj){
             }, document.body);
-            /*
-             gfx.send({msg: "Create",id: "box1"});
-             gfx.send({msg: "Mesh",id:"box1",pos:[-5,2,6], mesh:"cube"});
-             gfx.send({msg: "Create",id: "cam"});
-             gfx.send({msg: "Camera",id:"cam",pos:[1,15,8],primary:true});
-             setTimeout( function () {
-             gfx.send({msg:"Move",id:"box1",pos:[0,2,6], orient:[0,0,1]});
-             },
-             3000)
-             setTimeout( function () {
-             gfx.send({msg:"Move",id:"cam",pos:[1,20,8]});
-             },
-             5000)
-             */
             window.kata = new Kata.Main();
             graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("kata"));
             // Use a real space server.
@@ -129,9 +115,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 spaceid: defaultSpace,
                 server: "skloop://" // Loopback space
             });
-            var testObj0 = "tst0" //Math.uuid();
+            var testObj0 = "camera" //Math.uuid();
             var testObj1 = "tst1" //Math.uuid();
-//            var testObj2 = "tst2" //Math.uuid();
+            var testObj2 = "tst2" //Math.uuid();
             window.kata.getChannel().sendMessage({
                 msg: "Create",
                 spaceid: defaultSpace,
@@ -147,12 +133,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //                mesh: "http://www.sirikata.com/content/assets/cube.dae",
                 mesh: "cube",
                 id: testObj1
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "Proximity",
-                spaceid: defaultSpace,
-                id: testObj1,
-                radius: 1.0e+8
             });
             
             window.kata.getChannel().sendMessage({
@@ -161,15 +141,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 id: testObj0
             });
             window.kata.getChannel().sendMessage({
-                msg: "Mesh",
-//                mesh: "http://www.sirikata.com/content/assets/cube.dae",
-                mesh: "cube",
+                msg: "ConnectToSpace",
+                spaceid: defaultSpace,
                 id: testObj0
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "Proximity",
+                spaceid: defaultSpace,
+                id: testObj0,
+                radius: 1.0e+8
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "Create",
+                spaceid: defaultSpace,
+                id: testObj2,
+                pos: [1,2,3]
+            });
+            window.kata.getChannel().sendMessage({
+                msg: "Mesh",
+                mesh: "cube",
+                id: testObj2
             });
             window.kata.getChannel().sendMessage({
                 msg: "ConnectToSpace",
                 spaceid: defaultSpace,
-                id: testObj0
+                id: testObj2
             });
             
 //            window.kata.getChannel().sendMessage({

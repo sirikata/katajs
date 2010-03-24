@@ -109,7 +109,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     Sirikata.ProxyObject.prototype.destroy = function() {
         for (var propname in this.subscriptions) {
             var subinfo = this.subscriptions[propname];
-            var subMsg = new Sirikata.Protocol.Subscribe;
+            var subMsg = new Sirikata.Protocol.Broadcast;
             subMsg.object = this.mID;
             subMsg.broadcast_name = subscription.subid;
             // ommitted ttl = unsubscribe.
@@ -148,12 +148,13 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         subMsg.update_period = ttl;
         var header = new Sirikata.Protocol.Header;
         header.destination_object = SPACE_OBJECT;
-        header.destination_port = Ports.SUBSCRIPTION;
-        this.mBroadcastIds[subid] = propname;
+        header.destination_port = Ports.BROADCAST;
+        this.mBroadcastIds[subid] = func;
         this.mBroadcastPort.send(header, subMsg);
     };
     Sirikata.ProxyObject.prototype.receivedBroadcast = function(header, body) {
         var bcast = new Sirikata.Protocol.Broadcast;
+        bcast.ParseFromStream(new PROTO.Base64Stream(body));
         if (bcast.data!==undefined && bcast.broadcast_name!==undefined) {
             var bfunc = this.mBroadcastIds[bcast.broadcast_name];
             bfunc.call(this, bcast.data);
@@ -317,47 +318,6 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
         });
     };
-    Sirikata.ProxyObject.prototype.askForPosition__old = function() {
-        var loc = new Sirikata.Protocol.LocRequest;
-        var object_reference=this.mID;
-        loc.object=object_reference;
-        var msg = new Sirikata.Protocol.MessageBody;
-        msg.message_names.push("LocRequest");
-        msg.message_arguments.push(loc);
-        var header = new Sirikata.Protocol.Header;
-        header.destination_object = object_reference; //SPACE_OBJECT;
-        header.destination_port = Ports.RPC; //Ports.LOC;
-        var message = new Sirikata.QueryTracker.Message(header, msg);
-        var thus=this;
-        message.setCallback(function(respHeader, respBody) {
-            if (!thus.mDestroyed) {
-                // FIXME: Error checking
-                var msgBody = new Sirikata.Protocol.MessageBody;
-                msgBody.ParseFromStream(new PROTO.Base64Stream(respBody));
-                var objLoc=new Sirikata.Protocol.ObjLoc;
-                objLoc.ParseFromStream(new PROTO.ByteArrayStream(msgBody.message_arguments[0]));
-                thus.mObjectHost.sendToSimulation({
-                    msg: "Create",
-                    id: object_reference,//private ID for gfx (we can narrow it)
-                    time:objLoc.timestamp,
-                    pos:objLoc.position,
-                    vel:objLoc.velocity,
-                    orient:objLoc.orientation,
-                    rotaxis:objLoc.rotational_axis,
-                    rotvel:objLoc.angular_speed
-                    });
-                var deferredLength=thus.mLocationPendingRequests.length;
-                for (var index=0;index<deferredLength;index+=1) {
-                    thus.mLocationPendingRequests[index]();
-                }
-                delete thus.mLocationPendingRequests;
-                if (objLoc.subscription_id!==undefined) {
-                   thus.subscribeToProperty("ObjLoc", objLoc.subscription_id, respBody.ttl);
-                }
-            }
-        });
-        this.mQueryTracker.send(message);
-    };
 
     Sirikata.ProxyObject.prototype.askForPosition = function() {
         var sentBody = new Sirikata.Persistence.Protocol.ReadWriteSet;
@@ -366,16 +326,16 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         // check that MeshScale is capped at the object's bounding sphere.
         r = sentBody.reads.push();
         r.field_name = "Position";
-        r.object = this.mID;
+        r.object_uuid = this.mID;
         r = sentBody.reads.push();
         r.field_name = "Orientation";
-        r.object = this.mID;
+        r.object_uuid = this.mID;
         r = sentBody.reads.push();
         r.field_name = "Velocity";
-        r.object = this.mID;
+        r.object_uuid = this.mID;
         r = sentBody.reads.push();
         r.field_name = "AngVel";
-        r.object = this.mID;
+        r.object_uuid = this.mID;
         // Ports.LOC
         var header = new Sirikata.Protocol.Header;
         header.destination_object = SPACE_OBJECT;
@@ -384,6 +344,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         var message = new Sirikata.QueryTracker.Message(header, sentBody);
         var thus = this;
         sendPersistenceMessage(this.mQueryTracker, message, function() {
+            console.log("### Got LOC response for object "+object_reference, sentBody);
             if (!thus.mDestroyed) {
                 var createMsg = {
                     msg: "Create",
@@ -400,20 +361,20 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                     r = sentBody.reads[i];
                     if (!r.return_status) {
                         var objloc = new Sirikata.Protocol.ObjLoc;
-                        objloc.ParseFromStream(new ByteArrayStream(r.data));
+                        objloc.ParseFromStream(new PROTO.ByteArrayStream(r.data));
                         if (r.field_name == "Position") {
                             createMsg.pos = objloc.position;
                             createMsg.time = objloc.timestamp; // FIXME: Each property has own timestamp
                         } else if (r.field_name == "Orientation") {
-                            createMsg.orient = objLoc.orientation;
+                            createMsg.orient = objloc.orientation;
                         } else if (r.field_name == "Velocity") {
-                            createMsg.vel = objLoc.velocity;
+                            createMsg.vel = objloc.velocity;
                         } else if (r.field_name == "AngVel") {
-                            createMsg.rotaxi = objLoc.axis_of_rotation;
-                            createMsg.rotvel = objLoc.angular_speed;
+                            createMsg.rotaxi = objloc.axis_of_rotation;
+                            createMsg.rotvel = objloc.angular_speed;
                         }
-                        if (r.subscription_name) {
-                            thus.subscribeToProperty(r.subscription_name, r.ttl, thus._setLocation);
+                        if (r.subscription_id) {
+                            thus.subscribeToProperty(r.subscription_id, r.ttl, thus._setLocation);
                         }
                     }
                 }
@@ -425,7 +386,6 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 delete thus.mLocationPendingRequests;
             }
         });
-        this.mQueryTracker.send(message);
     };
 
 
@@ -651,7 +611,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 var proxCall = new Sirikata.Protocol.ProxCall;
                 proxCall.ParseFromStream(new PROTO.ByteArrayStream(message));
                 var proximate_object = proxCall.proximate_object;
-                if (proximate_object == spaceConn.objectID) {
+                if (0 && proximate_object == spaceConn.objectID) {
                     //FIXME: Maybe also check for other objects on this same ObjectHost?
                 } else if (proxCall.proximity_event == Sirikata.Protocol.ProxCall.ProximityEvent.ENTERED_PROXIMITY) {
                     var obj = this.mObjects[proximate_object];
@@ -706,7 +666,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             if (this.mProperties[fname] !== undefined) {
                 outRead.data = this.mProperties[fname];
                 // ttl?
-                // subscription_id???
+                outRead.subscription_id = this.mBroadcasts[fname];
             } else {
                 outRead.return_status = "KEY_MISSING";
             }
