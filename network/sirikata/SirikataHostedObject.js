@@ -228,7 +228,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             movemsg.pos = oloc.position;
         }
         if (oloc.orientation) {
-            movemsg.pos = oloc.orientation;
+            movemsg.orient = oloc.orientation;
         }
         if (oloc.velocity) {
             movemsg.vel = oloc.velocity;
