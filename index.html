@@ -39,6 +39,8 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div align="center">
 			<button onclick = 'addPicture(document.getElementById("input_tex1").value)'>new image:</button>
 			<input type="text" id="input_tex1" size="50" value="images/jais_test512x512.jpg"/><br>
+			<button onclick = 'addModel(document.getElementById("input_tex2").value)'>new model:</button>
+			<input type="text" id="input_tex2" size="50" value="david.dae"/><br>
 		</div>
 		<div id="galleryAnnotate" style="padding: 5px" align="center">
 		</div>
@@ -333,7 +335,7 @@ onLoadContinue = function () {
     scene.hoverable = ["closeWidget", "resizeWidget", "noteWidget"]
     scene.selectable = []
     scene.dragable = []
-	scene.dragWallable = ["david","resizeWidget","closeWidget","noteWidget"]
+	scene.dragWallable = ["resizeWidget","closeWidget","noteWidget"]
     g_dragOns = ["bornh_bldg_07_floor", "bornh_bldg_08_floor", "b7_firedoor_door","bornh_bldg_07_walls_int_01",
 	"bornh_bldg_07_walls_int_01_sub1","straightstair_smallgallery","straightstair_smallgallery_sub1",
 	"bornh_bldg_07_walls_int_02","bornh_bldg_08_wall_int_01", "bornh_bldg_08_wall_int_02b",
@@ -453,7 +455,7 @@ onLoadContinue = function () {
 	// statue comes up black!
 
 //	addModel("david.dae", "david", 0.17, [-80,-44,-2.19], [0,0,3])
-	addModel("david.dae", "david", 0.17)
+//	addModel("david.dae", "xxx", 0.17)
 
 	// character logic for Da Man!
 	var o = KJS.gameScene.getObjectById("daman")
@@ -518,7 +520,8 @@ addPicture = function(pic, scale){
 }
 
 addModel = function(url, id, scale, loc, orient){
-	if (scale==null) scale = 1.0
+	if(id==null) id = url
+	if (scale==null) scale = 0.1
 
 	var clda = new GLGE.Collada()
 	clda.setDocument(url)
@@ -551,7 +554,7 @@ addModel = function(url, id, scale, loc, orient){
 			var root = o.getRoot()
 			o.computeBoundingSphere()
 			o.makeDragable(dragWallStart, dragWallUpdate)			
-			positionOnWall(root, 0, 0)
+			positionOnWall(root, 0, -.2)
 		}
 	}
 	else {
