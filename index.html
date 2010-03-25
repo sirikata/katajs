@@ -455,23 +455,25 @@ onLoadContinue = function () {
 	var clda = new GLGE.Collada()
 	clda.setDocument("david.dae")
 	clda.setId("david")
+	clda.setScaleX(0.17)
+	clda.setScaleY(0.17)
+	clda.setScaleZ(0.17)
+	clda.setLocX(-80)
+	clda.setLocY(-44)
+	clda.setLocZ(-2.19)
 	KJS.gameScene.addCollada(clda)
-
-	/*
-	var o = KJS.gameScene.getObjectById("david")
-	console.log("david?",o)
-	console.log("objects:", KJS.gameScene.objects)
-	console.log("groups:", KJS.gameScene.groups)
-	o.setMaterial(doc.getElement("white"))
-	var root = o.getRoot()
-	root.setScaleX(0.17)
-	root.setScaleY(0.17)
-	root.setScaleZ(0.17)
-	o.computeBoundingSphere()
-	root.setLocX(-80)
-	root.setLocY(-44)
-	root.setLocZ(-2.19)
-	*/
+	KJS.gameScene.selectable.push("david")
+	
+	KJS.addObjectInit("david", function(o){
+		o.setMaterial(doc.getElement("white"))
+		var root = o.getRoot()
+		o.computeBoundingSphere()
+		o.makeSelectable(function(){
+			this.setMaterial(doc.getElement("gold"))
+		}, function(){
+			this.setMaterial(doc.getElement("white"))
+		})
+	})
 
 	// character logic for Da Man!
 	var o = KJS.gameScene.getObjectById("daman")
