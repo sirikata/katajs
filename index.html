@@ -452,28 +452,7 @@ onLoadContinue = function () {
 	//	loc_x="-80" loc_y="-44" loc_z="-2.19" animation="#spin" scale="0.17" 
 	// statue comes up black!
 
-	var clda = new GLGE.Collada()
-	clda.setDocument("david.dae")
-	clda.setId("david")
-	clda.setScaleX(0.17)
-	clda.setScaleY(0.17)
-	clda.setScaleZ(0.17)
-	clda.setLocX(-80)
-	clda.setLocY(-44)
-	clda.setLocZ(-2.19)
-	KJS.gameScene.addCollada(clda)
-	KJS.gameScene.selectable.push("david")
-	
-	KJS.addObjectInit("david", function(o){
-		o.setMaterial(doc.getElement("white"))
-		var root = o.getRoot()
-		o.computeBoundingSphere()
-		o.makeSelectable(function(){
-			this.setMaterial(doc.getElement("gold"))
-		}, function(){
-			this.setMaterial(doc.getElement("white"))
-		})
-	})
+	addModel("david.dae", "david", 0.17, [-80,-44,-2.19], [0,0,3])
 
 	// character logic for Da Man!
 	var o = KJS.gameScene.getObjectById("daman")
@@ -535,6 +514,45 @@ addPicture = function(pic, scale){
 //	document.input_editmode.R && document.input_editmode.R[1].checked = true
 	scene.hoverable.push(obj.id)
 	return obj
+}
+
+addModel = function(url, id, scale, loc, orient){
+	if (scale==null) scale = 1.0
+
+	var clda = new GLGE.Collada()
+	clda.setDocument(url)
+	clda.setId(id)
+	clda.setScaleX(scale)
+	clda.setScaleY(scale)
+	clda.setScaleZ(scale)
+	if (loc) {
+		clda.setLocX(loc[0])
+		clda.setLocY(loc[1])
+		clda.setLocZ(loc[2])
+	}
+	if (orient) {
+		if (orient.length == 3) {
+			clda.setRotX(orient[0])
+			clda.setRotY(orient[1])
+			clda.setRotZ(orient[2])
+		}
+		else {
+			clda.setQuat(orient)
+		}
+	}
+	KJS.gameScene.addCollada(clda)
+	KJS.gameScene.selectable.push(id)
+	
+	KJS.addObjectInit(id, function(o){
+		o.setMaterial(doc.getElement("white"))
+		var root = o.getRoot()
+		o.computeBoundingSphere()
+		o.makeSelectable(function(){
+			this.setMaterial(doc.getElement("gold"))
+		}, function(){
+			this.setMaterial(doc.getElement("white"))
+		})
+	})
 }
 
 movementButton = function(b) {
