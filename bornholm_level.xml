@@ -297,8 +297,8 @@
     <object id="ball"                            mesh="#sphere"                                 material="#bornh_bldg_08_wall_int_02_mat" scale_x="1" scale_y="1" scale_z="1" loc_x="-110" loc_z="10" />
     <collada id="duck"                           document="collada/duck.dae"                            animation="#spin" scale="0.03" />
     <object id="daman"                           mesh="#man" skeleton="#Armature" action="#Walk" material="#manmaterial" loc_x="-110" loc_z="2" />
--->
     <collada id="david"                          document="david.dae"                           animation="#spin" />
+-->
 
     <object id="resizeWidget"                    mesh="#resizeMesh"                             material="#gold" scale_x="0.7" scale_y="0.1" scale_z="0.7" />
     <object id="closeWidget"                     mesh="#closeMesh"                              material="#gold" scale_x="0.5" scale_y="0.1" scale_z="0.5" />

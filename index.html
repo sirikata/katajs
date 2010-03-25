@@ -316,8 +316,8 @@ doc.onLoad = function(){
 		lowZ: -36,
 		upZ: 46
 	}
-//	heightmap=null
-	scene = KJS.init(heightmap, 22,  						// # of objects to load -- hacky way to force everything loaded 
+	heightmap=null
+	scene = KJS.init(heightmap, 21,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
 	})
@@ -451,7 +451,17 @@ onLoadContinue = function () {
 	// hardcoded statue stuff until we get things working
 	//	loc_x="-80" loc_y="-44" loc_z="-2.19" animation="#spin" scale="0.17" 
 	// statue comes up black!
+
+	var clda = new GLGE.Collada()
+	clda.setDocument("david.dae")
+	clda.setId("david")
+	KJS.gameScene.addCollada(clda)
+
+	/*
 	var o = KJS.gameScene.getObjectById("david")
+	console.log("david?",o)
+	console.log("objects:", KJS.gameScene.objects)
+	console.log("groups:", KJS.gameScene.groups)
 	o.setMaterial(doc.getElement("white"))
 	var root = o.getRoot()
 	root.setScaleX(0.17)
@@ -461,6 +471,7 @@ onLoadContinue = function () {
 	root.setLocX(-80)
 	root.setLocY(-44)
 	root.setLocZ(-2.19)
+	*/
 
 	// character logic for Da Man!
 	var o = KJS.gameScene.getObjectById("daman")
