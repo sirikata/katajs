@@ -138,6 +138,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             });
             window.kata.getChannel().sendMessage({
                 msg: "Camera",
+				primary: "true",
+                spaceid: defaultSpace,
                 id: testObj0
             });
             window.kata.getChannel().sendMessage({
@@ -186,13 +188,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             setTimeout( function(){
 				window.kata.getChannel().sendMessage({
 					msg: "Move",
-					pos: [4, 2, 3],
+					pos: [1, 25, 3],
 					spaceid: defaultSpace,
 					id: testObj0
 				});
 				window.kata.getChannel().sendMessage({
 					msg: "Move",
-					pos: [-4, 2, 3],
+					pos: [-10, 2, 3],
 					orient: [.92,.38,0,0],			// rotate Z 45* as quat
 					spaceid: defaultSpace,
 					id: testObj1

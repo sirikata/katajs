@@ -1,7 +1,10 @@
 g_camera_id = null
 
+g_id_map = {}
+
 id2Obj = function(id){
 	console.log("id2obj:",id)
+	if (!(id in g_id_map)) alert ("k3dgfx error: unknown object(2) " + id)
     var obj = g_scene.getObjectById(id)
     if (obj == null) {
         if (id != g_camera_id) {
@@ -22,6 +25,7 @@ Kata3DGraphics=function(callbackFunction,parentElement) {
 
     this.methodTable["Create"]=function(msg) {
 		console.log("***Create",msg)
+		g_id_map[msg.id]="1"
 		// FIXME: should keep track of position? do something?
     }
     this.methodTable["Move"]=function(msg) {
@@ -77,7 +81,7 @@ Kata3DGraphics=function(callbackFunction,parentElement) {
     }
     this.methodTable["Camera"]=function(msg) {
 		console.log("Camera",msg)
-		if (msg.primary) {
+		if (msg.primary || true) {
 			g_camera_id = msg.id		// FIXME: need to handle non-primary camera
 		}
 		this["Move"](msg)
