@@ -768,7 +768,6 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                 var meshURI = new Sirikata.Protocol.StringProperty;
                 meshURI.value = data.mesh;
                 this.setProperty("MeshURI", meshURI);
-				this.mObjectHost.sendToSimulation(data);
             }
             break;
         case "DestroyMesh":

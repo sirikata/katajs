@@ -255,7 +255,6 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
                         oloc.timestamp = thisObj.mVel.timestamp;
                         ret.subscription_id = VELOCITY_SUBSCRIPTION;
                     }
-                    console.log("object loc for"+r.field_name,oloc);
                     if (!oloc.IsInitialized()) {
                         ret.return_status = Sirikata.Persistence.Protocol.
                             StorageElement.ReturnStatus.KEY_MISSING;

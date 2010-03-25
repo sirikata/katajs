@@ -84,7 +84,7 @@
         }
     };
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
-        console.log("ObjectHost received a message from "+this.getSimulationName(channel)+":", data);
+        //console.log("ObjectHost received a message from "+this.getSimulationName(channel)+":", data);
         var privid = data.id;
         if (channel == this.mSimulationsByName["graphics"]) {
             var spaceid = data.spaceid;
