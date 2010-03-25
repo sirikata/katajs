@@ -452,7 +452,8 @@ onLoadContinue = function () {
 	//	loc_x="-80" loc_y="-44" loc_z="-2.19" animation="#spin" scale="0.17" 
 	// statue comes up black!
 
-	addModel("david.dae", "david", 0.17, [-80,-44,-2.19], [0,0,3])
+//	addModel("david.dae", "david", 0.17, [-80,-44,-2.19], [0,0,3])
+	addModel("david.dae", "david", 0.17)
 
 	// character logic for Da Man!
 	var o = KJS.gameScene.getObjectById("daman")
@@ -542,13 +543,26 @@ addModel = function(url, id, scale, loc, orient){
 	}
 	KJS.gameScene.addCollada(clda)
 	KJS.gameScene.selectable.push(id)
-	
-	KJS.addObjectInit(id, function(o){
-		o.setMaterial(doc.getElement("white"))
-		var root = o.getRoot()
-		o.computeBoundingSphere()
-		o.makeDragable(dragWallStart, dragWallUpdate)
-	})
+
+	var init
+	if (!loc && !orient) {
+		init = function(o){
+			o.setMaterial(doc.getElement("white"))
+			var root = o.getRoot()
+			o.computeBoundingSphere()
+			o.makeDragable(dragWallStart, dragWallUpdate)			
+			positionOnWall(root, 0, 0)
+		}
+	}
+	else {
+		init = function(o){
+			o.setMaterial(doc.getElement("white"))
+			var root = o.getRoot()
+			o.computeBoundingSphere()
+			o.makeDragable(dragWallStart, dragWallUpdate)			
+		}
+	}
+	KJS.addObjectInit(id, init)
 }
 
 movementButton = function(b) {
