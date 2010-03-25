@@ -323,19 +323,23 @@ KJS.render = function (){
 	if (!david_done) {
 		var o = KJS.gameScene.getObjectById("david")
 		if (o) {
-			console.log("david?", o)
-			console.log("objects:", KJS.gameScene.objects)
-			console.log("groups:", KJS.gameScene.groups)
 			o.setMaterial(doc.getElement("white"))
 			var root = o.getRoot()
 			root.setScaleX(0.17)
 			root.setScaleY(0.17)
 			root.setScaleZ(0.17)
 			o.computeBoundingSphere()
+			o.makeHoverable(function(){
+				this.setMaterial(doc.getElement("gold"))
+			}, function(){
+				this.setMaterial(doc.getElement("white"))
+			})
+			
 			root.setLocX(-80)
 			root.setLocY(-44)
 			root.setLocZ(-2.19)
-			david_done=true
+			KJS.gameScene.hoverable.push("david")
+			david_done = true
 		}
 	}
 	
