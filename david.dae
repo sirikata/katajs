@@ -113,10 +113,10 @@
 	</library_effects>
 	<library_images>
 		<image id="norm-img" name="norm-img">
-			<init_from>images/norm.jpg</init_from>
+			<init_from>images/david_norm.jpg</init_from>
 		</image>
 		<image id="color-img" name="color-img">
-			<init_from>images/color.jpg</init_from>
+			<init_from>images/david_col.jpg</init_from>
 		</image>
 	</library_images>
 	<library_materials>
