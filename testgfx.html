@@ -35,6 +35,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <title>Kata Network Test</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
+	<!-- Core must be loaded before web-socket-js because it cludges window.console -->
+	<script type="text/javascript" src="network/Core.js"></script>
+
 	<script type="text/javascript" src="externals/web-socket-js/FABridge.js"></script>
 	<script type="text/javascript" src="externals/web-socket-js/swfobject.js"></script>
 	<script type="text/javascript" src="externals/web-socket-js/web_socket.js"></script>
@@ -46,7 +49,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	    }
 	</script>
 	
-	<script type="text/javascript" src="network/Core.js"></script>
 	<script type="text/javascript" src="network/Channel.js"></script>
 	<script type="text/javascript" src="network/WebWorkerChannel.js"></script>
 	<script type="text/javascript" src="network/SimpleChannel.js"></script>

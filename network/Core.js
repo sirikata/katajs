@@ -31,12 +31,11 @@
  */
 
 if (typeof(Kata) == "undefined") {Kata = {};}
-if (""+console.log==""+function () {}) {
+if (typeof(console) == "undefined") {
 	console = {};
-	debug_console = false
-}
-else {
-	debug_console = true
+	debug_console = false;
+} else {
+	debug_console = true;
 }
 if (typeof(JSON) == "undefined") {JSON = {};}
 
