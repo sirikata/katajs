@@ -95,6 +95,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         if (this.mCallback && header) {
             return this.mCallback(header, body);
         }
+        return false;
     };
 
 })();

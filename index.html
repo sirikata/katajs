@@ -528,6 +528,10 @@ function getDeepObjects(group) {
 addModel = function(url, id, scale, loc, orient){
 	if(id==null) id = url + Math.random()
 	console.log("addModel:", id)
+	if (url.indexOf("/" == -1)) {
+		url = "http://" + location.host + location.pathname + url
+	}
+//	console.log("url:", location.host, location.pathname, url)
 	if (scale==null) scale = 0.1
 
 	var clda = new GLGE.Collada()
@@ -558,7 +562,6 @@ addModel = function(url, id, scale, loc, orient){
 	var init
 	if (!loc && !orient) {
 		init = function(o){
-			console.log("would setMaterial on", o)
 //			o.setMaterial(doc.getElement("white"))
 			var root = o.getRoot()
 //			o.computeBoundingSphere()
@@ -568,10 +571,10 @@ addModel = function(url, id, scale, loc, orient){
 	}
 	else {
 		init = function(o){
-			o.setMaterial(doc.getElement("white"))
+//			o.setMaterial(doc.getElement("white"))
 			var root = o.getRoot()
-			o.computeBoundingSphere()
-			o.makeDragable(dragWallStart, dragWallUpdate)			
+//			o.computeBoundingSphere()
+//			o.makeDragable(dragWallStart, dragWallUpdate)			
 		}
 	}
 	KJS.addObjectInit(id, init)

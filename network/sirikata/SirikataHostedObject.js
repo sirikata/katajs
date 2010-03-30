@@ -744,6 +744,10 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         }
     };
 
+    Sirikata.HostedObject.prototype.messageFromScript = function (channel, data) {
+        return this.messageFromSimulation(channel,data);//probably want to just forward messages to space?
+    };
+
     Sirikata.HostedObject.prototype.messageFromSimulation = function (channel, data) {
         switch (data.msg) {
         case "ConnectToSpace":
@@ -759,8 +763,17 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             this.destroy(); //
             break;
         case "Move":
-			console.log("dbm data:", data)
+			console.log("dbm data:", data);
             this._parseMoveMessage(data,false);
+            break;
+        case "Script":
+            this.mScript=new Kata.WebWorker(data.script,data.className);
+            this.mScriptChannel=this.mScript.getChannel();
+            this.mScriptChannel.registerListener(Kata.bind(this.messageFromScript,this));
+            break;
+        case "ListenOnPort":
+            spaceconn.service.getPort(data.port).addReceiver(
+                Kata.bind(this.mScript.getChannel(), this));
             break;
         case "Mesh":
             {

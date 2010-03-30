@@ -30,11 +30,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof(Kata) == "undefined") {Kata = {};}
 self.onmessage = function (ev) {
     var data = ev.data;
-    var jsFile = data[0];
-    var clsName = data[1];
-    importScripts(jsFile);
-    new (Kata[clsName]) (new Kata.WebWorkerChannel(self));
+
+    // Bootstrapping root of source tree.
+    // This may not be necessary if importscripts uses relative paths.
+    var scriptroot = data[0];
+    importscripts(scriptroot+"Core.js");
+    Kata.scriptRoot = scriptroot
+
+    // Fetch classname to instanciate and arguments.
+    var jsFile = data[1];
+    var clsName = data[2].split(".");
+    var args = data[3];
+    Kata.include(jsFile);
+    // Our class name can be in a namespace heirarchy.
+    var cls = self;
+    for (var i = 0; i < clsName.length; i++) {
+        cls = cls[clsName[i]];
+    }
+    // We don't use the return value--but using 'new' here makes a unique this.
+    new cls (new Kata.WebWorker.Channel(self), args);
 }
