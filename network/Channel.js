@@ -31,9 +31,18 @@
  */
 
 (function() {
-    // public abstract class Channel
+    /**
+     * An abstract parent for a two-way communication channel. You may send
+     * messages to this channel, and another party may register listeners who
+     * can register to receive message callbacks.
+     * @constructor
+     */
     Kata.Channel = function () {};
 
+    /**
+     * Registers a function to be called when a message is sent.
+     * @param listener  Function that takes one argument.
+     */
     Kata.Channel.prototype.registerListener = function (listener) {
         if (!listener.call) {
             console.log("Listener call type is ",typeof(listener));
@@ -48,6 +57,11 @@
             this.mListener = [this.mListener, listener];
         }
     };
+    /**
+     * Protected function to be called by subclasses when a message has been
+     * received and is to be delivered to listeners.
+     * @param data  Serializable data received from this communication channel.
+     */
     Kata.Channel.prototype.callListeners = function (data) {
         if (!this.mListener) {
             Kata.error("Kata.Channel's mListener is not set");
@@ -60,6 +74,10 @@
             }
         }
     };
+    /**
+     * Abstract function to be called by subclasses when a message has been
+     * received and is to be delivered to listeners.
+     */
     Kata.Channel.prototype.sendMessage = null;
 
 })();
