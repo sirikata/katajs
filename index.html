@@ -557,18 +557,17 @@ addModel = function(url, id, scale, loc, orient){
 
 	var init
 	if (!loc && !orient) {
-		init = function(o){
-//			o.setMaterial(doc.getElement("white"))
-			var root = o.getRoot()
+		init = function(root){
+			console.log("calling getMeshObjects on:", root)
+			var objs = KJS.getMeshObjects(root)
+			console.log("result:", objs)
 //			o.computeBoundingSphere()
-//			o.makeDragable(dragWallStart, dragWallUpdate)			
+//			root.makeDragable(dragWallStart, dragWallUpdate)			
 			positionOnWall(root, 0, -.2)
 		}
 	}
 	else {
 		init = function(o){
-//			o.setMaterial(doc.getElement("white"))
-			var root = o.getRoot()
 //			o.computeBoundingSphere()
 //			o.makeDragable(dragWallStart, dragWallUpdate)			
 		}
@@ -697,6 +696,9 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
+	var o = scene.groups[0]
+	console.log("o:",o)
+	console.log(KJS.getMeshObjects(o))
 }
 
 loadGallery = function() {

@@ -320,9 +320,12 @@ KJS.render = function (){
 	for (id in KJS.objectInitCallbacks) {
 		var o = KJS.gameScene.getObjectById(id)
 		if (o) {
-			console.log("init callback for", id)
-			KJS.objectInitCallbacks[id](o)
-			delete KJS.objectInitCallbacks[id]
+			if (KJS.getMeshObjects(o).length > 0) {		// wait for mesh dl FIXME: what about multi-mesh?
+				console.log("init callback for", id)
+				KJS.objectInitCallbacks[id](o)
+				delete KJS.objectInitCallbacks[id]
+			}
+			else console.log("no mesh yet")
 		}
 	}
 
@@ -506,6 +509,26 @@ KJS.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
 	}
 	return null
 })
+
+///	given a thing, dig in & find all the objects with meshes
+/// tried to add this to Groups, but the groups in scene.groups doesn't seem to have a Groups prototype
+KJS.getMeshObjects = function (o) {
+//	console.log("getMeshObjects on:", o)
+	var objs = []
+	if (o.mesh) {
+//		console.log("  mesh obj:",o)
+		objs.push(o)
+	}
+	if (o.objects) {
+//		console.log("  mo objects:", o.objects.length)
+		for(var i=0; i<o.objects.length; i++) {
+//			console.log("    i:",i)
+			objs = objs.concat(KJS.getMeshObjects(o.objects[i]))
+		}
+	}
+//	console.log("getMeshObjects returns:", objs)
+	return objs
+}
 
 /// compute bounding sphere, add boundingRadius, boundingCenter
 KJS.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
