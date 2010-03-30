@@ -318,7 +318,7 @@ doc.onLoad = function(){
 		lowZ: -36,
 		upZ: 46
 	}
-//	heightmap=null
+	heightmap=null
 	scene = KJS.init(heightmap, 21,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
@@ -519,8 +519,15 @@ addPicture = function(pic, scale){
 	return obj
 }
 
+function getDeepObjects(group) {
+	var objs = []
+	while (group.objects) {
+		group =
+	}
+}
 addModel = function(url, id, scale, loc, orient){
-	if(id==null) id = url
+	if(id==null) id = url + Math.random()
+	console.log("addModel:", id)
 	if (scale==null) scale = 0.1
 
 	var clda = new GLGE.Collada()
@@ -544,16 +551,18 @@ addModel = function(url, id, scale, loc, orient){
 			clda.setQuat(orient)
 		}
 	}
+	console.log("calling addCollada with",clda)
 	KJS.gameScene.addCollada(clda)
 	KJS.gameScene.selectable.push(id)
 
 	var init
 	if (!loc && !orient) {
 		init = function(o){
-			o.setMaterial(doc.getElement("white"))
+			console.log("would setMaterial on", o)
+//			o.setMaterial(doc.getElement("white"))
 			var root = o.getRoot()
-			o.computeBoundingSphere()
-			o.makeDragable(dragWallStart, dragWallUpdate)			
+//			o.computeBoundingSphere()
+//			o.makeDragable(dragWallStart, dragWallUpdate)			
 			positionOnWall(root, 0, -.2)
 		}
 	}

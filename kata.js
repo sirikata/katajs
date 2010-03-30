@@ -43,23 +43,16 @@ KJS.addProtoSafely = function (cls, proto, func){
 // add getObjectById method to Scene
 
 KJS.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
-	for(var i=0; i<this.objects.length; i++) {
-		if (this.objects[i].getRef()==id) return this.objects[i]
-	}
-	return null
-})
-
-KJS.addProtoSafely(GLGE.Scene, "getObjectRootById", function(id) {
-	for(var i=0; i<this.objects.length; i++) {
-		if (this.objects[i].getRef()==id) return this.objects[i].getRoot()
+	for(var i=0; i<this.getRoots().length; i++) {
+		if (this.getRoots()[i].getRef()==id) return this.getRoots()[i]
 	}
 	return null
 })
 
 KJS.addProtoSafely(GLGE.Scene, "getObjectsById", function(id) {
 	var o = []
-	for(var i=0; i<this.objects.length; i++) {
-		if (this.objects[i].getRef()==id) o.push(this.objects[i])
+	for(var i=0; i<this.getRoots().length; i++) {
+		if (this.getRoots()[i].getRef()==id) o.push(this.getRoots()[i])
 	}
 	return o
 })
@@ -327,11 +320,15 @@ KJS.render = function (){
 	for (id in KJS.objectInitCallbacks) {
 		var o = KJS.gameScene.getObjectById(id)
 		if (o) {
+			console.log("init callback for", id)
 			KJS.objectInitCallbacks[id](o)
 			delete KJS.objectInitCallbacks[id]
 		}
 	}
-	
+
+	pdebug("objects: " + KJS.gameScene.objects.length, 2)	
+	pdebug("groups: " + KJS.gameScene.groups.length, 3)	
+	pdebug("roots: " + KJS.gameScene.getRoots().length, 4)	
 
     var now=parseInt(new Date().getTime());
 	KJS.elapsedTime = now-KJS.lasttime
@@ -537,18 +534,18 @@ KJS.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
 })
 
 KJS.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
-	for (var i in this.objects) {
-		this.objects[i].computeBoundingSphere()
-//		pdebug_log("object:", this.objects[i], this.objects[i].getRef(), "radius:", this.objects[i].boundingRadius)
+	for (var i in this.getRoots()) {
+		this.getRoots()[i].computeBoundingSphere()
+//		pdebug_log("object:", this.getRoots()[i], this.getRoots()[i].getRef(), "radius:", this.getRoots()[i].boundingRadius)
 	}
 })
 
 //	return count of objects not fully loaded
 KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
-	if (this.objects.length < this.objectsToLoad) return this.objectsToLoad-this.objects.length
+	if (this.getRoots().length < this.objectsToLoad) return this.objectsToLoad-this.getRoots().length
 	var count = 0
-	for (var i in this.objects) {
-		if ( (!this.objects[i].mesh) || (!this.objects[i].getRef()) ){
+	for (var i in this.getRoots()) {
+		if ( (!this.getRoots()[i].mesh) || (!this.getRoots()[i].getRef()) ){
 			count ++	
 		}
 	}
@@ -559,15 +556,15 @@ KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 KJS.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 	var j = null
 	var temp
-	for (var i in this.objects) {
-		if (this.objects[i].getRef() == id) {
+	for (var i in this.getRoots()) {
+		if (this.getRoots()[i].getRef() == id) {
 			j = i
 			break
 		}
 	}
 	if (j != null) {
-		this.objects[i] = this.objects[this.objects.length-1]
-		this.objects.pop()
+		this.getRoots()[i] = this.getRoots()[this.getRoots().length-1]
+		this.getRoots().pop()
 	}
 	j = null
 	for (var i in this.pickable) {

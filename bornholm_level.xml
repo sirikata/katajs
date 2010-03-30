@@ -281,6 +281,7 @@
     </animation_curve>
 </animation_vector>
 
+<!--
 <import url="man.xml" />
 <material id="manmaterial" specular="0.2">
     <texture id="mantexture1" src="images/man.jpg" />
@@ -288,7 +289,7 @@
     <material_layer texture="#mantexture1" mapinput="UV1" mapto="M_COLOR" />
     <material_layer texture="#mantexture2" mapinput="UV1" mapto="M_NOR" />
 </material>
-
+-->
 
 <camera id="maincamera" loc_y="20" loc_x="1" loc_z="8" rot_order="ROT_XZY" rot_y="3.14" rot_x="1.56" />
 
