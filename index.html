@@ -520,12 +520,14 @@ addPicture = function(pic, scale){
 }
 
 addModel = function(url, id, scale, loc, orient){
+	console.log("addModel input url:", url)
 	if(id==null) id = url + Math.random()
-	console.log("addModel:", id)
 	if (url.indexOf("/" == -1)) {
 		url = "http://" + location.host + location.pathname + url
 	}
-//	console.log("url:", location.host, location.pathname, url)
+	console.log("composite url:", url, "id:", id)
+	console.log("url host:", location.host)
+	console.log("url pathname:", location.pathname)
 	if (scale==null) scale = 0.1
 
 	var clda = new GLGE.Collada()
