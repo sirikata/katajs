@@ -521,6 +521,9 @@ addPicture = function(pic, scale){
 
 addModel = function(url, id, scale, loc, orient){
 	if(id==null) id = url
+	if (url.indexOf("/" == -1)) {
+		url = "http://" + location.host + "/" + url
+	}
 	if (scale==null) scale = 0.1
 
 	var clda = new GLGE.Collada()
@@ -550,7 +553,7 @@ addModel = function(url, id, scale, loc, orient){
 	var init
 	if (!loc && !orient) {
 		init = function(o){
-			o.setMaterial(doc.getElement("white"))
+//			o.setMaterial(doc.getElement("white"))
 			var root = o.getRoot()
 			o.computeBoundingSphere()
 			o.makeDragable(dragWallStart, dragWallUpdate)			
@@ -559,7 +562,7 @@ addModel = function(url, id, scale, loc, orient){
 	}
 	else {
 		init = function(o){
-			o.setMaterial(doc.getElement("white"))
+//			o.setMaterial(doc.getElement("white"))
 			var root = o.getRoot()
 			o.computeBoundingSphere()
 			o.makeDragable(dragWallStart, dragWallUpdate)			
