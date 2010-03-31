@@ -32,8 +32,14 @@
 
 (function() {
 
-    // public final class SimpleChannel extends Channel
     var SUPER = Kata.Channel.prototype;
+    /**
+     * One half of a simple two-way communication channel. These objects are
+     * usually created in pairs.
+     * @constructor
+     * @extends {Kata.Channel}
+     * @param {Kata.SimpleChannel=} partner  The channel to pair up with.
+     */
     Kata.SimpleChannel = function (partner) {
         SUPER.constructor.call(this);
         if (partner) {
@@ -42,6 +48,11 @@
     };
     Kata.extend(Kata.SimpleChannel, SUPER);
 
+    /**
+     * Pairs this SimpleChannel with another one. Usually called by the
+     * constructor.
+     * @param {Kata.SimpleChannel} otherChannel  The channel to pair up with.
+     */
     Kata.SimpleChannel.prototype.pair = function (otherChannel) {
         if (!(otherChannel instanceof Kata.SimpleChannel)) {
             console.error("otherChannel "+otherChannel+" is not instance of SimpleChannel");
@@ -50,6 +61,10 @@
         otherChannel.mPartner = this;
         this.mPartner = otherChannel;
     };
+    /**
+     * Sends a message to the partner SimpleChannel.
+     * @param {string|object} data  Any data to be sent to the partner.
+     */
     Kata.SimpleChannel.prototype.sendMessage = function (data) {
         this.mPartner.callListeners(data);
     };

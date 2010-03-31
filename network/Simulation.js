@@ -33,12 +33,21 @@
 if (typeof(Kata) == "undefined") {Kata = {};}
 (function() {
 
-    // public abstract class Kata.Simulation
-    /** @constructor */
+    /**
+     * Simulation is a simple interface for something that can talk to the
+     * ObjectHost via a Channel.
+     * @constructor
+     * @param {Kata.Channel} channel  A channel to the object host.
+     */
     Kata.Simulation = function (channel) {
         this.mChannel = channel;
         channel.registerListener(Kata.bind(this.receivedMessage, this));
     }
+    /**
+     * Received a message from the object host. Override this method.
+     * @param {Kata.Channel} channel  The sender. Usually equals this.mChannel.
+     * @param {object} data  A message usually in JavascriptGraphicsApi format.
+     */
     Kata.Simulation.prototype.receivedMessage = function (channel, data) {
     }
 

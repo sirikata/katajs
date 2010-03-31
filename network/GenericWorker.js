@@ -30,6 +30,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/** Wrapper to handle entry from a Worker thread the same as if workers are
+ * disabled. Uses Kata.include to include dependent files.
+ */
 self.onmessage = function (ev) {
     var data = ev.data;
 

@@ -34,8 +34,11 @@
 
     var NUM_STREAMS = 1; //FIXME: Test with more than one.
 
-    // public abstract class ObjectHost
-    /** @constructor */
+    /** Kata.ObjectHost is the main interface to access HostedObject's. It also
+     * manages the list of open space connections, and communication between
+     * other simulations (graphics and physics).
+     * @constructor
+     */
     Kata.ObjectHost = function () {
         this.mProtocols = {};
         this.mProtocols["sirikata"] = {
@@ -58,11 +61,20 @@
         console.log("ObjectHosted!");
     };
 
+    /** Notifies the ObjectHost about a new simulation.
+     * @param {Kata.Channel} channel  The corresponding simulation's channel.
+     * @param {string} name  Some human-readable name. May be useful if scripts
+     *     wish to talk to a specfic simulation?
+     */
     Kata.ObjectHost.prototype.registerSimulation = function (channel, name) {
         this.mSimulations.push(channel);
         this.mSimulationsByName[name] = channel;
         channel.registerListener(Kata.bind(this.receivedMessage, this));
     };
+    /**
+     * @return The human-readable name passed to registerSimulation.
+     * @param {Kata.Channel} channel  The corresponding simulation's channel.
+     */
     Kata.ObjectHost.prototype.getSimulationName = function (channel) {
         for (var name in this.mSimulationsByName) {
             if (this.mSimulationsByName[name] == channel) {
@@ -72,8 +84,11 @@
         return null;
     }
 
-    /** FIXME DESCRIPTION
-    @param {object=} name  Simulation name (if ommitted, broadcast). */
+    /** Sends a message to some simulation.
+     * @param {string|object} data  A message (often an object formatted as
+     *     JavascriptGraphicsApi)
+     * @param {string=} name  Simulation name (if ommitted, broadcast).
+     */
     Kata.ObjectHost.prototype.sendToSimulation = function (data, name) {
         if (!name) {
             for (name in this.mSimulationsByName) {
@@ -83,8 +98,12 @@
             this.mSimulationsByName[name].sendMessage(data);
         }
     };
+    /** Sends a message to some simulation.
+     * @param {Kata.Channel} channel  The sending simulation.
+     * @param {string|object} data  A message (often an object formatted as
+     *     JavascriptGraphicsApi)
+     */
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
-        //console.log("ObjectHost received a message from "+this.getSimulationName(channel)+":", data);
         var privid = data.id;
         if (channel == this.mSimulationsByName["graphics"]) {
             var spaceid = data.spaceid;
@@ -94,7 +113,7 @@
                 return;
             case "Create":
                 this.createObject(spaceid, privid, data);
-                // Don't send "ConnectToSpace" until you have set all the object properties.
+                // Don't send ConnectToSpace until you have set all properties.
                 return;
             default:
                 break;
@@ -108,6 +127,13 @@
         }
     };
 
+    /** Registers a space server in a map. This server is not connected yet.
+     * Does not handle spaces with multiple IP addresses, so this isn't very
+     * useful.
+     *
+     * @param {string} spacename  The name (or UUID) of a space server.
+     * @param {string} server  A URI (protocol, host, port) to connect to.
+     */
     Kata.ObjectHost.prototype.registerSpace = function (spacename, server) {
         var colon = server.indexOf("://");
         if (colon == -1) {
@@ -135,6 +161,16 @@
         this.mSpaceMap[spacename] = {protocol: proto, host: host, port: port};
     };
 
+    /** Creates a new instance of a Kata.HostedObject for a specific protocol.
+     * @param {string} spacename  A space id for which to create this object.
+     *     Since HostedObject is protocol-specific, you need to know which type
+     *     of space you wish to connect to to create the object.
+     * @param {string} id  A unique name for this object. You can use this to
+     *     lookup the object within the object host, and it gets passed to the
+     *     object's constructor.
+     * @param {object} msg  The creation message, which may contain extra data.
+     * @return {Kata.HostedObject} A pointer to the new object.
+     */
     Kata.ObjectHost.prototype.createObject = function(spacename, id, msg) {
         console.log("Creating Object "+id+" for space "+spacename+"!");
         var HostedClass = this.mSpaceMap[spacename].protocol.object_class;
@@ -142,8 +178,13 @@
         return this.mObjects[id];
     };
 
-    /** FIXME
-    @param {object=} channel  An optional top-level stream already connected to this same space. */
+    /** Connects to a space registered using registerSpace.
+     * @param {string} spacename  The name of a space (from registerSpace).
+     * @param {Kata.ObjectHost.TopLevelStream=} channel  A channel to register
+     *     to a new space. Omitted if a new connection is to be made instead.
+     * @return {Kata.ObjectHost.TopLevelStream}  A top-level stream to talk to
+     *     the space represented by spacename.
+     */
     Kata.ObjectHost.prototype.connectToSpace = function(spacename, channel) {
         var topLevelStream = channel;
         if (topLevelStream) {
@@ -159,5 +200,16 @@
         }
         return topLevelStream;
     };
+
+    /**
+     * A top-level connection to a remote server. It is not yet bound to a
+     * specific HostedObject.
+     * @interface
+     */
+    Kata.ObjectHost.TopLevelStream = function() {};
+    /**
+     * @return {Kata.Channel} A connection bound to a specific hosted object.
+     */
+    Kata.ObjectHost.TopLevelStream.prototype.clone = function() {};
 
 })();

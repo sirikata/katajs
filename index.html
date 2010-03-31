@@ -521,7 +521,7 @@ addPicture = function(pic, scale){
 
 addModel = function(url, id, scale, loc, orient){
 	if(id==null) id = url
-	if (url.indexOf("/" == -1)) {
+	if (url.indexOf("/") == -1) {
 		url = "http://" + location.host + location.pathname + url
 	}
 //	console.log("url:", location.host, location.pathname, url)
