@@ -635,4 +635,5 @@ KJS.ObjectEx.prototype.rayVsBoundingSphere = function(RayBeg, RayEnd){
 	return ret
 }
 
+console.log("GLGE:", GLGE)
 GLGE.augment(KJS.ObjectEx, GLGE.Object)

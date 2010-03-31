@@ -561,8 +561,10 @@ addModel = function(url, id, scale, loc, orient){
 			console.log("calling getMeshObjects on:", root)
 			var objs = KJS.getMeshObjects(root)
 			console.log("result:", objs)
-//			o.computeBoundingSphere()
-//			root.makeDragable(dragWallStart, dragWallUpdate)			
+			if (objs.length) {
+				objs[0].computeBoundingSphere()
+			}
+			root.makeDragable(dragWallStart, dragWallUpdate)			
 			positionOnWall(root, 0, -.2)
 		}
 	}
