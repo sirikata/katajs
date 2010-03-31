@@ -67,13 +67,6 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<div id="editInfoResize" align="center"></div>
 				<div id="editInfoDelete" align="center"></div>
 				<div id="editInfoAnnotate" align="center"></div>
-				<!--
-				<input type="radio" Name="R" onClick = 'editMode("safe")' />safe
-				<input type="radio" Name="R" onClick = 'editMode("move")'Checked="true" />move
-				<input type="radio" Name="R" onClick = 'editMode("resize")'/>resize
-				<input type="radio" Name="R" onClick = 'editMode("annotate")'/>annotate
-				<input type="radio" Name="R" onClick = 'editMode("delete")'/>delete
-				-->
 			</form>
 			<!--
 			<form Name="input_dragmode">
@@ -413,7 +406,7 @@ onLoadContinue = function () {
             root.dragStartRotX = parseFloat(root.getRotX()) ///	wtf? strings?
             root.dragStartRotY = parseFloat(root.getRotY())
             root.dragStartRotZ = parseFloat(root.getRotZ())
-			pdebug("dragging: " + root.id + " from: " + root.dragStartLocX+" "+root.dragStartLocY+" "+root.dragStartLocZ,3)
+//			pdebug("dragging: " + root.id + " from: " + root.dragStartLocX+" "+root.dragStartLocY+" "+root.dragStartLocZ,3)
         }, function(dx, dy){
 			var root = this.getRoot()
 			if (document.input_dragmode.R[1].checked) {
@@ -424,7 +417,7 @@ onLoadContinue = function () {
 				root.setLocX(root.dragStartLocX - dx * x * 0.05)
 				root.setLocY(root.dragStartLocY - dx * y * 0.05)
 				root.setLocZ(root.dragStartLocZ - dy * 0.05)
-				pdebug("edit move X="+root.getLocX().toFixed(3)+" Y="+root.getLocY().toFixed(3)+" Z="+root.getLocZ().toFixed(3),4)
+//				pdebug("edit move X="+root.getLocX().toFixed(3)+" Y="+root.getLocY().toFixed(3)+" Z="+root.getLocZ().toFixed(3),4)
 			}
 			if (document.input_dragmode.R[2].checked) {
 				root.setRotX(root.dragStartRotX + dy*.01)

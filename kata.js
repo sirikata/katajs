@@ -317,9 +317,9 @@ KJS.render = function (){
 		}
 	}
 
-	pdebug("objects: " + KJS.gameScene.objects.length, 2)	
-	pdebug("groups: " + KJS.gameScene.groups.length, 3)	
-	pdebug("roots: " + KJS.gameScene.getRoots().length, 4)	
+//	pdebug("objects: " + KJS.gameScene.objects.length, 2)	
+//	pdebug("groups: " + KJS.gameScene.groups.length, 3)	
+//	pdebug("roots: " + KJS.gameScene.getRoots().length, 4)	
 
     var now=parseInt(new Date().getTime());
 	KJS.elapsedTime = now-KJS.lasttime
