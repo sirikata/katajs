@@ -552,7 +552,7 @@ addModel = function(url, id, scale, loc, orient){
 	if (!loc && !orient) {
 		init = function(root){
 			console.log("calling getMeshObjects on:", root)
-			var objs = KJS.getMeshObjects(root)
+			var objs = root.getMeshObjects()
 			console.log("result:", objs)
 			if (objs.length) {
 				objs[0].computeBoundingSphere()
@@ -693,7 +693,7 @@ saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
 	var o = scene.groups[0]
 	console.log("o:",o)
-	console.log(KJS.getMeshObjects(o))
+	console.log(o.getMeshObjects())
 	console.log("meth:", o.computeBoundingSphere)
 }
 

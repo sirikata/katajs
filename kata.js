@@ -310,7 +310,7 @@ KJS.render = function (){
 	for (id in KJS.objectInitCallbacks) {
 		var o = KJS.gameScene.getObjectById(id)
 		if (o) {
-			if (KJS.getMeshObjects(o).length > 0) {		// wait for mesh dl FIXME: what about multi-mesh?
+			if (o.getMeshObjects().length > 0) {		// wait for mesh dl FIXME: what about multi-mesh?
 				KJS.objectInitCallbacks[id](o)
 				delete KJS.objectInitCallbacks[id]
 			}
@@ -340,7 +340,7 @@ KJS.render = function (){
 // also returns normal
 KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     // create raycast from camera to mouse xy
-	var mobjs = KJS.getMeshObjects(this)
+	var mobjs = this.getMeshObjects()
 	if (mobjs.length==0) return null
 	var mesh = mobjs[0].mesh
     if (mx == null || coordType=="pixels") {
@@ -503,18 +503,19 @@ KJS.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
 
 ///	given a thing, dig in & find all the objects with meshes
 /// tried to add this to Groups, but the groups in scene.groups doesn't seem to have a Groups prototype
-KJS.getMeshObjects = function (o) {
+///	adding to Collada too now
+KJS.ObjectEx.prototype.getMeshObjects = function () {
 //	console.log("getMeshObjects on:", o)
 	var objs = []
-	if (o.mesh) {
-//		console.log("  mesh obj:",o)
-		objs.push(o)
+	if (this.mesh) {
+//		console.log("  mesh obj:",this)
+		objs.push(this)
 	}
-	if (o.objects) {
-//		console.log("  mo objects:", o.objects.length)
-		for(var i=0; i<o.objects.length; i++) {
+	if (this.objects) {
+//		console.log("  mo objects:", this.objects.length)
+		for(var i=0; i<this.objects.length; i++) {
 //			console.log("    i:",i)
-			objs = objs.concat(KJS.getMeshObjects(o.objects[i]))
+			objs = objs.concat(this.objects[i].getMeshObjects())
 		}
 	}
 //	console.log("getMeshObjects returns:", objs)
