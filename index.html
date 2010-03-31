@@ -62,13 +62,6 @@ body{background-color: #000;color: #fff;font-family:arial}
 		</div>
 		<div id="saveLoadGallery" align="center"></div>
 		<div align="center">
-			<form Name="input_editmode">
-				<div id="editInfoMove" align="center"></div>
-				<div id="editInfoResize" align="center"></div>
-				<div id="editInfoDelete" align="center"></div>
-				<div id="editInfoAnnotate" align="center"></div>
-			</form>
-			<!--
 			<form Name="input_dragmode">
 				<div id="editInfo" align="center"></div>
 				<input type="radio" Name="R" />safe
@@ -77,7 +70,13 @@ body{background-color: #000;color: #fff;font-family:arial}
 				<input type="radio" Name="R" />rotY
 				<input type="radio" Name="R" />rotZ
 			</form>
-			-->
+
+			<form Name="input_editmode">
+				<div id="editInfoMove" align="center"></div>
+				<div id="editInfoResize" align="center"></div>
+				<div id="editInfoDelete" align="center"></div>
+				<div id="editInfoAnnotate" align="center"></div>
+			</form>
 		</div>
 	</div>
 </div>
@@ -548,9 +547,12 @@ addModel = function(url, id, scale, loc, orient){
 		}
 	}
 	else {
-		init = function(o){
-//			o.computeBoundingSphere()
-//			o.makeDragable(dragWallStart, dragWallUpdate)			
+		init = function(root){
+			var objs = root.getMeshObjects()
+			if (objs.length) {
+				objs[0].computeBoundingSphere()
+			}
+			root.makeDragable(dragWallStart, dragWallUpdate)			
 		}
 	}
 	KJS.addObjectInit(id, init)
