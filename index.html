@@ -450,13 +450,6 @@ onLoadContinue = function () {
 	// turn off loading banner
 	document.getElementById("loading").innerHTML = ""
 
-	// hardcoded statue stuff until we get things working
-	//	loc_x="-80" loc_y="-44" loc_z="-2.19" animation="#spin" scale="0.17" 
-	// statue comes up black!
-
-//	addModel("david.dae", "david", 0.17, [-80,-44,-2.19], [0,0,3])
-//	addModel("david.dae", "xxx", 0.17)
-
 	// character logic for Da Man!
 	var o = KJS.gameScene.getObjectById("daman")
 	if (o) {
@@ -701,6 +694,7 @@ saveGalleryCancel = function() {
 	var o = scene.groups[0]
 	console.log("o:",o)
 	console.log(KJS.getMeshObjects(o))
+	console.log("meth:", o.computeBoundingSphere)
 }
 
 loadGallery = function() {

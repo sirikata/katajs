@@ -340,6 +340,9 @@ KJS.render = function (){
 // also returns normal
 KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     // create raycast from camera to mouse xy
+	var mobjs = KJS.getMeshObjects(this)
+	if (mobjs.length==0) return null
+	var mesh = mobjs[0].mesh
     if (mx == null || coordType=="pixels") {
 		if (mx == null) {
 			var mousepos = KJS.gameScene.mouse.getMousePosition();
@@ -381,8 +384,8 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     var mindist = 999999.9
 	var minN = null
 	// get vertex coords
-    var p = this.getPositions()
-	var ff = this.mesh.faces.data
+    var p = mobjs[0].getPositions()
+	var ff = mesh.faces.data
 	var f = []
 	for (i in ff) f[i] = parseInt(ff[i]);				///	FIXME: this is stupid -- shouldn't be strings!
 //	console.log(p,f)
@@ -637,3 +640,5 @@ KJS.ObjectEx.prototype.rayVsBoundingSphere = function(RayBeg, RayEnd){
 
 console.log("GLGE:", GLGE)
 GLGE.augment(KJS.ObjectEx, GLGE.Object)
+GLGE.augment(KJS.ObjectEx, GLGE.Group)
+GLGE.augment(KJS.ObjectEx, GLGE.Collada)
