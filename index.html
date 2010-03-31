@@ -64,7 +64,7 @@ body{background-color: #000;color: #fff;font-family:arial}
 		<div align="center">
 			<form Name="input_dragmode">
 				<div id="editInfo" align="center"></div>
-				<input type="radio" Name="R" />safe
+				<input type="radio" Name="R" />resize
 				<input type="radio" Name="R" Checked="true" />move
 				<input type="radio" Name="R" />rotX
 				<input type="radio" Name="R" />rotY
@@ -225,6 +225,10 @@ nullSelectedPic = function() {
 
 dragWallStart = function(x, y){
 	var root = this.getRoot()
+    root.dragStartRotX = parseFloat(root.getRotX())
+    root.dragStartRotY = parseFloat(root.getRotY())
+    root.dragStartRotZ = parseFloat(root.getRotZ())
+	root.dragWallStartScale = root.getScaleX()
 	if (this.id == "closeWidget") {
 		KJS.gameScene.removeObjectById(g_selectedPic.id)
 		nullSelectedPic()
@@ -280,11 +284,47 @@ dragWallUpdate = function(dx, dy){
 		g_selectedPic.computeBoundingSphere()
 	}
 	else {
-		positionOnWall(root)
 		if (this.id.slice(0, 11) == "galleryPix_") {
+			positionOnWall(root)
 			setWidgets(root)
 		}
+		else {
+			if (document.input_dragmode.R[0].checked) {
+				var scale = root.dragWallStartScale * Math.pow(2, (0.01*(dx-dy)))
+				root.setScaleX(scale)
+				root.setScaleY(scale)
+				root.setScaleZ(scale)
+			}
+			if (document.input_dragmode.R[1].checked) {
+				positionOnWall(root)
+			}			
+			if (document.input_dragmode.R[2].checked) {
+				root.setRotX(root.dragStartRotX + dy*.01)
+//				show(root)
+			}
+			if (document.input_dragmode.R[3].checked) {
+				root.setRotY(root.dragStartRotY + dy*.01)
+//				show(root)
+			}
+			if (document.input_dragmode.R[4].checked) {
+				root.setRotZ(root.dragStartRotZ + dx*.01)
+//				show(root)
+			}
+		}
 	}
+}
+
+fix = function(v){
+    v = 57.2958 * v
+    while (v > 180) 
+        v -= 360
+    while (v < -180) 
+        v += 360
+    return v.toFixed(1)
+}
+
+show = function(self){
+    pdebug("edit rotate X=" + fix(self.getRotX()) + " Y=" + fix(self.getRotY()) + " Z=" + fix(self.getRotZ()), 4)
 }
 
 // create a new object with same props as old
@@ -382,17 +422,6 @@ onLoadContinue = function () {
         obj.highlightMaterial = null
     }
     
-	var fix = function(v) {
-		v = 57.2958*v
-		while(v>180) v-=360
-		while(v<-180) v+=360
-		return v.toFixed(1)
-	}
-
-	var show = function(self) {
-		pdebug("edit rotate X="+fix(self.getRotX())+" Y="+fix(self.getRotY())+" Z="+fix(self.getRotZ()),4)
-	}
-
     // drag is modal: move, rotatex, rotatey, rotatez
     for (i in scene.dragable) {
         obj=scene.getObjectById(scene.dragable[i])
