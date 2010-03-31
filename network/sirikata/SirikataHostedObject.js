@@ -50,6 +50,17 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     var MIN_TTL = 1; // subscription messages.
     var SPACE_OBJECT = "";
 
+    /**
+     * Sends a persistence message and keeps receiving replies until all the
+     * fields are known. Currently persisntece uses the QueryTracker protocol.
+     * @param {Sirikata.QueryTracker} querytracker  The socket to send and
+     *     receive persistence messages.
+     * @param {Sirikata.QueryTracker.Message} message  A prepared message.
+     *     Do not send the same message twice!
+     * @param {function()} callback  A function to be called when all the
+     *     fields are filled out. The outgoing message will get mutated, so the
+     *     callback function takes no arguments.
+     */
     function sendPersistenceMessage(querytracker, message, callback) {
         var sentBody = message.body();
         message.setCallback(function(respHeader, respBytes) {
@@ -92,6 +103,17 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         querytracker.send(message);
     }
 
+    /**
+     * A single object's view of a remote object (corresponds to a ProxCall
+     *     from a proximity query). If multiple objects have separate proximity
+     *     queries, each view of a remote object will have its own ProxyObject.
+     * @constructor
+     * @param {Sirikata.SstService} service  A service to allocate ports from.
+     * @param {Kata.ObjectHost} objectHost  The owner objectHost (does this
+     *     make sense?)
+     * @param {string} space  The remote space UUID.
+     * @param {string} id  The objectreference for this ProxyObject.
+     */
     Sirikata.ProxyObject = function(service, objectHost, space, id) {
         this.mObjectHost = objectHost;
         this.mRequests = {};
@@ -106,6 +128,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         this.mBroadcastIds = {};
     };
 
+    /** Clean up this data, and destroy all pending requests/ports. */
     Sirikata.ProxyObject.prototype.destroy = function() {
         for (var propname in this.subscriptions) {
             var subinfo = this.subscriptions[propname];
@@ -399,9 +422,20 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     // public class SirikataHostedObject
     var SUPER = Kata.HostedObject.prototype;
 
-    /** @constructor */
-    Sirikata.HostedObject = function (objectHost, uuid, createMsg) {
-        SUPER.constructor.call(this, objectHost, uuid);
+    /**
+     * An object connected to any number of sirikata space servers. Because
+     * this can be connected to more than one space, we have something called
+     * a "presence" to indicate space specific to a single space connection,
+     * such as position as well as some properties like "Parent".
+     * @constructor
+     * @extends Kata.HostedObject
+     * @param {Kata.ObjectHost} objectHost  The owner ObjectHost.
+     * @param {string} id  The id of this object, which is an arbitrary string.
+     * @param {object} createMsg  The creation message, since it contains some
+     *     relevant fields such as location information.
+     */
+    Sirikata.HostedObject = function (objectHost, id, createMsg) {
+        SUPER.constructor.call(this, objectHost, id);
         this.mSpaceConnectionMap = {};
         this.mObjects = {};
         this.mProperties = {};
@@ -703,29 +737,6 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         info.rpcPort.send(header, body);
     };
 
-    Sirikata.HostedObject.prototype.receivedMessage = function (channel, data) {
-        /*
-        var header = new Sirikata.Protocol.Header;
-        var info, spaceid;
-        header.ParseFromStream(new PROTO.Base64Stream(data));
-        for (spaceid in this.mSpaceConnectionMap) {
-            info = this.mSpaceConnectionMap[spaceid];
-            if (info.stream == channel) {
-                header.source_space = spaceid;
-                header.destination_object = info.objectID;
-                break;
-            }
-        }
-        console.log("Object "+this.mID+" got message on port "+header.destination_port, header, data);
-        if (!header.destination_port) {
-            this.mPortHandlers[0].call(this, header, data);
-        } else if (header.destination_port in this.mPortHandlers) {
-            this.mPortHandlers[channel].call(this, header, data);
-        } else {
-            SUPER.receivedMessage.call(this, header, data);
-        }
-        */
-    };
     Sirikata.HostedObject.prototype._sendNewProxQuery = function(data) {
         if (data.spaceid && data.radius) {
             var prox = new Sirikata.Protocol.NewProxQuery;

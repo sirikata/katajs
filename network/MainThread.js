@@ -32,18 +32,28 @@
 
 (function() {
 
-    // public final class Main
-    /** @constructor */
+    /** MainThread is a class to instantiate an ObjectHost thread and hold onto
+     * the multiplexed channel coming from it. This channel can be used to
+     * spawn Kata.GraphicsSimulation objects, or to communicate to the OH.
+     * @constructor
+     */
     Kata.MainThread = function () {
         this.mObjectHostWorker = new Kata.WebWorker("ObjectHostWorker.js", "Kata.ObjectHostWorker");
         this.mObjectHostChannel = this.mObjectHostWorker.getChannel();
         this.mObjectHostChannel.registerListener(Kata.bind(this.receivedMessage, this));
     };
 
+    /**
+     * @return {Kata.Channel} Some channel to talk to ObjectHost. This should
+     *     be multiplexed but isn't at the moment...
+     */
     Kata.MainThread.prototype.getChannel = function() {
         return this.mObjectHostChannel;
     };
 
+    /**
+     * Not really useful. May be for multiplexing the OH channel?
+     */
     Kata.MainThread.prototype.receivedMessage = function(channel, data) {
         //console.log("Kata.MainThread received ObjectHost message:",data);
     };

@@ -51,8 +51,15 @@
     }
 
     if (typeof(WebSocket)!="undefined") {
-        // public final class TCPSST
-        /** @constructor */
+        /**
+         * TCPSST is a protocol which has several substreams over a single
+         *     TCP (WebSocket) connection.
+         * @constructor
+         * @implements {Kata.ObjectHost.TopLevelStream}
+         * @param {string} host  The hostname to connect to.
+         * @param {string} port  The port number to connect to.
+         * @param {number=1} numStreams  Number of connections to make (def. 1)
+         */
         Kata.TCPSST = function (host, port, numStreams) {
             if (!numStreams) {
                 numStreams = 1;
@@ -69,6 +76,11 @@
             this.mSubstreams = new Object;
         };
 
+        /**
+         * Start connecting a new WebSocket. Also sets callbacks.
+         * @param {number} which  Which socket is starting to connect.
+         * @private
+         */
         Kata.TCPSST.prototype._connectSocket = function (which) {
             if (this.mSockets[which] && this.mSockets[which].readyState == WebSocket.CONNECTED) {
                 this.mConnected--;
@@ -79,6 +91,11 @@
             sock.onmessage = getMessageCallback(this, which);
             this.mSockets[which] = sock;
         };
+        /**
+         * A remote connection ended for some reason.
+         * @param {number} which  Which socket disconnected.
+         * @private
+         */
         Kata.TCPSST.prototype._onClose = function (which) {
             console.log("Closed socket "+which);
             var index = this.mConnected.indexOf(which);
@@ -91,6 +108,14 @@
                 this.mSubstreams[i].callListeners(null);
             }
         };
+        /**
+         * A remote connection was established. Sends all messages in the
+         * queue on this single socket, since other sockets have not yet been
+         * established. This might not always be ideal, so maybe timeouts would
+         * work better.
+         * @param {number} which  Which socket finished connecting.
+         * @private
+         */
         Kata.TCPSST.prototype._onOpen = function (which) {
             console.log("Opened socket "+which);
             this.mConnected.push(which);
@@ -100,6 +125,12 @@
             this.mMessageQueue = new Array;
             // Set this.mConnected = true; send anything waiting in queue.
         };
+        /**
+         * Received data on one of our sokets.
+         * @param {number} which  Which socket got some data.
+         * @param {string} b64data  Received some ASCII data (usually base64).
+         * @private
+         */
         Kata.TCPSST.prototype._onMessage = function (which, b64data) {
             var percent = b64data.indexOf('%');
             var streamnumber = parseInt(b64data.substr(0,percent), 16);
@@ -114,6 +145,11 @@
             }
             this.mSubstreams[streamnumber].callListeners(b64data);
         };
+        /**
+         * Sends a message over the WebSocket connection
+         * @param streamid  Which stream number (allocated by Substream)
+         * @param base64data  Any ASCII data (binary data not yet supported).
+         */
         Kata.TCPSST.prototype.send = function (streamid, base64data) {
             //console.log("Send to socket stream "+streamid+":",base64data);
             var finalString = streamid.toString(16)+"%"+base64data;
@@ -126,11 +162,22 @@
                 Math.random()*this.mConnected.length)]];
             randsock.send(finalString);
         };
+        /**
+         * Picks a new substream ID. Does not yet clean up old substreams.
+         * Doing this is tricky because you need to receive acknowledgement
+         * from all open connections before it can be reused.
+         * @return {number} A new substream ID.
+         * @private
+         */
         Kata.TCPSST.prototype._getNewSubstreamID = function () {
             var ret = this.mNextSubstream;
             this.mNextSubstream += 2;
             return ret;
         };
+        /**
+         * Allocates a new Substream using the next available substream ID.
+         * @return {Kata.TCPSST.Substream} A new Channel that can send/receive.
+         */
         Kata.TCPSST.prototype.clone = function () {
             var id = this._getNewSubstreamID();
             var substr = new Kata.TCPSST.Substream(this, id);
@@ -138,8 +185,13 @@
             return substr;
         };
 
-        // final class TCPSST.Substream extends Channel
-        /** @constructor */
+        /**
+         * A single substream which is able to send/receive messages.
+         * @constructor
+         * @extends Kata.Channel
+         * @param {Kata.TCPSST} tcpsst  The top-level stream.
+         * @param {number} which  This stream id (for sending messages).
+         */
         Kata.TCPSST.Substream = function (tcpsst, which) {
             this.mOwner = tcpsst;
             this.mWhich = which;
@@ -147,12 +199,22 @@
         };
         Kata.extend(Kata.TCPSST.Substream, Kata.Channel.prototype);
 
+        /**
+         * Send ASCII (usually base64 encoded) data over this substream
+         */
         Kata.TCPSST.Substream.prototype.sendMessage = function (data) {
             this.mOwner.send(this.mWhich, data);
         };
+        /**
+         * @return {Kata.TCPSST}  The owning top-level stream.
+         */
         Kata.TCPSST.Substream.prototype.getTopLevelStream = function () {
             return this.mOwner;
         };
+        /**
+         * Close and clean-up this substream. Not yet implemented!!!
+         * Send a packet on stream 0 with the contents equal to this stream id?
+         */
         Kata.TCPSST.Substream.prototype.close = function () {
             // FIXME: How do we send a "close" message?
         };

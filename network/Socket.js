@@ -33,6 +33,13 @@
 (function() {
 
     var SUPER = Kata.Port.prototype;
+    /** A socket is a two way communication channel layered over another
+     * socket or port. The only difference from a Port object is this class
+     * automatically subscribes itself to its parent.
+     * @constructor
+     * @extends {Kata.Port}
+     * @param {Kata.Port} port  A parent port or socket.
+     */
     Kata.Socket = function (port) {
         SUPER.constructor.call(this, port);
         this.mParentReceiver = Kata.bind(this.receivedMessage, this);
@@ -41,6 +48,12 @@
     };
     Kata.extend(Kata.Socket, SUPER);
 
+    /** Because sockets are subscribed to their parent, it means that they need
+     * to be unsubscribed at some point. Because Port instances are created by
+     * services, it is the service's resposibility to clean up after them.
+     * However, Sockets are created and extended by user code, and hence must
+     * be cleaned up by user code.
+     */
     Kata.Socket.prototype.destroy = function () {
         this.mService.removeReceiver(this.mParentReceiver);
         delete this.mService;

@@ -34,6 +34,16 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
 (function() {
     var SUPER = Kata.Service.prototype;
+    /**
+     * The SstService is a wrapper around a TCPSST substream, for use with the
+     * protobuf-encoded messages in the sirikata protocol.
+     * @constructor
+     * @extends {Kata.Service}
+     * @param {Kata.TCPSST.Substream} sst_substream  A TCPSST connection to
+     *     wrap around.
+     * @param {string} spaceid  The corresponding spaceid, so it can be set in
+     *     outgoing messages.
+     */
     Sirikata.SstService=function (sst_substream, spaceid) {
         SUPER.constructor.call(this);
         sst_substream.registerListener(Kata.bind(this.receivedMessage, this));
@@ -42,14 +52,31 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     };
     Kata.extend(Sirikata.SstService, SUPER);
 
+    /**
+     * Set an object reference corresponding to this substream, so that the
+     * destination_field can be correctly set on incoming messages (which do
+     * not have such a field set over the wire).
+     * @param {string} objectref  An objectrefernce (uuid) of this object.
+     */
     Sirikata.SstService.prototype.setObjectReference = function(objectref) {
         this.mSubstream.objectReference = objectref;
     };
 
+    /**
+     * @return {Sirikata.SstService.Port} A new port object.
+     * @private
+      */
     Sirikata.SstService.prototype._createPort = function(portid) {
         return new Sirikata.SstService.Port(this, portid);
     };
 
+    /**
+     * Send a message to the remote space.
+     * @param {Sirikata.Protocol.Header} header  Some header to send.
+     * @param {PROTO.Message} bodyunser  Some unserialzed body data. Due to the
+     *     base64 packing used in the message, it makes it easier to encode to
+     *     the same PROTO.Base64Stream as the header.
+     */
     Sirikata.SstService.prototype.send = function(header, bodyunser) {
 /*
         console.log("SstService for object "+this.mSubstream.objectReference,
@@ -61,6 +88,11 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         this.mSubstream.sendMessage(b64stream.getString());
     };
 
+    /**
+     * Send a message to the remote space.
+     * @param {Kata.TCPSST.Substream} sender  The source substream.
+     * @param {string} data  Some base64 encoded header+body data.
+     */
     Sirikata.SstService.prototype.receivedMessage = function(sender, data) {
         var header = new Sirikata.Protocol.Header;
         header.ParseFromStream(new PROTO.Base64Stream(data));
@@ -76,6 +108,14 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 })();
 (function(){
     var SUPER = Kata.Port.prototype;
+    /**
+     * A subclass of Kata.Port to set the proper fields in outgoing messages.
+     * Always instantiated by Sirikata.SstService.
+     * @constructor
+     * @extends Kata.Port
+     * @param {Sirikata.SstService} service  The owner.
+     * @param {number} portid  The port number to set in outgoing messages.
+     */
     Sirikata.SstService.Port = function(service, portid) {
         this.mPortId = portid;
         SUPER.constructor.call(this, service);
@@ -83,6 +123,14 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
     Kata.extend(Sirikata.SstService.Port, SUPER);
 
+    /**
+     * Send a message to the remote space, from this source port.
+     * Also validates the destination object and port for this message.
+     * @param {Sirikata.Protocol.Header} header  Some header to send.
+     * @param {PROTO.Message} bodyunser  Some unserialzed body data. Due to the
+     *     base64 packing used in the message, it makes it easier to encode to
+     *     the same PROTO.Base64Stream as the header.
+     */
     Sirikata.SstService.Port.prototype.send = function(header, bodyunser) {
         header.source_port = this.mPortId;
         if (!header.destination_port) {

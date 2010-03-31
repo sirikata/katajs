@@ -32,9 +32,18 @@
 
 (function() {
 
-    // public abstract class GraphicsSimulation extends Simulation
     var SUPER = Kata.Simulation.prototype;
-    /** @constructor */
+    /** GraphicsSimulation is a wrapper around kata3d. It must be instantiated
+     * on the main DOM thread, using the channel to the ObjectHost thread.
+     * Because there is only one main thread (and hence only one channel to the
+     * ObjectHost thread), this channel should be multiplexed to allow multiple
+     * simulations on the main thread.
+     * 
+     * @constructor
+     * @extends {Kata.Simulation}
+     * @param {Kata.Channel} channel  Communication with the object host.
+     * @param {HTMLElement} domElement  Some parent element to display inside.
+     */
     Kata.GraphicsSimulation = function (channel, domElement) {
         SUPER.constructor.call(this, channel);
         this.mElement = domElement;
@@ -43,6 +52,12 @@
     };
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 
+    /** Handle receiving a cross-thread message
+     * @param {Kata.Channel} channel Channel to the object host (in order to
+     *     talk to controlling camera objects)
+     * @param {object} data JavascriptGraphicsApi formatted messages from the
+     *     object host.
+     */
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
         SUPER.receivedMessage.apply(this, arguments);
         console.log("Graphics received message from ObjectHost:", data);

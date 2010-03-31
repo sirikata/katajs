@@ -52,11 +52,24 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     var ORIENTATION_SUBSCRIPTION = -3;
     var ANGVEL_SUBSCRIPTION = -4;
 
+    /**
+     * Sirikata.Loopback is a simple top-level server connection that pretends
+     * to be a remote server, but implements everything synchronously in
+     * javascript.
+     * @constructor
+     * @implements {Kata.ObjectHost.TopLevelStream}
+     */
     Sirikata.Loopback = function() {
         this.mObjects = {};
         this.mProxQueries = [];
         this.mSubscriptions = {};
     };
+    /**
+     * Send data via this space. It may synchronously call back to another
+     * object on this object host, or broadcast a message to multiple objects.
+     * @param {string} objectref  The sender objectreference (uuid)
+     * @param {string} base64data  The fully encoded message (header+body)
+     */
     Sirikata.Loopback.prototype.send = function (objectref, base64data) {
         var header = new Sirikata.Protocol.Header;
         var base64stream = new PROTO.Base64Stream(base64data);
@@ -82,6 +95,19 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             }
         }
     };
+    /**
+     * Send out a ProxCall message. Called in three cases:
+     * <ul>
+     * <li>Sent to all other proximity queries when an object enters.</li>
+     * <li>Sent to all other proximity queries when an object exits.</li>
+     * <li>Sent for each existing object to any new proximity subscribers.</li>
+     * </ul>
+     * @param {string} proxquery  A simple object holding proximity query info.
+     * @param {string} newobj  The objectreference of the newly entered/exited
+     *     object.
+     * @param {boolean} isentering  If true, entered. If false, exited.
+     * @private
+     */
     Sirikata.Loopback.prototype._sendProxCall = function (proxquery, newobj, isentering) {
         var messageBody = new Sirikata.Protocol.MessageBody;
         messageBody.message_names.push("ProxCall");
@@ -100,6 +126,18 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         messageBody.SerializeToStream(b64stream);
         this.send(SPACE_OBJECT,b64stream.getString());
     };
+    /**
+     * Send out a ProxCall message. Called in three cases:
+     * <ul>
+     * <li>Sent to all other proximity queries when an object enters.</li>
+     * <li>Sent to all other proximity queries when an object exits.</li>
+     * <li>Sent for each existing object to any new proximity subscribers.</li>
+     * </ul>
+     * @param {string} object  The source objectreference of the broadcast.
+     * @param {number} fid  The field number to broadcast.
+     * @param {Array.<number>} data  Encoded data to broadcast (byte array).
+     * @private
+     */
     Sirikata.Loopback.prototype._broadcast = function(object, fid, data) {
         var key = object+"_"+fid;
         var bcastinfo = this.mSubscriptions[key];
@@ -122,6 +160,14 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             }
         }
     };
+    /**
+     * Subscribe somebody to the broadcast map.
+     * @param {string} key  The broadcast key (owner+"_"+fid)
+     * @param {string} subscriber  The objectreference of the subscriber.
+     * @param {number} port  The port of the BROADCAST message.
+     * @param {number} period  PBJ.duration amount between broadcasts (us).
+     * @private
+     */
     Sirikata.Loopback.prototype._subscribe = function(key, subscriber, port, period) {
         var bcastinfo = this.mSubscriptions[key];
         if (!bcastinfo) {
@@ -143,6 +189,14 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             delete this.mSubscriptions[key];
         }
     };
+    /**
+     * Update some object's position in the space.
+     * @param {string} object  The objectreference of the object that moved.
+     * @param {Sirikata.Protocol.ObjLoc} oloc  New location information (only
+     *     the assigned fields in the protobuf will be changed).
+     * @param {boolean} dobroadcast  Usually true, except for initialization.
+     * @private
+     */
     Sirikata.Loopback.prototype._updateObjectPosition = function (object, oloc, dobroadcast) {
         var objToSet = this.mObjects[object];
         if (oloc.position !== undefined) {
@@ -190,6 +244,11 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             }
         }
     };
+    /**
+     * Process a message destined for the space (object id 0).
+     * @param {Sirikata.Protocol.Header} header  Header parsed from sender.
+     * @param {string} base64data  Message from object to be parsed.
+     */
     Sirikata.Loopback.prototype._spaceMessage = function (header, base64data) {
         var dport = header.destination_port || Ports.RPC;
         switch (dport) {
@@ -366,14 +425,24 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             break;
         }
     };
+    /**
+     * @return {Sirikata.Loopback.Substream} A Substream to talk to this space.
+     */
     Sirikata.Loopback.prototype.clone = function () {
         var objectref = Math.uuid().toLowerCase();
         this.mObjects[objectref] = new Sirikata.Loopback.Substream(this, objectref);
         return this.mObjects[objectref];
     };
 
-    Sirikata.Loopback.Substream = function (tcpsst, objectReference) {
-        this.mOwner = tcpsst;
+    /**
+     * The Substream represents a connection with some object. There is one
+     * loopback space per object host, so the Loopback is the toplevel stream.
+     * @param {Sirikata.Loopback} loopback  Pointer to controlling space.
+     * @param {string} objectReference  ObjectReference of connection (not the
+     *     same as the object_uuid_evidence).
+     */
+    Sirikata.Loopback.Substream = function (loopback, objectReference) {
+        this.mOwner = loopback;
         this.mWhich = objectReference;
         this.mPos = new Sirikata.Protocol.ObjLoc;
         this.mPos.position = [0,0,0];
@@ -391,6 +460,7 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     Sirikata.Loopback.Substream.prototype.sendMessage = function (data) {
         this.mOwner.send(this.mWhich, data);
     };
+    /** @return {Sirikata.Loopback} Controlling space */
     Sirikata.Loopback.Substream.prototype.getTopLevelStream = function () {
         return this.mOwner;
     };
