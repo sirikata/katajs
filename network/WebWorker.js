@@ -43,18 +43,23 @@
         /**
          * WebWorker is a class to create another subprocess, and manage the
          * bootstrapping process when Workers are enabled.
+         * @see GenericWorker.js
          * @constructor
          * @param {string} jsFile  An initial javascript file to be imported.
          * @param {string} clsName  A dot-separated path to the class from
          *     "self" (the root object). Actual classes can not be sent across
          *     the thread boundary, which is why this needs the name.
-         * @param {Array.<string|object|number>} args  Primitive data to
+         * @param {Array.<string|object|number>=} args  Primitive data to
          *     instantiate the class with.
          */
         Kata.WebWorker = function (jsFile, clsName, args) {
             this.mWorker = new Worker("GenericWorker.js");
             this.mWorker.onerror = getErrorCallback(this);
-            this.mWorker.postMessage([Kata.scriptRoot, jsFile, clsName, args]);
+            this.mWorker.postMessage([
+                Kata.scriptRoot,
+                jsFile,
+                clsName,
+                args]);
             this.mChannel = new Kata.WebWorker.Channel(this.mWorker);
         }
     } else {
@@ -66,10 +71,10 @@
          * @param {string} clsName  A dot-separated path to the class from
          *     "self" (the root object). Actual classes can not be sent across
          *     the thread boundary, which is why this needs the name.
-         * @param {Array.<string|object|number>} args  Primitive data to
+         * @param {Array.<string|object|number>=} args  Primitive data to
          *     instantiate the class with.
          */
-        Kata.WebWorker = function (jsFile, clsName) {
+        Kata.WebWorker = function (jsFile, clsName, args) {
             this.mChannel = new Kata.SimpleChannel;
             var clsTree = clsName.split(".");
             Kata.include(jsFile);
@@ -78,7 +83,9 @@
                 cls = cls[clsTree[i]];
             }
             if (cls) {
-                this.mChild = new cls (new Kata.SimpleChannel(this.mChannel));
+                this.mChild = new cls (
+                    new Kata.SimpleChannel(this.mChannel),
+                    args);
             } else {
                 Kata.error(clsName+" is undefined.");
             }
@@ -117,7 +124,7 @@
      * the DedicatedWorkerGlobalScope interface (if you pass in 'self')
      * @constructor
      * @extends {Kata.Channel}
-     * @param {DedicatedWorkerGlobalScope|Worker} Object implementing the
+     * @param {DedicatedWorkerGlobalScope|Worker} port  Object implementing the
      *     MessagePort interface (see the Web Workers specification).
      */
     Kata.WebWorker.Channel = function (port) {

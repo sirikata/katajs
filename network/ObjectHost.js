@@ -180,8 +180,10 @@
 
     /** Connects to a space registered using registerSpace.
      * @param {string} spacename  The name of a space (from registerSpace).
-     * @param {Object=} channel  A channel to register to a new space. Omitted
-     *     if a new connection is to be made.
+     * @param {Kata.ObjectHost.TopLevelStream=} channel  A channel to register
+     *     to a new space. Omitted if a new connection is to be made instead.
+     * @return {Kata.ObjectHost.TopLevelStream}  A top-level stream to talk to
+     *     the space represented by spacename.
      */
     Kata.ObjectHost.prototype.connectToSpace = function(spacename, channel) {
         var topLevelStream = channel;
@@ -198,5 +200,16 @@
         }
         return topLevelStream;
     };
+
+    /**
+     * A top-level connection to a remote server. It is not yet bound to a
+     * specific HostedObject.
+     * @interface
+     */
+    Kata.ObjectHost.TopLevelStream = function() {};
+    /**
+     * @return {Kata.Channel} A connection bound to a specific hosted object.
+     */
+    Kata.ObjectHost.TopLevelStream.prototype.clone = function() {};
 
 })();

@@ -39,6 +39,13 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 // Why not use unique ports for this purpose?
 
     var SUPER = Kata.Socket.prototype;
+    /**
+     * QueryTracker sends messages on a single socket using the "id" field for
+     * messages sent and the "reply_id" for messages received.
+     * @constructor
+     * @extends {Kata.Socket}
+     * @param {Kata.Port} socket  A parent socket/port.
+     */
     Sirikata.QueryTracker = function (socket) {
         SUPER.constructor.call(this, socket);
         this.mNextId = 0;
@@ -46,6 +53,13 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     };
     Kata.extend(Sirikata.QueryTracker, SUPER);
 
+    /**
+     * Sends a message and sets the "id" field to the next available message
+     * id.
+     * @note Make sure not to send the same Message object twice.
+     * @param {Sirikata.QueryTracker.Message} message  Completed message--the
+     *     header.id field will be set before it is sent.
+     */
     Sirikata.QueryTracker.prototype.send = function (message) {
         var header = message.header();
         var id = this.mNextId;
@@ -55,6 +69,11 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         SUPER.send.call(this, header, message.body());
     };
 
+    /**
+     * Parses a message received from the network, using the "reply_id" field.
+     * @param {Sirikata.Protocol.Header} header  Received message header.
+     * @param {string} body  Base64-encoded body data.
+     */
     Sirikata.QueryTracker.prototype.receivedMessage = function (header, body) {
         var replyId = header.reply_id.toNumber();
         var message = this.mPendingMessages[replyId];
@@ -70,27 +89,54 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
             delete this.mPendingMessages[replyId];
         }
     };
+    /**
+     * Cleans up this QueryTracker instance.
+     */
     Sirikata.QueryTracker.prototype.destroy = function() {
         SUPER.destroy.call(this);
         delete this.mPendingMessages;
     }
 
+    /**
+     * A message holds onto the header and body of a message that has been sent
+     * and is awaiting a reply. In the future, this will handle timeouts and
+     * resending to provide a reliable transport. Currently, the underlying
+     * protocol is assumed to be reliable.
+     * @constructor
+     * @param {Sirikata.Protocol.Header} header Any header
+     * @param {PROTO.Message} body
+     * @param {function(Sirikata.Protocol.Header,string): boolean} callback
+     *     Takes the new header and base64 body data; returns true if it expects
+     *     more data, or false if this Message is to be discarded.
+     */
     Sirikata.QueryTracker.Message = function(header, body, callback) {
         this.mHeader = header;
         this.mBody = body;
         this.mCallback = callback;
     };
 
+    /**
+     * Changes the callback for this message.
+     * @param {function(Sirikata.Protocol.Header,string): boolean} callback
+     *     See constructor.
+     */
     Sirikata.QueryTracker.Message.prototype.setCallback = function(callback) {
         this.mCallback = callback;
     };
+    /** @return {Sirikata.Protocol.Header} The header sent in this mesasge. */
     Sirikata.QueryTracker.Message.prototype.header = function() {
         return this.mHeader;
     };
+    /** @return {PROTO.Message} An unencoded protocol buffer body message. */
     Sirikata.QueryTracker.Message.prototype.body = function() {
         return this.mBody;
     };
-    // Returns true if message is to stay in map.
+    /**
+     * Received a message from the QueryTracker.
+     * @param {Sirikata.Protocol.Header} header The header of the reply message
+     * @param {string} body  Base64 encoded body data to be passed to callback.
+     * @return {boolean} true if message is to stay in map.
+     */
     Sirikata.QueryTracker.Message.prototype.receivedMessage = function(header, body) {
         if (this.mCallback && header) {
             return this.mCallback(header, body);

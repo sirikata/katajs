@@ -61,6 +61,7 @@
      * Protected function to be called by subclasses when a message has been
      * received and is to be delivered to listeners.
      * @param {string|object} data  Serializable data to pass to the listeners.
+     * @protected
      */
     Kata.Channel.prototype.callListeners = function (data) {
         if (!this.mListener) {
