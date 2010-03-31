@@ -318,7 +318,7 @@ doc.onLoad = function(){
 		lowZ: -36,
 		upZ: 46
 	}
-	heightmap=null
+//	heightmap=null
 	scene = KJS.init(heightmap, 21,  						// # of objects to load -- hacky way to force everything loaded 
 	function(){
 		onLoadContinue()
@@ -513,14 +513,11 @@ addPicture = function(pic, scale){
 }
 
 addModel = function(url, id, scale, loc, orient){
-	console.log("addModel input url:", url)
+//	console.log("addModel input url:", url)
 	if(id==null) id = url + Math.random()
 	if (url.indexOf("/" == -1)) {
 		url = "http://" + location.host + location.pathname + url
 	}
-	console.log("composite url:", url, "id:", id)
-	console.log("url host:", location.host)
-	console.log("url pathname:", location.pathname)
 	if (scale==null) scale = 0.1
 
 	var clda = new GLGE.Collada()
@@ -544,16 +541,13 @@ addModel = function(url, id, scale, loc, orient){
 			clda.setQuat(orient)
 		}
 	}
-	console.log("calling addCollada with",clda)
 	KJS.gameScene.addCollada(clda)
 	KJS.gameScene.selectable.push(id)
 
 	var init
 	if (!loc && !orient) {
 		init = function(root){
-			console.log("calling getMeshObjects on:", root)
 			var objs = root.getMeshObjects()
-			console.log("result:", objs)
 			if (objs.length) {
 				objs[0].computeBoundingSphere()
 			}
@@ -691,10 +685,14 @@ saveGalleryFinish = function () {
 
 saveGalleryCancel = function() {
 	document.getElementById("saveLoadGallery").innerHTML = ""
-	var o = scene.groups[0]
-	console.log("o:",o)
-	console.log(o.getMeshObjects())
-	console.log("meth:", o.computeBoundingSphere)
+
+//	console.log("objects:",scene.objects)
+//	console.log("groups:",scene.groups)
+//	console.log("roots:",scene.getRoots())
+//	var o = scene.groups[0]
+//	console.log("o:",o)
+//	console.log("mesh obj:", o.getMeshObjects())
+
 }
 
 loadGallery = function() {

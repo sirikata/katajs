@@ -639,7 +639,7 @@ KJS.ObjectEx.prototype.rayVsBoundingSphere = function(RayBeg, RayEnd){
 	return ret
 }
 
-console.log("GLGE:", GLGE)
+//console.log("GLGE:", GLGE)
 GLGE.augment(KJS.ObjectEx, GLGE.Object)
 GLGE.augment(KJS.ObjectEx, GLGE.Group)
 GLGE.augment(KJS.ObjectEx, GLGE.Collada)
