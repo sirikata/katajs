@@ -566,19 +566,19 @@ KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 	return count
 })
 
-// remove object from scene
+// remove object from scene FIXME: only works for atomic objects, not Groups or Collada
 KJS.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 	var j = null
 	var temp
-	for (var i in this.getRoots()) {
-		if (this.getRoots()[i].getRef() == id) {
+	for (var i in this.objects) {
+		if (this.objects[i].getRef() == id) {
 			j = i
 			break
 		}
 	}
 	if (j != null) {
-		this.getRoots()[i] = this.getRoots()[this.getRoots().length-1]
-		this.getRoots().pop()
+		this.objects[i] = this.objects[this.objects.length-1]
+		this.objects.pop()
 	}
 	j = null
 	for (var i in this.pickable) {
