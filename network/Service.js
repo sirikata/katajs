@@ -31,11 +31,28 @@
  */
 
 (function() {
+    /** A Service is an interface which represents some connection that has a
+     * number of ports. This class is responsible for allocating ports and
+     * keeping a map of in-use ports. It has a send function to send a packet
+     * over the network connection, assuming the port number is already set.
+     * @constructor
+     */
     Kata.Service=function () {
         this.mPorts = {};
-        this.mNextPortId = 16384;
+        this.mNextPortId = this.sMaxPortNumber;
     };
 
+    /** The maximum port number that can be specifically requested.
+     * New allocations start at this number.
+     * Subclasses can override this default number.
+     */
+    Kata.Service.prototype.sMaxPortNumber = 16384;
+
+    /**
+     * Returns a known port, usually to listen to specific network services.
+     * @param {number} portid  A well known port number.
+     * @return {Kata.Port}  The single port instance assigned to this portid.
+     */
     Kata.Service.prototype.getPort = function(portid) {
         var port = this.mPorts[portid];
         if (!port) {
@@ -45,6 +62,11 @@
         return port;
     };
 
+    /**
+     * Allocates a new port to be assigned, usually used for sending data and
+     * waiting for it to be returned to the same sender.
+     * @return {Kata.Port}  Some new or unused Kata.Port instance.
+     */
     Kata.Service.prototype.newPort = function() {
         while (this.mPorts[this.mNextPortId]) {
             this.mNextPortId++;
@@ -54,6 +76,12 @@
         return this.getPort(portid);
     };
 
+    /**
+     * Delivers data on a specific port. Generally called by Kata.Port when it
+     * is sending a message.
+     * @param {number} portid  Some port identifier, usually of the caller.
+     * @param {Array} args  Any arguments to be passed to the
+     */
     Kata.Service.prototype.deliver = function(portid, args) {
         var listener = this.mPorts[portid];
         if (!listener) {
@@ -62,6 +90,17 @@
         listener.deliver(args);
     };
 
+    /**
+     * Delivers data on a specific port. Generally called by Kata.Port when it
+     * is sending a message.
+     * @param {...*} var_args  Any arguments to be passed in the message
+     */
     Kata.Service.prototype.send = null;
+    /**
+     * Creates a new Kata.Port instance.
+     * @param {number} portnum  What number to be assigned to this new port.
+     * @return {Kata.Port}  A new port instance assigned this ID.
+     */
+    Kata.Service.prototype._createPort = null;
 
 })();

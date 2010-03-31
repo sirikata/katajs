@@ -703,29 +703,6 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         info.rpcPort.send(header, body);
     };
 
-    Sirikata.HostedObject.prototype.receivedMessage = function (channel, data) {
-        /*
-        var header = new Sirikata.Protocol.Header;
-        var info, spaceid;
-        header.ParseFromStream(new PROTO.Base64Stream(data));
-        for (spaceid in this.mSpaceConnectionMap) {
-            info = this.mSpaceConnectionMap[spaceid];
-            if (info.stream == channel) {
-                header.source_space = spaceid;
-                header.destination_object = info.objectID;
-                break;
-            }
-        }
-        console.log("Object "+this.mID+" got message on port "+header.destination_port, header, data);
-        if (!header.destination_port) {
-            this.mPortHandlers[0].call(this, header, data);
-        } else if (header.destination_port in this.mPortHandlers) {
-            this.mPortHandlers[channel].call(this, header, data);
-        } else {
-            SUPER.receivedMessage.call(this, header, data);
-        }
-        */
-    };
     Sirikata.HostedObject.prototype._sendNewProxQuery = function(data) {
         if (data.spaceid && data.radius) {
             var prox = new Sirikata.Protocol.NewProxQuery;

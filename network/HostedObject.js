@@ -32,25 +32,38 @@
 
 (function() {
 
-    // public class HostedObject
-    /** @constructor */
+    /** Base class for protocol-specific HostedObject implementations.
+     * @constructor
+     * @param {Kata.ObjectHost} objectHost Pointer to controlling object host.
+     * @param {string} id Some identifier for this object. It may not be
+     *     meaningful to the underlying protocol?
+     */
     Kata.HostedObject = function (objectHost, id) {
         this.mObjectHost = objectHost;
         this.mID = id;
     };
 
+    /**
+     * @return Pointer to controlling object host as passed in constructor.
+     */
     Kata.HostedObject.prototype.getObjectHost = function () {
         return this.mObjectHost;
     };
 
+    /**
+     * @return Pointer to identifier passed in constructor.
+     */
     Kata.HostedObject.prototype.getID = function () {
         return this.mID;
     };
 
+    /** A simulation sent a message to this object via the object host.
+     *
+     * @param {Kata.Channel} channel  Channel of the sending simulation.
+     * @param {object} data  Data from the simulation (at the moment, in
+     *     JavascriptGraphicsApi format, as well as protocol-specific messages)
+     */
     Kata.HostedObject.prototype.messageFromSimulation = function (channel, data) {
-    };
-
-    Kata.HostedObject.prototype.receivedMessage = function (channel, data) {
     };
 
 })();

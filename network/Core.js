@@ -47,12 +47,12 @@ if (typeof(JSON) == "undefined") {JSON = {};}
     Kata.scriptRoot="";
     if (Kata.precompiled) {
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
-         * @param scriptfile {string}  A script to include only once.
+         * @param {string} scriptfile  A script to include only once.
          */
         Kata.include = function(scriptfile) {};
     } else if (typeof(importscripts) != "undefined") {
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
-         * @param scriptfile {string}  A script to include only once.
+         * @param {string} scriptfile  A script to include only once.
          *
          * This version uses "importscripts" as defined in the Web Worker API.
          */
@@ -76,7 +76,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             }
         }
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
-         * @param scriptfile {string}  A script to include only once.
+         * @param {string} scriptfile  A script to include only once.
          *
          * This version inserts a "script" tag into the DOM.
          */
@@ -97,8 +97,8 @@ if (typeof(JSON) == "undefined") {JSON = {};}
      *  into the child prototype . This style of inheritence does not use the
      *  __proto__ chain, so operations such as "instanceof" will not work.
      *
-     * @param childcons {Function}  The constructor of the child class.
-     * @param parent {Object}  The *prototype* of the parent class. The parent
+     * @param {Function} childcons  The constructor of the child class.
+     * @param {Object} parent  The *prototype* of the parent class. The parent
      *     prototype is often stored in a "SUPER" variable in the local scope.
     */
     Kata.extend = function(childcons, parent) {
@@ -113,9 +113,9 @@ if (typeof(JSON) == "undefined") {JSON = {};}
      *  Useful for all cases where you need to pass a function argument, but
      *  you expect 'this' to be correctly set.
      *
-     *  @param func {function(this:Object,...[*])}  A function object to bind.
-     *  @param object {Object}  Instance of some class to become 'this'.
-     *  @return  A new function which applys func with the object.
+     *  @param {function(this:Object,...[*])} func  A function object to bind.
+     *  @param {Object} object  Instance of some class to become 'this'.
+     *  @return {function(...[*])}  A new function that wraps func.apply()
      */
     Kata.bind = function(func, object) {
         return function() {
@@ -124,13 +124,14 @@ if (typeof(JSON) == "undefined") {JSON = {};}
     };
     if (console.log && debug_console) {
         /** Logs msg to the console, in addition to some json object.
-         @param var_args  Some optional JSON or string data to log. */
+         * @param {...(object|string)} var_args  Some optional JSON data to log.
+         */
         Kata.log = function(var_args) {
             console.log.apply(console, arguments);
         };
     } else {
         /** Logs msg to the console, in addition to some json object.
-         * @param var_args {...(object|string)}  Logs some optional JSON data.
+         * @param {...(object|string)} var_args  Logs some optional JSON data.
          */
         Kata.log = console.log = function(var_args) {
             if (typeof(document)=="undefined" || typeof(window)=="undefined") {
@@ -181,7 +182,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
      * In some cases, it may be preferrable to deliberately reference an
      * undefined variable or another runtime error to produce a stacktrace.
      * 
-     * @param error {string}  A message to report to the console.
+     * @param {string} error  A message to report to the console.
      *     This string is thrown.
      */
     Kata.error = function(error) {

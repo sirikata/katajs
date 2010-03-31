@@ -41,7 +41,7 @@
 
     /**
      * Registers a function to be called when a message is sent.
-     * @param listener  Function that takes one argument.
+     * @param {function(Kata.Channel, string|object)} listener  A callback func
      */
     Kata.Channel.prototype.registerListener = function (listener) {
         if (!listener.call) {
@@ -60,7 +60,7 @@
     /**
      * Protected function to be called by subclasses when a message has been
      * received and is to be delivered to listeners.
-     * @param data  Serializable data received from this communication channel.
+     * @param {string|object} data  Serializable data to pass to the listeners.
      */
     Kata.Channel.prototype.callListeners = function (data) {
         if (!this.mListener) {

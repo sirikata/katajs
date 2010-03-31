@@ -32,8 +32,12 @@
 
 (function() {
 
-    // public final class ObjectHostWorker
-    /** @constructor */
+    /** A worker thread to instantiate an ObjectHost and manage the channel to
+     * the main thread and the graphics system (which may be multiplexed?).
+     * This class is only ever created by Kata.MainThread.
+     * @constructor
+     * @param {Kata.Channel=} graphicsChannel A channel to Kata.MainThread.
+     */
     Kata.ObjectHostWorker = function (graphicsChannel) {
         this.mObjectHost = new Kata.ObjectHost();
 
