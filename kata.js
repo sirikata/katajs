@@ -43,23 +43,16 @@ KJS.addProtoSafely = function (cls, proto, func){
 // add getObjectById method to Scene
 
 KJS.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
-	for(var i=0; i<this.objects.length; i++) {
-		if (this.objects[i].getRef()==id) return this.objects[i]
-	}
-	return null
-})
-
-KJS.addProtoSafely(GLGE.Scene, "getObjectRootById", function(id) {
-	for(var i=0; i<this.objects.length; i++) {
-		if (this.objects[i].getRef()==id) return this.objects[i].getRoot()
+	for(var i=0; i<this.getRoots().length; i++) {
+		if (this.getRoots()[i].getRef()==id) return this.getRoots()[i]
 	}
 	return null
 })
 
 KJS.addProtoSafely(GLGE.Scene, "getObjectsById", function(id) {
 	var o = []
-	for(var i=0; i<this.objects.length; i++) {
-		if (this.objects[i].getRef()==id) o.push(this.objects[i])
+	for(var i=0; i<this.getRoots().length; i++) {
+		if (this.getRoots()[i].getRef()==id) o.push(this.getRoots()[i])
 	}
 	return o
 })
@@ -68,9 +61,10 @@ KJS.addProtoSafely(GLGE.Scene, "addPickable", function(id) {
 	if (this.pickable.indexOf(id)<0) this.pickable.push(id)
 })
 
-// add makeDragable to Object.
+KJS.ObjectEx = function () {}
 
-KJS.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
+// add makeDragable to Object.
+KJS.ObjectEx.prototype.makeDragable = function(cbStart, cbUpdate) {
 	this.dragable = true
 	this.dragStartCb = cbStart
 	this.dragUpdateCb = cbUpdate
@@ -83,27 +77,25 @@ KJS.addProtoSafely(GLGE.Object, "makeDragable", function(cbStart, cbUpdate) {
 		this.dragUpdateCb(mouse_x-this.dragStartMouseX, mouse_y-this.dragStartMouseY)
 	}
 	KJS.gameScene.addPickable(this.getRef())
-})
+}
 
 // add makeHoverable to Object.
-
-KJS.addProtoSafely(GLGE.Object, "makeHoverable", function(cbStart, cbEnd) {
+KJS.ObjectEx.prototype.makeHoverable = function(cbStart, cbEnd) {
 	this.hoverable = true
 	this.hoverStart = cbStart
 	this.hoverStop = cbEnd
 	KJS.gameScene.addPickable(this.getRef())
-})
+}
 
 // add makeSelectable to Object.
-
-KJS.addProtoSafely(GLGE.Object, "makeSelectable", function(cbSelect, cbDeselect) {
+KJS.ObjectEx.prototype.makeSelectable = function(cbSelect, cbDeselect) {
 	this.selectable = true
 	this.selectStart = cbSelect
 	this.selectStop = cbDeselect
 	KJS.gameScene.addPickable(this.getRef())
-})
+}
 
-KJS.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) {
+KJS.ObjectEx.prototype.makeClickableCallback = function(cbDown, cbUp) {
 	this.clickable = true
 	this.clickCallbackDown = cbDown
 	this.clickCallbackUp = cbUp
@@ -114,11 +106,10 @@ KJS.addProtoSafely(GLGE.Object, "makeClickableCallback", function(cbDown, cbUp) 
 		if (this.clickCallbackUp) this.clickCallbackUp(mouse_x, mouse_y)
 	}
 	KJS.gameScene.addPickable(this.getRef())
-})
+}
 
 // get position buffer
-bugg=0
-KJS.addProtoSafely(GLGE.Object, "getPositions", function() {
+KJS.ObjectEx.prototype.getPositions = function() {
 	var posbuf
 	if (this.mesh) {
 		for (i in this.mesh.buffers) {
@@ -126,16 +117,8 @@ KJS.addProtoSafely(GLGE.Object, "getPositions", function() {
 				posbuf = this.mesh.buffers[i].data
 		}
 	}
-	else {
-//		pdebug("meshless object: " + this.getRef() + " " + bugg++,8)
-	}
 	return posbuf
-})
-
-// does a ray intersect this object? return null or point
-KJS.addProtoSafely(GLGE.Object, "rayIntersect", function() {
-	
-})
+}
 
 KJS.initComplete = false
 KJS.onInitComplete = function () {}
@@ -327,11 +310,16 @@ KJS.render = function (){
 	for (id in KJS.objectInitCallbacks) {
 		var o = KJS.gameScene.getObjectById(id)
 		if (o) {
-			KJS.objectInitCallbacks[id](o)
-			delete KJS.objectInitCallbacks[id]
+			if (o.getMeshObjects().length > 0) {		// wait for mesh dl FIXME: what about multi-mesh?
+				KJS.objectInitCallbacks[id](o)
+				delete KJS.objectInitCallbacks[id]
+			}
 		}
 	}
-	
+
+	pdebug("objects: " + KJS.gameScene.objects.length, 2)	
+	pdebug("groups: " + KJS.gameScene.groups.length, 3)	
+	pdebug("roots: " + KJS.gameScene.getRoots().length, 4)	
 
     var now=parseInt(new Date().getTime());
 	KJS.elapsedTime = now-KJS.lasttime
@@ -350,8 +338,11 @@ KJS.render = function (){
 
 // return point at which mouse picks object + distance from camera, or null
 // also returns normal
-KJS.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
+KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     // create raycast from camera to mouse xy
+	var mobjs = this.getMeshObjects()
+	if (mobjs.length==0) return null
+	var mesh = mobjs[0].mesh
     if (mx == null || coordType=="pixels") {
 		if (mx == null) {
 			var mousepos = KJS.gameScene.mouse.getMousePosition();
@@ -393,8 +384,8 @@ KJS.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     var mindist = 999999.9
 	var minN = null
 	// get vertex coords
-    var p = this.getPositions()
-	var ff = this.mesh.faces.data
+    var p = mobjs[0].getPositions()
+	var ff = mesh.faces.data
 	var f = []
 	for (i in ff) f[i] = parseInt(ff[i]);				///	FIXME: this is stupid -- shouldn't be strings!
 //	console.log(p,f)
@@ -424,7 +415,7 @@ KJS.addProtoSafely(GLGE.Object, "getPickPoint", function(mx, my, coordType){
     else {
 		return [minI.data, mindist, minN]
     }
-})
+}
 
 // return pick point of nearest object in olist under cursor, or null if none
 // list can include actual objects or string id's
@@ -510,8 +501,29 @@ KJS.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
 	return null
 })
 
+///	given a thing, dig in & find all the objects with meshes
+/// tried to add this to Groups, but the groups in scene.groups doesn't seem to have a Groups prototype
+///	adding to Collada too now
+KJS.ObjectEx.prototype.getMeshObjects = function () {
+//	console.log("getMeshObjects on:", o)
+	var objs = []
+	if (this.mesh) {
+//		console.log("  mesh obj:",this)
+		objs.push(this)
+	}
+	if (this.objects) {
+//		console.log("  mo objects:", this.objects.length)
+		for(var i=0; i<this.objects.length; i++) {
+//			console.log("    i:",i)
+			objs = objs.concat(this.objects[i].getMeshObjects())
+		}
+	}
+//	console.log("getMeshObjects returns:", objs)
+	return objs
+}
+
 /// compute bounding sphere, add boundingRadius, boundingCenter
-KJS.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
+KJS.ObjectEx.prototype.computeBoundingSphere = function(){
 	root = this.getRoot()								///	give all objects the bounding sphere of the group
     var sx = parseFloat(root.getScaleX())
     var sy = parseFloat(root.getScaleY())
@@ -534,21 +546,20 @@ KJS.addProtoSafely(GLGE.Object, "computeBoundingSphere", function(){
 		if (d > r) r = d
     }
 	this.boundingRadius = r
-})
+}
 
 KJS.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
-	for (var i in this.objects) {
-		this.objects[i].computeBoundingSphere()
-//		pdebug_log("object:", this.objects[i], this.objects[i].getRef(), "radius:", this.objects[i].boundingRadius)
+	for (var i in this.getRoots()) {
+		this.getRoots()[i].computeBoundingSphere()
 	}
 })
 
 //	return count of objects not fully loaded
 KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
-	if (this.objects.length < this.objectsToLoad) return this.objectsToLoad-this.objects.length
+	if (this.getRoots().length < this.objectsToLoad) return this.objectsToLoad-this.getRoots().length
 	var count = 0
-	for (var i in this.objects) {
-		if ( (!this.objects[i].mesh) || (!this.objects[i].getRef()) ){
+	for (var i in this.getRoots()) {
+		if ( (!this.getRoots()[i].mesh) || (!this.getRoots()[i].getRef()) ){
 			count ++	
 		}
 	}
@@ -559,15 +570,15 @@ KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 KJS.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 	var j = null
 	var temp
-	for (var i in this.objects) {
-		if (this.objects[i].getRef() == id) {
+	for (var i in this.getRoots()) {
+		if (this.getRoots()[i].getRef() == id) {
 			j = i
 			break
 		}
 	}
 	if (j != null) {
-		this.objects[i] = this.objects[this.objects.length-1]
-		this.objects.pop()
+		this.getRoots()[i] = this.getRoots()[this.getRoots().length-1]
+		this.getRoots().pop()
 	}
 	j = null
 	for (var i in this.pickable) {
@@ -583,7 +594,7 @@ KJS.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 })
 
 // test ray against our bounding sphere
-KJS.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
+KJS.ObjectEx.prototype.rayVsBoundingSphere = function(RayBeg, RayEnd){
 	if (this.boundingRadius == null) {
 		if (this.mesh) {
 			this.computeBoundingSphere()			// ech, gotta do it here due to async mesh load
@@ -626,4 +637,9 @@ KJS.addProtoSafely(GLGE.Object, "rayVsBoundingSphere", function(RayBeg, RayEnd){
 		}
 	}
 	return ret
-})
+}
+
+//console.log("GLGE:", GLGE)
+GLGE.augment(KJS.ObjectEx, GLGE.Object)
+GLGE.augment(KJS.ObjectEx, GLGE.Group)
+GLGE.augment(KJS.ObjectEx, GLGE.Collada)
