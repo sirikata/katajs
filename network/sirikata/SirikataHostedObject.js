@@ -30,6 +30,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+if (0) {
+    // JSDoc hack
+    /** Sirikata is for subclasses specific to the Sirikata protocol.
+     * @constructor
+     */
+    Sirikata = function(){};
+}
 if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
 (function() {

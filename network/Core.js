@@ -30,6 +30,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+if (0) {
+    // JSDoc hack
+    /** Top-level namespace for KataJS.
+     * @constructor
+     */
+    Kata = function(){};
+}
 if (typeof(Kata) == "undefined") {Kata = {};}
 if (typeof(console) == "undefined") {
 	console = {};

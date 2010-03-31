@@ -36,6 +36,7 @@
     /**
      * One half of a simple two-way communication channel. These objects are
      * usually created in pairs.
+     * @constructor
      * @extends {Kata.Channel}
      * @param {Kata.SimpleChannel=} partner  The channel to pair up with.
      */
