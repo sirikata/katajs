@@ -33,7 +33,7 @@
 (function() {
 
     var SUPER = Kata.Simulation.prototype;
-    /** GraphicsSimulation is a wrapper around kata3d. It must be instantiated
+    /** GraphicsSimulation is a wrapper around katajs. It must be instantiated
      * on the main DOM thread, using the channel to the ObjectHost thread.
      * Because there is only one main thread (and hence only one channel to the
      * ObjectHost thread), this channel should be multiplexed to allow multiple
