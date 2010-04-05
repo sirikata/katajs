@@ -95,7 +95,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
         doc.onLoad = function(){
             g_scene = KJS.init()
-            var gfx = new Kata3DGraphics(function(obj){
+            var gfx = new KatajsGraphics(function(obj){
             }, document.body);
             window.kata = new Kata.MainThread();
             graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("kata"));

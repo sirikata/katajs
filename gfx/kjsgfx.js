@@ -18,7 +18,7 @@ id2Obj = function(id){
     return obj
 }
 
-Kata3DGraphics=function(callbackFunction,parentElement) {
+KatajsGraphics=function(callbackFunction,parentElement) {
     this.callback=callbackFunction;
     this.parent=parentElement;
     this.methodTable={}

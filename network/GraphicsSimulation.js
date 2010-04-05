@@ -48,7 +48,7 @@
         SUPER.constructor.call(this, channel);
         this.mElement = domElement;
 //        this.mGFX = new TextGraphics(function(obj){},domElement.parentNode);
-        this.mGFX = new Kata3DGraphics(function(obj){},document.body);
+        this.mGFX = new KatajsGraphics(function(obj){},document.body);
     };
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 
