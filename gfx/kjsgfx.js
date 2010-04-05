@@ -89,34 +89,35 @@ KatajsGraphics=function(callbackFunction,parentElement) {
     this.methodTable["MeshShaderUniform"]=function(msg) {
 		console.log("***MeshShaderUniform",msg)
     }
-    this.methodTable["Mesh"]=function(msg) {
+    this.methodTable["Mesh"] = function(msg){
 		var obj
-		console.log("***Mesh",msg)
-		var el = doc.getElement(msg.mesh,true)
-		if (el) {
-			obj = new GLGE.Object()			// FIXME: not all k3d objects should be GLGE objects (the camera?)
-			obj.setId(msg.id)
-			obj.setMesh(el)
-			var tx = new GLGE.Texture("images/crate.jpg")
-			var ml = new GLGE.MaterialLayer(0, GLGE.M_COLOR, GLGE.UV1, null, null)
-			ml.setTexture(tx)
-			var mat = new GLGE.Material()
-			mat.id = msg.id + "_mat"
-			mat.addTexture(tx)
-			mat.addMaterialLayer(ml)
-			obj.setMaterial(mat)
-			g_scene.addObject(obj)
+		console.log("***Mesh", msg)
+		if (msg.mesh.indexOf(".dae") == msg.mesh.length - 4) {
+			obj = addModel(msg.mesh, msg.id)
 		}
 		else {
-			if (msg.mesh.indexOf(".dae") == msg.mesh.length - 4) {
-				obj = addModel(msg.mesh, msg.id)
+			var el = doc.getElement(msg.mesh, true)
+			if (el) {
+				obj = new GLGE.Object() // FIXME: not all k3d objects should be GLGE objects (the camera?)
+				obj.setId(msg.id)
+				obj.setMesh(el)
+				var tx = new GLGE.Texture("images/crate.jpg")
+				var ml = new GLGE.MaterialLayer(0, GLGE.M_COLOR, GLGE.UV1, null, null)
+				ml.setTexture(tx)
+				var mat = new GLGE.Material()
+				mat.id = msg.id + "_mat"
+				mat.addTexture(tx)
+				mat.addMaterialLayer(ml)
+				obj.setMaterial(mat)
+				g_scene.addObject(obj)
 			}
 			else {
 				console.log("mesh not found as element or parsable type:", msg.mesh)
 			}
 		}
 		this["Move"](msg)
-    }
+	}
+
     this.methodTable["DestroyMesh"]=function(msg) {
 		console.log("DestroyMesh",msg)
     }
