@@ -18,6 +18,41 @@ id2Obj = function(id){
     return obj
 }
 
+addModel = function(url, id, scale, loc, orient, cb){
+	console.log("************************* addModel")
+	if(id==null) id = url + Math.random()
+	if (url.indexOf("http://") != 0) {
+		url = "http://" + location.host + location.pathname + url
+	}
+	if (scale==null) scale = 0.1
+
+	var clda = new GLGE.Collada()
+	console.log("************************* addModel clda:", clda)
+	clda.setDocument(url)
+	clda.setId(id)
+	clda.setScaleX(scale)
+	clda.setScaleY(scale)
+	clda.setScaleZ(scale)
+	if (loc) {
+		clda.setLocX(loc[0])
+		clda.setLocY(loc[1])
+		clda.setLocZ(loc[2])
+	}
+	if (orient) {
+		if (orient.length == 3) {
+			clda.setRotX(orient[0])
+			clda.setRotY(orient[1])
+			clda.setRotZ(orient[2])
+		}
+		else {
+			clda.setQuat(orient)
+		}
+	}
+	KJS.gameScene.addCollada(clda)
+	if (cb) KJS.addObjectInit(id, cb)
+	return KJS.gameScene.getObjectById(id)
+}
+
 KatajsGraphics=function(callbackFunction,parentElement) {
     this.callback=callbackFunction;
     this.parent=parentElement;
@@ -55,19 +90,31 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		console.log("***MeshShaderUniform",msg)
     }
     this.methodTable["Mesh"]=function(msg) {
+		var obj
 		console.log("***Mesh",msg)
-		var obj = new GLGE.Object()			// FIXME: not all k3d objects should be GLGE objects (the camera?)
-		obj.setId(msg.id)
-		obj.setMesh(doc.getElement(msg.mesh))
-		var tx = new GLGE.Texture("images/crate.jpg")
-		var ml = new GLGE.MaterialLayer(0,GLGE.M_COLOR,GLGE.UV1,null,null)
-		ml.setTexture(tx)
-		var mat = new GLGE.Material()
-		mat.id = msg.id + "_mat"
-		mat.addTexture(tx)
-		mat.addMaterialLayer(ml)
-		obj.setMaterial(mat)
-		g_scene.addObject(obj)
+		var el = doc.getElement(msg.mesh,true)
+		if (el) {
+			obj = new GLGE.Object()			// FIXME: not all k3d objects should be GLGE objects (the camera?)
+			obj.setId(msg.id)
+			obj.setMesh(el)
+			var tx = new GLGE.Texture("images/crate.jpg")
+			var ml = new GLGE.MaterialLayer(0, GLGE.M_COLOR, GLGE.UV1, null, null)
+			ml.setTexture(tx)
+			var mat = new GLGE.Material()
+			mat.id = msg.id + "_mat"
+			mat.addTexture(tx)
+			mat.addMaterialLayer(ml)
+			obj.setMaterial(mat)
+			g_scene.addObject(obj)
+		}
+		else {
+			if (msg.mesh.indexOf(".dae") == msg.mesh.length - 4) {
+				obj = addModel(msg.mesh, msg.id)
+			}
+			else {
+				console.log("mesh not found as element or parsable type:", msg.mesh)
+			}
+		}
 		this["Move"](msg)
     }
     this.methodTable["DestroyMesh"]=function(msg) {
