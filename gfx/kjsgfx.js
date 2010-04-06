@@ -159,7 +159,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 			return meth(obj)
 		}
 		else {
-			alert("unknown msg type in kjsgfx: " + msg)
+			alert("unknown msg type in kjsgfx: " + obj.msg)
 		}
     }
     this.destroy=function(){}
