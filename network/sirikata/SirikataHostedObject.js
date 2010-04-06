@@ -463,11 +463,8 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
     Sirikata.HostedObject.prototype._parseMoveMessage = function(msg, initialization) {
         if (msg.scale) {
-            var meshScale = new Sirikata.Protocol.Vector3fProperty;
             var scaleX = msg.scale[0], scaleY = msg.scale[1], scaleZ = msg.scale[2];
-            meshScale.value.push(scaleX);
-            meshScale.value.push(scaleY);
-            meshScale.value.push(scaleZ);
+            var meshScale = new Sirikata.Protocol.Vector3fProperty(scaleX, scaleY, scaleZ);
             this.setProperty("MeshScale", meshScale);
             if (initialization) {
                 this.mBoundingSphere = Math.sqrt(scaleX*scaleX+scaleY*scaleY+scaleZ*scaleZ);
