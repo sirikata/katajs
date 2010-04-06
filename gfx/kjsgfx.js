@@ -53,6 +53,27 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 	return KJS.gameScene.getObjectById(id)
 }
 
+kjsgfx_Move = function(msg){
+	console.log("***Move", msg)
+	obj = kjsgfx_id2Obj(msg.id)
+	if (msg.pos) {
+		obj.setLocX(msg.pos[0])
+		obj.setLocY(msg.pos[1])
+		obj.setLocZ(msg.pos[2])
+	}
+	if (msg.orient) {
+		if (msg.orient.length == 3) { ///	Euler angles
+			obj.setRotX(msg.orient[0])
+			obj.setRotY(msg.orient[1])
+			obj.setRotZ(msg.orient[2])
+		}
+		else { /// Quaternion
+			console.log("setQuat:", msg.orient)
+			obj.setQuat(msg.orient[0], msg.orient[1], msg.orient[2], msg.orient[3])
+		}
+	}
+}
+
 KatajsGraphics=function(callbackFunction,parentElement) {
     this.callback=callbackFunction;
     this.parent=parentElement;
@@ -65,26 +86,8 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		kjsgfx_id_map[msg.id]="1"
 		// FIXME: should keep track of position? do something?
     }
-    this.methodTable["Move"]=function(msg) {
-		console.log("***Move",msg)
-		obj = kjsgfx_id2Obj(msg.id)
-		if (msg.pos) {
-			obj.setLocX(msg.pos[0])
-			obj.setLocY(msg.pos[1])
-			obj.setLocZ(msg.pos[2])
-		}
-		if (msg.orient) {
-			if (msg.orient.length == 3) {			///	Euler angles
-				obj.setRotX(msg.orient[0])
-				obj.setRotY(msg.orient[1])
-				obj.setRotZ(msg.orient[2])
-			}
-			else {									/// Quaternion
-				console.log("setQuat:", msg.orient)
-				obj.setQuat(msg.orient[0],msg.orient[1],msg.orient[2],msg.orient[3])
-			}
-		}
-    }
+    this.methodTable["Move"]=kjsgfx_Move
+
     this.methodTable["Destroy"]=function(msg) {
 		console.log("***Destroy",msg)
     }
@@ -117,7 +120,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 				console.log("mesh not found as element or parsable type:", msg.mesh)
 			}
 		}
-		this["Move"](msg)
+		kjsgfx_Move(msg)
 	}
 
     this.methodTable["DestroyMesh"]=function(msg) {
@@ -134,7 +137,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		if (msg.primary || true) {
 			kjsgfx_camera_id = msg.id		// FIXME: need to handle non-primary camera
 		}
-		this["Move"](msg)
+		kjsgfx_Move(msg)
     }
     this.methodTable["AttachCamera"]=function(msg) {
 		console.log("AttachCamera",msg)
@@ -150,8 +153,14 @@ KatajsGraphics=function(callbackFunction,parentElement) {
     }
     
     this.send=function(obj) {
-		console.log("k3dgfx msg sent:", obj)
-        return this.methodTable[obj.msg](obj);
+		var meth = this.methodTable[obj.msg]
+		console.log("k3dgfx msg sent:", obj, "mtable:", this.methodTable)
+		if (meth) {
+			return meth(obj)
+		}
+		else {
+			alert("unknown msg type in kjsgfx: " + msg)
+		}
     }
     this.destroy=function(){}
 }
