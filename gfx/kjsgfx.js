@@ -1,5 +1,6 @@
 kjsgfx_camera_id = null
 kjsgfx_id_map = {}
+kjsgfx_mesh_map = {}
 kjsgfx_scene = null
 
 kjsgfx_id2Obj = function(id){
@@ -120,6 +121,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 				console.log("mesh not found as element or parsable type:", msg.mesh)
 			}
 		}
+		kjsgfx_mesh_map[msg.mesh] = msg.id
 		kjsgfx_Move(msg)
 	}
 
@@ -151,6 +153,23 @@ KatajsGraphics=function(callbackFunction,parentElement) {
     this.methodTable["DestroyIFrame"]=function(msg) {
 		console.log("DestroyIFrame",msg)
     }
+    
+    this.methodTable["Special"] = function(msg){
+		/// klugey methods to get id
+		var id
+		if (msg.id == "camera") {
+			id = kjsgfx_camera_id
+		}
+		else {
+			if (msg.mesh) {
+				id = kjsgfx_mesh_map[msg.mesh]
+			}
+			else {
+				id = kjsgfx_mesh_map[msg.id]
+			}
+		}
+		console.log("Special", msg, id)
+	}
     
     this.send=function(obj) {
 		var meth = this.methodTable[obj.msg]
