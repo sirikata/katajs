@@ -94,9 +94,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         var kata, graphics;
         var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
         doc.onLoad = function(){
-            g_scene = KJS.init()
-            var gfx = new KatajsGraphics(function(obj){
-            }, document.body);
             window.kata = new Kata.MainThread();
             graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("kata"));
             // Use a real space server.
