@@ -317,10 +317,6 @@ KJS.render = function (){
 		}
 	}
 
-//	pdebug("objects: " + KJS.gameScene.objects.length, 2)	
-//	pdebug("groups: " + KJS.gameScene.groups.length, 3)	
-//	pdebug("roots: " + KJS.gameScene.getRoots().length, 4)	
-
     var now=parseInt(new Date().getTime());
 	KJS.elapsedTime = now-KJS.lasttime
     KJS.cnt=(KJS.cnt+1)%10;
@@ -558,8 +554,9 @@ KJS.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 	if (this.getRoots().length < this.objectsToLoad) return this.objectsToLoad-this.getRoots().length
 	var count = 0
-	for (var i in this.getRoots()) {
-		if ( (!this.getRoots()[i].mesh) || (!this.getRoots()[i].getRef()) ){
+	var roots = this.getRoots()
+	for (var i in roots) {
+		if ( (!roots[i].getMeshObjects().length) || (!roots[i].getRef()) ){
 			count ++	
 		}
 	}
