@@ -169,6 +169,11 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 			}
 		}
 		console.log("Special", msg, id)
+		if (msg.rescale) {
+			obj.setScaleX(msg.rescale[0])
+			obj.setScaleY(msg.rescale[1])
+			obj.setScaleZ(msg.rescale[2])
+		}
 	}
     
     this.send=function(obj) {
