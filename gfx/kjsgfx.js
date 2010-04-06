@@ -1,25 +1,25 @@
-g_camera_id = null
+kjsgfx_camera_id = null
+kjsgfx_id_map = {}
+kjsgfx_scene = null
 
-g_id_map = {}
-
-id2Obj = function(id){
+kjsgfx_id2Obj = function(id){
 	console.log("id2obj:",id)
-	if (!(id in g_id_map)) alert ("k3dgfx error: unknown object(2) " + id)
-    var obj = g_scene.getObjectById(id)
+	if (!(id in kjsgfx_id_map)) alert ("k3dgfx error: unknown object(2) " + id)
+    var obj = kjsgfx_scene.getObjectById(id)
     if (obj == null) {
-        if (id != g_camera_id) {
+        if (id != kjsgfx_camera_id) {
 //            alert("k3dgfx error: unknown object " + id)
             return null
         }
         else {
-            obj = g_scene.camera
+            obj = kjsgfx_scene.camera
         }
     }
     return obj
 }
 
-addModel = function(url, id, scale, loc, orient, cb){
-	console.log("************************* addModel")
+kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
+	console.log("************************* kjsgfx_addModel")
 	if(id==null) id = url + Math.random()
 	if (url.indexOf("http://") != 0) {
 		url = "http://" + location.host + location.pathname + url
@@ -27,7 +27,7 @@ addModel = function(url, id, scale, loc, orient, cb){
 	if (scale==null) scale = 0.1
 
 	var clda = new GLGE.Collada()
-	console.log("************************* addModel clda:", clda)
+	console.log("************************* kjsgfx_addModel clda:", clda)
 	clda.setDocument(url)
 	clda.setId(id)
 	clda.setScaleX(scale)
@@ -58,14 +58,16 @@ KatajsGraphics=function(callbackFunction,parentElement) {
     this.parent=parentElement;
     this.methodTable={}
 
+    kjsgfx_scene = KJS.init()
+
     this.methodTable["Create"]=function(msg) {
 		console.log("***Create",msg)
-		g_id_map[msg.id]="1"
+		kjsgfx_id_map[msg.id]="1"
 		// FIXME: should keep track of position? do something?
     }
     this.methodTable["Move"]=function(msg) {
 		console.log("***Move",msg)
-		obj = id2Obj(msg.id)
+		obj = kjsgfx_id2Obj(msg.id)
 		if (msg.pos) {
 			obj.setLocX(msg.pos[0])
 			obj.setLocY(msg.pos[1])
@@ -93,7 +95,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		var obj
 		console.log("***Mesh", msg)
 		if (msg.mesh.indexOf(".dae") == msg.mesh.length - 4) {
-			obj = addModel(msg.mesh, msg.id)
+			obj = kjsgfx_addModel(msg.mesh, msg.id)
 		}
 		else {
 			var el = doc.getElement(msg.mesh, true)
@@ -109,7 +111,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 				mat.addTexture(tx)
 				mat.addMaterialLayer(ml)
 				obj.setMaterial(mat)
-				g_scene.addObject(obj)
+				kjsgfx_scene.addObject(obj)
 			}
 			else {
 				console.log("mesh not found as element or parsable type:", msg.mesh)
@@ -130,7 +132,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
     this.methodTable["Camera"]=function(msg) {
 		console.log("Camera",msg)
 		if (msg.primary || true) {
-			g_camera_id = msg.id		// FIXME: need to handle non-primary camera
+			kjsgfx_camera_id = msg.id		// FIXME: need to handle non-primary camera
 		}
 		this["Move"](msg)
     }
