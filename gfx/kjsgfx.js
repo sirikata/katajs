@@ -164,6 +164,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 			}
 		}
 		kjsgfx_mesh_map[msg.mesh] = msg.id
+		console.log(">>>mapping",msg.mesh,"to",msg.id)
 		kjsgfx_Move(msg)
 	}
 
@@ -210,6 +211,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 				id = kjsgfx_mesh_map[msg.id]
 			}
 		}
+		var obj = kjsgfx_id2Obj(id)
 		console.log("Special", msg, id)
 		if (msg.rescale) {
 			obj.setScaleX(msg.rescale[0])
