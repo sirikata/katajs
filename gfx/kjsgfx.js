@@ -19,15 +19,17 @@ kjsgfx_id2Obj = function(id){
     return obj
 }
 
-kjsgfx_uploadModel = function(url){
-	url = "http://localhost/cgi-bin/kjs-cgi.py?" + url
+BASE_URL = "http://localhost/"
+
+kjsgfx_uploadModel = function(url, cb){
+	url = BASE_URL + "cgi-bin/kjs-cgi.py?" + url
 	
 	var req = new XMLHttpRequest();
 	if (req) {
 		req.onreadystatechange = function(){
 			if (req.readyState == 4) {
 				if (req.status == 200 || req.status == 0) {
-					console.log("response:", req.responseText.length, req.responseText)
+					if(cb) cb(req.responseText)
 				}
 				else {
 					alert("Error loading Document: status ", req.status);
@@ -41,6 +43,36 @@ kjsgfx_uploadModel = function(url){
 
 
 kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
+	var addModelCont = function(){
+		if (scale==null) scale = 0.1
+		var clda = new GLGE.Collada()
+		console.log("************************* kjsgfx_addModel clda:", clda)
+		clda.setDocument(url)
+		clda.setId(id)
+		clda.setScaleX(scale)
+		clda.setScaleY(scale)
+		clda.setScaleZ(scale)
+		if (loc) {
+			clda.setLocX(loc[0])
+			clda.setLocY(loc[1])
+			clda.setLocZ(loc[2])
+		}
+		if (orient) {
+			if (orient.length == 3) {
+				clda.setRotX(orient[0])
+				clda.setRotY(orient[1])
+				clda.setRotZ(orient[2])
+			}
+			else {
+				clda.setQuat(orient)
+			}
+		}
+		KJS.gameScene.addCollada(clda)
+		if (cb) 
+			KJS.addObjectInit(id, cb)
+		return KJS.gameScene.getObjectById(id)
+	}
+
 	console.log("************************* kjsgfx_addModel")
 	if(id==null) id = url + Math.random()
 	if (url.indexOf("http://") != 0) {
@@ -48,36 +80,20 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 	}
 	else {
 		console.log("uploading: " + url)
-		kjsgfx_uploadModel(url)
+		kjsgfx_uploadModel(url, function(text) {
+			if (text.length>8 && text.substr(0,8) == "loaded: ") {
+				var asset = url.substr(url.lastIndexOf("/")+1,url.length)
+				url = "tmp/" + asset
+				console.log("upload success!", url)
+				addModelCont()
+			}
+			else {
+				console.log("upload failure:(", text, url)
+			}
+		})
 		return
 	}
-	if (scale==null) scale = 0.1
-
-	var clda = new GLGE.Collada()
-	console.log("************************* kjsgfx_addModel clda:", clda)
-	clda.setDocument(url)
-	clda.setId(id)
-	clda.setScaleX(scale)
-	clda.setScaleY(scale)
-	clda.setScaleZ(scale)
-	if (loc) {
-		clda.setLocX(loc[0])
-		clda.setLocY(loc[1])
-		clda.setLocZ(loc[2])
-	}
-	if (orient) {
-		if (orient.length == 3) {
-			clda.setRotX(orient[0])
-			clda.setRotY(orient[1])
-			clda.setRotZ(orient[2])
-		}
-		else {
-			clda.setQuat(orient)
-		}
-	}
-	KJS.gameScene.addCollada(clda)
-	if (cb) KJS.addObjectInit(id, cb)
-	return KJS.gameScene.getObjectById(id)
+	addModelCont()
 }
 
 kjsgfx_Move = function(msg){
