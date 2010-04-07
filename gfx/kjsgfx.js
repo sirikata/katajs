@@ -83,7 +83,7 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 		kjsgfx_uploadModel(url, function(text) {
 			if (text.length>8 && text.substr(0,8) == "loaded: ") {
 				var asset = url.substr(url.lastIndexOf("/")+1,url.length)
-				url = "tmp/" + asset
+				url = BASE_URL + "katatoob/tmp/" + asset
 				console.log("upload success!", url)
 				addModelCont()
 			}
