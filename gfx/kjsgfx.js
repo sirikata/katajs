@@ -19,11 +19,37 @@ kjsgfx_id2Obj = function(id){
     return obj
 }
 
+kjsgfx_uploadModel = function(url){
+	url = "http://localhost/cgi-bin/kjs-cgi.py?" + url
+	
+	var req = new XMLHttpRequest();
+	if (req) {
+		req.onreadystatechange = function(){
+			if (req.readyState == 4) {
+				if (req.status == 200 || req.status == 0) {
+					console.log("response:", req.responseText.length, req.responseText)
+				}
+				else {
+					alert("Error loading Document: status ", req.status);
+				}
+			}
+		};
+		req.open("GET", url, true);
+		req.send("");
+	}
+}
+
+
 kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 	console.log("************************* kjsgfx_addModel")
 	if(id==null) id = url + Math.random()
 	if (url.indexOf("http://") != 0) {
 		url = "http://" + location.host + location.pathname + url
+	}
+	else {
+		console.log("uploading: " + url)
+		kjsgfx_uploadModel(url)
+		return
 	}
 	if (scale==null) scale = 0.1
 
