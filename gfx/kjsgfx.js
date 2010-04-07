@@ -22,7 +22,7 @@ kjsgfx_id2Obj = function(id){
 BASE_URL = "http://localhost/"
 
 kjsgfx_uploadModel = function(url, cb){
-	url = BASE_URL + "cgi-bin/kjs-cgi.py?" + url
+	url = BASE_URL + "cgi-bin/kjs_upload.py?" + url
 	
 	var req = new XMLHttpRequest();
 	if (req) {
