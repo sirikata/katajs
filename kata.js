@@ -534,14 +534,17 @@ KJS.ObjectEx.prototype.computeBoundingSphere = function(){
     var O = new GLGE.Vec([0, 0, 0])
     for (var i = 0; i < p.length; i+=3) { // for each vertex
         var V = new GLGE.Vec([sx * p[i], sy * p[i+1], sz * p[i+2]])
-        O = O.add(V)
+        O = GLGE.addVec3(O, V)
     }
-    O = O.mul(3.0 / p.length)
+	var k = 3.0 / p.length
+	O[0]*= k
+	O[1]*=k
+	O[2]*=k
 	this.boundingCenter = O
 	var r = 0
     for (var i = 0; i < p.length; i+=3) { // for each vertex
         var V = new GLGE.Vec([sx * p[i], sy * p[i+1], sz * p[i+2]])
-		var d = V.distanceFrom(O)
+		var d = GLGE.distanceVec3(V, O)
 		if (d > r) r = d
     }
 	this.boundingRadius = r
