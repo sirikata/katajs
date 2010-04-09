@@ -40,6 +40,8 @@ KJS.addProtoSafely = function (cls, proto, func){
     }
 }
 
+if (GLGE.Scene.prototype.getRoots==null) GLGE.Scene.prototype.getRoots = GLGE.Scene.prototype.getObjects
+
 // add getObjectById method to Scene
 
 KJS.addProtoSafely(GLGE.Scene, "getObjectById", function(id) {
@@ -546,17 +548,23 @@ KJS.ObjectEx.prototype.computeBoundingSphere = function(){
 }
 
 KJS.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
-	for (var i in this.getRoots()) {
+	for (var i=0; i<this.getRoots().length; i++) {
 		this.getRoots()[i].computeBoundingSphere()
 	}
 })
 
 //	return count of objects not fully loaded
+bugg=0
 KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
+	if(bugg) return
 	if (this.getRoots().length < this.objectsToLoad) return this.objectsToLoad-this.getRoots().length
 	var count = 0
 	var roots = this.getRoots()
-	for (var i in roots) {
+	for (i=0; i<roots.length; i++) {
+		if (roots[i].getMeshObjects==null) {
+			console.log("obj lacks method:", roots[i])
+			bugg++
+		}
 		if ( (!roots[i].getMeshObjects().length) || (!roots[i].getRef()) ){
 			count ++	
 		}
