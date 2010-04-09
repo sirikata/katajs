@@ -114,7 +114,7 @@ KJS.ObjectEx.prototype.makeClickableCallback = function(cbDown, cbUp) {
 KJS.ObjectEx.prototype.getPositions = function() {
 	var posbuf
 	if (this.mesh) {
-		for (i in this.mesh.buffers) {
+		for (i=0; i<this.mesh.buffers.length; i++) {
 			if (this.mesh.buffers[i].name == "position") 
 				posbuf = this.mesh.buffers[i].data
 		}
@@ -285,7 +285,7 @@ KJS.checkkeys = function (){
 }
 
 KJS.runScripts = function () {
-	for (var i in KJS.gameScene.scriptedObjects) {
+	for (var i=0; i<KJS.gameScene.scriptedObjects.length; i++) {
 		KJS.gameScene.scriptedObjects[i].frameScript(KJS.elapsedTime)
 	}
 }
@@ -385,7 +385,7 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     var p = mobjs[0].getPositions()
 	var ff = mesh.faces.data
 	var f = []
-	for (i in ff) f[i] = parseInt(ff[i]);				///	FIXME: this is stupid -- shouldn't be strings!
+	for (i=0; i<ff.length; i++) f[i] = parseInt(ff[i]);				///	FIXME: this is stupid -- shouldn't be strings!
 //	console.log(p,f)
     for (var i = 0; i < f.length; i += 3) { // for each tri
         var A = new GLGE.Vec([sx * p[f[i]*3], sy * p[f[i]*3 + 1], sz * p[f[i]*3 + 2], 1]) // get vertex points for triangle ABC
@@ -422,7 +422,7 @@ KJS.getNearestObject = function (olist, x, y, coordType) {
     var place = null
 	var hit = null
 	var norm = null
-    for (var i in olist) {
+    for (var i=0; i<olist.length; i++) {
 		var obj = olist[i]
 		if (typeof(obj)=="string") obj = KJS.gameScene.getObjectById(obj)
 		if (!obj) continue
@@ -489,10 +489,15 @@ KJS.lineSegOfBalls = function(beg, end, num, size, color){
 }
 
 /// software-only pick function
-KJS.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist) {
-//	objlist=null
-	if (objlist==null) objlist=this.pickable
-	var s= ""; for (i in objlist) s+=objlist[i]+" "
+KJS.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist){
+	//	objlist=null
+	if (objlist == null) {
+		objlist = this.pickable
+	}
+	var s = ""
+	for (var i = 0; i < objlist.length; i++) {
+		s += objlist[i] + " "
+	}
 	var place_hit_norm = KJS.getNearestObject(objlist, x, y, "pixels")
 	if (place_hit_norm) {
 		return this.getObjectById(objlist[place_hit_norm[1]])
@@ -579,7 +584,7 @@ KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 KJS.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 	var j = null
 	var temp
-	for (var i in this.objects) {
+	for (var i=0; i<this.objects.length; i++) {
 		if (this.objects[i].getRef() == id) {
 			j = i
 			break
@@ -590,7 +595,7 @@ KJS.addProtoSafely(GLGE.Scene, "removeObjectById", function(id) {
 		this.objects.pop()
 	}
 	j = null
-	for (var i in this.pickable) {
+	for (var i=0; i<this.pickable.length; i++) {
 		if (this.pickable[i] == id) {
 			j = i
 			break
