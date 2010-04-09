@@ -459,6 +459,7 @@ KJS.createObjectAndAddToScene = function (id, mesh, texurl, cb) {
 	return obj
 }
 
+/*
 // rewrite the Texture class (this may have to change -- should be incorporated into GLGE)
 GLGE.Texture=function(url, cb){
 	this.image=new Image();
@@ -474,7 +475,7 @@ GLGE.Texture=function(url, cb){
 	this.state=0;
 	this.glTexture=null;
 }
-
+*/
 // line segment of balls, used for editing
 // beg, end are GLGE.Vec
 KJS.lineSegOfBalls = function(beg, end, num, size, color){
