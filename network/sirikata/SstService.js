@@ -32,6 +32,15 @@
 
 if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
+Kata.include("Service.js");
+Kata.include("Port.js");
+Kata.include("TCPSST.js");
+Kata.include("sirikata/SirikataHostedObject.js");
+Kata.include("ObjectHost.js");
+Kata.include("../externals/protojs/protobuf.js");
+Kata.include("../externals/protojs/pbj.js");
+Kata.include("sirikata/protocol/MessageHeader.pbj.js");
+
 (function() {
     var SUPER = Kata.Service.prototype;
     /**
@@ -141,5 +150,13 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
         }
         this.mService.send(header, bodyunser);
     };
-    
+
+
+    Kata.ObjectHost.sProtocols["sirikata"] = {
+        name: "sirikata",
+        default_port: 5943,
+        protocol_class: Kata.TCPSST,
+        object_class: Sirikata.HostedObject
+    };
+
 })();

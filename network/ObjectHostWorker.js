@@ -30,6 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("ObjectHost.js");
+// HACK:
+Kata.include("sirikata/SirikataLoopback.js");
+Kata.include("sirikata/SstService.js");
+
 (function() {
 
     /** A worker thread to instantiate an ObjectHost and manage the channel to

@@ -30,6 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("MainThread.js");
+Kata.include("Channel.js");
+Kata.include("WebWorker.js");
+
 (function() {
 
     /** MainThread is a class to instantiate an ObjectHost thread and hold onto

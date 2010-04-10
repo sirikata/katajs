@@ -32,6 +32,16 @@
 
 if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
+Kata.include("sirikata/SirikataHostedObject.js");
+Kata.include("Channel.js");
+Kata.include("../Math.uuid.js");
+Kata.include("../externals/protojs/protobuf.js");
+Kata.include("../externals/protojs/pbj.js");
+Kata.include("sirikata/protocol/MessageHeader.pbj.js");
+Kata.include("sirikata/protocol/Persistence.pbj.js");
+Kata.include("sirikata/protocol/Sirikata.pbj.js");
+Kata.include("sirikata/protocol/Subscription.pbj.js");
+
 (function() {
 
     var Ports = {
@@ -466,5 +476,14 @@ if (typeof Sirikata == "undefined") { Sirikata = {}; }
     };
     Sirikata.Loopback.Substream.prototype.close = function () {
     };
+
+
+    Kata.ObjectHost.sProtocols["skloop"] = {
+        name: "skloop",
+        default_port: 0,
+        protocol_class: Sirikata.Loopback,
+        object_class: Sirikata.HostedObject
+    };
+
 
 })();

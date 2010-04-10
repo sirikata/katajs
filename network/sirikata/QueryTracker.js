@@ -32,6 +32,11 @@
 
 if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
+Kata.include("Socket.js");
+Kata.include("../externals/protojs/protobuf.js");
+Kata.include("../externals/protojs/pbj.js");
+Kata.include("sirikata/protocol/MessageHeader.pbj.js");
+
 (function() {
 
 // Multiplexer on header.id from one socket to several.

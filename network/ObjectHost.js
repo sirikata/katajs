@@ -40,19 +40,6 @@
      * @constructor
      */
     Kata.ObjectHost = function () {
-        this.mProtocols = {};
-        this.mProtocols["sirikata"] = {
-            name: "sirikata",
-            default_port: 5943,
-            protocol_class: Kata.TCPSST,
-            object_class: Sirikata.HostedObject
-        };
-        this.mProtocols["skloop"] = {
-            name: "skloop",
-            default_port: 0,
-            protocol_class: Sirikata.Loopback,
-            object_class: Sirikata.HostedObject
-        };
         this.mSimulations = [];
         this.mSimulationsByName = {};
         this.mSpaceMap = {};
@@ -60,6 +47,8 @@
         this.mObjects = {};
         console.log("ObjectHosted!");
     };
+
+    Kata.ObjectHost.sProtocols = {};
 
     /** Notifies the ObjectHost about a new simulation.
      * @param {Kata.Channel} channel  The corresponding simulation's channel.
@@ -139,9 +128,10 @@
         if (colon == -1) {
             Kata.error("registerSpace missing protocol for server "+server);
         }
-        var proto = this.mProtocols[server.substr(0, colon)];
+        var protoname = server.substr(0, colon);
+        var proto = Kata.ObjectHost.sProtocols[protoname];
         if (!proto) {
-            Kata.error("Protocol "+proto+" is not registered.");
+            Kata.error("Protocol "+protoname+" is not registered.");
         }
         var ProtoClass = proto.protocol_class;
         server = server.substr(colon+3);

@@ -39,8 +39,10 @@ self.onmessage = function (ev) {
     // Bootstrapping root of source tree.
     // This may not be necessary if importscripts uses relative paths.
     var scriptroot = data[0];
-    importscripts(scriptroot+"Core.js");
-    Kata.scriptRoot = scriptroot
+    //scriptroot+
+    importScripts("Core.js");
+    Kata.include("WebWorker.js");
+    //Kata.scriptRoot = scriptroot
 
     // Fetch classname to instanciate and arguments.
     var jsFile = data[1];

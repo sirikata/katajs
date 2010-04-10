@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("Channel.js");
+
 (function() {
 
     function getMessageCallback(thus, which) {

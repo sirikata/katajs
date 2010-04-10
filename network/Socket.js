@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("Port.js");
+
 (function() {
 
     var SUPER = Kata.Port.prototype;

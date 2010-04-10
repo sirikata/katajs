@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("ObjectHost.js");
+
 (function() {
 
     /** Base class for protocol-specific HostedObject implementations.

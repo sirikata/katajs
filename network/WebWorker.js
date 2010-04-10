@@ -30,8 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("SimpleChannel.js");
+
 (function() {
-    var WEB_WORKERS_ENABLED = false;
+    var WEB_WORKERS_ENABLED = true;
 
     function getErrorCallback(thus) {
         return function(ev) {
@@ -53,7 +55,7 @@
          *     instantiate the class with.
          */
         Kata.WebWorker = function (jsFile, clsName, args) {
-            this.mWorker = new Worker("GenericWorker.js");
+            this.mWorker = new Worker(Kata.scriptRoot+"GenericWorker.js");
             this.mWorker.onerror = getErrorCallback(this);
             this.mWorker.postMessage([
                 Kata.scriptRoot,
@@ -110,13 +112,14 @@
         Kata.error("ERROR at "+file+":"+line+": "+data);
     };
 
+})();
+(function() {
     function getCallback(thus) {
         return function(ev) {
             thus.callListeners(ev.data);
         };
     }
-})();
-(function() {
+
     var SUPER = Kata.Channel.prototype;
     /**
      * WebWorker.Channel is a channel that uses the postMessage function

@@ -57,7 +57,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
          * @param {string} scriptfile  A script to include only once.
          */
         Kata.include = function(scriptfile) {};
-    } else if (typeof(importscripts) != "undefined") {
+    } else if (typeof(importScripts) != "undefined") {
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
          * @param {string} scriptfile  A script to include only once.
          *
@@ -68,9 +68,9 @@ if (typeof(JSON) == "undefined") {JSON = {};}
                 return;
             }
             includedscripts[scriptfile] = true;
-            importscripts(Kata.scriptRoot+scriptfile);
+            importScripts(Kata.scriptRoot+scriptfile);
         }
-    } else if (typeof(document) != "undefined") {
+    } else if (typeof(document) != "undefined" && document.write) {
         var scripttags = document.getElementsByTagName("script");
         var headTag = document.getElementsByTagName("head")[0];
         for (var i = 0; i < scripttags.length; i++) {
@@ -92,10 +92,32 @@ if (typeof(JSON) == "undefined") {JSON = {};}
                 return;
             }
             includedscripts[scriptfile] = true;
+            /*
             var scriptTag = document.createElement("script");
-            scriptTag.setAttribute("src",Kata._scriptroot+scriptfile);
+            scriptTag.setAttribute("src",Kata.scriptRoot+scriptfile);
             scriptTag.setAttribute("type","text/javascript");
             headTag.appendChild(scriptTag);
+            */
+            /*
+            document.write("<script type='text/javascript' src='"+
+                Kata.scriptRoot+scriptfile+"'></scr"+"ipt>");
+            */
+            //console.log("importing script "+scriptfile+"...");
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", Kata.scriptRoot+scriptfile, false);
+            xhr.send();
+            if (xhr.readyState==4 &&
+                (xhr.status==0 || xhr.status==200)) {
+                with(self){ // ie hack?
+                    self.eval(xhr.responseText);
+                }
+            } else {
+                console.log("Unable to load script file "+scriptfile+
+                    ": status is "+xhr.status+" "+xhr.statusText);
+                console.log("content type is "+
+                    xhr.getResponseHeader("Content-Type"));
+            }
+            //console.log("done importing script "+scriptfile);
         }
     } else {
         // Running without dom?

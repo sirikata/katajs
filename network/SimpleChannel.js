@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("Channel.js");
+
 (function() {
 
     var SUPER = Kata.Channel.prototype;
