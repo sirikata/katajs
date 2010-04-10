@@ -216,6 +216,11 @@ if (typeof(JSON) == "undefined") {JSON = {};}
         window.status = msg;
     };
 
+    // Named (the string) somewhat ridiculously to avoid naming conflicts.
+    // This makes it safe to always filter this type of message on every
+    // thread.
+    var __magic_debug_msg_string = "__magic_debug_msg_string";
+
     /** Throws a fatal error (up to the point of entry from the browser.
      *
      * @note  This uses 'throw' which is poorly supported in some debuggers.
@@ -226,6 +231,17 @@ if (typeof(JSON) == "undefined") {JSON = {};}
      *     This string is thrown.
      */
     Kata.error = function(error) {
+        // Worker thread
+        if (typeof(window) == "undefined") {
+            // Worker thread
+            self.postMessage({
+                msg : __magic_debug_msg_string,
+                debug : "error",
+                contents : error
+            });
+            throw error;
+        }
+        // Main thread
         console.log(error);
         if (typeof(console.error)!="undefined") {
             Kata.setStatus(error);
@@ -247,8 +263,51 @@ if (typeof(JSON) == "undefined") {JSON = {};}
         if (note) {
             msg = msg + ": " + note;
         }
+
+        // Worker thread
+        if (typeof(window) == "undefined") {
+            // Worker thread
+            self.postMessage({
+                msg : __magic_debug_msg_string,
+                debug : "notImplemented",
+                contents : note
+            });
+            return;
+        }
+
+        // Main thread
         console.log(msg);
         Kata.setStatus(msg);
         console.trace && console.trace();
+    };
+
+    /** Tries to handle debug messages from other threads.  This allows
+     *  Web Worker threads to access the logging functionality available
+     *  to the main thread.
+     */
+    Kata.debugMessage = function(data) {
+        if (data.msg != __magic_debug_msg_string)
+            return false;
+
+        // We'll always return true after this since we know somebody
+        // was using the magic debug string.  Naming collisions are unlikely
+        // due to crazy value of the string.
+
+        // Only handle debug messages in main thread
+        if (typeof(window) == "undefined") return true;
+
+        switch (data.debug) {
+        case "error":
+            Kata.error(data.contents);
+            break;
+        case "notImplemented":
+            Kata.notImplemented(data.contents);
+            break;
+        default:
+            // Somebody probably meant to get a real error...
+            Kata.error("Unknown debug message type: " + data.debug);
+            break;
+        }
+        return true;
     };
 })();

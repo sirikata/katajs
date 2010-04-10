@@ -64,6 +64,10 @@
      * @protected
      */
     Kata.Channel.prototype.callListeners = function (data) {
+        // Filter for debug messages first
+        if (Kata.debugMessage(data))
+            return;
+
         if (!this.mListener) {
             Kata.error("Kata.Channel mListener not set");
         }
