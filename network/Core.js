@@ -206,22 +206,49 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             }
         };
     }
+
+    /** Sets the status on the window if possible (i.e. if called from the
+     *  original thread instead of a Web Worker.
+     */
+    Kata.setStatus = function(msg) {
+        if (typeof(window) == "undefined")
+            return;
+        window.status = msg;
+    };
+
     /** Throws a fatal error (up to the point of entry from the browser.
-     * 
+     *
      * @note  This uses 'throw' which is poorly supported in some debuggers.
      * In some cases, it may be preferrable to deliberately reference an
      * undefined variable or another runtime error to produce a stacktrace.
-     * 
+     *
      * @param {string} error  A message to report to the console.
      *     This string is thrown.
      */
     Kata.error = function(error) {
         console.log(error);
         if (typeof(console.error)!="undefined") {
-            window.status = error;
+            Kata.setStatus(error);
             console.error && console.error(error);
             console.trace && console.trace();
         }
         throw error;
+    };
+
+    /** Leaves a note for developers that they've hit an unimplemented
+     *  method.  Usually this means functionality has been stubbed out,
+     *  but not added.
+     *
+     *  @param {string} note If supplied, this note will be reported
+     *         with the rest of the information.
+     */
+    Kata.notImplemented = function(note) {
+        var msg = "Unimplemented";
+        if (note) {
+            msg = msg + ": " + note;
+        }
+        console.log(msg);
+        Kata.setStatus(msg);
+        console.trace && console.trace();
     };
 })();
