@@ -465,6 +465,8 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         this.mRotSpeed = 0;
         this.mParentObject = null;
         this.mBoundingSphere = 0;
+        this.mScript=null;
+        this.mScriptChannel=null;
         this._parseMoveMessage(createMsg, true);
     };
 
@@ -635,7 +637,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             case "LocRequest":
                 var objLoc = new Sirikata.Protocol.ObjLoc;
                 this._fillObjLoc(objLoc);
-                outMsg.message_arguments.push(objLoc)
+                outMsg.message_arguments.push(objLoc);
                 sendReply = addReply = true;
                 break;
             case "RetObj":
@@ -645,6 +647,9 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 console.log("Object "+this.mID+" maps to "+retObj.object_reference);
                 spaceConn.objectID = retObj.object_reference;
                 spaceConn.service.setObjectReference(spaceConn.objectID);
+                if (this.mScriptChannel){
+                    this.mScriptChannel.sendMessage({msg:"RetObj",spaceid:header.source_space,object_reference:retObj.object_reference,location:retObj.location,bounding_sphere:retObj.bounding_sphere});   
+                }
 /*
                 this.mObjectHost.sendToSimulation({
                     msg: "Create",
@@ -771,7 +776,10 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     Sirikata.HostedObject.prototype.messageFromScript = function (channel, data) {
         return this.messageFromSimulation(channel,data);//probably want to just forward messages to space?
     };
-
+    Sirikata.HostedObject.prototype.setScriptChannel=function(channel){
+        this.mScriptChannel=channel;
+        channel.registerListener(Kata.bind(this.messageFromScript,this));
+    };
     Sirikata.HostedObject.prototype.messageFromSimulation = function (channel, data) {
         switch (data.msg) {
         case "ConnectToSpace":
@@ -791,13 +799,11 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             this._parseMoveMessage(data,false);
             break;
         case "Script":
-            this.mScript=new Kata.WebWorker(data.script,data.className);
-            this.mScriptChannel=this.mScript.getChannel();
-            this.mScriptChannel.registerListener(Kata.bind(this.messageFromScript,this));
+            var script=new Kata.WebWorker(data.script,data.method,data.args, Kata.bind(this.setScriptChannel,this));
             break;
         case "ListenOnPort":
             spaceconn.service.getPort(data.port).addReceiver(
-                Kata.bind(this.mScript.getChannel(), this));
+                Kata.bind(this.mScriptChannel, this));
             break;
         case "Mesh":
             {

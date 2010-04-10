@@ -33,7 +33,7 @@
 Kata.include("SimpleChannel.js");
 
 (function() {
-    var WEB_WORKERS_ENABLED = true;
+    var WEB_WORKERS_ENABLED = false;
 
     function getErrorCallback(thus) {
         return function(ev) {
@@ -54,16 +54,21 @@ Kata.include("SimpleChannel.js");
          * @param {Array.<string|object|number>=} args  Primitive data to
          *     instantiate the class with.
          */
-        Kata.WebWorker = function (jsFile, clsName, args) {
+        Kata.WebWorker = function (jsFile, clsName, args, bindChannel) {
             this.mWorker = new Worker(Kata.scriptRoot+"GenericWorker.js");
             this.mWorker.onerror = getErrorCallback(this);
+            //FIXME: is this order valid? -DRH
+            //otherwise we get weird race conditions as exemplified in the synchronous version
+            this.mChannel = new Kata.WebWorker.Channel(this.mWorker);
+            if (bindChannel){
+                bindChannel(this.mChannel);
+            }
             this.mWorker.postMessage([
                 Kata.scriptRoot,
                 jsFile,
                 clsName,
                 args]);
-            this.mChannel = new Kata.WebWorker.Channel(this.mWorker);
-        }
+        };
     } else {
         /**
          * WebWorker is a class to create another subprocess, and manage the
@@ -76,7 +81,7 @@ Kata.include("SimpleChannel.js");
          * @param {Array.<string|object|number>=} args  Primitive data to
          *     instantiate the class with.
          */
-        Kata.WebWorker = function (jsFile, clsName, args) {
+        Kata.WebWorker = function (jsFile, clsName, args, bindChannel) {
             this.mChannel = new Kata.SimpleChannel;
             var clsTree = clsName.split(".");
             Kata.include(jsFile);
@@ -85,8 +90,11 @@ Kata.include("SimpleChannel.js");
                 cls = cls[clsTree[i]];
             }
             if (cls) {
+                var opposingChannel=new Kata.SimpleChannel(this.mChannel);
+                if (bindChannel)
+                    bindChannel(this.mChannel);
                 this.mChild = new cls (
-                    new Kata.SimpleChannel(this.mChannel),
+                    opposingChannel,
                     args);
             } else {
                 Kata.error(clsName+" is undefined.");

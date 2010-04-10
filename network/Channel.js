@@ -65,7 +65,7 @@
      */
     Kata.Channel.prototype.callListeners = function (data) {
         if (!this.mListener) {
-            Kata.error("Kata.Channel's mListener is not set");
+            Kata.error("Kata.Channel mListener not set");
         }
         if (this.mListener.call) {
             this.mListener(this, data);

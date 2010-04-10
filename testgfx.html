@@ -119,6 +119,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 id: testObj0
             });
             window.kata.getChannel().sendMessage({
+                id: testObj0,
+                msg:"Script",
+                script:"sirikata/CameraScript.js",
+                method:"Sirikata.CameraScript",
+                args:{spaceid:defaultSpace}});
+/* handled by the camera script
+            window.kata.getChannel().sendMessage({
                 msg: "ConnectToSpace",
                 spaceid: defaultSpace,
                 id: testObj0
@@ -128,7 +135,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 spaceid: defaultSpace,
                 id: testObj0,
                 radius: 1.0e+8
-            });
+            });*/
             window.kata.getChannel().sendMessage({
                 msg: "Create",
                 spaceid: defaultSpace,
