@@ -251,6 +251,38 @@ if (typeof(JSON) == "undefined") {JSON = {};}
         throw error;
     };
 
+    /** Log a warning.
+     *
+     *  @param {string} note If supplied, this note will be reported
+     *         with the rest of the information.
+     *  @param {string} type If supplied, is used as a prefix to .
+     */
+    Kata.warn = function(note, type) {
+        if (typeof(type) == "undefined" || !type)
+            type = "";
+
+        // Worker thread
+        if (typeof(window) == "undefined") {
+            // Worker thread
+            self.postMessage({
+                msg : __magic_debug_msg_string,
+                debug : "warn",
+                type : type,
+                contents : note
+            });
+            return;
+        }
+
+        var msg = type;
+        if (note)
+            msg = msg + ": " + note;
+
+        // Main thread
+        console.log(msg);
+        Kata.setStatus(msg);
+        console.trace && console.trace();
+    };
+
     /** Leaves a note for developers that they've hit an unimplemented
      *  method.  Usually this means functionality has been stubbed out,
      *  but not added.
@@ -259,26 +291,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
      *         with the rest of the information.
      */
     Kata.notImplemented = function(note) {
-        var msg = "Unimplemented";
-        if (note) {
-            msg = msg + ": " + note;
-        }
-
-        // Worker thread
-        if (typeof(window) == "undefined") {
-            // Worker thread
-            self.postMessage({
-                msg : __magic_debug_msg_string,
-                debug : "notImplemented",
-                contents : note
-            });
-            return;
-        }
-
-        // Main thread
-        console.log(msg);
-        Kata.setStatus(msg);
-        console.trace && console.trace();
+        Kata.warn(note, "notImplemented");
     };
 
     /** Tries to handle debug messages from other threads.  This allows
@@ -300,8 +313,8 @@ if (typeof(JSON) == "undefined") {JSON = {};}
         case "error":
             Kata.error(data.contents);
             break;
-        case "notImplemented":
-            Kata.notImplemented(data.contents);
+        case "warn":
+            Kata.warn(data.contents, data.type);
             break;
         default:
             // Somebody probably meant to get a real error...
