@@ -273,9 +273,13 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             return;
         }
 
-        var msg = type;
-        if (note)
-            msg = msg + ": " + note;
+        var msg = null;
+        if (type && note)
+            msg = type + ": " + note;
+        else if (type)
+            msg = type;
+        else if (note)
+            msg = note;
 
         // Main thread
         console.log(msg);
