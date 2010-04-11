@@ -783,10 +783,6 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     Sirikata.HostedObject.prototype.messageFromScript = function (channel, data) {
         return this.messageFromSimulation(channel,data);//probably want to just forward messages to space?
     };
-    Sirikata.HostedObject.prototype.setScriptChannel=function(channel){
-        this.mScriptChannel=channel;
-        channel.registerListener(Kata.bind(this.messageFromScript,this));
-    };
     Sirikata.HostedObject.prototype.messageFromSimulation = function (channel, data) {
         switch (data.msg) {
         case "ConnectToSpace":
@@ -806,7 +802,11 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             this._parseMoveMessage(data,false);
             break;
         case "Script":
-            var script=new Kata.WebWorker(data.script,data.method,data.args, Kata.bind(this.setScriptChannel,this));
+            var script=new Kata.WebWorker(data.script,data.method,data.args);
+            this.mScriptChannel=script.getChannel();
+            this.mScriptChannel.registerListener(
+                Kata.bind(this.messageFromScript,this));
+            script.go();
             break;
         case "ListenOnPort":
             spaceconn.service.getPort(data.port).addReceiver(

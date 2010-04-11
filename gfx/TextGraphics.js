@@ -44,9 +44,11 @@ TextGraphics=function(callbackFunction,parentElement) {
     }
     this.methodTable["Move"]=function(msg) {
         element=returnObjById(msg.id);
-        element.style.left=msg.pos[0]+"px";
-        element.style.top=msg.pos[1]+"px";
-        element.style.zIndex=msg.pos[2];
+        if (msg.pos && msg.pos.length == 3) {
+            element.style.left=msg.pos[0]+"px";
+            element.style.top=msg.pos[1]+"px";
+            element.style.zIndex=msg.pos[2];
+        }
     }
     this.methodTable["Destroy"]=function(msg) {
         var div=returnObjById(msg.id);

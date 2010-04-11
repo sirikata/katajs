@@ -34,6 +34,7 @@
  * disabled. Uses Kata.include to include dependent files.
  */
 self.onmessage = function (ev) {
+    self.onmessage = function(){};
     var data = ev.data;
 
     // Bootstrapping root of source tree.

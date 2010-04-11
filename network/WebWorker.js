@@ -33,7 +33,10 @@
 Kata.include("SimpleChannel.js");
 
 (function() {
-    var WEB_WORKERS_ENABLED = false;
+    /** @variable {boolean} If true, uses Workers on supported Javascript
+     * engines. If false, never uses workers, and runs code synchronously.
+     */
+    Kata.WEB_WORKERS_ENABLED = false;
 
     function getErrorCallback(thus) {
         return function(ev) {
@@ -41,47 +44,53 @@ Kata.include("SimpleChannel.js");
         }
     }
 
-    if (WEB_WORKERS_ENABLED && typeof(Worker)!="undefined") {
+    if (Kata.WEB_WORKERS_ENABLED && typeof(Worker)!="undefined") {
         /**
          * WebWorker is a class to create another subprocess, and manage the
          * bootstrapping process when Workers are enabled.
+         * To avoid race conditions, the code is not executed until you call
+         * the go() method on this WebWorker object.
          * @see GenericWorker.js
          * @constructor
          * @param {string} jsFile  An initial javascript file to be imported.
          * @param {string} clsName  A dot-separated path to the class from
          *     "self" (the root object). Actual classes can not be sent across
          *     the thread boundary, which is why this needs the name.
-         * @param {Array.<string|object|number>=} args  Primitive data to
-         *     instantiate the class with.
+         * @param {*} args  Primitive data to instantiate the class with.
          */
-        Kata.WebWorker = function (jsFile, clsName, args, bindChannel) {
+        Kata.WebWorker = function (jsFile, clsName, args) {
             this.mWorker = new Worker(Kata.scriptRoot+"GenericWorker.js");
             this.mWorker.onerror = getErrorCallback(this);
-            //FIXME: is this order valid? -DRH
-            //otherwise we get weird race conditions as exemplified in the synchronous version
-            this.mChannel = new Kata.WebWorker.Channel(this.mWorker);
-            if (bindChannel){
-                bindChannel(this.mChannel);
-            }
-            this.mWorker.postMessage([
+            this.mInitialMessage = [
                 Kata.scriptRoot,
                 jsFile,
                 clsName,
-                args]);
+                args];
+            this.mChannel = new Kata.WebWorker.Channel(this.mWorker);
+        };
+        /** Runs the WebWorker. At this point, it is possible to receive a
+         *  message synchronously, so make sure to set up all listeners before
+         *  calling the go method.
+         */
+        Kata.WebWorker.prototype.go = function() {
+            var initMsg = this.mInitialMessage;
+            delete this.mInitialMessage;
+            this.mWorker.postMessage(initMsg);
         };
     } else {
         /**
          * WebWorker is a class to create another subprocess, and manage the
          * bootstrapping process, in this case when Workers are disabled.
+         * To avoid race conditions, the code is not executed until you call
+         * the go() method on this WebWorker object.
          * @constructor
          * @param {string} jsFile  An initial javascript file to be imported.
          * @param {string} clsName  A dot-separated path to the class from
          *     "self" (the root object). Actual classes can not be sent across
          *     the thread boundary, which is why this needs the name.
-         * @param {Array.<string|object|number>=} args  Primitive data to
-         *     instantiate the class with.
+         * @param {*} args  Primitive data to instantiate the class with.
          */
-        Kata.WebWorker = function (jsFile, clsName, args, bindChannel) {
+        Kata.WebWorker = function (jsFile, clsName, args) {
             this.mChannel = new Kata.SimpleChannel;
             var clsTree = clsName.split(".");
             Kata.include(jsFile);
@@ -89,21 +98,32 @@ Kata.include("SimpleChannel.js");
             for (var i = 0; cls && i < clsTree.length; i++) {
                 cls = cls[clsTree[i]];
             }
-            if (cls) {
-                var opposingChannel=new Kata.SimpleChannel(this.mChannel);
-                if (bindChannel)
-                    bindChannel(this.mChannel);
-                this.mChild = new cls (
-                    opposingChannel,
-                    args);
-            } else {
+            this.mArgs = args;
+            this.mClass = cls;
+            if (!cls) {
                 Kata.error(clsName+" is undefined.");
             }
+            console.log("new webworker");
+        }
+        /** Runs the WebWorker. At this point, it is possible to receive a
+         *  message synchronously, so make sure to set up all listeners before
+         *  calling the go method.
+         */
+        Kata.WebWorker.prototype.go = function() {
+            var opposingChannel=new Kata.SimpleChannel(this.mChannel);
+            var cls = this.mClass;
+            console.log("going!");
+            this.mChild = new cls (
+                opposingChannel,
+                this.mArgs);
+            delete this.mArgs;
         }
     }
 
     /**
      * @return {Kata.Channel} The Channel to correspond with the worker.
+     * You should subscribe listeners to this channel before executing, but
+     * you cannot send any messages until you have called the go() method.
      */
     Kata.WebWorker.prototype.getChannel = function() {
         return this.mChannel;

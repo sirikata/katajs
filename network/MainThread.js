@@ -42,9 +42,10 @@ Kata.include("WebWorker.js");
      * @constructor
      */
     Kata.MainThread = function () {
-        this.mObjectHostWorker = new Kata.WebWorker("ObjectHostWorker.js", "Kata.ObjectHostWorker");
+        this.mObjectHostWorker = new Kata.WebWorker("ObjectHostWorker.js", "Kata.ObjectHostWorker", []);
         this.mObjectHostChannel = this.mObjectHostWorker.getChannel();
         this.mObjectHostChannel.registerListener(Kata.bind(this.receivedMessage, this));
+        this.mObjectHostWorker.go();
     };
 
     /**
