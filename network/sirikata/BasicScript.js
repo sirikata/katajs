@@ -8,7 +8,19 @@ Kata.include("../externals/protojs/pbj.js");
          this.mChannel=channel;
          channel.registerListener(Kata.bind(this.processMessage,this));
          if(args.spaceid) {
-             Sirikata.BasicScript.prototype.connectToSpace.call(this,args.spaceid,function(msg){});
+             if (args.parent) {
+                 var parentObject=args.parent;
+                 var parentNickname=args.nickname;
+                 Sirikata.BasicScript.prototype.connectToSpace
+                     .call(this,args.spaceid,
+                           function(msg){
+                               msg.msg="ChildObjectSpaceConnect";
+                               msg.nickname=parentNickname;
+                              //FIXME: channel.sendODPMessage(parentObject,msg);
+                           });
+             } else {
+                 Sirikata.BasicScript.prototype.connectToSpace.call(this,args.spaceid,function(msg){});                 
+             }
                                                                 //,function(msg){alert("Connected to space "+msg.spaceid+" as "+msg.object_reference);});//if we want to test callback mechanism
          }
      };
