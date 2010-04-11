@@ -310,9 +310,9 @@ if (typeof(JSON) == "undefined") {JSON = {};}
         // was using the magic debug string.  Naming collisions are unlikely
         // due to crazy value of the string.
 
-        // Only handle debug messages in main thread
-        if (typeof(window) == "undefined") return true;
-
+        // If you add to this list, be careful that your handler either
+        // a) chains properly or b) checks if you are in the main thread,
+        // e.g. by checking for window.
         switch (data.debug) {
         case "error":
             Kata.error(data.contents);
