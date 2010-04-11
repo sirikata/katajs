@@ -233,20 +233,20 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         var setangspd = false;
         if (oloc.angular_speed !== undefined) {
             objToSet.mRot.angular_speed = oloc.angular_speed;
-            if (objToSet.mRot.axis_of_rotation === undefined) {
-                objToSet.mRot.axis_of_rotation = [1,0,0];
+            if (objToSet.mRot.rotational_axis === undefined) {
+                objToSet.mRot.rotational_axis = [1,0,0];
             }
             objToSet.mRot.timestamp = oloc.timestamp || new Date;
             setangspd = true;
         }
-        if (oloc.axis_of_rotation !== undefined) {
-            objToSet.mRot.axis_of_rotation = oloc.axis_of_rotation;
+        if (oloc.rotational_axis !== undefined) {
+            objToSet.mRot.rotational_axis = oloc.rotational_axis;
             objToSet.mRot.timestamp = oloc.timestamp || new Date;
             setangspd = true;
         }
         if (!(objToSet.mRot.angular_speed > 0)) {
             objToSet.mRot.angular_speed = 0;
-            objToSet.mRot.axis_of_rotation = [1,0,0];
+            objToSet.mRot.rotational_axis = [1,0,0];
         }
         if (setangspd) {
             if (dobroadcast) {
@@ -316,7 +316,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                         ret.subscription_id = ORIENTATION_SUBSCRIPTION;
                     } else if (r.field_name == "AngVel") {
                         oloc.angular_speed = thisObj.mRot.angular_speed;
-                        oloc.axis_of_rotation = thisObj.mRot.axis_of_rotation;
+                        oloc.rotational_axis = thisObj.mRot.rotational_axis;
                         oloc.timestamp = thisObj.mRot.timestamp;
                         ret.subscription_id = ANGVEL_SUBSCRIPTION;
                     } else if (r.field_name == "Velocity" ) {
@@ -462,7 +462,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         this.mVel.velocity = [0,0,0];
         this.mRot = new Sirikata.Protocol.ObjLoc;
         this.mRot.angular_speed = 0;
-        this.mRot.axis_of_rotation = [1,0,0];
+        this.mRot.rotational_axis = [1,0,0];
         Kata.Channel.call(this);
     };
     Kata.extend(Sirikata.Loopback.Substream, Kata.Channel.prototype);

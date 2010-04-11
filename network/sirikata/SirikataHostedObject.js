@@ -130,8 +130,8 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
      * @param {string} space  The remote space UUID.
      * @param {string} id  The objectreference for this ProxyObject.
      */
-    Sirikata.ProxyObject = function(service, objectHost, space, id) {
-        this.mObjectHost = objectHost;
+    Sirikata.ProxyObject = function(service, controllingObject, space, id) {
+        this.mControllingObject = controllingObject;
         this.mRequests = {};
         this.mSubscriptions = [];
         this.mRefCount = 0;
@@ -143,7 +143,14 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         this.mBroadcastPort.addReceiver(Kata.bind(this.receivedBroadcast, this));
         this.mBroadcastIds = {};
     };
-
+    Sirikata.ProxyObject.prototype.sendToSimulation=function(message) {
+      this.mControllingObject.mObjectHost.sendToSimulation(message);
+      var channel=this.mControllingObject.mScriptChannel;
+      if (channel){
+          channel.sendMessage(message);
+      }
+    };
+     
     /** Clean up this data, and destroy all pending requests/ports. */
     Sirikata.ProxyObject.prototype.destroy = function() {
         for (var propname in this.subscriptions) {
@@ -159,9 +166,9 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             this.mQueryTracker.send(message);
             delete this.mQueryTracker;
             if (this.mLocationPendingRequests===undefined) {
-                thus.mObjectHost.sendToSimulation({msg:"Destroy",
-                                                   id:this.mID
-                                                   });
+                thus.sendToSimulation({msg:"Destroy",
+                                       id:this.mID
+                                      });
             }
             this.mDestroyed=true;
         }
@@ -203,11 +210,11 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         var meshScale = new Sirikata.Protocol.Vector3fProperty;
         meshScale.ParseFromStream(new PROTO.ByteArrayStream(newdata));
         if (meshScale.value) {
-            this.mObjectHost.sendToSimulation({msg: "Move",
-                                               id: this.mID,
-                                               time: new Date,
-                                               scale: meshScale.value
-                                              });
+            this.sendToSimulation({msg: "Move",
+                                   id: this.mID,
+                                   time: new Date,
+                                   scale: meshScale.value
+                                  });
         }
     };
     Sirikata.ProxyObject.prototype._setMeshURI = function(newdata) {
@@ -217,10 +224,10 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             console.log("MeshURI Property parse failure",newdata);
         }else {
             //send item to graphics system
-            this.mObjectHost.sendToSimulation({msg:"Mesh",
-                                               id:this.mID,
-                                               mesh:meshURI.value
-                                              });
+            this.sendToSimulation({msg:"Mesh",
+                                   id:this.mID,
+                                   mesh:meshURI.value
+                                  });
         }
     };
     Sirikata.ProxyObject.prototype._setWebViewURL = function(newdata) {
@@ -229,22 +236,22 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         if (meshURI.value===undefined) {
             console.log("WebViewURL Property parse failure",newdata);
         }else {
-            this.mObjectHost.sendToSimulation({msg:"IFrame",
-                                               id:this.mID,
-                                               mesh:webURI.value
-                                              });
+            this.sendToSimulation({msg:"IFrame",
+                                   id:this.mID,
+                                   mesh:webURI.value
+                                  });
         }
     };
     Sirikata.ProxyObject.prototype._setLightInfo = function(newdata) {
         var lightProp=new Sirikata.Protocol.LightInfoProperty;
         lightProp.ParseFromStream(new PROTO.ByteArrayStream(newdata));
-        this.mObjectHost.sendToSimulation({msg:"Light",
-                                           id:this.mID,
-                                           diffuse_color:lightProp.diffuse_color,
-                                           specular_color:lightProp.specular_color,
-                                           ambient_color:lightProp.ambient_color,
-                                           power:lightProp.power
-                                            });
+        this.sendToSimulation({msg:"Light",
+                               id:this.mID,
+                               diffuse_color:lightProp.diffuse_color,
+                               specular_color:lightProp.specular_color,
+                               ambient_color:lightProp.ambient_color,
+                               power:lightProp.power
+                              });
     };
     Sirikata.ProxyObject.prototype._setPhysical = function(newdata) {
         
@@ -253,9 +260,9 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         
     };
     Sirikata.ProxyObject.prototype._setCamera = function(newdata) {
-        this.mObjectHost.sendToSimulation({msg:"Camera",
-                                           id:this.mID
-                                          });
+        this.sendToSimulation({msg:"Camera",
+                               id:this.mID
+                              });
     };
     Sirikata.ProxyObject.prototype._setLocation = function(newdata) {
         var oloc = new Sirikata.Protocol.ObjLoc;
@@ -272,11 +279,11 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         if (oloc.velocity) {
             movemsg.vel = oloc.velocity;
         }
-        if (oloc.angular_speed || oloc.axis_of_rotation) {
-            movemsg.rotvel = oloc.angular_speed;
-            movemsg.rotaxis = oloc.axis_of_rotation;
+        if (oloc.angular_speed || oloc.rotational_axis) {
+            movemsg.rotvel = oloc.angular_speed;            
+            movemsg.rotaxis = oloc.rotational_axis;
         }
-        this.mObjectHost.sendToSimulation(movemsg);
+        this.sendToSimulation(movemsg);
     };
     Sirikata.ProxyObject.prototype.askForProperties = function() {
         var sentBody = new Sirikata.Persistence.Protocol.ReadWriteSet;
@@ -416,7 +423,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                         } else if (r.field_name == "Velocity") {
                             createMsg.vel = objloc.velocity;
                         } else if (r.field_name == "AngVel") {
-                            createMsg.rotaxi = objloc.axis_of_rotation;
+                            createMsg.rotaxis = objloc.rotational_axis;
                             createMsg.rotvel = objloc.angular_speed;
                         }
                         if (r.subscription_id) {
@@ -424,7 +431,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                         }
                     }
                 }
-                thus.mObjectHost.sendToSimulation(createMsg);
+                thus.sendToSimulation(createMsg);
                 var deferredLength=thus.mLocationPendingRequests.length;
                 for (var index=0;index<deferredLength;index+=1) {
                     thus.mLocationPendingRequests[index]();
@@ -675,7 +682,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 } else if (proxCall.proximity_event == Sirikata.Protocol.ProxCall.ProximityEvent.ENTERED_PROXIMITY) {
                     var obj = this.mObjects[proximate_object];
                     if (!obj) {
-                        obj = new Sirikata.ProxyObject(spaceConn.service, this.mObjectHost, header.source_space, proximate_object);
+                        obj = new Sirikata.ProxyObject(spaceConn.service, this, header.source_space, proximate_object);
                         obj.askForProperties();
                         obj.askForPosition();
                     }
