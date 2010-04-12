@@ -28,14 +28,14 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 		url = "http://" + location.host + location.pathname + url
 	}
 	if (scale == null) 
-		scale = 0.1
+		scale = [1.0,1.0,1.0]
 	var clda = new GLGE.Collada()
 	console.log("************************* kjsgfx_addModel clda:", clda)
 	clda.setDocument(url)
 	clda.setId(id)
-	clda.setScaleX(scale)
-	clda.setScaleY(scale)
-	clda.setScaleZ(scale)
+	clda.setScaleX(scale[0])
+	clda.setScaleY(scale[1])
+	clda.setScaleZ(scale[2])
 	if (loc) {
 		clda.setLocX(loc[0])
 		clda.setLocY(loc[1])
@@ -65,6 +65,11 @@ kjsgfx_Move = function(msg){
 		obj.setLocY(msg.pos[1])
 		obj.setLocZ(msg.pos[2])
 	}
+    if (msg.scale) {
+        obj.setScaleX(msg.scale[0]);
+        obj.setScaleY(msg.scale[1]);
+        obj.setScaleZ(msg.scale[2]);
+    }
 	if (msg.orient) {
 		if (msg.orient.length == 3) { ///	Euler angles
 			obj.setRotX(msg.orient[0])
