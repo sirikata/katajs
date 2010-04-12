@@ -486,7 +486,6 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         this.mRotSpeed = 0;
         this.mParentObject = null;
         this.mBoundingSphere = null;
-        this.mScript=null;
         this.mScriptChannel=null;
         this._parseMoveMessage(createMsg, true);
     };
@@ -827,9 +826,42 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 Kata.bind(this.messageFromScript,this));
             script.go();
             break;
-        case "ListenOnPort":
-            spaceconn.service.getPort(data.port).addReceiver(
-                Kata.bind(this.mScriptChannel, this));
+        case "Send":
+            {
+                var header=new Sirikata.Protocol.Header;
+                header.source_object=data.source_object;
+                header.destination_object=data.destination_object;
+                header.source_space=data.space;
+                header.destination_space=data.space;
+                header.source_port=data.source_port;
+                header.destination_port=data.destination_port;
+                if (data.header.reply_id!==undefined)
+                  header.reply_id=data.reply_id;  
+                if (data.header.id!==undefined)
+                  header.id=data.id;
+                if(data.space in this.mSpaceConnectionMap) {
+                    var spaceConn = this.mSpaceConnectionMap[data.space];
+                    spaceConn.service.getPort(data.source_port).send(header,data.message);
+                }
+            }
+            break;
+        case "BindPort":
+            {
+                if (!this.mScirptPortFunction)
+                    this.mScriptPortFunction=Kata.bind(this.mScriptChannel, this);
+                if (!mScriptPorts[data.port]){
+                    var spaceConn = this.mSpaceConnectionMap[data.space];
+                    if (spaceConn)
+                        spaceConn.service.getPort(data.port).addReceiver(this.mScriptPortFunction);
+                }
+            }
+            break;
+        case "UnbindPort":
+            if (this.mScirptPortFunction) {
+                var spaceConn = this.mSpaceConnectionMap[data.space];
+                if (spaceConn)
+                    spaceConn.service.getPort(data.port).addReceiver(this.mScriptPortFunction);                
+            }
             break;
         case "Mesh":
             {

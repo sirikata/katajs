@@ -93,7 +93,11 @@ Kata.include("sirikata/protocol/MessageHeader.pbj.js");
 */
         var b64stream = new PROTO.Base64Stream;
         header.SerializeToStream(b64stream);
-        bodyunser.SerializeToStream(b64stream);
+        if (bodyunser instanceof Array) {
+            b64stream.write(bodyunser);
+        }else {
+            bodyunser.SerializeToStream(b64stream);   
+        }
         this.mSubstream.sendMessage(b64stream.getString());
     };
 

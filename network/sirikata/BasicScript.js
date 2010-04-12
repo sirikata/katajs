@@ -9,14 +9,18 @@ Kata.include("../externals/protojs/pbj.js");
          channel.registerListener(Kata.bind(this.processMessage,this));
          if(args.spaceid) {
              if (args.parent) {
-                 var parentObject=args.parent;
-                 var parentNickname=args.nickname;
+                 var th=this;
+                 var creatorObject=args.creator;
+                 var creatorNickname=args.creatornickname;
+                 var creatorPort=args.creatorport;
                  Sirikata.BasicScript.prototype.connectToSpace
                      .call(this,args.spaceid,
                            function(msg){
-                               msg.msg="ChildObjectSpaceConnect";
-                               msg.nickname=parentNickname;
-                              //FIXME: channel.sendODPMessage(parentObject,msg);
+                               if (msg.object_reference) {
+                                   var bound_port=120;
+                                   th.mChannel.sendMessage({msg:"BindPort",space:spaceid,port:bound_port});
+                                   th.mChannel.sendMessage({msg:"Send",space:spaceid,destination_object:creatorObject,destination_port:creatorPort,source_port:bound_port}[1,2,3,4,5]);
+                               }
                            });
              } else {
                  Sirikata.BasicScript.prototype.connectToSpace.call(this,args.spaceid,function(msg){});                 
