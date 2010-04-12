@@ -61,6 +61,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     var VELOCITY_SUBSCRIPTION = -2;
     var ORIENTATION_SUBSCRIPTION = -3;
     var ANGVEL_SUBSCRIPTION = -4;
+    var BOUNDING_SUBSCRIPTION = -5;
 
     /**
      * Sirikata.Loopback is a simple top-level server connection that pretends
@@ -250,10 +251,19 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         }
         if (setangspd) {
             if (dobroadcast) {
-                this._broadcast(object,ANGVEL_SUBSCRIPTION,bcastmsg.objToSet.mRot);
+                this._broadcast(object,ANGVEL_SUBSCRIPTION,objToSet.mRot);
             }
         }
     };
+    Sirikata.Loopback.prototype._updateObjectScale = function (object, scale, dobroadcast) {
+        var objToSet = this.mObjects[object];
+        if (scale) {
+            objToSet.mScale.value = scale;
+            if (dobroadcast) {
+                this._broadcast(object,BOUNDING_SUBSCRIPTION,objToSet.mScale);
+            }
+        }
+    }
     /**
      * Process a message destined for the space (object id 0).
      * @param {Sirikata.Protocol.Header} header  Header parsed from sender.
@@ -291,21 +301,30 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 var rws = new Sirikata.Persistence.Protocol.ReadWriteSet;
                 rws.ParseFromStream(new PROTO.Base64Stream(base64data));
                 var object = header.source_object;
+                var oloc = new Sirikata.Protocol.ObjLoc;
+                var changedloc = false;
                 for (var i = 0; i < rws.writes.length; i++) {
                     var w = rws.writes[i];
                     if (w.field_name == "Position" || w.field_name == "Orientation" ||
                        w.field_name == "AngVel" || w.field_name == "Velocity") {
-                        var oloc = new Sirikata.Protocol.ObjLoc;
                         oloc.ParseFromStream(new PROTO.ByteArrayStream(w.data));
-                        this._updateObjectPosition(object, oloc, true);
+                        changedloc = true;
                     }
+                    if (w.field_name == "Scale") {
+                        var scale = new Sirikata.Protocol.Vector3fProperty;
+                        scale.ParseFromStream(new PROTO.ByteArrayStream(w.data));
+                        this._updateObjectScale(object, scale.value, true);
+                    }
+                }
+                if (changedloc) {
+                    this._updateObjectPosition(object, oloc, true);
                 }
                 var retMsg = new Sirikata.Persistence.Protocol.Response;
                 for (var i = 0; i < rws.reads.length; i++) {
                     var r = rws.reads[i];
                     var ret = retMsg.reads.push();
-                    var oloc = new Sirikata.Protocol.ObjLoc;
-                    var thisObj = this.mObjects[r.object || header.source_object];
+                    oloc = new Sirikata.Protocol.ObjLoc;
+                    var thisObj = this.mObjects[r.object_uuid || header.source_object];
                     if (r.field_name == "Position") {
                         oloc.position = thisObj.mPos.position;
                         oloc.timestamp = thisObj.mPos.timestamp;
@@ -323,6 +342,9 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                         oloc.velocity = thisObj.mVel.velocity;
                         oloc.timestamp = thisObj.mVel.timestamp;
                         ret.subscription_id = VELOCITY_SUBSCRIPTION;
+                    } else if (r.field_name == "Scale" ) {
+                        oloc = thisObj.mScale;
+                        ret.subscription_id = BOUNDING_SUBSCRIPTION;
                     }
                     if (!oloc.IsInitialized()) {
                         ret.return_status = Sirikata.Persistence.Protocol.
@@ -367,7 +389,12 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                         newObj.ParseFromStream(argstream);
                         this._updateObjectPosition(object, newObj.requested_object_loc, false);
                         var outRetObj = new Sirikata.Protocol.RetObj;
-                        outRetObj.bounding_sphere = newObj.bounding_sphere;
+                        if (newObj.bounding_sphere_scale && newObj.bounding_sphere_scale.length == 3) {
+                            outRetObj.bounding_sphere_scale = newObj.bounding_sphere_scale;
+                        } else {
+                            outRetObj.bounding_sphere_scale = [0,0,0];
+                        }
+                        this._updateObjectScale(object, outRetObj.bounding_sphere_scale, false);
                         outRetObj.location = newObj.requested_object_loc;
                         outRetObj.object_reference = object;
                         outMsg.message_names.push("RetObj");
@@ -463,6 +490,8 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         this.mRot = new Sirikata.Protocol.ObjLoc;
         this.mRot.angular_speed = 0;
         this.mRot.rotational_axis = [1,0,0];
+        this.mScale = new Sirikata.Protocol.Vector3fProperty;
+        this.mScale.value = [0,0,0];
         Kata.Channel.call(this);
     };
     Kata.extend(Sirikata.Loopback.Substream, Kata.Channel.prototype);

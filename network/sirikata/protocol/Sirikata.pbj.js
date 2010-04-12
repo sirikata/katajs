@@ -226,10 +226,10 @@ Sirikata.Protocol.NewObj = PROTO.Message("Sirikata.Protocol.NewObj",{
 		type: function(){return Sirikata.Protocol.ObjLoc;},
 		id: 3
 	},
-	bounding_sphere: {
+	bounding_sphere_scale: {
 		options: {packed:true},
 		multiplicity: PROTO.optional,
-		type: function(){return PBJ.boundingsphere3f;},
+		type: function(){return PBJ.vector3f;},
 		id: 4
 	}});
 Sirikata.Protocol.RetObj = PROTO.Message("Sirikata.Protocol.RetObj",{
@@ -245,10 +245,10 @@ Sirikata.Protocol.RetObj = PROTO.Message("Sirikata.Protocol.RetObj",{
 		type: function(){return Sirikata.Protocol.ObjLoc;},
 		id: 3
 	},
-	bounding_sphere: {
+	bounding_sphere_scale: {
 		options: {packed:true},
 		multiplicity: PROTO.optional,
-		type: function(){return PBJ.boundingsphere3f;},
+		type: function(){return PBJ.vector3f;},
 		id: 4
 	}});
 Sirikata.Protocol.DelObj = PROTO.Message("Sirikata.Protocol.DelObj",{

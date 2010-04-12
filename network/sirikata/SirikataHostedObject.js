@@ -212,7 +212,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         if (meshScale.value) {
             this.sendToSimulation({msg: "Move",
                                    id: this.mID,
-                                   time: new Date,
+                                   time: new Date().getTime(),
                                    scale: meshScale.value
                                   });
         }
@@ -269,7 +269,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         oloc.ParseFromStream(new PROTO.ByteArrayStream(newdata));
         var movemsg = {msg: "Move",
                        id: this.mID,
-                       time: oloc.timestamp||new Date};
+                       time: oloc.timestamp||(new Date().getTime())};
         if (oloc.position) {
             movemsg.pos = oloc.position;
         }
@@ -288,7 +288,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     Sirikata.ProxyObject.prototype.askForProperties = function() {
         var sentBody = new Sirikata.Persistence.Protocol.ReadWriteSet;
         // check that MeshScale is capped at the object's bounding sphere.
-        sentBody.reads.push().field_name = "MeshScale";
+        //sentBody.reads.push().field_name = "MeshScale"; // Now a LOC property called "Scale"
         sentBody.reads.push().field_name = "MeshURI";
         sentBody.reads.push().field_name = "WebViewURL";
         sentBody.reads.push().field_name = "LightInfo";
@@ -329,11 +329,13 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                     var propval = fields["MeshURI"];
                     thus._setMeshURI(propval.data, true);
                     thus.subscribeToProperty(propval.subid, propval.ttl, this._setMeshURI);
+                    /*
                     if (fields["MeshScale"]) {
                         propval = fields["MeshScale"];
                         thus._setMeshScale(propval.data);
                         thus.subscribeToProperty(propval.subid, propval.ttl, this._setMeshScale);
                     }
+                    */
                 }break;
                 case 'light':{
                     var propval = fields["LightInfo"];
@@ -389,6 +391,9 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         r = sentBody.reads.push();
         r.field_name = "AngVel";
         r.object_uuid = this.mID;
+        r = sentBody.reads.push();
+        r.field_name = "Scale";
+        r.object_uuid = this.mID;
         // Ports.LOC
         var header = new Sirikata.Protocol.Header;
         header.destination_object = SPACE_OBJECT;
@@ -402,7 +407,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 var createMsg = {
                     msg: "Create",
                     id: object_reference,//private ID for gfx (we can narrow it)
-                    time:new Date,
+                    time:new Date().getTime(),
                     pos:[0,0,0],
                     vel:[0,0,0],
                     orient:[1,0,0,0],
@@ -413,21 +418,30 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 for (var i = 0; i < sentBody.reads.length; i++) {
                     r = sentBody.reads[i];
                     if (!r.return_status) {
-                        var objloc = new Sirikata.Protocol.ObjLoc;
-                        objloc.ParseFromStream(new PROTO.ByteArrayStream(r.data));
-                        if (r.field_name == "Position") {
-                            createMsg.pos = objloc.position;
-                            createMsg.time = objloc.timestamp; // FIXME: Each property has own timestamp
-                        } else if (r.field_name == "Orientation") {
-                            createMsg.orient = objloc.orientation;
-                        } else if (r.field_name == "Velocity") {
-                            createMsg.vel = objloc.velocity;
-                        } else if (r.field_name == "AngVel") {
-                            createMsg.rotaxis = objloc.rotational_axis;
-                            createMsg.rotvel = objloc.angular_speed;
-                        }
-                        if (r.subscription_id) {
-                            thus.subscribeToProperty(r.subscription_id, r.ttl, thus._setLocation);
+                        if (r.field_name == "Scale") {
+                            var scaleprop = new Sirikata.Protocol.Vector3fProperty;
+                            scaleprop.ParseFromStream(new PROTO.ByteArrayStream(r.data));
+                            createMsg.scale = scaleprop.value;
+                            if (r.subscription_id) {
+                                thus.subscribeToProperty(r.subscription_id, r.ttl, thus._setMeshScale);
+                            }
+                        } else {
+                            var objloc = new Sirikata.Protocol.ObjLoc;
+                            objloc.ParseFromStream(new PROTO.ByteArrayStream(r.data));
+                            if (r.field_name == "Position") {
+                                createMsg.pos = objloc.position;
+                                createMsg.time = objloc.timestamp; // FIXME: Each property has own timestamp
+                            } else if (r.field_name == "Orientation") {
+                                createMsg.orient = objloc.orientation;
+                            } else if (r.field_name == "Velocity") {
+                                createMsg.vel = objloc.velocity;
+                            } else if (r.field_name == "AngVel") {
+                                createMsg.rotaxis = objloc.rotational_axis;
+                                createMsg.rotvel = objloc.angular_speed;
+                            }
+                            if (r.subscription_id) {
+                                thus.subscribeToProperty(r.subscription_id, r.ttl, thus._setLocation);
+                            }
                         }
                     }
                 }
@@ -471,7 +485,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         this.mRotAxis = [0,0,1];
         this.mRotSpeed = 0;
         this.mParentObject = null;
-        this.mBoundingSphere = 0;
+        this.mBoundingSphere = null;
         this.mScript=null;
         this.mScriptChannel=null;
         this._parseMoveMessage(createMsg, true);
@@ -480,15 +494,18 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     Kata.extend(Sirikata.HostedObject, SUPER);
 
     Sirikata.HostedObject.prototype._parseMoveMessage = function(msg, initialization) {
-        if (msg.scale) {
-            var scaleX = msg.scale[0], scaleY = msg.scale[1], scaleZ = msg.scale[2];
-            var meshScale = new Sirikata.Protocol.Vector3fProperty(scaleX, scaleY, scaleZ);
-            this.setProperty("MeshScale", meshScale);
-            if (initialization) {
-                this.mBoundingSphere = Math.sqrt(scaleX*scaleX+scaleY*scaleY+scaleZ*scaleZ);
-            }
-        }
         var locMessage = new Sirikata.Persistence.Protocol.ReadWriteSet;
+        if (msg.scale) {
+            var w = locMessage.writes.push();
+            var scaleX = msg.scale[0], scaleY = msg.scale[1], scaleZ = msg.scale[2];
+            var meshScale = new Sirikata.Protocol.Vector3fProperty;
+            meshScale.value = [scaleX, scaleY, scaleZ];
+            w.data = meshScale;
+            w.field_name = "Scale";
+            this.setProperty("MeshScale", meshScale);
+            //this.mBoundingSphere = Math.sqrt(scaleX*scaleX+scaleY*scaleY+scaleZ*scaleZ);
+            this.mBoundingSphere = meshScale.value;
+        }
         if (msg.pos) {
             var w = locMessage.writes.push();
             var oloc = new Sirikata.Protocol.ObjLoc;
@@ -614,7 +631,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             body.message_names.push("NewObj");
             var newObj = new Sirikata.Protocol.NewObj;
             newObj.object_uuid_evidence = this.mID;
-            newObj.bounding_sphere = [0,0,0,this.mBoundingSphere];
+            newObj.bounding_sphere_scale = this.mBoundingSphere || [0,0,0];
             this._fillObjLoc(newObj.requested_object_loc);
             body.message_arguments.push(newObj);
             var header = new Sirikata.Protocol.Header;
@@ -655,7 +672,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 spaceConn.objectID = retObj.object_reference;
                 spaceConn.service.setObjectReference(spaceConn.objectID);
                 if (this.mScriptChannel){
-                    this.mScriptChannel.sendMessage({msg:"RetObj",spaceid:header.source_space,object_reference:retObj.object_reference,location:retObj.location,bounding_sphere:retObj.bounding_sphere});   
+                    this.mScriptChannel.sendMessage({msg:"RetObj",spaceid:header.source_space,object_reference:retObj.object_reference,location:retObj.location,bounding_sphere:retObj.bounding_sphere_scale});   
                 }
 /*
                 this.mObjectHost.sendToSimulation({
@@ -798,7 +815,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             this.destroy(); //
             break;
         case "Move":
-			console.log("dbm data:", data);
+			console.log("dbm move data:", data);
             this._parseMoveMessage(data,false);
             break;
         case "Script":
@@ -814,10 +831,12 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             break;
         case "Mesh":
             {
-                console.log("MESHED!");
                 var meshURI = new Sirikata.Protocol.StringProperty;
                 meshURI.value = data.mesh;
                 this.setProperty("MeshURI", meshURI);
+                if (!this.mBoundingSphere) {
+                    this._parseMoveMessage({scale: [1,1,1]},true);
+                }
             }
             break;
         case "DestroyMesh":
