@@ -76,6 +76,11 @@ kjsgfx_Move = function(msg){
 			obj.setQuat(msg.orient[0], msg.orient[1], msg.orient[2], msg.orient[3])
 		}
 	}
+	if (msg.scale) {
+		obj.setScaleX(msg.scale[0])
+		obj.setScaleY(msg.scale[1])
+		obj.setScaleZ(msg.scale[2])
+	}
 }
 
 KatajsGraphics=function(callbackFunction,parentElement) {
