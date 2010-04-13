@@ -296,6 +296,8 @@ KJS.addObjectInit = function (id, cb) {
 }
 
 KJS.render = function (){
+    KJS.initComplete = true
+	console.log("FIXME: initComplete")
 	if (!KJS.initComplete) {
 		var c = KJS.gameScene.incompleteObjects()
 		if (c == 0) {

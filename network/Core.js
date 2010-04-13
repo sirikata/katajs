@@ -30,6 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+network_debug = false
 if (0) {
     // JSDoc hack
     /** Top-level namespace for KataJS.

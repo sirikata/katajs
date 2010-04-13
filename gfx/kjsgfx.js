@@ -2,9 +2,10 @@ kjsgfx_camera_id = null
 kjsgfx_id_map = {}
 kjsgfx_mesh_map = {}
 kjsgfx_scene = null
+kjsgfx_debug = false
 
 kjsgfx_id2Obj = function(id){
-	console.log("id2obj:",id)
+	if(kjsgfx_debug) console.log("id2obj:",id)
 	if (!(id in kjsgfx_id_map)) alert ("k3dgfx error: unknown object(2) " + id)
     var obj = kjsgfx_scene.getObjectById(id)
     if (obj == null) {
@@ -21,7 +22,7 @@ kjsgfx_id2Obj = function(id){
 
 kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 
-	console.log("************************* kjsgfx_addModel")
+	if(kjsgfx_debug) console.log("************************* kjsgfx_addModel")
 	if (id == null) 
 		id = url + Math.random()
 	if (url.indexOf("http://") != 0) {
@@ -30,7 +31,7 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 	if (scale == null) 
 		scale = [1.0,1.0,1.0]
 	var clda = new GLGE.Collada()
-	console.log("************************* kjsgfx_addModel clda:", clda)
+	if(kjsgfx_debug) console.log("************************* kjsgfx_addModel clda:", clda)
 	clda.setDocument(url)
 	clda.setId(id)
 	clda.setScaleX(scale[0])
@@ -58,7 +59,7 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 }
 
 kjsgfx_Move = function(msg){
-	console.log("***Move", msg)
+	if(kjsgfx_debug) console.log("***Move", msg)
 	obj = kjsgfx_id2Obj(msg.id)
 	if (msg.pos) {
 		obj.setLocX(msg.pos[0])
@@ -77,7 +78,7 @@ kjsgfx_Move = function(msg){
 			obj.setRotZ(msg.orient[2])
 		}
 		else { /// Quaternion
-			console.log("setQuat:", msg.orient)
+			if(kjsgfx_debug) console.log("setQuat:", msg.orient)
 			obj.setQuat(msg.orient[0], msg.orient[1], msg.orient[2], msg.orient[3])
 		}
 	}
@@ -96,21 +97,21 @@ KatajsGraphics=function(callbackFunction,parentElement) {
     kjsgfx_scene = KJS.init()
 
     this.methodTable["Create"]=function(msg) {
-		console.log("***Create",msg)
+		if(kjsgfx_debug) console.log("***Create",msg)
 		kjsgfx_id_map[msg.id]="1"
 		// FIXME: should keep track of position? do something?
     }
     this.methodTable["Move"]=kjsgfx_Move
 
     this.methodTable["Destroy"]=function(msg) {
-		console.log("***Destroy",msg)
+		if(kjsgfx_debug) console.log("***Destroy",msg)
     }
     this.methodTable["MeshShaderUniform"]=function(msg) {
-		console.log("***MeshShaderUniform",msg)
+		if(kjsgfx_debug) console.log("***MeshShaderUniform",msg)
     }
     this.methodTable["Mesh"] = function(msg){
 		var obj
-		console.log("***Mesh", msg)
+		if(kjsgfx_debug) console.log("***Mesh", msg)
 		if (msg.mesh.indexOf(".dae") == msg.mesh.length - 4) {
 			obj = kjsgfx_addModel(msg.mesh, msg.id)
 		}
@@ -131,41 +132,41 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 				kjsgfx_scene.addObject(obj)
 			}
 			else {
-				console.log("mesh not found as element or parsable type:", msg.mesh)
+				if(kjsgfx_debug) console.log("mesh not found as element or parsable type:", msg.mesh)
 			}
 		}
 		kjsgfx_mesh_map[msg.mesh] = msg.id
-		console.log(">>>mapping",msg.mesh,"to",msg.id)
+		if(kjsgfx_debug) console.log(">>>mapping",msg.mesh,"to",msg.id)
 		kjsgfx_Move(msg)
 	}
 
     this.methodTable["DestroyMesh"]=function(msg) {
-		console.log("DestroyMesh",msg)
+		if(kjsgfx_debug) console.log("DestroyMesh",msg)
     }
     this.methodTable["Light"]=function(msg) {
-		console.log("Light",msg)
+		if(kjsgfx_debug) console.log("Light",msg)
     }
     this.methodTable["DestroyLight"]=function(msg) {
-		console.log("DestroyLight",msg)
+		if(kjsgfx_debug) console.log("DestroyLight",msg)
     }
     this.methodTable["Camera"]=function(msg) {
-		console.log("Camera",msg)
+		if(kjsgfx_debug) console.log("Camera",msg)
 		if (msg.primary || true) {
 			kjsgfx_camera_id = msg.id		// FIXME: need to handle non-primary camera
 		}
 		kjsgfx_Move(msg)
     }
     this.methodTable["AttachCamera"]=function(msg) {
-		console.log("AttachCamera",msg)
+		if(kjsgfx_debug) console.log("AttachCamera",msg)
     }
     this.methodTable["DestroyCamera"]=function(msg) {
-		console.log("DestroyCamera",msg)
+		if(kjsgfx_debug) console.log("DestroyCamera",msg)
     }
     this.methodTable["IFrame"]=function(msg) {
-		console.log("IFrame",msg)
+		if(kjsgfx_debug) console.log("IFrame",msg)
     }
     this.methodTable["DestroyIFrame"]=function(msg) {
-		console.log("DestroyIFrame",msg)
+		if(kjsgfx_debug) console.log("DestroyIFrame",msg)
     }
     
     this.methodTable["Special"] = function(msg){
@@ -183,8 +184,9 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 			}
 		}
 		var obj = kjsgfx_id2Obj(id)
-		console.log("Special", msg, id)
+		if(kjsgfx_debug) console.log("Special", msg, id)
 		if (msg.rescale) {
+			if(kjsgfx_debug) console.log("  rescale:", msg.rescale[0], msg.rescale[1], msg.rescale[2])
 			obj.setScaleX(msg.rescale[0])
 			obj.setScaleY(msg.rescale[1])
 			obj.setScaleZ(msg.rescale[2])
@@ -193,7 +195,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
     
     this.send=function(obj) {
 		var meth = this.methodTable[obj.msg]
-		console.log("k3dgfx msg sent:", obj, "mtable:", this.methodTable)
+		if(kjsgfx_debug) console.log("k3dgfx msg sent:", obj, "mtable:", this.methodTable)
 		if (meth) {
 			return meth(obj)
 		}

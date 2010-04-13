@@ -312,7 +312,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                         fields[propname] = propval;
                     }
                 }
-                console.log(fields);
+                //console.log(fields);
                 var type = 'node';
                 if (fields["MeshURI"]) {//these are data coming from the network in PBJ string form, not fields in a js struct
                     type = 'mesh';
@@ -402,7 +402,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         var message = new Sirikata.QueryTracker.Message(header, sentBody);
         var thus = this;
         sendPersistenceMessage(this.mQueryTracker, message, function() {
-            console.log("### Got LOC response for object "+object_reference, sentBody);
+            if (network_debug) console.log("### Got LOC response for object "+object_reference, sentBody);
             if (!thus.mDestroyed) {
                 var createMsg = {
                     msg: "Create",
@@ -645,7 +645,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     Sirikata.HostedObject.prototype._parseRPC = function (header, bodydata) {
         var body = new Sirikata.Protocol.MessageBody;
         body.ParseFromStream(new PROTO.Base64Stream(bodydata));
-        console.log("Received RPC from:",header,"Body:",body);
+        if (network_debug) console.log("Received RPC from:",header,"Body:",body);
         var spaceConn = this.mSpaceConnectionMap[header.source_space];
         var message_name = '';
         var message = null;
@@ -667,8 +667,8 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             case "RetObj":
                 var retObj = new Sirikata.Protocol.RetObj;
                 retObj.ParseFromStream(new PROTO.ByteArrayStream(message));
-                console.log("Got RetObj!", retObj);
-                console.log("Object "+this.mID+" maps to "+retObj.object_reference);
+                if (network_debug) console.log("Got RetObj!", retObj);
+                if (network_debug) console.log("Object "+this.mID+" maps to "+retObj.object_reference);
                 spaceConn.objectID = retObj.object_reference;
                 spaceConn.service.setObjectReference(spaceConn.objectID);
                 if (this.mScriptChannel){
@@ -704,7 +704,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                         obj.askForPosition();
                     }
                     obj.mRefCount++; // in case this object has multiple queries.
-                    console.log("Entered:",proxCall.proximate_object);
+                    if (network_debug) console.log("Entered:",proxCall.proximate_object);
                 } else {
                     var obj = this.mObjects[proximate_object];
                     if (obj) {
@@ -713,7 +713,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                             delete this.mObjects[proximate_object];
                         }
                     }
-                    console.log("Exited:",proxCall.proximate_object);
+                    if (network_debug) console.log("Exited:",proxCall.proximate_object);
                 }
                 break;
             }
@@ -735,7 +735,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     Sirikata.HostedObject.prototype._parsePersistence = function (header, bodydata) {
         var body = new Sirikata.Persistence.Protocol.ReadWriteSet;
         body.ParseFromStream(new PROTO.Base64Stream(bodydata));
-        console.log("Received Persistence from:",header,"Body:",body);
+        if (network_debug) console.log("Received Persistence from:",header,"Body:",body);
         var respBody = new Sirikata.Persistence.Protocol.Response;
         var returnNames = (body.options & Sirikata.Persistence.Protocol.ReadWriteSet
             .ReadWriteSetOptions.RETURN_READ_NAMES) != 0;
@@ -768,7 +768,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     Sirikata.HostedObject.prototype._parseBroadcast = function (header, bodydata) {
         var body = new Sirikata.Protocol.Broadcast;
         body.ParseFromStream(new PROTO.Base64Stream(bodydata));
-        console.log("Received Broadcast from:",header,"Body:",body);
+        if (network_debug) console.log("Received Broadcast from:",header,"Body:",body);
     };
 
     Sirikata.HostedObject.prototype.sendMessage = function (destSpace, header, body) {
@@ -804,7 +804,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         switch (data.msg) {
         case "ConnectToSpace":
             if (data.spaceid) {
-                console.log("Connecting "+this.mID+" to space "+data.spaceid);
+                if (network_debug) console.log("Connecting "+this.mID+" to space "+data.spaceid);
                 this.connectToSpace(data.spaceid.toLowerCase());
             }
             break;
@@ -815,7 +815,6 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             this.destroy(); //
             break;
         case "Move":
-			console.log("dbm move data:", data);
             this._parseMoveMessage(data,false);
             break;
         case "Script":

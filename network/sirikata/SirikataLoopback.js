@@ -422,7 +422,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                             object: header.source_object,
                             port: header.source_port||0,
                             query_id: npq.query_id};
-                        console.log("Adding prox query:",newQuery);
+                        if (network_debug) console.log("Adding prox query:",newQuery);
                         this.mProxQueries.push(newQuery);
                         for (var objid in this.mObjects) {
                             this._sendProxCall(newQuery, objid, true);
@@ -439,7 +439,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                             }
                         }
                     }
-                    console.log("Loopback space RPC message "+messname);
+                    if (network_debug) console.log("Loopback space RPC message "+messname);
                     if (!addReply) {
                         outMsg.message_arguments.push([]);
                     }
