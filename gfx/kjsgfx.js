@@ -121,14 +121,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 				obj = new GLGE.Object() // FIXME: not all k3d objects should be GLGE objects (the camera?)
 				obj.setId(msg.id)
 				obj.setMesh(el)
-				var tx = new GLGE.Texture("images/crate.jpg")
-				var ml = new GLGE.MaterialLayer(0, GLGE.M_COLOR, GLGE.UV1, null, null)
-				ml.setTexture(tx)
-				var mat = new GLGE.Material()
-				mat.id = msg.id + "_mat"
-				mat.addTexture(tx)
-				mat.addMaterialLayer(ml)
-				obj.setMaterial(mat)
+				obj.setMaterial(doc.getElement("box"))
 				kjsgfx_scene.addObject(obj)
 			}
 			else {

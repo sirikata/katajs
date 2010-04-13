@@ -183,6 +183,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 					spaceid: defaultSpace,
 					id: testObj1
 				});
+				// FIXME: this should not be necessary to get cube to move:
+				window.kata.getChannel().sendMessage({
+					msg: "Move",
+					pos: [-10, 2, 3],
+					spaceid: defaultSpace,
+					id: testObj1
+				});
 				window.kata.getChannel().sendMessage({
 					msg: "Move",
 					scale: [.1, .1, .1],
