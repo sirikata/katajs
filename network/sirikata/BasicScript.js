@@ -61,7 +61,7 @@ Kata.include("../externals/protojs/pbj.js");
              for (var i in msg) {
                  s+=i+":"+msg[i]+"\n";
              }
-             console.log("Script got property "+msg.msg+" {\n"+s+"\n}\n");
+             if (network_debug) console.log("Script got property "+msg.msg+" {\n"+s+"\n}\n");
              //alert(s);
          }
 

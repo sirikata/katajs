@@ -103,7 +103,7 @@ Kata.include("SimpleChannel.js");
             if (!cls) {
                 Kata.error(clsName+" is undefined.");
             }
-            console.log("new webworker");
+            if (network_debug) console.log("new webworker");
         }
         /** Runs the WebWorker. At this point, it is possible to receive a
          *  message synchronously, so make sure to set up all listeners before
@@ -112,7 +112,7 @@ Kata.include("SimpleChannel.js");
         Kata.WebWorker.prototype.go = function() {
             var opposingChannel=new Kata.SimpleChannel(this.mChannel);
             var cls = this.mClass;
-            console.log("going!");
+            if (network_debug) console.log("going!");
             this.mChild = new cls (
                 opposingChannel,
                 this.mArgs);

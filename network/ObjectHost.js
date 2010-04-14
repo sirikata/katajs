@@ -45,7 +45,7 @@
         this.mSpaceMap = {};
         this.mSpaceConnections = {};
         this.mObjects = {};
-        console.log("ObjectHosted!");
+        if (network_debug) console.log("ObjectHosted!");
     };
 
     Kata.ObjectHost.sProtocols = {};
@@ -162,7 +162,7 @@
      * @return {Kata.HostedObject} A pointer to the new object.
      */
     Kata.ObjectHost.prototype.createObject = function(spacename, id, msg) {
-        console.log("Creating Object "+id+" for space "+spacename+"!");
+        if (network_debug) console.log("Creating Object "+id+" for space "+spacename+"!");
         var HostedClass = this.mSpaceMap[spacename].protocol.object_class;
         this.mObjects[id] = new HostedClass(this, id, msg);
         return this.mObjects[id];

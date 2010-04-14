@@ -7,7 +7,7 @@ kjsgfx_debug = false
 kjsgfx_id2Obj = function(id){
 	if(kjsgfx_debug) console.log("id2obj:",id)
 	if (!(id in kjsgfx_id_map)) alert ("k3dgfx error: unknown object(2) " + id)
-    var obj = kjsgfx_scene.getObjectById(id)
+    var obj = kjsgfx_id_map[id]
     if (obj == null) {
         if (id != kjsgfx_camera_id) {
 //            alert("k3dgfx error: unknown object " + id)
@@ -55,7 +55,7 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 	KJS.gameScene.addCollada(clda)
 	if (cb) 
 		KJS.addObjectInit(id, cb)
-	return KJS.gameScene.getObjectById(id)
+	return clda
 }
 
 kjsgfx_Move = function(msg){
@@ -98,7 +98,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 
     this.methodTable["Create"]=function(msg) {
 		if(kjsgfx_debug) console.log("***Create",msg)
-		kjsgfx_id_map[msg.id]="1"
+		kjsgfx_id_map[msg.id]="no_mesh"
 		// FIXME: should keep track of position? do something?
     }
     this.methodTable["Move"]=kjsgfx_Move
@@ -118,7 +118,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		else {
 			var el = doc.getElement(msg.mesh, true)
 			if (el) {
-				obj = new GLGE.Object() // FIXME: not all k3d objects should be GLGE objects (the camera?)
+				obj = new GLGE.Object()
 				obj.setId(msg.id)
 				obj.setMesh(el)
 				obj.setMaterial(doc.getElement("box"))
@@ -128,6 +128,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 				if(kjsgfx_debug) console.log("mesh not found as element or parsable type:", msg.mesh)
 			}
 		}
+		kjsgfx_id_map[msg.id] = obj
 		kjsgfx_mesh_map[msg.mesh] = msg.id
 		if(kjsgfx_debug) console.log(">>>mapping",msg.mesh,"to",msg.id)
 		kjsgfx_Move(msg)

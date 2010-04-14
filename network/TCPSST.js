@@ -99,7 +99,7 @@ Kata.include("Channel.js");
          * @private
          */
         Kata.TCPSST.prototype._onClose = function (which) {
-            console.log("Closed socket "+which);
+            if (network_debug) console.log("Closed socket "+which);
             var index = this.mConnected.indexOf(which);
             if (index != -1) {
                 this.mConnected.splice(index,1);
@@ -119,7 +119,7 @@ Kata.include("Channel.js");
          * @private
          */
         Kata.TCPSST.prototype._onOpen = function (which) {
-            console.log("Opened socket "+which);
+            if (network_debug) console.log("Opened socket "+which);
             this.mConnected.push(which);
             for (var i = 0; i < this.mMessageQueue.length; i++) {
                 this.mSockets[which].send(this.mMessageQueue[i]);
