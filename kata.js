@@ -323,7 +323,8 @@ KJS.render = function (){
     if(KJS.cnt==0){
 	    KJS.frameRateBuffer=(10000/(now-KJS.lasttimeFps)).toFixed(1);
 		KJS.lasttimeFps=now
-	    document.getElementById("debug").innerHTML="Frame Rate:"+KJS.frameRateBuffer;
+		var dbg = document.getElementById("debug")
+	    if (dbg) dbg.innerHTML="Frame Rate:"+KJS.frameRateBuffer;
     }
     KJS.lasttime=now;
     KJS.mouselook();
