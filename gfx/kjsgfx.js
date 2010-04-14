@@ -2,13 +2,13 @@ kjsgfx_camera_id = null
 kjsgfx_id_map = {}
 kjsgfx_mesh_map = {}
 kjsgfx_scene = null
-kjsgfx_debug = false
+kjsgfx_debug = true
 
 kjsgfx_id2Obj = function(id){
 	if(kjsgfx_debug) console.log("id2obj:",id)
 	if (!(id in kjsgfx_id_map)) alert ("k3dgfx error: unknown object(2) " + id)
     var obj = kjsgfx_id_map[id]
-    if (obj == null) {
+    if (obj == "no_mesh") {
         if (id != kjsgfx_camera_id) {
 //            alert("k3dgfx error: unknown object " + id)
             return null
@@ -61,6 +61,7 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 kjsgfx_Move = function(msg){
 	if(kjsgfx_debug) console.log("***Move", msg)
 	obj = kjsgfx_id2Obj(msg.id)
+	console.log("Move obj:", obj)
 	if (msg.pos) {
 		obj.setLocX(msg.pos[0])
 		obj.setLocY(msg.pos[1])
@@ -81,11 +82,6 @@ kjsgfx_Move = function(msg){
 			if(kjsgfx_debug) console.log("setQuat:", msg.orient)
 			obj.setQuat(msg.orient[0], msg.orient[1], msg.orient[2], msg.orient[3])
 		}
-	}
-	if (msg.scale) {
-		obj.setScaleX(msg.scale[0])
-		obj.setScaleY(msg.scale[1])
-		obj.setScaleZ(msg.scale[2])
 	}
 }
 
