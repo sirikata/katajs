@@ -123,7 +123,6 @@ KJS.ObjectEx.prototype.getPositions = function() {
 }
 
 KJS.initComplete = false
-KJS.onInitComplete = function () {}
 KJS.init = function (map, objectcount, cb){
 	if (cb) KJS.onInitComplete = cb
     //create the GLGE renderer.  
@@ -308,7 +307,6 @@ KJS.render = function (){
 			return			
 		}
 	}
-
 	for (id in KJS.objectInitCallbacks) {
 		var o = KJS.gameScene.getObjectById(id)
 		if (o) {
