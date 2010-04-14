@@ -2,7 +2,7 @@ kjsgfx_camera_id = null
 kjsgfx_id_map = {}
 kjsgfx_mesh_map = {}
 kjsgfx_scene = null
-kjsgfx_debug = true
+kjsgfx_debug = false
 
 kjsgfx_id2Obj = function(id){
 	if(kjsgfx_debug) console.log("id2obj:",id)
