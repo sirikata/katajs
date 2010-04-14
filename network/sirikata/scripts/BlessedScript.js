@@ -8,7 +8,6 @@ Kata.include("sirikata/scripts/CameraScript.js");
     Sirikata.BlessedScript = function(channel,args){
         SUPER.constructor.call(this,channel,args);
 
-        channel.sendMessage({msg:"Proximity",spaceid:args.spaceid,radius:1.0e+8});
         channel.sendMessage({
                                 msg: "Camera",
 				                primary: "true",
