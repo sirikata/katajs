@@ -307,7 +307,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                     var w = rws.writes[i];
                     if (w.field_name == "Position" || w.field_name == "Orientation" ||
                        w.field_name == "AngVel" || w.field_name == "Velocity") {
-                        oloc.ParseFromStream(new PROTO.ByteArrayStream(w.data));
+                        oloc.MergeFromStream(new PROTO.ByteArrayStream(w.data));
                         changedloc = true;
                     }
                     if (w.field_name == "Scale") {
