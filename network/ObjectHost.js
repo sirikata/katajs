@@ -71,7 +71,7 @@
             }
         }
         return null;
-    }
+    };
 
     /** Sends a message to some simulation.
      * @param {string|object} data  A message (often an object formatted as
