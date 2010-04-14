@@ -90,41 +90,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             var testObj0 = "camera" //Math.uuid();
             var testObj1 = "tst1" //Math.uuid();
             var testObj2 = "tst2" //Math.uuid();
-            window.kata.getChannel().sendMessage({
-                msg: "Create",
-                spaceid: defaultSpace,
-                id: testObj1
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "ConnectToSpace",
-                spaceid: defaultSpace,
-                id: testObj1
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "Mesh",
-//                mesh: "http://www.sirikata.com/content/assets/cube.dae",
-                mesh: "cube",
-                id: testObj1
-            });
             
             window.kata.getChannel().sendMessage({
                 msg: "Create",
                 spaceid: defaultSpace,
-                id: testObj0
+                id: testObj0,
+                script:"sirikata/scripts/BlessedScript.js",
+                method:"Sirikata.BlessedScript",
+                args:{spaceid:defaultSpace}
             });
+/* handled by the camera script
             window.kata.getChannel().sendMessage({
                 msg: "Camera",
 				primary: "true",
                 spaceid: defaultSpace,
                 id: testObj0
             });
-            window.kata.getChannel().sendMessage({
-                id: testObj0,
-                msg:"Script",
-                script:"sirikata/CameraScript.js",
-                method:"Sirikata.CameraScript",
-                args:{spaceid:defaultSpace}});
-/* handled by the camera script
             window.kata.getChannel().sendMessage({
                 msg: "ConnectToSpace",
                 spaceid: defaultSpace,
@@ -135,7 +116,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 spaceid: defaultSpace,
                 id: testObj0,
                 radius: 1.0e+8
-            });*/
+            });
             window.kata.getChannel().sendMessage({
                 msg: "Create",
                 spaceid: defaultSpace,
@@ -197,8 +178,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 					id: testObj2
 				});
 			},5000)
+*/
         }
-        
         doc.load("testgfx.xml")
     </script>
 

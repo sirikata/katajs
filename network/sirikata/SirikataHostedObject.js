@@ -817,6 +817,9 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         case "Move":
             this._parseMoveMessage(data,false);
             break;
+        case "Create":
+            this.mObjectHost.receivedMessage(channel,data);
+            break;
         case "Script":
             var script=new Kata.WebWorker(data.script,data.method,data.args);
             this.mScriptChannel=script.getChannel();

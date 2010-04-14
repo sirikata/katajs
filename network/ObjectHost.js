@@ -94,16 +94,21 @@
      */
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
         var privid = data.id;
-        if (channel == this.mSimulationsByName["graphics"]) {
+        if (channel == this.mSimulationsByName["graphics"]||data.msg=="Create") {
             var spaceid = data.spaceid;
             switch (data.msg) {
             case "RegisterSpace":
                 this.registerSpace(spaceid, data.server);
                 return;
-            case "Create":
-                this.createObject(spaceid, privid, data);
+            case "Create":{
+                var createdObject=this.createObject(spaceid, privid, data);
+                if (data.script) {
+                    data.msg="Script";
+                }
+                createdObject.messageFromSimulation(channel, data);
                 // Don't send ConnectToSpace until you have set all properties.
                 return;
+            }
             default:
                 break;
             }
