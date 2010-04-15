@@ -94,91 +94,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             window.kata.getChannel().sendMessage({
                 msg: "Create",
                 spaceid: defaultSpace,
-                id: testObj0,
                 script:"sirikata/scripts/BlessedScript.js",
                 method:"Sirikata.BlessedScript",
                 args:{spaceid:defaultSpace}
             });
-/* handled by the camera script
-            window.kata.getChannel().sendMessage({
-                msg: "Camera",
-				primary: "true",
-                spaceid: defaultSpace,
-                id: testObj0
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "ConnectToSpace",
-                spaceid: defaultSpace,
-                id: testObj0
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "Proximity",
-                spaceid: defaultSpace,
-                id: testObj0,
-                radius: 1.0e+8
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "Create",
-                spaceid: defaultSpace,
-                id: testObj2,
-                pos: [1,2,3]
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "Mesh",
-                mesh: "cube",
-                id: testObj2
-            });
-            window.kata.getChannel().sendMessage({
-                msg: "ConnectToSpace",
-                spaceid: defaultSpace,
-                id: testObj2
-            });
-            
-//            window.kata.getChannel().sendMessage({
-//                msg: "Create",
-//                spaceid: defaultSpace,
-//                id: testObj2
-//            });
-//            window.kata.getChannel().sendMessage({
-//                msg: "Light",
-//                diffuse_color: [1, 1, 1],
-//                id: testObj2
-//            });
-//            window.kata.getChannel().sendMessage({
-//                msg: "ConnectToSpace",
-//                spaceid: defaultSpace,
-//                id: testObj2
-//            });
-            setTimeout( function(){
-				window.kata.getChannel().sendMessage({
-					msg: "Move",
-					pos: [1, 25, 3],
-					spaceid: defaultSpace,
-					id: testObj0
-				});
-				window.kata.getChannel().sendMessage({
-					msg: "Move",
-					pos: [-10, 2, 3],
-					orient: [.92,.38,0,0],			// rotate Z 45* as quat
-                    scale: [.3,.3,.3],
-					spaceid: defaultSpace,
-					id: testObj1
-				});
-				// FIXME: this should not be necessary to get cube to move:
-				window.kata.getChannel().sendMessage({
-					msg: "Move",
-					pos: [-10, 2, 3],
-					spaceid: defaultSpace,
-					id: testObj1
-				});
-				window.kata.getChannel().sendMessage({
-					msg: "Move",
-					scale: [.1, .1, .1],
-					spaceid: defaultSpace,
-					id: testObj2
-				});
-			},5000)
-*/
         }
         doc.load("testgfx.xml")
     </script>

@@ -150,6 +150,10 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
           channel.sendMessage(message);
       }
     };
+
+    Sirikata.ProxyObject.prototype.sendMessageToScript=function(header,message) {
+        this.mControllingObject.sendMessageToScript(header,message);
+    };
      
     /** Clean up this data, and destroy all pending requests/ports. */
     Sirikata.ProxyObject.prototype.destroy = function() {
@@ -795,6 +799,12 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             Kata.error("Not enough information to send new prox query", data);
         }
     };
+    Sirikata.HostedObject.prototype.sendMessageToScript=function(header,body) {
+      var channel=this.mScriptChannel;
+      if (channel){
+          channel.sendMessage({msg:"Message",header:{source_object:header.source_object,destination_object:header.destination_object,destination_port:header.destination_port,source_port:header.source_port,destination_space:header.destination_space,source_space:header.source_space},data:body});
+      }
+    };
 
     Sirikata.HostedObject.prototype.messageFromScript = function (channel, data) {
         return this.messageFromSimulation(channel,data);//probably want to just forward messages to space?
@@ -835,9 +845,9 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 header.destination_space=data.space;
                 header.source_port=data.source_port;
                 header.destination_port=data.destination_port;
-                if (data.header.reply_id!==undefined)
+                if (data.reply_id!==undefined)
                   header.reply_id=data.reply_id;  
-                if (data.header.id!==undefined)
+                if (data.id!==undefined)
                   header.id=data.id;
                 if(data.space in this.mSpaceConnectionMap) {
                     var spaceConn = this.mSpaceConnectionMap[data.space];
@@ -847,12 +857,13 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             break;
         case "BindPort":
             {
-                if (!this.mScirptPortFunction)
-                    this.mScriptPortFunction=Kata.bind(this.mScriptChannel, this);
-                if (!mScriptPorts[data.port]){
-                    var spaceConn = this.mSpaceConnectionMap[data.space];
-                    if (spaceConn)
-                        spaceConn.service.getPort(data.port).addReceiver(this.mScriptPortFunction);
+                if (!this.mScriptPortFunction) {
+                    this.mScriptPortFunction=Kata.bind(this.sendMessageToScript, this);
+                }
+                var spaceConn = this.mSpaceConnectionMap[data.space];
+                if (spaceConn) {
+                    spaceConn.service.getPort(data.port).addReceiver(this.mScriptPortFunction);
+                    
                 }
             }
             break;
@@ -860,7 +871,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             if (this.mScirptPortFunction) {
                 var spaceConn = this.mSpaceConnectionMap[data.space];
                 if (spaceConn)
-                    spaceConn.service.getPort(data.port).addReceiver(this.mScriptPortFunction);                
+                    spaceConn.service.getPort(data.port).removeReceiver(this.mScriptPortFunction);                
             }
             break;
         case "Mesh":
@@ -929,6 +940,8 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 }
             }
             break;
+        default:
+            console.log("unknown message ",data)
         }
     };
 

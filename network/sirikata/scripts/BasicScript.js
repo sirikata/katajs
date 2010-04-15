@@ -4,7 +4,7 @@ Kata.include("../externals/protojs/protobuf.js");
 Kata.include("../externals/protojs/pbj.js");
 (function() {
      var connectionAttempt=2;
-     Sirikata.BasicScript = function(channel,args){
+     Sirikata.BasicScript = function(channel,args,connectionCallback){
          var th=this;
          this.mChannel=channel;
          channel.registerListener(Kata.bind(this.processMessage,this));
@@ -12,16 +12,30 @@ Kata.include("../externals/protojs/pbj.js");
              this.setMesh(args);
          }
          if(args.spaceid) {
-             if (args.parent) {
-                 var parentObject=args.parent;
-                 var parentNickname=args.nickname;
+             if (args.creator) {
+                 var creatorObject=args.creator;
+                 var creatorPort=args.creatorport;
+                 var creatorNickname=args.nickname;
                  Sirikata.BasicScript.prototype.connectToSpace
                      .call(this,args.spaceid,
                            function(msg){
-                               msg.msg="ChildObjectSpaceConnect";
-                               msg.nickname=parentNickname;
                                th.move(args.spaceid,args);
+                               if (connectionCallback!==undefined)
+                                   connectionCallback(msg);
 
+                               msg.msg="Send";
+                               msg.nickname=creatorNickname;
+                               msg.destination_object=creatorObject;
+                               msg.source_object=msg.object_reference;
+                               msg.space=args.spaceid;
+                               msg.destination_port=creatorPort;
+                               msg.source_port=0;
+                               var nickname = new Sirikata.Protocol.StringProperty;
+                               nickname.value=creatorNickname;
+                               var byteArrStream = new PROTO.ByteArrayStream;
+                               nickname.SerializeToStream(byteArrStream);
+                               msg.message=byteArrStream.getArray();
+                               channel.sendMessage(msg);
                               //FIXME: channel.sendODPMessage(parentObject,msg);
                            });
              } else {
@@ -29,7 +43,10 @@ Kata.include("../externals/protojs/pbj.js");
                                                                     args.spaceid,
                                                                     function(msg){  
                                                                         th.move(args.spaceid,args);
-                                                                    });                 
+                                                                        if (connectionCallback!==undefined)
+                                                                            connectionCallback(msg);
+                                                                        
+                                                                    });
              }
                                                                 //,function(msg){alert("Connected to space "+msg.spaceid+" as "+msg.object_reference);});//if we want to test callback mechanism
          }

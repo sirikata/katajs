@@ -87,13 +87,21 @@
             this.mSimulationsByName[name].sendMessage(data);
         }
     };
+
+    Kata.ObjectHost.prototype.privateIdGenerator=function(){
+        var retval=0;
+        return function() {
+            retval+=1;
+            return ""+retval;
+        };
+    }();
     /** Sends a message to some simulation.
      * @param {Kata.Channel} channel  The sending simulation.
      * @param {string|object} data  A message (often an object formatted as
      *     JavascriptGraphicsApi)
      */
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
-        var privid = data.id;
+        var privid = this.privateIdGenerator();
         if (channel == this.mSimulationsByName["graphics"]||data.msg=="Create") {
             var spaceid = data.spaceid;
             switch (data.msg) {
