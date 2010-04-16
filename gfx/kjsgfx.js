@@ -79,8 +79,11 @@ kjsgfx_Move = function(msg){
 			obj.setRotZ(msg.orient[2])
 		}
 		else { /// Quaternion
-			if(kjsgfx_debug) console.log("setQuat:", msg.orient)
-			obj.setQuat(msg.orient[0], msg.orient[1], msg.orient[2], msg.orient[3])
+			/// re-compute w; protojs code is b0rk
+			var w = Math.sqrt(1.0 - (msg.orient[0] * msg.orient[0] + msg.orient[1] * msg.orient[1] + msg.orient[2] * msg.orient[2]))
+			if (kjsgfx_debug) 
+				console.log("setQuat:", msg.orient[0], msg.orient[1], msg.orient[2], w)
+			obj.setQuat(msg.orient[0], msg.orient[1], msg.orient[2], w)
 		}
 	}
 }
