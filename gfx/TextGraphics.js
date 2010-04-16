@@ -4,6 +4,7 @@
  *@constructor
  */
 TextGraphics=function(callbackFunction,parentElement) {
+    var thus = this;
     this.callback=callbackFunction;
     this.parent=parentElement;
     this.methodTable={}
@@ -19,16 +20,16 @@ TextGraphics=function(callbackFunction,parentElement) {
     }
     this.methodTable["Create"]=function(msg) {
         var div=document.createElement("div");
-        div.style.width="300px";
-        div.style.height="300px";
         div.style.padding="0.0em";
         div.style.position="absolute"
         div.style.border="solid 10px #10107c"
         div.style.backgroundColor="#000008"; 
+        div.style.width = "300px";
+        div.style.height = "300px";
         div.style.color="#ffffff"; 
-        div.style.left=msg.pos[0]+"px";
-        div.style.top=msg.pos[1]+"px";
-        div.style.zIndex=msg.pos[2];
+        div.style.left="0px";
+        div.style.top="0px";
+        div.style.zIndex="1";
         div.id=msg.id;
         if (msg.parent) {
             element=returnObjById(msg.parent);
@@ -40,14 +41,22 @@ TextGraphics=function(callbackFunction,parentElement) {
         }else {
             parentElement.appendChild(div);
         }
-        div.innerHTML='<p class="alignleft">Object Properties</p>'
+        div.innerHTML='<p class="alignleft">Object Properties</p>';
+        thus.methodTable["Move"](msg);
     }
     this.methodTable["Move"]=function(msg) {
         element=returnObjById(msg.id);
         if (msg.pos && msg.pos.length == 3) {
-            element.style.left=msg.pos[0]+"px";
-            element.style.top=msg.pos[1]+"px";
+            element.style.left=msg.pos[0]*10+"px";
+            element.style.top=msg.pos[1]*10+"px";
             element.style.zIndex=msg.pos[2];
+            element.style.borderColor="rgb("+(msg.pos[2]*10)+","+(msg.pos[2]*10)+",124)";
+        }
+        if (msg.scale) {
+            var xscale = Math.sqrt(msg.scale[0]*msg.scale[0]+msg.scale[2]*msg.scale[2]);
+            var yscale = Math.sqrt(msg.scale[0]*msg.scale[0]+msg.scale[2]*msg.scale[2]);
+            element.style.width = (300*xscale)+"px";
+            element.style.height = (300*yscale)+"px";
         }
     }
     this.methodTable["Destroy"]=function(msg) {

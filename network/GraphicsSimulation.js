@@ -48,8 +48,8 @@ Kata.include("Simulation.js");
     Kata.GraphicsSimulation = function (channel, domElement) {
         SUPER.constructor.call(this, channel);
         this.mElement = domElement;
-//        this.mGFX = new TextGraphics(function(obj){},domElement.parentNode);
-        this.mGFX = new KatajsGraphics(function(obj){},document.body);
+        this.mGFX = new TextGraphics(function(obj){},domElement.parentNode);
+//        this.mGFX = new KatajsGraphics(function(obj){},document.body);
     };
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 
@@ -61,7 +61,7 @@ Kata.include("Simulation.js");
      */
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
         SUPER.receivedMessage.apply(this, arguments);
-        if (network_debug) console.log("Graphics received message from ObjectHost:", data);
+        console.log("Graphics received message from ObjectHost:", data);
         this.mGFX.send(data);
     };
 
