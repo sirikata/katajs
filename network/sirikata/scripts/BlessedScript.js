@@ -10,7 +10,7 @@ Kata.include("sirikata/scripts/CameraScript.js");
             channel.sendMessage({msg:"BindPort",port:64,space:args.spaceid});
             
             
-            
+/*            
             channel.sendMessage({msg: "Create",
                                  spaceid: args.spaceid,
                                  script:"sirikata/scripts/DeferScript.js",
@@ -28,7 +28,7 @@ Kata.include("sirikata/scripts/CameraScript.js");
                                  }
                                  
                                 });
-            
+  */          
             //make object 1
             channel.sendMessage({msg: "Create",
                                  spaceid: defaultSpace,
@@ -40,7 +40,7 @@ Kata.include("sirikata/scripts/CameraScript.js");
                                      creator:message.object_reference,
                                      creatorport:64,
                                      nickname:"pretty print object B",                                     
-                                     deferpos:[1,18,3],
+                                     deferpos:[1,20,3],
                                      pos:[1,20,3],//Warning current code does not respect movement settings before proxies discovered: so you need to set defer pos
                                      scale:[.1,.1,.1],//Warning current code does not respect scale settings before proxies discovered: so you need to set defer pos
                                  spaceid: args.spaceid,
