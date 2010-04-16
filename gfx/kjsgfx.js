@@ -61,7 +61,6 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 kjsgfx_Move = function(msg){
 	if(kjsgfx_debug) console.log("***Move", msg)
 	obj = kjsgfx_id2Obj(msg.id)
-	console.log("Move obj:", obj)
 	if (msg.pos) {
 		obj.setLocX(msg.pos[0])
 		obj.setLocY(msg.pos[1])
