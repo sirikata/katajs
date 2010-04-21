@@ -8,10 +8,10 @@ kjsgfx_id2Obj = function(id){
 	if(kjsgfx_debug) console.log("id2obj:",id)
 	if (!(id in kjsgfx_id_map)) alert ("k3dgfx error: unknown object(2) " + id)
     var obj = kjsgfx_id_map[id]
-    if (obj == "no_mesh") {
+    if (obj.no_mesh) {
         if (id != kjsgfx_camera_id) {
 //            alert("k3dgfx error: unknown object " + id)
-            return null
+            return obj
         }
         else {
             obj = kjsgfx_scene.camera
@@ -59,30 +59,37 @@ kjsgfx_addModel = function(url, id, scale, loc, orient, cb){
 }
 
 kjsgfx_Move = function(msg){
-	if(kjsgfx_debug) console.log("***Move", msg)
-	obj = kjsgfx_id2Obj(msg.id)
-	if (msg.pos) {
-		obj.setLocX(msg.pos[0])
-		obj.setLocY(msg.pos[1])
-		obj.setLocZ(msg.pos[2])
+	if(kjsgfx_debug) 
+		console.log("***Move", msg)
+	var obj = kjsgfx_id2Obj(msg.id)
+	if (obj.no_mesh) {
+		if(msg.pos) obj.msg.pos=msg.pos
+		if(msg.orient) obj.msg.orient=msg.orient
+		if(msg.scale) obj.msg.scale=msg.scale
 	}
-    if (msg.scale) {
-        obj.setScaleX(msg.scale[0]);
-        obj.setScaleY(msg.scale[1]);
-        obj.setScaleZ(msg.scale[2]);
-    }
-	if (msg.orient) {
-		if (msg.orient.length == 3) { ///	Euler angles
-			obj.setRotX(msg.orient[0])
-			obj.setRotY(msg.orient[1])
-			obj.setRotZ(msg.orient[2])
+	else {
+		if (msg.pos) {
+			obj.setLocX(msg.pos[0])
+			obj.setLocY(msg.pos[1])
+			obj.setLocZ(msg.pos[2])
 		}
-		else { /// Quaternion
-			/// re-compute w; protojs code is b0rk
-			var w = Math.sqrt(1.0 - (msg.orient[0] * msg.orient[0] + msg.orient[1] * msg.orient[1] + msg.orient[2] * msg.orient[2]))
-			if (kjsgfx_debug) 
-				console.log("setQuat:", msg.orient[0], msg.orient[1], msg.orient[2], w)
-			obj.setQuat(msg.orient[0], msg.orient[1], msg.orient[2], w)
+		if (msg.scale) {
+			obj.setScaleX(msg.scale[0]);
+			obj.setScaleY(msg.scale[1]);
+			obj.setScaleZ(msg.scale[2]);
+		}
+		if (msg.orient) {
+			if (msg.orient.length == 3) { ///	Euler angles
+				obj.setRotX(msg.orient[0])
+				obj.setRotY(msg.orient[1])
+				obj.setRotZ(msg.orient[2])
+			}
+			else { /// Quaternion
+				/// re-compute w; protojs code is b0rk
+				if (kjsgfx_debug) 
+					console.log("setQuat:", msg.orient[0], msg.orient[1], msg.orient[2], w)
+				obj.setQuat(msg.orient[0], msg.orient[1], msg.orient[2], msg.orient[3])
+			}
 		}
 	}
 }
@@ -96,9 +103,13 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 
     this.methodTable["Create"]=function(msg) {
 		if(kjsgfx_debug) console.log("***Create",msg)
-		kjsgfx_id_map[msg.id]="no_mesh"
-		// FIXME: should keep track of position? do something?
+		var obj = {
+			no_mesh:true,
+			msg:msg
+		}
+		kjsgfx_id_map[msg.id]=obj
     }
+
     this.methodTable["Move"]=kjsgfx_Move
 
     this.methodTable["Destroy"]=function(msg) {
@@ -108,8 +119,11 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		if(kjsgfx_debug) console.log("***MeshShaderUniform",msg)
     }
     this.methodTable["Mesh"] = function(msg){
-		var obj
 		if(kjsgfx_debug) console.log("***Mesh", msg)
+		var obj = kjsgfx_id2Obj(msg.id)
+		if (obj.no_mesh) {
+			var initMsg=obj.msg
+		}
 		if (msg.mesh.indexOf(".dae") == msg.mesh.length - 4) {
 			obj = kjsgfx_addModel(msg.mesh, msg.id)
 		}
@@ -129,6 +143,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		kjsgfx_id_map[msg.id] = obj
 		kjsgfx_mesh_map[msg.mesh] = msg.id
 		if(kjsgfx_debug) console.log(">>>mapping",msg.mesh,"to",msg.id)
+		kjsgfx_Move(initMsg)
 		kjsgfx_Move(msg)
 	}
 
