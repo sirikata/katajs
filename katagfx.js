@@ -193,7 +193,6 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 }
 
 kjsgfx_doc.onLoad = function(){
-	var camera = "camera" //Math.uuid();
 	kjsgfx_gfx = new KatajsGraphics()
 	updateKatagfx()
 	if (debug_level > 2) 
