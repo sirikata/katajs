@@ -127,7 +127,7 @@ KJS.init = function (map, objectcount, cb){
 	if (cb) KJS.onInitComplete = cb
     //create the GLGE renderer.  
     KJS.gameRenderer = new GLGE.Renderer(document.getElementById('canvas'));
-    KJS.gameScene = doc.getElement("mainscene");
+    KJS.gameScene = kjsgfx_doc.getElement("mainscene");
 	KJS.gameScene.objectsToLoad=objectcount
 	KJS.gameScene.pickable = []
 	KJS.gameScene.scriptedObjects = []

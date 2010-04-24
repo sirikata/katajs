@@ -3,6 +3,8 @@ kjsgfx_id_map = {}
 kjsgfx_mesh_map = {}
 kjsgfx_scene = null
 kjsgfx_debug = false
+kjsgfx_doc = new GLGE.Document();
+kjsgfx_gfx = null
 
 kjsgfx_id2Obj = function(id){
 	if(kjsgfx_debug) console.log("id2obj:",id)
@@ -129,12 +131,12 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 			obj = kjsgfx_addModel(msg.mesh, msg.id)
 		}
 		else {
-			var el = doc.getElement(msg.mesh, true)
+			var el = kjsgfx_doc.getElement(msg.mesh, true)
 			if (el) {
 				obj = new GLGE.Object()
 				obj.setId(msg.id)
 				obj.setMesh(el)
-				obj.setMaterial(doc.getElement("box"))
+				obj.setMaterial(kjsgfx_doc.getElement("box"))
 				kjsgfx_scene.addObject(obj)
 			}
 			else {
@@ -177,30 +179,6 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		if(kjsgfx_debug) console.log("DestroyIFrame",msg)
     }
     
-    this.methodTable["Special"] = function(msg){
-		/// klugey methods to get id
-		var id
-		if (msg.id == "camera") {
-			id = kjsgfx_camera_id
-		}
-		else {
-			if (msg.mesh) {
-				id = kjsgfx_mesh_map[msg.mesh]
-			}
-			else {
-				id = kjsgfx_mesh_map[msg.id]
-			}
-		}
-		var obj = kjsgfx_id2Obj(id)
-		if(kjsgfx_debug) console.log("Special", msg, id)
-		if (msg.rescale) {
-			if(kjsgfx_debug) console.log("  rescale:", msg.rescale[0], msg.rescale[1], msg.rescale[2])
-			obj.setScaleX(msg.rescale[0])
-			obj.setScaleY(msg.rescale[1])
-			obj.setScaleZ(msg.rescale[2])
-		}
-	}
-    
     this.send=function(obj) {
 		var meth = this.methodTable[obj.msg]
 		if(kjsgfx_debug) console.log("k3dgfx msg sent:", obj, "mtable:", this.methodTable)
@@ -212,4 +190,12 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		}
     }
     this.destroy=function(){}
+}
+
+kjsgfx_doc.onLoad = function(){
+	var camera = "camera" //Math.uuid();
+	kjsgfx_gfx = new KatajsGraphics()
+	updateKatagfx()
+	if (debug_level > 2) 
+		console.log("mGFX:", kjsgfx_gfx)
 }
