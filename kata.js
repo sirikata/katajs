@@ -356,10 +356,10 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     var cam = KJS.gameScene.camera
     var mro = GLGE.rotateMatrix(cam.getRotX(), cam.getRotY(), cam.getRotZ(), GLGE.ROT_XZY)
     var mlo = GLGE.translateMatrix(cam.getLocX(), cam.getLocY(), cam.getLocZ())
-    var mat = mlo.x(mro) // camera matrix    
+    var mat = GLGE.mulMat4(mlo, mro) // camera matrix    
 //    pdebug("mx: " + mx + " my: " + my)
     var v = new GLGE.Vec([mx, my, -1, 1]) // camera points along -Z axis
-    v = mat.x(v) // transform to camera matrix
+    v = GLGE.mulMat4Vec4(mat, v) // transform to camera matrix
     var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
     var vP0 = new GLGE.Vec(P0)
 	if (!this.rayVsBoundingSphere(vP0, new GLGE.Vec([v.e(1), v.e(2), v.e(3)]) ) ) {
@@ -372,7 +372,7 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
 	var root = this.getRoot()
     mro = GLGE.rotateMatrix(root.getRotX(), root.getRotY(), root.getRotZ(), GLGE.ROT_XZY) // our rotation matrix
     mlo = GLGE.translateMatrix(root.getLocX(), root.getLocY(), root.getLocZ()) // our location matrix
-    mat = mlo.x(mro) // our full matrix
+    mat = GLGE.mulMat4(mlo, mro) // our full matrix
     // scale wall vertices
     var sx = parseFloat(root.getScaleX())
     var sy = parseFloat(root.getScaleY())
@@ -390,15 +390,15 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
         var A = new GLGE.Vec([sx * p[f[i]*3], sy * p[f[i]*3 + 1], sz * p[f[i]*3 + 2], 1]) // get vertex points for triangle ABC
         var B = new GLGE.Vec([sx * p[f[i+1]*3], sy * p[f[i+1]*3 + 1], sz * p[f[i+1]*3 + 2], 1])
         var C = new GLGE.Vec([sx * p[f[i+2]*3], sy * p[f[i+2]*3 + 1], sz * p[f[i+2]*3 + 2], 1])
-        A = mat.x(A) // convert them to global coords
-        B = mat.x(B)
-        C = mat.x(C)
-        var T = [A.data.slice(0, 3), B.data.slice(0, 3), C.data.slice(0, 3)]
+        A = GLGE.mulMat4Vec4(mat, A) // convert them to global coords
+        B = GLGE.mulMat4Vec4(mat, B)
+        C = GLGE.mulMat4Vec4(mat, C)
+        var T = [A.slice(0, 3), B.slice(0, 3), C.slice(0, 3)]
         //		pdebug("T: " + T)
 		var N = []
         var I = ray_tri_intersect(R, T, N)
         if (I) {
-            dist = vP0.distanceFrom(I)
+            dist = GLGE.distanceVec3(vP0, I)
             if (dist < mindist) {
                 mindist = dist
                 minI = I
@@ -629,13 +629,13 @@ KJS.ObjectEx.prototype.rayVsBoundingSphere = function(RayBeg, RayEnd){
 	else {
 		c = this.boundingCenter
 	}
-	var S = c.add([parseFloat(root.getLocX()),parseFloat(root.getLocY()),parseFloat(root.getLocZ())])
+	var S = GLGE.addVec3(c, [parseFloat(root.getLocX()),parseFloat(root.getLocY()),parseFloat(root.getLocZ())])
 	var r = this.boundingRadius
-	var d = S.distanceFrom(RayBeg)					// distance from ray origin to sphere center
+	var d = GLGE.distanceVec3(S, RayBeg)					// distance from ray origin to sphere center
 	if (d < r) 
 		ret = true // origin is inside sphere
 	else {
-		var a = S.sub(RayBeg).angle(RayEnd.sub(RayBeg)) // angle between ray and center of sphere
+		var a = GLGE.angleVec3(GLGE.subVec3(S, RayBeg),GLGE.subVec3(RayEnd, RayBeg)) // angle between ray and center of sphere
 		if (a > 1.5708) {
 			ret = false // sphere is behind us
 		}
