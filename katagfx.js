@@ -5,6 +5,7 @@ kjsgfx_scene = null
 kjsgfx_debug = false
 kjsgfx_doc = new GLGE.Document();
 kjsgfx_gfx = null
+kjsgfx_doc_loadFinish = null // jeez
 
 kjsgfx_id2Obj = function(id){
 	if(kjsgfx_debug) console.log("id2obj:",id)
@@ -196,5 +197,8 @@ kjsgfx_doc.onLoad = function(){
 	kjsgfx_gfx = new KatajsGraphics()
 	updateKatagfx()
 	if (debug_level > 2) 
-		console.log("mGFX:", kjsgfx_gfx)
+		console.log("gfx:", kjsgfx_gfx)
+	if (kjsgfx_doc_loadFinish) {
+		kjsgfx_doc_loadFinish()
+	}
 }
