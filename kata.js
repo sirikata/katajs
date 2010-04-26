@@ -168,7 +168,7 @@ KJS.mouselook = function(){
         var leftbutton = KJS.gameScene.mouse.isButtonDown(0)
         mousepos.x = mousepos.x - document.getElementById("container").offsetLeft;
         mousepos.y = mousepos.y - document.getElementById("container").offsetTop;
-//        pdebug("KJS.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
+        pdebug("KJS.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
             var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.hoverable);			
@@ -337,6 +337,7 @@ KJS.render = function (){
 // also returns normal
 KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     // create raycast from camera to mouse xy
+//	console.log("getPickPoint:", this, mx, my)
 	var mobjs = this.getMeshObjects()
 	if (mobjs.length==0) return null
 	var mesh = mobjs[0].mesh
@@ -363,6 +364,7 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     var P0 = [parseFloat(cam.getLocX()), parseFloat(cam.getLocY()), parseFloat(cam.getLocZ())]
     var vP0 = new GLGE.Vec(P0)
 	if (!this.rayVsBoundingSphere(vP0, new GLGE.Vec([v.e(1), v.e(2), v.e(3)]) ) ) {
+//		console.log("---return: failed bounding sphere")
 		return null
 	}
     var P1 = [v.e(1), v.e(2), v.e(3)]
@@ -407,16 +409,19 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
         }
     }
     if (minI == null) {
+//		console.log("---return: null (minI==null)")
 		return null
     }
     else {
-		return [minI.data, mindist, minN]
+//		console.log("---return:", minI, mindist, minN)
+		return [minI, mindist, minN]
     }
 }
 
 // return pick point of nearest object in olist under cursor, or null if none
 // list can include actual objects or string id's
 KJS.getNearestObject = function (olist, x, y, coordType) {
+//	console.log("getNearestObject", olist, x, y, coordType)
     var dist = 9999999.9
     var place = null
 	var hit = null
@@ -426,6 +431,7 @@ KJS.getNearestObject = function (olist, x, y, coordType) {
 		if (typeof(obj)=="string") obj = KJS.gameScene.getObjectById(obj)
 		if (!obj) continue
 		var pdn = obj.getPickPoint(x,y,coordType)
+//		console.log("getNearestObject pdn:", pdn)
         if (pdn) {
             if (pdn[1] < dist) {
                 place = pdn[0]
@@ -493,10 +499,7 @@ KJS.addProtoSafely(GLGE.Scene, "pickSoft", function(x, y, objlist){
 	if (objlist == null) {
 		objlist = this.pickable
 	}
-	var s = ""
-	for (var i = 0; i < objlist.length; i++) {
-		s += objlist[i] + " "
-	}
+//	console.log('pickable:', objlist)
 	var place_hit_norm = KJS.getNearestObject(objlist, x, y, "pixels")
 	if (place_hit_norm) {
 		return this.getObjectById(objlist[place_hit_norm[1]])
@@ -569,7 +572,7 @@ KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
 	var roots = this.getRoots()
 	for (i=0; i<roots.length; i++) {
 		if (roots[i].getMeshObjects==null) {
-			console.log("obj lacks method:", roots[i])
+//			console.log("obj lacks method:", roots[i])
 			bugg++
 		}
 		if ( (!roots[i].getMeshObjects().length) || (!roots[i].getRef()) ){
