@@ -371,7 +371,7 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     var R = [P0, P1]
 //    pdebug("R = [[" + R[0] + "],[" + R[1] + "]]")
     // get wall matrix
-	var root = this.getRoot()
+	var root = this //.getRoot() is obsolete
     mro = GLGE.rotateMatrix(root.getRotX(), root.getRotY(), root.getRotZ(), GLGE.ROT_XZY) // our rotation matrix
     mlo = GLGE.translateMatrix(root.getLocX(), root.getLocY(), root.getLocZ()) // our location matrix
     mat = GLGE.mulMat4(mlo, mro) // our full matrix
@@ -530,7 +530,8 @@ KJS.ObjectEx.prototype.getMeshObjects = function () {
 
 /// compute bounding sphere, add boundingRadius, boundingCenter
 KJS.ObjectEx.prototype.computeBoundingSphere = function(){
-	root = this.getRoot()								///	give all objects the bounding sphere of the group
+//	root = this.getRoot()								///	give all objects the bounding sphere of the group
+	root = this	// getRoot doesn't work anymore -- returns scene
     var sx = parseFloat(root.getScaleX())
     var sy = parseFloat(root.getScaleY())
     var sz = parseFloat(root.getScaleZ())
@@ -623,7 +624,7 @@ KJS.ObjectEx.prototype.rayVsBoundingSphere = function(RayBeg, RayEnd){
 	var c;
 	
 	// gotta rotate boundingCenter by our matrix (FIXME: this is all crap!  Objects should be normed with proper centers)
-	var root = this.getRoot()
+	var root = this //.getRoot() doesn't work anymore
 	if (root.getRotX() || root.getRotY() || root.getRotZ()) {
 		var mat = GLGE.rotateMatrix([root.getRotX(), root.getRotY(), root.getRotZ()], GLGE.ROT_XZY)
 		c = mat.cross(this.boundingCenter)
