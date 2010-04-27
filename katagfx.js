@@ -195,7 +195,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 
 kjsgfx_doc.onLoad = function(){
 	kjsgfx_gfx = new KatajsGraphics()
-	updateKatagfx()
+	if(typeof(updateKatagfx) !=  typeof(undefined)) updateKatagfx()
 	if (debug_level > 2) 
 		console.log("gfx:", kjsgfx_gfx)
 	if (kjsgfx_doc_loadFinish) {

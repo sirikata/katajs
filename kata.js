@@ -171,7 +171,7 @@ KJS.mouselook = function(){
         var leftbutton = KJS.gameScene.mouse.isButtonDown(0)
         mousepos.x = mousepos.x - document.getElementById("container").offsetLeft;
         mousepos.y = mousepos.y - document.getElementById("container").offsetTop;
-        pdebug("KJS.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
+//        pdebug("KJS.gameScene.mouse x: " + mousepos.x + " y: " + mousepos.y + " left button: " + leftbutton, 0)
         
         if (mousepos.x && mousepos.y) {
             var obj = KJS.gameScene.picker(mousepos.x, mousepos.y, KJS.gameScene.hoverable);			
