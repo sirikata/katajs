@@ -40,7 +40,10 @@ KJS.addProtoSafely = function (cls, proto, func){
     }
 }
 
-if (GLGE.Scene.prototype.getRoots==null) GLGE.Scene.prototype.getRoots = GLGE.Scene.prototype.getObjects
+//if (GLGE.Scene.prototype.getRoots==null) GLGE.Scene.prototype.getRoots = GLGE.Scene.prototype.getObjects
+GLGE.Scene.prototype.getRoots = function () {
+	return this.children
+}
 
 // add getObjectById method to Scene
 
@@ -339,6 +342,7 @@ KJS.ObjectEx.prototype.getPickPoint = function(mx, my, coordType){
     // create raycast from camera to mouse xy
 //	console.log("getPickPoint:", this, mx, my)
 	var mobjs = this.getMeshObjects()
+//	console.log("  mesh objs:", mobjs)
 	if (mobjs.length==0) return null
 	var mesh = mobjs[0].mesh
     if (mx == null || coordType=="pixels") {
@@ -517,11 +521,11 @@ KJS.ObjectEx.prototype.getMeshObjects = function () {
 //		console.log("  mesh obj:",this)
 		objs.push(this)
 	}
-	if (this.objects) {
+	if (this.children) {
 //		console.log("  mo objects:", this.objects.length)
-		for(var i=0; i<this.objects.length; i++) {
+		for(var i=0; i<this.children.length; i++) {
 //			console.log("    i:",i)
-			objs = objs.concat(this.objects[i].getMeshObjects())
+			objs = objs.concat(this.children[i].getMeshObjects())
 		}
 	}
 //	console.log("getMeshObjects returns:", objs)
