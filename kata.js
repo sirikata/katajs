@@ -221,16 +221,15 @@ KJS.checkkeys = function (){
 		var trans1 = trans.e(2)
 		trans[0] = trans.e(1)*incAmt*40 / mag;
 		trans[1] = trans.e(2)*incAmt*40 / mag;
-		trans[2] = 0.1;
 		var yinc = 0;
 		var xinc = 0;
 		var zinc = 0;
 
 		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_UP)) {
-			zinc += parseFloat(trans[2])
+			zinc += incAmt*10
 		}
 		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_DOWN)) {
-			zinc -= parseFloat(trans[2])
+			zinc -= incAmt*10
 		}
 		if (KJS.keys.isKeyPressed(GLGE.KI_W)) {
 			yinc = yinc + parseFloat(trans[1]);
