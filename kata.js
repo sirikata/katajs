@@ -221,9 +221,17 @@ KJS.checkkeys = function (){
 		var trans1 = trans.e(2)
 		trans[0] = trans.e(1)*incAmt*40 / mag;
 		trans[1] = trans.e(2)*incAmt*40 / mag;
+		trans[2] = trans.e(3)*incAmt*200 / mag;
 		var yinc = 0;
 		var xinc = 0;
-		
+		var zinc = 0;
+
+		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_UP)) {
+			zinc += parseFloat(trans[2])
+		}
+		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_DOWN)) {
+			zinc -= parseFloat(trans[2])
+		}
 		if (KJS.keys.isKeyPressed(GLGE.KI_W)) {
 			yinc = yinc + parseFloat(trans[1]);
 			xinc = xinc + parseFloat(trans[0]);
@@ -274,12 +282,15 @@ KJS.checkkeys = function (){
 				xinc = 0;
 			}
 			else {
-				camera.setLocZ(KJS.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
+				camera.setLocZ(KJS.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + zinc);
 			}
 		}
 		if (xinc != 0 || yinc != 0) {
 			camera.setLocY(camerapos.y + yinc);
 			camera.setLocX(camerapos.x + xinc);
+		}
+		if (zinc != 0 ) {
+			camera.setLocZ(camerapos.z + zinc);			
 		}
 		camera.setRotX(1.56 - trans1 * KJS.inc);
 		camera.setRotZ(-trans0 * KJS.inc);
