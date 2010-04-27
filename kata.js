@@ -154,7 +154,7 @@ KJS.init = function (map, objectcount, cb){
 	KJS.lasttimeFps=0;
 	KJS.frameRateBuffer=10;
 	KJS.cnt=0;
-	KJS.inc=-0.025;
+	KJS.inc=null;
 
 	setInterval(KJS.render,15);
 	return KJS.gameScene
@@ -216,14 +216,23 @@ KJS.checkkeys = function (){
 		var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 0]);
 		var mag = Math.pow(Math.pow(trans.e(1), 2) + Math.pow(trans.e(2), 2), 0.5);
 		var incAmt = KJS.elapsedTime / 1500.0
-		if(incAmt > 0.1) incAmt=0.1
+		if (incAmt > 0.1) 
+			incAmt = 0.1
 		var trans0 = trans.e(1)
 		var trans1 = trans.e(2)
-		trans[0] = trans.e(1)*incAmt*40 / mag;
-		trans[1] = trans.e(2)*incAmt*40 / mag;
+		trans[0] = trans.e(1) * incAmt * 40 / mag;
+		trans[1] = trans.e(2) * incAmt * 40 / mag;
 		var yinc = 0;
 		var xinc = 0;
 		var zinc = 0;
+		if (KJS.inc == null) {
+			if (Math.abs(trans0) > Math.abs(trans1)) {
+				KJS.inc = -camera.getRotZ() / trans0
+			}			
+			else {
+				KJS.inc = (1.56 - camera.getRotX()) / trans1
+			}
+		}
 
 		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_UP)) {
 			zinc += incAmt*10
@@ -268,7 +277,7 @@ KJS.checkkeys = function (){
 			camera.setRotY(camerarot.y - incAmt);
 		}
 //		pdebug("KJS.levelmap: " + KJS.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc), 5)
-		if (KJS.levelmap) {
+		if (KJS.levelmap) {	
 //			pdebug("camera: " + camerapos.x.toFixed(2) + ", " + camerapos.y.toFixed(2) + " height: " +
 //				KJS.levelmap.getHeightAt(camerapos.x, camerapos.y).toFixed(2) ,1)
 			if (KJS.levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) 
