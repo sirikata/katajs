@@ -234,11 +234,11 @@ KJS.checkkeys = function (){
 			}
 		}
 
-		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_UP)) {
+		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_UP) || KJS.keys.isKeyPressed(GLGE.KI_R)) {
 			zinc += incAmt*10
 		}
-		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_DOWN)) {
-			zinc -= incAmt*10
+		if (KJS.keys.isKeyPressed(GLGE.KI_PAGE_DOWN) || KJS.keys.isKeyPressed(GLGE.KI_L)) {
+			zinc -= incAmt * 10
 		}
 		if (KJS.keys.isKeyPressed(GLGE.KI_W)) {
 			yinc = yinc + parseFloat(trans[1]);
