@@ -30,6 +30,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("ScriptProtocol.js");
+Kata.include("Presence.js");
+
 (function() {
 
      /** Script is the base class for all scripts.  It should cover

@@ -65,12 +65,23 @@
       * @constructor
       * @param {Kata.Script} script Script for the object this presence is
       * for
+      * @param {Kata.SpaceID} space Space for this presence
       * @param {Kata.PresenceID} id Unique identifier of this object in
       * the space.
       */
-     Kata.Presence = function (script, id) {
+     Kata.Presence = function (script, space, id, pos, vel, acc, bounds, vis) {
          this.mScript = script;
+         this.mSpace = space;
          this.mID = id;
+
+         this.mPosition = pos;
+         this.mVelocity = vel;
+         this.mAcceleration = acc;
+         this.mBounds = bounds;
+
+         this.mVisual = vis;
+
+         this.mQuery = null;
      };
 
      /** Get the unique ID associated with this Presence.
@@ -93,23 +104,23 @@
 
      /** Get the current estimate of this object's position. */
      Kata.Presence.prototype.position = function() {
-         Kata.notImplemented();
+         return this.mPosition;
      };
      /** Get the current estimate of this object's velocity. */
      Kata.Presence.prototype.velocity = function() {
-         Kata.notImplemented();
+         return this.mVelocity;
      };
      /** Get the current estimate of this object's acceleration. */
      Kata.Presence.prototype.acceleration = function() {
-         Kata.notImplemented();
+         return this.mAcceleration;
      };
      /** Get the current estimate of this object's bounds. */
      Kata.Presence.prototype.bounds = function() {
-         Kata.notImplemented();
+         return this.mBounds;
      };
      /** Get the current estimate of this object's visual representation (e.g. mesh). */
      Kata.Presence.prototype.visual = function() {
-         Kata.notImplemented();
+         return this.mVisual;
      };
 
      /** Get the current interest query's value. */
@@ -123,27 +134,82 @@
 
      /** Request that the object's location parameters be updated. */
      Kata.Presence.prototype.setLocation = function(pos,vel,acc,bounds) {
-         Kata.notImplemented();
+         this._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Location(
+                 space = this.mSpace,
+                 position = pos,
+                 velocity = vel,
+                 acceleration = acc,
+                 bounds = bounds
+             )
+         );
+         this.mPosition = pos;
+         this.mVelocity = vel;
+         this.mAcceleration = acc;
+         this.mBounds = bounds;
      };
      /** Request that the object's position be updated. */
      Kata.Presence.prototype.setPosition = function(val) {
-         Kata.notImplemented();
+         this._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Location(
+                 space = this.mSpace,
+                 position = val,
+                 velocity = null,
+                 acceleration = null,
+                 bounds = null
+             )
+         );
+         this.mPosition = val;
      };
      /** Request that the object's velocity be updated. */
      Kata.Presence.prototype.velocity = function(val) {
-         Kata.notImplemented();
+         this._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Location(
+                 space = this.mSpace,
+                 position = null,
+                 velocity = val,
+                 acceleration = null,
+                 bounds = null
+             )
+         );
+         this.mVelocity = val;
      };
      /** Request that the object's acceleration be updated. */
      Kata.Presence.prototype.acceleration = function(val) {
-         Kata.notImplemented();
+         this._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Location(
+                 space = this.mSpace,
+                 position = null,
+                 velocity = null,
+                 acceleration = val,
+                 bounds = null
+             )
+         );
+         this.mAcceleration = val;
      };
      /** Request that the object's bounds be updated. */
      Kata.Presence.prototype.bounds = function(val) {
-         Kata.notImplemented();
+         this._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Location(
+                 space = this.mSpace,
+                 position = null,
+                 velocity = null,
+                 acceleration = null,
+                 bounds = val
+             )
+         );
+         this.mBounds = val;
      };
+
      /** Request that the object's visual representation (e.g. mesh) be updated. */
      Kata.Presence.prototype.visual = function(val) {
-         Kata.notImplemented();
+         this._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Visual(
+                 space = this.mSpace,
+                 url = val
+             )
+         );
+         this.mVisual = val;
      };
 
      /** Request the interest query parameters be updated. */
