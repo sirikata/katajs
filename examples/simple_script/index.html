@@ -1,5 +1,5 @@
 <!-- katajs Javascript Utilities
- test.html
+ index.html
 
  Copyright (c) 2010, Patrick Reiter Horn
  All rights reserved.
@@ -32,16 +32,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Kata Network Test</title>
+    <title>Kata Simple Scripting</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 	<!-- Core must be loaded before web-socket-js because it cludges window.console -->
-	<script type="text/javascript" src="network/Core.js"></script>
-
+	<script type="text/javascript" src="../../network/Core.js"></script>
 <!--
-	<script type="text/javascript" src="externals/web-socket-js/FABridge.js"></script>
-	<script type="text/javascript" src="externals/web-socket-js/swfobject.js"></script>
-	<script type="text/javascript" src="externals/web-socket-js/web_socket.js"></script>
+	<script type="text/javascript" src="../../externals/web-socket-js/FABridge.js"></script>
+	<script type="text/javascript" src="../../externals/web-socket-js/swfobject.js"></script>
+	<script type="text/javascript" src="../../externals/web-socket-js/web_socket.js"></script>
 	<script type="text/javascript">
 	    try {
 	        WebSocket.__swfLocation = "../externals/web-socket-js/WebSocketMain.swf";
@@ -50,28 +49,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	    }
 	</script>
 -->
-	<script type="text/javascript" src="network/GraphicsSimulation.js"></script>
-	<script type="text/javascript" src="network/MainThread.js"></script>
-	
-	<script type="text/javascript" src="gfx/TextGraphics.js"></script>
-	
-	<script type="text/javascript" src="Math.uuid.js"></script>
-	
-	
-	<script type="text/javascript" src="pdebug.js"></script> 
-	<script type="text/javascript" src="externals/GLGE/glge_math.js"></script> 
-	<script type="text/javascript" src="externals/GLGE/glge.js"></script> 
-	<script type="text/javascript" src="externals/GLGE/glge_input.js"></script> 
-	<script type="text/javascript" src="externals/GLGE/glge_collada.js"></script> 
-	<script type="text/javascript" src="ray_tri.js"></script> 
-	<script type="text/javascript" src="kata.js"></script> 
-	<script type="text/javascript" src="gfx/kjsgfx.js"></script>
+	<script type="text/javascript" src="../../network/GraphicsSimulation.js"></script>
+	<script type="text/javascript" src="../../network/MainThread.js"></script>
+	<script type="text/javascript" src="../../gfx/TextGraphics.js"></script>
+	<script type="text/javascript" src="../../Math.uuid.js"></script>
+
+	<script type="text/javascript" src="../../pdebug.js"></script>
+	<script type="text/javascript" src="../../externals/GLGE/glge_math.js"></script>
+	<script type="text/javascript" src="../../externals/GLGE/glge.js"></script>
+	<script type="text/javascript" src="../../externals/GLGE/glge_input.js"></script>
+	<script type="text/javascript" src="../../externals/GLGE/glge_collada.js"></script>
+	<script type="text/javascript" src="../../ray_tri.js"></script>
+	<script type="text/javascript" src="../../kata.js"></script>
+	<script type="text/javascript" src="../../gfx/kjsgfx.js"></script>
 
     <script type="text/javascript">
         doc = new GLGE.Document();
         var kata, graphics;
         var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
-        doc.onLoad = function(){
+        doc.onLoad = function() {
             window.kata = new Kata.MainThread();
             graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("container"));
             // Use a real space server.
@@ -87,9 +83,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 spaceid: defaultSpace,
                 server: "skloop://" // Loopback space
             });
-            var testObj0 = "camera" //Math.uuid();
-            var testObj1 = "tst1" //Math.uuid();
-            var testObj2 = "tst2" //Math.uuid();
             window.kata.getChannel().sendMessage({
                 msg: "Create",
                 spaceid: defaultSpace,
@@ -98,11 +91,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 args:{spaceid:defaultSpace}
             });
         }
-        doc.load("testgfx.xml")
+        doc.load("scene.xml")
     </script>
 
   </head>
-  
+
   <body>
 	<div></div>
 	<div style="width:900px;margin:auto;position:relative" id="container">
