@@ -302,6 +302,19 @@ KJS.checkkeys = function (){
 		}
 		camera.setRotX(1.56 - trans1 * KJS.inc);
 		camera.setRotZ(-trans0 * KJS.inc);
+		
+		for (var k in assetScripts) {
+			var s = assetScripts[k]
+			
+			/// just numeric keys for testing FIXME: need to figure out input priority
+			for (var key = GLGE.KI_0; key <= GLGE.KI_9; key++) {
+				if (KJS.keys.isKeyPressed(key)) {
+					if (s.onKey) {
+						s.onKey(key)
+					}
+				}
+			}
+		}
 	}
 }
 
