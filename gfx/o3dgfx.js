@@ -29,6 +29,8 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+o3djs.base.o3d = o3d;
 o3djs.require('o3djs.webgl');
 o3djs.require('o3djs.util');
 o3djs.require('o3djs.math');
@@ -39,10 +41,10 @@ o3djs.require('o3djs.arcball');
 o3djs.require('o3djs.scene');
 
 var RenderTarget=function(element,width,height,fov,hither,yon) {
-  return {mElement:element,mWidth:width,mHeight:height,mFOV:fov,mHither:higher,mYon:yon};
+  return {mElement:element,mWidth:width,mHeight:height,mFOV:fov,mHither:hither,mYon:yon};
 };
 var VWObject=function(id,time,spaceid,element) {
-    var pack=element.createPack();
+    var pack=element.client.createPack();
     
     var retval = {
         mID:id,
@@ -69,14 +71,24 @@ var updateTransformation=function(vwObject,date) {
  *@constructor
  */
 O3DGraphics=function(callbackFunction,parentElement) {
+    var oldID = parentElement.id;
+    parentElement.style.width="600px";
+    parentElement.style.height="600px";
     var thus = this;
     this.callback=callbackFunction;
     this.parentEl=parentElement;
     this.initEvents=[];
     this.methodTable={};
-    
+    this.mObjects={};
     this.loadingElement = document.createElement("div");
-    this.parentEl.appendChild(loadingElement);
+    this.parentEl.appendChild(this.loadingElement);
+
+    // For dragging camera
+    this.dragging = false;
+    this.thisRot = o3djs.math.matrix4.identity();
+    this.lastRot = o3djs.math.matrix4.identity();
+    this.aball = o3djs.arcball.create(100, 100);
+
     
     this.sceneLoadedCallback = function(renderTarg, pack, parent, exception) {
         enableInput(true);
@@ -160,7 +172,7 @@ O3DGraphics=function(callbackFunction,parentElement) {
     this.loadScene = function(context, path, mat, par) {
       // FIXME: clientElements[0]?
       var renderTarg = this.mRenderTargets[0];
-      var pack = renderTarg.element.client.createPack();
+      var pack = renderTarg.mElement.client.createPack();
 
       // Create a new transform for the loaded file
       var parent = pack.createObject('Transform');
@@ -186,22 +198,23 @@ O3DGraphics=function(callbackFunction,parentElement) {
 
     
     this.send=function(obj) {
-        initEvents[initEvents.length]=obj;
+        this.initEvents.push(obj);
     };
+    parentElement.id="o3d";
     this.asyncInit=function (clientElements) {
         var thus=this;
         this.mUnsetParents={};
-        this.mRenderTargets={};//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
+        this.mRenderTargets=[];//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
         this.mSpaceRoots={};//this will contain scene graph roots for each space
         for (var i=0;i<clientElements.length;i++) {
           this.mRenderTargets[i]=RenderTarget(clientElements[i],
                                              parseInt(clientElements[i].width),
                                              parseInt(clientElements[i].height),
-                                             o3d.math.degToRad(45),
+                                             o3djs.math.degToRad(45),
                                              0.1,
                                              50000);
            if(i==0) {
-             this.mRenderTargets[0].mViewInfo = o3djs.rendergraph.createBasicView(clientElements[0].createPack(),
+             this.mRenderTargets[0].mViewInfo = o3djs.rendergraph.createBasicView(clientElements[0].client.createPack(),
                                                                 clientElements[0].root,
                                                                 clientElements[0].renderGraphRoot);
            }else {
@@ -213,19 +226,23 @@ O3DGraphics=function(callbackFunction,parentElement) {
         }
         /* FIXME: can be done when camera is created
         this.mViewInfo.drawContext.projection = o3djs.math.matrix4.perspective(
-                     o3d.math.degToRad(45), g_o3dWidth / g_o3dHeight,
+                     o3djs.math.degToRad(45), g_o3dWidth / g_o3dHeight,
                      this.mNearPlane,this.mFarPlane)
                      ;*/
                                              
         this.methodTable={};
         
         this.methodTable["Create"]=function(msg) {//this function creates a scene graph node
-            if (!msg.spaceid in this.mSpaceRoots) {
-                this.mSpaceRoots[msg.spaceid]=this.mRenderTargets[0].element.createPack().createObject('o3d.Transform');
+            var s = msg.spaceid;
+            if (!s) {
+                s=""
+            }
+            if (!(s in this.mSpaceRoots)) {
+                this.mSpaceRoots[s]=this.mRenderTargets[0].mElement.client.createPack().createObject('o3d.Transform');
             }
             var spaceRoot=this.mSpaceRoots[msg.spaceid];
             var newObject;
-            this.mObjects[msg.id]=newObject=VWObject(msg.id,msg.spaceid,this.mRenderTargets[0].element);
+            this.mObjects[msg.id]=newObject=VWObject(msg.id,msg.time,msg.spaceid,this.mRenderTargets[0].mElement);
             newObject.mNode.parent=spaceRoot;
 
             if (msg.id in this.mUnsetParents) {
@@ -261,11 +278,11 @@ O3DGraphics=function(callbackFunction,parentElement) {
                 }
             }
             if (msg.pos) {                
-                vwObject.mPos=msg.translate;
+                vwObject.mPos=msg.pos;
                 vwObject.mPosTime=msg.time;
             }
             if (msg.vel)
-                vwObject.mVel=msg.velocity;
+                vwObject.mVel=msg.vel;
             if (msg.orient) {
                 vwObject.mOrient=msg.orient;
                 vwObject.mOrientTime=msg.time;
@@ -276,9 +293,9 @@ O3DGraphics=function(callbackFunction,parentElement) {
                 vwObject.mRotVel=msg.rotvel;
             if (msg.scale) {
                 vwObject.mScale=msg.scale;
-                vwObject.mScaleTime=msg.scale;
+                vwObject.mScaleTime=msg.time;
             }
-            updateTransformation(vwObject,newDate());            
+            updateTransformation(vwObject,new Date());            
             //FIXME actually translate element
         };
         this.methodTable["Move"]=function(msg) {
@@ -349,25 +366,77 @@ O3DGraphics=function(callbackFunction,parentElement) {
         };
         
         this.send=function(obj) {
-            return this.methodTable[obj.msg](obj);
+            return this.methodTable[obj.msg].call(this, obj);
         };
         this.destroy=function(){}
         for (var i=0;i<this.initEvents.length;++i) {
           this.send(this.initEvents[i]);
         }
         delete this.initEvents;
-        o3djs.event.addEventListener(this.mClientElements[0],
-                                     'mousedown',
-                                     function (e){thus.startDragging(e);});
-        o3djs.event.addEventListener(this.mClientElements[0],
-                                     'mousemove',
-                                     function(e){thus.drag(e);});
-        o3djs.event.addEventListener(this.mClientElements[0],
-                                     'mouseup',
-                                     function(e){thus.stopDragging(e);});
-        o3djs.event.addEventListener(this.mClientElements[0],
-                                     'wheel',
-                                     function(e){thus.scrollMe(e);});
+        var el = this.mRenderTargets[0].mElement;
+        el.addEventListener('mousedown',
+                            function (e){thus.startDragging(e);},
+                            true);
+        el.addEventListener('mousemove',
+                            function(e){thus.drag(e);},
+                            true);
+        el.addEventListener('mouseup',
+                            function(e){thus.stopDragging(e);},
+                            true);
+        el.addEventListener('wheel',
+                            function(e){thus.scrollMe(e);},
+                            true);
     };
-    o3djs.webgl.makeClients(function(clientElements){thus.asyncInit(clientElements);});
+    o3djs.webgl.makeClients(function(clientElements){
+        parentElement.id=oldID;
+        thus.asyncInit(clientElements);
+    });
 };
+
+O3DGraphics.prototype.startDragging = function(e) {
+  this.lastRot = this.thisRot;
+
+  this.aball.click([e.x, e.y]);
+
+  this.dragging = true;
+}
+
+O3DGraphics.prototype.drag = function(e) {
+  if (this.dragging) {
+    var rotationQuat = this.aball.drag([e.x, e.y]);
+    var rot_mat = o3djs.quaternions.quaternionToRotation(rotationQuat);
+    this.thisRot = o3djs.math.matrix4.mul(this.lastRot, rot_mat);
+
+    var root = this.mRenderTargets[0].mElement.client.root;
+    var m = root.localMatrix;
+    o3djs.math.matrix4.setUpper3x3(m, this.thisRot);
+    root.localMatrix = m;
+    this.updateCamera();
+  }
+}
+
+O3DGraphics.prototype.stopDragging = function(e) {
+  this.dragging = false;
+}
+
+O3DGraphics.prototype.updateCamera = function() {
+  var up = [0, 1, 0];
+  this.viewInfo.drawContext.view = o3djs.math.matrix4.lookAt(this.camera.eye,
+                                                      this.camera.target,
+                                                      up);
+  this.lightPosParam.value = this.camera.eye;
+}
+
+O3DGraphics.prototype.scrollMe = function(e) {
+  if (e.deltaY) {
+    var t = 1;
+    if (e.deltaY > 0)
+      t = 11 / 12;
+    else
+      t = 13 / 12;
+    this.camera.eye = o3djs.math.lerpVector(this.camera.target, this.camera.eye, t);
+
+    this.updateCamera();
+  }
+}
+
