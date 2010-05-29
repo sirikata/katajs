@@ -38,9 +38,32 @@ o3djs.require('o3djs.pack');
 o3djs.require('o3djs.arcball');
 o3djs.require('o3djs.scene');
 
-RenderTarget=function(element,width,height,fov,hither,yon) {
-  return {element:element,width:width,height:height,fov:fov,hither:higher,yon:yon};
-}
+var RenderTarget=function(element,width,height,fov,hither,yon) {
+  return {mElement:element,mWidth:width,mHeight:height,mFOV:fov,mHither:higher,mYon:yon};
+};
+var VWObject=function(id,time,spaceid,element) {
+    var pack=element.createPack();
+    
+    var retval = {
+        mID:id,
+        mSpaceID:spaceid,
+        mPack:pack,
+        mNode:pack.createObject('o3d.Transform'),
+        mScale:[1,1,1],
+        mOrient:[0,0,0,1],
+        mPos:[0,0,0]
+    };
+    retval.mNode.mKataObject=retval;
+    return retval;
+};
+var updateTransformation=function(vwObject,date) {
+    vwObject.mNode.identity();
+    //FIXME need to interpolate
+    vwObject.mNode.scale(vwObject.mScale[0],vwObject.mScale[1],vwObject.mScale[2]);
+    vwObject.mNode.translate(vwObject.mPos[0],vwObject.mPos[1],vwObject.mPos[2]);
+    vwObject.mNode.quaternionRotate([vwObject.mOrient[1],vwObject.mOrient[2],vwObject.mOrient[3],vwObject.mOrient[0]]);
+    
+};
 /**
  * Constructor for O3DGraphics interface.
  *@constructor
@@ -133,7 +156,7 @@ O3DGraphics=function(callbackFunction,parentElement) {
             }
           }
         }
-    }
+    };
     this.loadScene = function(context, path, mat, par) {
       // FIXME: clientElements[0]?
       var renderTarg = this.mRenderTargets[0];
@@ -159,16 +182,17 @@ O3DGraphics=function(callbackFunction,parentElement) {
       }
 
       return parent;
-    }
+    };
 
     
     this.send=function(obj) {
         initEvents[initEvents.length]=obj;
-    }
+    };
     this.asyncInit=function (clientElements) {
         var thus=this;
-        this.mRenderTargets={}//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
-        this.mSpaceRoots={}//this will contain scene graph roots for each space
+        this.mUnsetParents={};
+        this.mRenderTargets={};//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
+        this.mSpaceRoots={};//this will contain scene graph roots for each space
         for (var i=0;i<clientElements.length;i++) {
           this.mRenderTargets[i]=RenderTarget(clientElements[i],
                                              parseInt(clientElements[i].width),
@@ -193,139 +217,140 @@ O3DGraphics=function(callbackFunction,parentElement) {
                      this.mNearPlane,this.mFarPlane)
                      ;*/
                                              
-        this.methodTable={}
+        this.methodTable={};
+        
         this.methodTable["Create"]=function(msg) {//this function creates a scene graph node
+            if (!msg.spaceid in this.mSpaceRoots) {
+                this.mSpaceRoots[msg.spaceid]=this.mRenderTargets[0].element.createPack().createObject('o3d.Transform');
+            }
+            var spaceRoot=this.mSpaceRoots[msg.spaceid];
+            var newObject;
+            this.mObjects[msg.id]=newObject=VWObject(msg.id,msg.spaceid,this.mRenderTargets[0].element);
+            newObject.mNode.parent=spaceRoot;
 
-            div.id=msg.id;
-            if (msg.parent) {
-                element=returnObjById(msg.parent);
-                if (element) {
-                    element.appendChild(div);
+            if (msg.id in this.mUnsetParents) {
+                var unset=this.mUnsetParents[msg.id];
+                var unsetl=unset.length;
+                for (var i=0;i<unsetl;++i) {
+                    unset[i].mNode.parent=newObject.mNode;
+                    delete unset[i].mUnsetParent;
+                }
+            }
+            this.moveTo(newObject,msg,spaceRoot);
+        };
+        this.moveTo=function(vwObject,msg,spaceRoot) {
+            if (msg.parent!==undefined) {
+                if (vwObject.mUnsetParent) {
+                    delete this.mUnsetParents[vwObject.mUnsetParent][msg.id];                    
+                    delete vwObject.mUnsetParent;
+                }
+                if (msg.parent) {
+                    if (msg.parent in this.mObjects) {
+                        vwObject.mNode.parent=this.mObject[msg.parent].mNode;
+                    }else {
+                        if (!(msg.parent in this.mUnsetParents)) {
+                            this.mUnsetParents[msg.parent]={};
+                        }
+                        this.mUnsetParents[msg.parent][msg.id]=newObject;
+                        vwObject.mUnsetParent=msg.parent;
+                        vwObject.mNode.parent=this.mSpaceRoots[vwObject.mSpaceID];
+                    }
                 }else {
-                    parentElement.appendChild(div);
+                    vwObject.mNode.parent=this.mSpaceRoot[vwObject.mSpaceID];
+                    //set parent transform
                 }
-            }else {
-                parentElement.appendChild(div);
             }
-            thus.methodTable["Move"](msg);
-        }
-        this.methodTable["Move"]=function(msg) {
-            element=returnObjById(msg.id);
-            if (msg.pos && msg.pos.length == 3) {
-                element.style.left=msg.pos[0]*10+"px";
-                element.style.top=msg.pos[1]*10+"px";
-                element.style.zIndex=msg.pos[2];
-                element.style.borderColor="rgb("+(msg.pos[2]*10)+","+(msg.pos[2]*10)+",124)";
+            if (msg.pos) {                
+                vwObject.mPos=msg.translate;
+                vwObject.mPosTime=msg.time;
             }
+            if (msg.vel)
+                vwObject.mVel=msg.velocity;
+            if (msg.orient) {
+                vwObject.mOrient=msg.orient;
+                vwObject.mOrientTime=msg.time;
+            }
+            if (msg.rotaxis)
+                vwObject.mRotAxis=msg.rotaxis;
+            if (msg.rotvel)
+                vwObject.mRotVel=msg.rotvel;
             if (msg.scale) {
-                var xscale = Math.sqrt(msg.scale[0]*msg.scale[0]+msg.scale[1]*msg.scale[1]);
-                var yscale = Math.sqrt(msg.scale[0]*msg.scale[0]+msg.scale[2]*msg.scale[2]);
-                element.style.width = (300*xscale)+"px";
-                element.style.height = (300*yscale)+"px";
+                vwObject.mScale=msg.scale;
+                vwObject.mScaleTime=msg.scale;
             }
-        }
+            updateTransformation(vwObject,newDate());            
+            //FIXME actually translate element
+        };
+        this.methodTable["Move"]=function(msg) {
+            var vwObject=this.mObjects[msg.id];
+            this.moveTo(vwObject,msg);
+        };
         this.methodTable["Destroy"]=function(msg) {
-            var div=returnObjById(msg.id);
-            if (div) {
-                div.parentNode.removeChild(div);        
-            }
-        }
-        var getOrCreateP=function(elementName) {
-            var q=returnObjById(elementName);        
-            if(q) {
-                
-            }else {
-                q=document.createElement("p");
-                q.id=elementName;
-            }
-            return q;
-        }
-        this.methodTable["MeshShaderUniform"]=function(msg) {
-            var div=returnObjById(msg.id);
-            if (div) {
-                var q=getOrCreateP("Uniform"+msg.name+msg.id);
-                q.innerHTML="Uniform "+msg.name+"="+msg.value;
-                div.appendChild(q);
-            }        
-        }
-        this.methodTable["Mesh"]=function(msg) {
-            var div=returnObjById(msg.id);
-            if (div) {
-                var q=getOrCreateP("Mesh"+msg.id);
-                q.innerHTML="Mesh "+msg.mesh;
-                div.appendChild(q);
-            }        
-        }
-        var destroyX=function(msg,X) {
-            var div=returnObjById(msg.id);
-            if (div) {
-                var q=returnObjById(X+msg.id);
-                if (q) {
-                    div.removeChild(q);
+            if (msg.id in this.mObjects) {
+                var vwObject=this.mObjects[msg.id];
+                var children=vwObject.mNode.children;
+                for (var i=0;i<children.length;++i) {
+                    var mat=children[i].getUpdatedWorldMatrix();
+                    if (!(msg.id in this.mUnsetParents)) {
+                        this.mUnsetParents[msg.id]={};
+                    }
+                    this.mUnsetParents[msg.id][children[i].mKataObject.mId]=children[i].mKataObject;
+                    children[i].mKataObject.mUnsetParent=msg.id;
+                    children[i].localTransformMatrix=mat;
+                    children[i].parent=this.mSpaceRoots[children[i].mKataObject.mSpaceId];
+                    children[i].getUpdatedWorldMatrix();
+                    //FIXME: update interpolation parameters with world coordinates
                 }
+                vwObject.mNode.parent=null;
+                vwObject.mPack.destroy();
+                delete this.mObjects[msg.id];
             }
-        }
+        };
+        this.methodTable["MeshShaderUniform"]=function(msg) {
+            //"Uniform "+msg.name+"="+msg.value;
+        };
+        this.methodTable["Mesh"]=function(msg) {
+            //q.innerHTML="Mesh "+msg.mesh;
+        };
         this.methodTable["DestroyMesh"]=function(msg) {
-            destroyX(msg,"Mesh");
-        }
+            //FIXMEdestroyX(msg,"Mesh");
+        };
         this.methodTable["Light"]=function(msg) {
-            var div=returnObjById(msg.id);
-            if (div) {
-                var q=getOrCreateP("Light"+msg.id);
-                q.innerHTML="Light "+msg.type;
-                div.appendChild(q);
-            }        
-        }
+            //q.innerHTML="Light "+msg.type;
+        };
         this.methodTable["DestroyLight"]=function(msg) {
-            destroyX(msg,"Light");
-        }
+            //destroyX(msg,"Light");
+        };
         
         this.methodTable["Camera"]=function(msg) {
-            var div=returnObjById(msg.id);
-            if (div) {
-                var q=getOrCreateP("Camera"+msg.id);
-                q.innerHTML="Camera "+msg.primary;
-                div.appendChild(q);
-            }        
-        }
+            //q.innerHTML="Camera "+msg.primary;
+        };
         this.methodTable["AttachCamera"]=function(msg) {
             if (msg.camid) {
-                var div=returnObjById(msg.id);
-                if (div) {
-                    var q=getOrCreateP(msg.texname+"CameraAttachment"+msg.id);
-                    q.innerHTML="Camera "+msg.camid+" attached to texture "+msg.texname;
-                    div.appendChild(q);
-                }
+                //var div=returnObjById(msg.id);
+                //if (div) {
+                    //var q=getOrCreateP(msg.texname+"CameraAttachment"+msg.id);
+                    //q.innerHTML="Camera "+msg.camid+" attached to texture "+msg.texname;
+                    //div.appendChild(q);
+                //}
             }else {
-                destroyX(msg,msg.texname+"CameraAttachment");
+                //destroyX(msg,msg.texname+"CameraAttachment");
             }
-        }
+        };
         this.methodTable["DestroyCamera"]=function(msg) {
-            destroyX(msg,"Camera");
-        }
+            //destroyX(msg,"Camera");
+        };
 
         this.methodTable["IFrame"]=function(msg) {
-
-            var div=returnObjById(msg.id);
-            if (div) {
-                var q=returnObjById("IFrame"+msg.id);        
-                if(q) {
-                    
-                }else {
-                    q=document.createElement("iframe");                
-                    q.id="IFrame"+msg.id;
-                }
-                q.setAttribute("src",msg.uri);
-                div.appendChild(q);
-            }        
-        }
+            /*UNIMPL*/
+        };
         this.methodTable["DestroyIFrame"]=function(msg) {
-            destroyX(msg,"IFrame");
-        }
+            //destroyX(msg,"IFrame");
+        };
         
         this.send=function(obj) {
             return this.methodTable[obj.msg](obj);
-        }
+        };
         this.destroy=function(){}
         for (var i=0;i<this.initEvents.length;++i) {
           this.send(this.initEvents[i]);
@@ -343,6 +368,6 @@ O3DGraphics=function(callbackFunction,parentElement) {
         o3djs.event.addEventListener(this.mClientElements[0],
                                      'wheel',
                                      function(e){thus.scrollMe(e);});
-    }
+    };
     o3djs.webgl.makeClients(function(clientElements){thus.asyncInit(clientElements);});
-}
+};
