@@ -40,8 +40,131 @@ o3djs.require('o3djs.pack');
 o3djs.require('o3djs.arcball');
 o3djs.require('o3djs.scene');
 
-var RenderTarget=function(element,width,height,fov,hither,yon) {
+function RenderTarget(element,width,height,fov,hither,yon) {
   return {mElement:element,mWidth:width,mHeight:height,mFOV:fov,mHither:hither,mYon:yon};
+};
+function LocationIdentityNow() {
+    return LocationIdentity(newDate());
+};
+function LocationIdentity(time){
+    return {
+      mScale:[1,1,1],
+      mScaleTime:time,
+      mPos:[0,0,0],
+      mPosTime:time,
+      mOrient:[1,0,0,0],
+      mOrientTime:time,
+      mVel:[0,0,0],
+      mRotAxis:[0,0,1],
+      mRotVel:0
+    };
+};
+///interpolates between 2 locations at a time probably between the two, otherwise the newer one is extrapolated
+var LocationInterpolate=(function(){
+    function interpolate3vec(a,adel,atime,b,bdel,btime,time) {
+      //FIXME  
+    }
+    function interpolateQuaternion(a,avel,aaxis,atime,b,bvel,baxis,btime,time) {
+        //FIXME
+    }
+    return function(location,prevLocation,time){
+        return {
+            mScale:interpolate3vec(location.mScale,[0,0,0],location.mScaleTime,
+                                   prevLocation.mScale,[0,0,0],prevLocation.mScaleTime,
+                                   time),
+            mScaleTime:time,
+            mPos:interpolate3vec(location.mPos,location.mVel,location.mPosTime,
+                                 prevLocation.mPos,prevLocation.mVel,prevLocation.mPosTime,time),
+            mPosTime:time,
+            mOrient:extrapolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,location.mOrientTime,
+                                          prevLocation.mOrient,prevLocation.mRotVel,prevLocation.mRotAxis,prevLocation.mOrientTime,
+                                          time),
+            mOrientTime:time,
+            mRotVel:location.mRotVel,
+            mRotAxis:location.mRotAxis,
+            mVel:location.mVel
+        };
+    };
+})();
+///Extrapolates a location to a future time so that it may be interpolated
+var LocationExtrapolate=function() {
+    function extrapolate3vec(a,adel,atime,btime){
+        //FIXME
+    }
+    function extrapolateQuaternion(a,avel,aaxis,atime,btime){
+        //FIXME
+    }
+    return function(location,time) {
+        return {
+            mScale:location.mScale,
+            mScaleTime:time,
+            mPos:extrapolate3vec(location.mPos,location.mVel,location.mPosTime,time),
+            mPosTime:time,
+            mOrient:extrapolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,location.mOrientTime,time),
+            mOrientTime:time,
+            mRotVel:location.mRotVel,
+            mRotAxis:location.mRotAxis,
+            mVel:location.mVel
+        };
+    }();
+};
+/**
+ * Takes a current and prev location samples and 
+ * returns a new location that has the previous location properties where the msg does not specify the values
+ * and uses the messages values where they are specified
+ *  then the currentLocation is updated with prevLocations values if the would otherwise be the same as curLocation
+ * @param msg the network message being received
+ * @param curLocation the currently known latest update
+ * @param prevLocation the update before the current update
+ * @returns a Location class with curLocation augmented with the msg fields that exist
+ */ 
+var LocationUpdate=function(msg,curLocation,prevLocation) {
+    if (!prevLocation)
+        prevLocation=curLocation;
+    var retval={
+      mScale:curLocation.mScale,
+      mScaleTime:curLocation.mScaleTime,
+      mPos:curLocation.mPos,  
+      mPosTime:curLocation.mPosTime,
+      mOrient:curLocation.mOrient,  
+      mOrientTime:curLocation.mOrientTime,
+      mVel:curLocation.mVel,
+      mRotAxis:curLocation.mRotAxis,
+      mRotVel:curLocation.mRotVel
+    };
+    if (msg.pos) {
+        retval.mPos=msg.pos;
+        retval.mPosTime=msg.time;
+    }else {
+        curLocation.mPos=prevLocation.mPos;
+        curLocation.mPosTime=prevLocation.mPosTime;
+    }
+    if (msg.vel) {
+        retval.mVel=msg.vel;
+    }else {
+        curLocation.mVel=prevLocation.mVel;
+    }
+    if (msg.orient) {
+        retval.mOrient=msg.orient;
+        retval.mOrientTime=msg.time;
+    }else {
+        curLocation.mOrient=prevLocation.mOrient;
+        curLocation.mOrientTime=prevLocation.mOrientTime;
+    }
+    if (msg.rotvel&&msg.rotaxis) {
+        retval.mRotAxis=msg.rotaxis;
+        retval.mRotVel=msg.rotvel;
+    }else {
+        curLocation.mRotAxis=prevLocation.mRotAxis;
+        curLocation.mRotVel=prevLocation.mRotVel;
+    }
+    if (msg.scale) {
+        retval.mScale=msg.scale;
+        retval.mScaleTime=msg.time;
+    }else {
+        curLocation.mScale=prevLocation.mScaleTime;
+        curLocation.mScaleTime=prevLocation.mScaleTime;
+    }
 };
 var VWObject=function(id,time,spaceid,element) {
     var pack=element.client.createPack();
@@ -51,6 +174,7 @@ var VWObject=function(id,time,spaceid,element) {
         mSpaceID:spaceid,
         mPack:pack,
         mNode:pack.createObject('o3d.Transform'),
+        mPrevScale:[1,1,1],
         mScale:[1,1,1],
         mOrient:[0,0,0,1],
         mPos:[0,0,0]
