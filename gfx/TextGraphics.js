@@ -53,7 +53,7 @@ TextGraphics=function(callbackFunction,parentElement) {
             element.style.borderColor="rgb("+(msg.pos[2]*10)+","+(msg.pos[2]*10)+",124)";
         }
         if (msg.scale) {
-            var xscale = Math.sqrt(msg.scale[0]*msg.scale[0]+msg.scale[2]*msg.scale[2]);
+            var xscale = Math.sqrt(msg.scale[0]*msg.scale[0]+msg.scale[1]*msg.scale[1]);
             var yscale = Math.sqrt(msg.scale[0]*msg.scale[0]+msg.scale[2]*msg.scale[2]);
             element.style.width = (300*xscale)+"px";
             element.style.height = (300*yscale)+"px";

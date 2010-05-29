@@ -55,7 +55,7 @@ O3DGraphics=function(callbackFunction,parentElement) {
     this.loadingElement = document.createElement("div");
     this.parentEl.appendChild(loadingElement);
     
-    this.sceneLoadedCallback = function(pack, parent, exception) {
+    this.sceneLoadedCallback = function(renderTarg, pack, parent, exception) {
         enableInput(true);
         if (exception) {
           alert("Could not load: " + path + "\n" + exception);
@@ -63,8 +63,11 @@ O3DGraphics=function(callbackFunction,parentElement) {
         } else {
           this.loadingElement.innerHTML = "loading finished.";
           // Generate draw elements and setup material draw lists.
-          o3djs.pack.preparePack(pack, g_viewInfo);
-          var bbox = o3djs.util.getBoundingBoxOfTree(g_client.root);
+          o3djs.pack.preparePack(pack, renderTarg.mViewInfo);
+          // FIXME: Why root?
+          var bbox = o3djs.util.getBoundingBoxOfTree(renderTarg.element.client.root);
+          // Aim camera at object?
+          /*
           g_camera.target = g_math.lerpVector(bbox.minExtent, bbox.maxExtent, 0.5);
           var diag = g_math.length(g_math.subVector(bbox.maxExtent,
                                                     bbox.minExtent));
@@ -74,8 +77,11 @@ O3DGraphics=function(callbackFunction,parentElement) {
           setClientSize();
           updateCamera();
           updateProjection();
+          */
 
           // Manually connect all the materials' lightWorldPos params to the context
+          // FIXME: What is this for?
+          /*
           var materials = pack.getObjectsByClassName('o3d.Material');
           for (var m = 0; m < materials.length; ++m) {
             var material = materials[m];
@@ -84,19 +90,18 @@ O3DGraphics=function(callbackFunction,parentElement) {
               param.bind(g_lightPosParam);
             }
           }
-
-          g_finished = true;  // for selenium
+          */
 
           // Comment out the next line to dump lots of info.
-          if (false) {
+          if (true) {
             o3djs.dump.dump('---dumping context---\n');
             o3djs.dump.dumpParamObject(context);
 
             o3djs.dump.dump('---dumping root---\n');
-            o3djs.dump.dumpTransformTree(g_client.root);
+            o3djs.dump.dumpTransformTree(client.root);
 
             o3djs.dump.dump('---dumping render root---\n');
-            o3djs.dump.dumpRenderNodeTree(g_client.renderGraphRoot);
+            o3djs.dump.dumpRenderNodeTree(client.renderGraphRoot);
 
             o3djs.dump.dump('---dump g_pack shapes---\n');
             var shapes = pack.getObjectsByClassName('o3d.Shape');
@@ -130,17 +135,23 @@ O3DGraphics=function(callbackFunction,parentElement) {
         }
     }
     this.loadScene = function(context, path, mat, par) {
-      g_pack = g_client.createPack();
+      // FIXME: clientElements[0]?
+      var renderTarg = this.mRenderTargets[0];
+      var pack = renderTarg.element.client.createPack();
 
       // Create a new transform for the loaded file
-      var parent = g_pack.createObject('Transform');
-      parent.parent = par || g_client.root;
+      var parent = pack.createObject('Transform');
+      parent.parent = par || client.root;
       parent.localMatrix = mat || parent.localMatrix;
       if (path != null) {
         this.loadingElement.innerHTML = "Loading: " + path;
         enableInput(false);
         try {
-          o3djs.scene.loadScene(g_client, g_pack, parent, path, callback);
+          var thus = this;
+          o3djs.scene.loadScene(renderTarg.element.client, pack, parent, path,
+            function(p, par, exc) {
+              thus.sceneLoadedCallback.apply(this, renderTarg, p, par, exc);
+            });
         } catch (e) {
           enableInput(true);
           this.loadingElement.innerHTML = "loading failed : " + e;
@@ -158,7 +169,6 @@ O3DGraphics=function(callbackFunction,parentElement) {
         var thus=this;
         this.mRenderTargets={}//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
         this.mSpaceRoots={}//this will contain scene graph roots for each space
-        
         for (var i=0;i<clientElements.length;i++) {
           this.mRenderTargets[i]=RenderTarget(clientElements[i],
                                              parseInt(clientElements[i].width),
@@ -171,7 +181,7 @@ O3DGraphics=function(callbackFunction,parentElement) {
                                                                 clientElements[0].root,
                                                                 clientElements[0].renderGraphRoot);
            }else {
-             th8is.mRenderTargets[i].mViewInfo = o3djs.rendergraph.createExtraView(this.mRenderTargets[0].mViewInfo,
+             this.mRenderTargets[i].mViewInfo = o3djs.rendergraph.createExtraView(this.mRenderTargets[0].mViewInfo,
                                                                 clientElements[i].root,//FIXME: not sure if this should be the canonical view or the secondary views
                                                                 clientElements[i].renderGraphRoot);           
            }
