@@ -353,6 +353,10 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, lightPosParam, pac
         // Generate draw elements and setup material draw lists.
         o3djs.pack.preparePack(pack, renderTarg.mViewInfo);
 
+        var bbox = o3djs.util.getBoundingBoxOfTree(parent);
+        var diag = o3djs.math.length(o3djs.math.subVector(bbox.maxExtent,
+                                                          bbox.minExtent));
+        console.log("Bounding Box of "+this.mMeshURI, bbox, diag);
         // FIXME: lightPosParam
         // Manually connect all the materials' lightWorldPos params to the context
         var materials = pack.getObjectsByClassName('o3d.Material');
@@ -418,13 +422,18 @@ VWObject.prototype.createMesh = function(renderTarg, lightPosParam, path) {
     this.mMeshURI = path;
     var thus = this;
     try {
-        o3djs.scene.loadScene(renderTarg.mElement.client, this.mPack, this.mNode, path,
-                              function(p, par, exc) {
-                                  if (thus.mMeshURI == path) {
-                                      thus.mMeshPack = p;
-                                      thus.sceneLoadedCallback(renderTarg, lightPosParam, p, par, exc);
-                                  }
-                              });
+        o3djs.scene.loadScene(
+            renderTarg.mElement.client,
+            this.mPack, this.mNode, path,
+            function(p, par, exc) {
+                if (thus.mMeshURI == path) {
+                    thus.mMeshPack = p;
+                    thus.sceneLoadedCallback(
+                        renderTarg, lightPosParam,
+                        p, par, exc);
+                    par.parent = this.mNode;
+                }
+            });
     } catch (e) {
         console.log("loading failed : ",e);
     }
@@ -537,7 +546,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRoot) {
         }
         if (msg.parent) {
             if (msg.parent in this.mObjects) {
-                vwObject.mNode.parent=this.mObject[msg.parent].mNode;
+                vwObject.mNode.parent=this.mObjects[msg.parent].mNode;
             }else {
                 if (!(msg.parent in this.mUnsetParents)) {
                     this.mUnsetParents[msg.parent]={};
@@ -547,7 +556,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRoot) {
                 vwObject.mNode.parent=this.mSpaceRoots[vwObject.mSpaceID];
             }
         }else {
-            vwObject.mNode.parent=this.mSpaceRoot[vwObject.mSpaceID];
+            vwObject.mNode.parent=this.mSpaceRoots[vwObject.mSpaceID];
             //set parent transform
         }
     }
@@ -602,7 +611,6 @@ O3DGraphics.prototype.methodTable["MeshShaderUniform"]=function(msg) {
 };
 O3DGraphics.prototype.methodTable["Mesh"]=function(msg) {
     //q.innerHTML="Mesh "+msg.mesh;
-    console.log(this.mRenderTargets[0].mElement);
     if (msg.mesh && msg.id in this.mObjects) {
         var vwObject=this.mObjects[msg.id];
         vwObject.createMesh(this.mRenderTargets[0], this.lightPosParam, msg.mesh, vwObject);
