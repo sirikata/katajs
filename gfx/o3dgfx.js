@@ -282,14 +282,14 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
     this.detachRenderTarget();
     this.mRenderTarg = renderTarg;
     renderTarg.mCamera = this;
-    renderTarg.mViewInfo.treeRoot = renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID];
+    renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= renderTarg.mViewInfo.treeRoot;
     renderTarg.mO3DGraphics.addObjectUpdate(this);
 }
 VWObject.prototype.detachRenderTarget = function() {
     if (this.mRenderTarg) {
         renderTarg.mO3DGraphics.removeObjectUpdate(this);
         this.mRenderTarg.mCamera = null;
-        this.mRenderTarg.mViewInfo.treeRoot = this.mRenderTarg.mEmptyRoot;
+        renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= null;
         delete this.mRenderTarg;
     }
 }
@@ -688,7 +688,7 @@ O3DGraphics.prototype.drag = function(e) {
     var m = root.localMatrix;
     o3djs.math.matrix4.setUpper3x3(m, this.thisRot);
     root.localMatrix = m;
-    this.updateCamera();
+    this.mRenderTargets[0].mCamera.updateCamera();
   }
 }
 
@@ -704,6 +704,11 @@ VWObject.prototype.updateCamera = function() {
   var mat = o3djs.quaternions.quaternionToRotation(this.mOrient);
   o3djs.math.matrix4.setTranslation(mat, this.mPos);
   this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.matrix4.inverse(mat);
+/*
+  this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.matrix4.lookAt([0, 1, 5],  // eye
+                                            [0, 0, 0],  // target
+                                            [0, 1, 0]); // up
+*/
   this.updateDefault();
 }
 
