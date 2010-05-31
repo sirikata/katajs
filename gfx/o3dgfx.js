@@ -454,9 +454,8 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
             var mainPack = clientElements[0].client.createPack();
             this.mRenderTargets[0].mViewInfo = o3djs.rendergraph.createBasicView(
                 mainPack,
-                clientElements[0].root,
-                clientElements[0].renderGraphRoot,
-                [1,0,0,1]);
+                clientElements[0].client.root,
+                clientElements[0].client.renderGraphRoot);
             var paramObject = mainPack.createObject('ParamObject');
             this.lightPosParam = paramObject.createParam('lightWorldPos', 'ParamFloat3');
         }else {
