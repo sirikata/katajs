@@ -267,6 +267,10 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         this.sendToSimulation({msg:"Camera",
                                id:this.mID
                               });
+        this.sendToSimulation({msg:"AttachCamera",
+                               id:this.mID,
+                               target:0
+                              });
     };
     Sirikata.ProxyObject.prototype._setLocation = function(newdata) {
         var oloc = new Sirikata.Protocol.ObjLoc;
