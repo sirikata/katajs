@@ -59,24 +59,94 @@ function LocationIdentity(time){
       mRotVel:0
     };
 };
+function deltaTime(newTime,oldTime) {
+    return (curtime.getTime()-atime.getTime())*.001;
+}
+function _helperLocationExtrapolate3vec(a,adel,deltaTime){
+    return [a[0]+adel[0]*deltaTime,
+            a[1]+adel[1]*deltaTime,
+            a[2]+adel[2]*deltaTime];
+}
+function _helperQuatFromAxisAngle(aaxis,aangle) {
+    var sinHalf=Math.sin(aangle/2.0);
+    var cosHalf=Math.cos(aangle/2.0);
+    return [sinHalf*aaxis[0],sinHalf*aaxis[1],sinHalf*aaxis[2],cosHalf];
+}
+
+/**
+ * Multiplies two quaternions.
+ * @param {!o3djs.quaternions.Quaternion} a Operand quaternion.
+ * @param {!o3djs.quaternions.Quaternion} b Operand quaternion.
+ * @return {!o3djs.quaternions.Quaternion} The quaternion product a * b.
+ */
+function _helperLocationExtrapolateQuaternion(a,avel,aaxis,deltaTime){
+    var aangle=avel*deltaTime;
+    var b=_helperQuatFromAxisAngle(aaxis,aangle);
+    var aX = a[0];
+    var aY = a[1];
+    var aZ = a[2];
+    var aW = a[3];
+    var bX = b[0];
+    var bY = b[1];
+    var bZ = b[2];
+    var bW = b[3];
+
+    return [
+        aW * bX + aX * bW + aY * bZ - aZ * bY,
+        aW * bY + aY * bW + aZ * bX - aX * bZ,
+        aW * bZ + aZ * bW + aX * bY - aY * bX,
+        aW * bW - aX * bX - aY * bY - aZ * bZ];
+}
+function _helperLocationInterpolate3vec(a,adel,atime,b,bdel,btime,curtime) {
+    var secondsPassed=deltaTime(curtime,atime);
+    if (secondsPassed>0) {
+        return _helperLocationExtrapolate3vec(a,adel,deltaTime);
+    }
+    var sampleDelta=deltaTime(atime,btime);
+    secondsPassed+=sampleDelta;
+    if (secondsPassed<0) {
+        return b;
+    }
+    var interp=secondsPassed/sampleDelta;
+    var ointerp=1.0-interp;
+    return [interp*a[0]+ointerp*b[0],
+            interp*a[1]+ointerp*b[1],
+            interp*a[2]+ointerp*b[2]];
+}
+function _helperLocationInterpolateQuaternion(a,avel,aaxis,atime,b,bvel,baxis,btime,curtime) {
+    var secondsPassed=deltaTime(curtime,atime);
+    if (secondsPassed>0) {
+        return _helperLocationExtrapolateQuaternion(a,avel,aaxis,deltaTime);
+    }
+    var sampleDelta=deltaTime(atime,btime);
+    secondsPassed+=sampleDelta;
+    if (secondsPassed<0) {
+        return b;
+    }
+    var interp=secondsPassed/sampleDelta;
+    var ointerp=1.0-interp;
+    var x=interp*a[0]+ointerp*b[0];
+    var y=interp*a[1]+ointerp*b[1];
+    var z=interp*a[2]+ointerp*b[2];
+    var w=interp*a[3]+ointer*b[3];
+    var len=Math.sqrt(w*w+x*x+y*y+z*z);
+    if (len<1.0e-20)
+        return [x,y,z,w];
+    return [x/len,y/len,z/len,w/len];
+}
+
 ///interpolates between 2 locations at a time probably between the two, otherwise the newer one is extrapolated
 var LocationInterpolate=(function(){
-    function interpolate3vec(a,adel,atime,b,bdel,btime,time) {
-      //FIXME  
-    }
-    function interpolateQuaternion(a,avel,aaxis,atime,b,bvel,baxis,btime,time) {
-        //FIXME
-    }
     return function(location,prevLocation,time){
         return {
-            mScale:interpolate3vec(location.mScale,[0,0,0],location.mScaleTime,
+            mScale:_helperLocationInterpolate3vec(location.mScale,[0,0,0],location.mScaleTime,
                                    prevLocation.mScale,[0,0,0],prevLocation.mScaleTime,
                                    time),
             mScaleTime:time,
-            mPos:interpolate3vec(location.mPos,location.mVel,location.mPosTime,
+            mPos:_helperLocationInterpolate3vec(location.mPos,location.mVel,location.mPosTime,
                                  prevLocation.mPos,prevLocation.mVel,prevLocation.mPosTime,time),
             mPosTime:time,
-            mOrient:extrapolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,location.mOrientTime,
+            mOrient:_helperLocationInterpolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,location.mOrientTime,
                                           prevLocation.mOrient,prevLocation.mRotVel,prevLocation.mRotAxis,prevLocation.mOrientTime,
                                           time),
             mOrientTime:time,
@@ -88,19 +158,13 @@ var LocationInterpolate=(function(){
 })();
 ///Extrapolates a location to a future time so that it may be interpolated
 var LocationExtrapolate=function() {
-    function extrapolate3vec(a,adel,atime,btime){
-        //FIXME
-    }
-    function extrapolateQuaternion(a,avel,aaxis,atime,btime){
-        //FIXME
-    }
     return function(location,time) {
         return {
             mScale:location.mScale,
             mScaleTime:time,
-            mPos:extrapolate3vec(location.mPos,location.mVel,location.mPosTime,time),
+            mPos:_helperLocationExtrapolate3vec(location.mPos,location.mVel,deltaTime(time,location.mPosTime)),
             mPosTime:time,
-            mOrient:extrapolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,location.mOrientTime,time),
+            mOrient:_helperLocationExtrapolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,deltaTime(time,location.mOrientTime)),
             mOrientTime:time,
             mRotVel:location.mRotVel,
             mRotAxis:location.mRotAxis,
@@ -187,7 +251,7 @@ var updateTransformation=function(vwObject,date) {
     //FIXME need to interpolate
     vwObject.mNode.scale(vwObject.mScale[0],vwObject.mScale[1],vwObject.mScale[2]);
     vwObject.mNode.translate(vwObject.mPos[0],vwObject.mPos[1],vwObject.mPos[2]);
-    vwObject.mNode.quaternionRotate([vwObject.mOrient[1],vwObject.mOrient[2],vwObject.mOrient[3],vwObject.mOrient[0]]);
+    vwObject.mNode.quaternionRotate(vwObject.mOrient);
     
 };
 /**
