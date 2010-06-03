@@ -1,0 +1,75 @@
+<!-- katajs Javascript Utilities
+ test.html
+
+ Copyright (c) 2010, Patrick Reiter Horn
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+ * Neither the name of katajs nor the names of its contributors may
+   be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kata Network Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../externals/o3djs/base.js"></script>
+    <script type="text/javascript" src="../externals/o3d-webgl/base.js"></script>
+    <script type="text/javascript" src="o3dgfx.js"></script>
+    <script type="text/javascript">
+      documentLoaded=function() {
+         var gfx=new O3DGraphics(function(obj){},document.getElementById("container"));
+         gfx.send({msg:"Create",id:"cam",spaceid:"A",pos:[100,200,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Camera",id:"cam"});
+         gfx.send({msg:"AttachCamera",id:"cam",target:0});
+         gfx.send({msg:"Create",id:"teapot0",spaceid:"A",pos:[300,200,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot0",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot1",spaceid:"A",pos:[-100,200,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot1",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot2",spaceid:"A",pos:[100,200,0],orient:[0,.5,0,.86],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot2",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot3",spaceid:"A",pos:[100,200,800],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot3",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot4",spaceid:"A",pos:[100,0,400],orient:[0,0,0,1],scale:[.1,.5,.1]});
+         gfx.send({msg:"Mesh",id:"teapot4",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot5",spaceid:"A",pos:[100,-600,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot5",mesh:"teapot"});
+
+      }
+    </script>
+
+  </head>
+  
+  <body onload="documentLoaded();">
+    <h1>Under construction</h1>
+	<div style="width:900px;margin:auto;position:relative" id="container">
+    </div>
+
+  </body>
+</html>
