@@ -41,45 +41,80 @@ o3djs.require('o3djs.arcball');
 o3djs.require('o3djs.dump');
 o3djs.require('o3djs.scene');
 
+
+function SpaceDrawList(o3dgfx, element) {
+    this.mElement = element;
+    this.mPack = this.mElement.client.createPack();
+    this.mRootNode = this.mPack.createObject('o3d.Transform');
+    this.mDefaultRenderView = new RenderTarget(o3dgfx, this);
+    this.mDefaultRenderView.createBasicView([0,0,1,1], [0,0,1,1], this.mPack, this.mRootNode);
+    this.initializeDrawList(this.mDefaultRenderView.mViewInfo);
+/*
+    this.mPack = element.client.createPack();
+    this.mPerformanceDrawList = this.mPack.createObject('DrawList');
+    this.mZOrderedDrawList = this.mPack.createObject('DrawList');
+*/
+}
+SpaceDrawList.prototype.initializeDrawList = function(viewInfo) {
+    this.mPack = viewInfo.pack;
+    this.mPerformanceDrawList = viewInfo.performanceDrawList;
+    this.mZOrderedDrawList = viewInfo.zOrderedDrawList;
+    var paramObject = this.mPack.createObject('ParamObject');
+    this.mLightPosParam = paramObject.createParam('lightWorldPos', 'ParamFloat3');
+}
+
 /**
  * @constructor
  * @param {!O3DGraphics} o3dgfx The render system for which the render target is created
- * @param {!Element} element html element/context for which to instantiate the RenderTarget
- * @param {number} width how many pixels wide to make this (for aspect ratio calcs)
- * @param {number} height how many pixels tall to make this (for aspect ratio calcs)
+ * @param {!o3d.node} spaceRoot 
  * Creates a render target for a view info to be stored within
  */
-function RenderTarget(o3dgfx,element,width,height) {
+function RenderTarget(o3dgfx,spaceRoot) {
 /**
  * The render system for which the render target is created
  * @type {!O3DGraphics}
  */
   this.mO3DGraphics = o3dgfx;
-/**
- * html element/context for which to instantiate the RenderTarget
- * @type {!Element} 
- */
-  this.mElement = element;
-/**
- * how many pixels wide to make this (for aspect ratio calcs)
- * @type {number}
- */
-  this.mWidth = width;
-/**
- * how many pixels tall to make this (for aspect ratio calcs)
- * @type {number}
- */
-  this.mHeight = height;
-/**
- * The vwObject holding the camera that is attached to this RenderTarget
- * @type {!VWObject}
- */
+  this.mSpaceRoot = spaceRoot;
+  console.log(spaceRoot.mElement);
+  this.mElement = spaceRoot.mElement;
+  this.mWidth = 0 + this.mElement.width;
+  this.mHeight = 0 + this.mElement.height;
   this.mCamera = null;
 /**
  * The ViewInfo associated with the o3d createView made for this render target
  * @type {!o3d.rendergraph.ViewInfo}
  */
   this.mViewInfo = null;
+};
+
+RenderTarget.prototype.createBasicView = function(color, viewRect) {
+
+    var rootNode = this.mSpaceRoot.mRootNode;
+    this.mViewInfo = o3djs.rendergraph.createBasicView(
+        this.mSpaceRoot.mPack,
+        rootNode,
+        this.mElement.client.renderGraphRoot,
+        color,
+        0,
+        viewRect);
+    return this.mViewInfo;
+};
+
+
+RenderTarget.prototype.createExtraView = function(color, viewRect) {
+    var spaceDrawList = this.mSpaceRoot;
+    var rootNode = spaceDrawList.mPack.createObject('o3d.Transform');
+    this.mViewInfo = o3djs.rendergraph.createView(
+        spaceDrawList.mPack,
+        rootNode,
+        this.mElement.client.renderGraphRoot,
+        color,
+        1,
+        viewRect,
+        spaceDrawList.mPerformanceDrawList,
+        spaceDrawList.mZOrderedDrawList);
+    return spaceDrawList;
 };
 
 /**
@@ -93,7 +128,63 @@ RenderTarget.prototype.updateProjection = function() {
       this.mCamera.mHither, this.mCamera.mYon);
   }
 }
+/*
+function SpaceDrawList(o3dgfx, element) {
+    this.mElement = element;
+    this.mPack = this.mElement.client.createPack();
+    this.mRootNode = this.mPack.createObject('o3d.Transform');
+    this.mDefaultRenderView = new RenderTarget(o3dgfx, this);
+    this.mDefaultRenderView.createBasicView([0,0,1,1], [0,0,1,1]);
+    this.initializeDrawList(this.mDefaultRenderView.mViewInfo);
+}
+SpaceDrawList.prototype.initializeDrawList = function(viewInfo) {
+    this.mPack = viewInfo.pack;
+    this.mPerformanceDrawList = viewInfo.performanceDrawList;
+    this.mZOrderedDrawList = viewInfo.zOrderedDrawList;
+    var paramObject = this.mPack.createObject('ParamObject');
+    this.mLightPosParam = paramObject.createParam('lightWorldPos', 'ParamFloat3');
+}
 
+function RenderTarget(o3dgfx,spaceRoot) {
+  this.mO3DGraphics = o3dgfx;
+  this.mSpaceRoot = spaceRoot;
+  console.log(spaceRoot.mElement);
+  this.mElement = spaceRoot.mElement;
+  this.mWidth = 0 + this.mElement.width;
+  this.mHeight = 0 + this.mElement.height;
+  this.mCamera = null;
+  this.mViewInfo = null;
+};
+
+RenderTarget.prototype.createBasicView = function(color, viewRect) {
+
+    var rootNode = this.mSpaceRoot.mPack.createObject('o3d.Transform');
+    rootNode.parent = this.mSpaceRoot.mRootNode;
+    this.mViewInfo = o3djs.rendergraph.createBasicView(
+        this.mSpaceRoot.mPack,
+        rootNode,
+        this.mElement.client.renderGraphRoot,
+        color,
+        0,
+        viewRect);
+    return this.mViewInfo;
+}
+
+RenderTarget.prototype.createExtraView = function(color, viewRect) {
+    var rootnode = this.mSpaceRoot.mPack.createObject('o3d.Transform');
+    rootnode.parent = this.mSpaceRoot.mRootNode;
+    this.mViewInfo = o3djs.rendergraph.createView(
+        this.mSpaceRoot.mPack,
+        rootnode,
+        this.mElement.client.renderGraphRoot,
+        color,
+        1,
+        viewRect,
+        this.mSpaceRoot.mPerformanceDrawList,
+        this.mSpaceRoot.mZOrderedDrawList);
+    return this.mViewInfo;
+};
+ */
 
 /**
  * Returns the identity location updated at the current time
@@ -422,7 +513,8 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
         return false;
     }
     this.stationary=returnFalse;
-    renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= renderTarg.mViewInfo.treeRoot;
+    this.mRenderTarg.mSpaceRoot = renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID];
+    renderTarg.mSpaceRoot.mRootNode.parent = renderTarg.mViewInfo.treeRoot;
     renderTarg.mO3DGraphics.addObjectUpdate(this);
 };
 
@@ -435,7 +527,8 @@ VWObject.prototype.stationary = function (curTime) {
 VWObject.prototype.detachRenderTarget = function(curTime) {
     if (this.mRenderTarg) {
         this.mRenderTarg.mCamera = null;
-        this.mRenderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= null;
+        this.mRenderTarg.mSpaceRoot.mRootNode.parent= null;
+        this.mRenderTarg.mSpaceRoot = null;
         delete this.mRenderTarg;
         this.stationary=VWObject.prototype.stationary;
         if (this.stationary(curTime))
@@ -462,6 +555,7 @@ var O3DGraphics=function(callbackFunction,parentElement) {
     this.parentEl=parentElement;
     this.initEvents=[];
     this.mObjects={};
+    this.mClientElement = null;
 
     this.mObjectUpdates = {}; // map id -> function
 
@@ -514,47 +608,6 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, lightPosParam, pac
                 param.bind(lightPosParam);
             }
         }
-
-        // Comment out the next line to dump lots of info.
-        if (false) {
-            o3djs.dump.dump('---dumping context---\n');
-            //o3djs.dump.dumpParamObject(renderTarg.mElement);
-
-            o3djs.dump.dump('---dumping root---\n');
-            try {o3djs.dump.dumpTransformTree(renderTarg.mElement.client.root);}catch(e){}
-
-            o3djs.dump.dump('---dumping render root---\n');
-            try {o3djs.dump.dumpRenderNodeTree(renderTarg.mElement.client.renderGraphRoot);}catch(e){}
-
-            o3djs.dump.dump('---dump g_pack shapes---\n');
-            var shapes = pack.getObjectsByClassName('o3d.Shape');
-            for (var t = 0; t < shapes.length; t++) {
-                o3djs.dump.dumpShape(shapes[t]);
-            }
-
-            o3djs.dump.dump('---dump g_pack materials---\n');
-            var materials = pack.getObjectsByClassName('o3d.Material');
-            for (var t = 0; t < materials.length; t++) {
-                o3djs.dump.dump (
-                    '  ' + t + ' : ' + materials[t].className +
-                        ' : "' + materials[t].name + '"\n');
-                o3djs.dump.dumpParams(materials[t], '    ');
-            }
-
-            o3djs.dump.dump('---dump g_pack textures---\n');
-            var textures = pack.getObjectsByClassName('o3d.Texture');
-            for (var t = 0; t < textures.length; t++) {
-                o3djs.dump.dumpTexture(textures[t]);
-            }
-
-            o3djs.dump.dump('---dump g_pack effects---\n');
-            var effects = pack.getObjectsByClassName('o3d.Effect');
-            for (var t = 0; t < effects.length; t++) {
-                o3djs.dump.dump ('  ' + t + ' : ' + effects[t].className +
-                                 ' : "' + effects[t].name + '"\n');
-                o3djs.dump.dumpParams(effects[t], '    ');
-            }
-        }
     }
 };
 
@@ -596,43 +649,10 @@ VWObject.prototype.destroyMesh = function() {
 O3DGraphics.prototype.asyncInit=function (clientElements) {
     var thus=this;
     this.mUnsetParents={};
+    this.mClientElement = clientElements[0];
     this.mRenderTargets=[];//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
     this.mSpaceRoots={};//this will contain scene graph roots for each space
-    var viewWidth=1.0/clientElements.length;
-    for (var i=0;i<clientElements.length;i++) {
-        this.mRenderTargets[i]=new RenderTarget(
-            this,
-            clientElements[i],
-            parseInt(clientElements[i].width),
-            parseInt(clientElements[i].height));
-        var mainPack = clientElements[0].client.createPack();
-        if(i==0) {
-            
-            this.mRenderTargets[0].mViewInfo = o3djs.rendergraph.createBasicView(
-                mainPack,
-                clientElements[0].client.root,
-                clientElements[0].client.renderGraphRoot,[0.7, 0.2, 0.2, 1],
-                0,
-                [0, 0, viewWidth, 1]);
-            var paramObject = mainPack.createObject('ParamObject');
-            this.lightPosParam = paramObject.createParam('lightWorldPos', 'ParamFloat3');
-        }else if(true){
-            //var mainPack = clientElements[i].client.createPack();
-/*
-            this.mRenderTargets[i].mViewInfo = o3djs.rendergraph.createBasicView(
-                mainPack,
-                clientElements[0].client.root,
-                clientElements[0].client.renderGraphRoot,[0.7, 0.7, 0.2, 1],
-                1,
-                [viewWidth*i, 0, viewWidth, 1],clientElements[0].client.performanceDrawList,clientElements[0].client.zOrderedDrawList);
-*/
-            this.mRenderTargets[i].mViewInfo = o3djs.rendergraph.createExtraView(
-                this.mRenderTargets[0].mViewInfo,[viewWidth*i, 0, viewWidth, 1],[0.2, 0.2, 0.2, 1],
-                i);           
-
-        }
-        this.mRenderTargets[i].updateProjection();
-    }
+    this.mViewWidth=1.0/clientElements.length;
 
     this.send=function(obj) {
         return this.methodTable[obj.msg].call(this, obj);
@@ -681,12 +701,12 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
         s="";
     }
     if (!(s in this.mSpaceRoots)) {
-        this.mSpaceRoots[s]=this.mRenderTargets[0].mElement.client.createPack().createObject('o3d.Transform');
+        this.mSpaceRoots[s] = new SpaceDrawList(this, this.mClientElement);
     }
     var spaceRoot=this.mSpaceRoots[msg.spaceid];
     var newObject;
-    this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,this.mRenderTargets[0].mElement);
-    newObject.mNode.parent=spaceRoot;
+    this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,spaceRoot.mElement);
+    newObject.mNode.parent=spaceRoot.mRootNode;
 
     if (msg.id in this.mUnsetParents) {
         var unset=this.mUnsetParents[msg.id];
@@ -696,9 +716,9 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
             delete unset[i].mUnsetParent;
         }
     }
-    this.moveTo(newObject,msg,spaceRoot);
+    this.moveTo(newObject,msg,spaceRoot.mRootNode);
 };
-O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRoot) {
+O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
     if (msg.parent!==undefined) {
         if (vwObject.mUnsetParent) {
             delete this.mUnsetParents[vwObject.mUnsetParent][msg.id];
@@ -713,10 +733,10 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRoot) {
                 }
                 this.mUnsetParents[msg.parent][msg.id]=newObject;
                 vwObject.mUnsetParent=msg.parent;
-                vwObject.mNode.parent=this.mSpaceRoots[vwObject.mSpaceID];
+                vwObject.mNode.parent=spaceRoot;
             }
         }else {
-            vwObject.mNode.parent=this.mSpaceRoots[vwObject.mSpaceID];
+            vwObject.mNode.parent=spaceRoot;
             //set parent transform
         }
     }
@@ -757,7 +777,7 @@ O3DGraphics.prototype.methodTable["Destroy"]=function(msg) {
             this.mUnsetParents[msg.id][children[i].mKataObject.mId]=children[i].mKataObject;
             children[i].mKataObject.mUnsetParent=msg.id;
             children[i].localTransformMatrix=mat;
-            children[i].parent=this.mSpaceRoots[children[i].mKataObject.mSpaceId];
+            children[i].parent=this.mSpaceRoots[children[i].mKataObject.mSpaceId].mRootNode;
             children[i].getUpdatedWorldMatrix();
             //FIXME: update interpolation parameters with world coordinates
         }
@@ -799,11 +819,30 @@ O3DGraphics.prototype.methodTable["Camera"]=function(msg) {
 };
 O3DGraphics.prototype.methodTable["AttachCamera"]=function(msg) {
     var renderTarg;
-    if (msg.target !== undefined) {
-        renderTarg = this.mRenderTargets[msg.target];
-    }
-    if (msg.id in this.mObjects) {
+    if (msg.id in this.mObjects && msg.target !== undefined) {
         var cam = this.mObjects[msg.id];
+        var spaceView;
+        console.log(cam.mSpaceID);
+        if (cam.mSpaceID in this.mSpaceRoots) {
+            spaceView = this.mSpaceRoots[cam.mSpaceID];
+        } else {
+            spaceView = new SpaceDrawList(this, this.mClientElement);
+            this.mSpaceRoots[cam.MSpaceID] = spaceView;
+        }
+
+        renderTarg = this.mRenderTargets[msg.target];
+        if (!renderTarg) {
+            renderTarg = new RenderTarget(
+                this,
+                spaceView);
+            this.mRenderTargets[msg.target] = renderTarg;
+        }
+
+        renderTarg.createExtraView(
+            [0.7, 0.7, 0.2*msg.target, 1],
+            [this.mViewWidth*(0+msg.target), 0, this.mViewWidth, 1]
+        );
+        renderTarg.updateProjection();
         if (renderTarg) {
             cam.attachRenderTarget(renderTarg);
         }
@@ -844,7 +883,7 @@ O3DGraphics.prototype.drag = function(e) {
     var rot_mat = o3djs.quaternions.quaternionToRotation(rotationQuat);
     this.thisRot = o3djs.math.matrix4.mul(this.lastRot, rot_mat);
 
-    var root = this.mRenderTargets[0].mElement.client.root;
+    var root = this.mRenderTargets[0].mSpaceRoot.mRootNode;
     var m = root.localMatrix;
     o3djs.math.matrix4.setUpper3x3(m, this.thisRot);
     root.localMatrix = m;

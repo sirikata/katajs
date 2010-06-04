@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript">
       documentLoaded=function() {
          var gfx=new O3DGraphics(function(obj){},document.getElementById("container"));
-         gfx.send({msg:"Create",id:"cam",spaceid:"A",pos:[1,2,4],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"cam",spaceid:"B",pos:[1,2,4],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Camera",id:"cam"});
          gfx.send({msg:"AttachCamera",id:"cam",target:0});
 
@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          gfx.send({msg:"Create",id:"teapot1",spaceid:"A",pos:[-1,2,4],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot1",mesh:"teapot"});
 
-         gfx.send({msg:"Create",id:"teapot2",spaceid:"A",pos:[1,2,0],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"teapot2",spaceid:"B",pos:[1,2,0],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot2",mesh:"teapot"});
 
          gfx.send({msg:"Create",id:"teapot3",spaceid:"A",pos:[1,2,8],orient:[0,0,0,1],scale:[1,1,1]});
