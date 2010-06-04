@@ -287,9 +287,9 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
 }
 VWObject.prototype.detachRenderTarget = function() {
     if (this.mRenderTarg) {
-        renderTarg.mO3DGraphics.removeObjectUpdate(this);
+        this.mRenderTarg.mO3DGraphics.removeObjectUpdate(this);
         this.mRenderTarg.mCamera = null;
-        renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= null;
+        this.mRenderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= null;
         delete this.mRenderTarg;
     }
 }
@@ -452,28 +452,39 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     this.mUnsetParents={};
     this.mRenderTargets=[];//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
     this.mSpaceRoots={};//this will contain scene graph roots for each space
-
+    var viewWidth=1.0/clientElements.length;
     for (var i=0;i<clientElements.length;i++) {
         this.mRenderTargets[i]=new RenderTarget(
             this,
             clientElements[i],
             parseInt(clientElements[i].width),
             parseInt(clientElements[i].height));
+        var mainPack = clientElements[0].client.createPack();
         if(i==0) {
-            var mainPack = clientElements[0].client.createPack();
+            
             this.mRenderTargets[0].mViewInfo = o3djs.rendergraph.createBasicView(
                 mainPack,
                 clientElements[0].client.root,
-                clientElements[0].client.renderGraphRoot);
+                clientElements[0].client.renderGraphRoot,[0.7, 0.2, 0.2, 1],
+                0,
+                [0, 0, viewWidth, 1]);
             var paramObject = mainPack.createObject('ParamObject');
             this.lightPosParam = paramObject.createParam('lightWorldPos', 'ParamFloat3');
-        }else {
+        }else if(true){
+            //var mainPack = clientElements[i].client.createPack();
+/*
+            this.mRenderTargets[i].mViewInfo = o3djs.rendergraph.createBasicView(
+                mainPack,
+                clientElements[0].client.root,
+                clientElements[0].client.renderGraphRoot,[0.7, 0.7, 0.2, 1],
+                1,
+                [viewWidth*i, 0, viewWidth, 1],clientElements[0].client.performanceDrawList,clientElements[0].client.zOrderedDrawList);
+*/
             this.mRenderTargets[i].mViewInfo = o3djs.rendergraph.createExtraView(
-                this.mRenderTargets[0].mViewInfo,
-                clientElements[i].root,//FIXME: not sure if this should be the canonical view or the secondary views
-                clientElements[i].renderGraphRoot);           
+                this.mRenderTargets[0].mViewInfo,[viewWidth*i, 0, viewWidth, 1],[0.2, 0.2, 0.2, 1],
+                i);           
+
         }
-        this.mRenderTargets[i].mEmptyRoot=clientElements[i].root;
         this.mRenderTargets[i].updateProjection();
     }
 

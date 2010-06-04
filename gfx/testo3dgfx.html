@@ -43,6 +43,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          gfx.send({msg:"Create",id:"cam",spaceid:"A",pos:[100,200,400],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Camera",id:"cam"});
          gfx.send({msg:"AttachCamera",id:"cam",target:0});
+
+         gfx.send({msg:"Create",id:"cam2",spaceid:"A",pos:[100,200,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Camera",id:"cam2"});
+         gfx.send({msg:"AttachCamera",id:"cam2",target:1});
+
+
          gfx.send({msg:"Create",id:"teapot0",spaceid:"A",pos:[300,200,400],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot0",mesh:"teapot"});
 
@@ -69,6 +75,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <body onload="documentLoaded();">
     <h1>Under construction</h1>
 	<div style="width:900px;margin:auto;position:relative" id="container">
+    </div>
+    <h1>
+
+	<div style="width:890px;margin:auto;position:relative" id="o3dxxx">
     </div>
 
   </body>
