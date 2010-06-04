@@ -297,8 +297,8 @@ VWObject.prototype.detachRenderTarget = function() {
 var updateTransformation=function(vwObject,date) {
     vwObject.mNode.identity();
     //FIXME need to interpolate
-    vwObject.mNode.scale(vwObject.mScale[0],vwObject.mScale[1],vwObject.mScale[2]);
     vwObject.mNode.translate(vwObject.mPos[0],vwObject.mPos[1],vwObject.mPos[2]);
+    vwObject.mNode.scale(vwObject.mScale[0],vwObject.mScale[1],vwObject.mScale[2]);
     vwObject.mNode.quaternionRotate(vwObject.mOrient);
     
 };
@@ -308,8 +308,6 @@ var updateTransformation=function(vwObject,date) {
  */
 O3DGraphics=function(callbackFunction,parentElement) {
     var oldID = parentElement.id;
-    parentElement.style.width="600px";
-    parentElement.style.height="600px";
     var thus = this;
     this.callback=callbackFunction;
     this.parentEl=parentElement;
@@ -692,7 +690,7 @@ O3DGraphics.prototype.startDragging = function(e) {
 }
 
 O3DGraphics.prototype.drag = function(e) {
-  if (this.dragging) {
+  if (false&&this.dragging) {
     var rotationQuat = this.aball.drag([e.x, e.y]);
     var rot_mat = o3djs.quaternions.quaternionToRotation(rotationQuat);
     this.thisRot = o3djs.math.matrix4.mul(this.lastRot, rot_mat);
@@ -715,8 +713,9 @@ VWObject.prototype.updateDefault = function() {
 
 VWObject.prototype.updateCamera = function() {
   var mat = o3djs.quaternions.quaternionToRotation(this.mOrient);
+  //console.log(mat);
   o3djs.math.matrix4.setTranslation(mat, this.mPos);
-  this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.matrix4.inverse(mat);
+  this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.inverse(mat);
 /*
   this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.matrix4.lookAt([0, 1, 5],  // eye
                                             [0, 0, 0],  // target
