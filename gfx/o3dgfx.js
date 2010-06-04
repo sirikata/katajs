@@ -518,7 +518,9 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
 };
 
 O3DGraphics.prototype.renderCallback = function() {
-    this.mRenderTargets[0].updateProjection();
+    for (var i = 0; i < this.mRenderTargets.length; i++) {
+        this.mRenderTargets[i].updateProjection();
+    }
     for (var id in this.mObjectUpdates) {
         this.mObjectUpdates[id].update();
     }
