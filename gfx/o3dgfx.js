@@ -54,7 +54,7 @@ RenderTarget.prototype.updateProjection = function() {
   // Create a perspective projection matrix.
   if (this.mCamera) {
     this.mViewInfo.drawContext.projection = o3djs.math.matrix4.perspective(
-      o3djs.math.degToRad(this.mCamera.mFOV), this.mWidth / this.mHeight,
+      this.mCamera.mFOV, this.mWidth / this.mHeight,
       this.mCamera.mHither, this.mCamera.mYon);
   }
 }
@@ -690,7 +690,7 @@ O3DGraphics.prototype.startDragging = function(e) {
 }
 
 O3DGraphics.prototype.drag = function(e) {
-  if (false&&this.dragging) {
+  if (this.dragging) {
     var rotationQuat = this.aball.drag([e.x, e.y]);
     var rot_mat = o3djs.quaternions.quaternionToRotation(rotationQuat);
     this.thisRot = o3djs.math.matrix4.mul(this.lastRot, rot_mat);

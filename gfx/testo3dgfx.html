@@ -40,31 +40,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript">
       documentLoaded=function() {
          var gfx=new O3DGraphics(function(obj){},document.getElementById("container"));
-         gfx.send({msg:"Create",id:"cam",spaceid:"A",pos:[100,200,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"cam",spaceid:"A",pos:[1,2,4],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Camera",id:"cam"});
          gfx.send({msg:"AttachCamera",id:"cam",target:0});
 
-         gfx.send({msg:"Create",id:"cam2",spaceid:"A",pos:[101,203,800],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"cam2",spaceid:"A",pos:[3,14,12],orient:[-.5,0,0,.86],scale:[1,1,1]});
          gfx.send({msg:"Camera",id:"cam2"});
          gfx.send({msg:"AttachCamera",id:"cam2",target:1});
 
 
-         gfx.send({msg:"Create",id:"teapot0",spaceid:"A",pos:[300,200,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"teapot0",spaceid:"A",pos:[3,2,4],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot0",mesh:"teapot"});
 
-         gfx.send({msg:"Create",id:"teapot1",spaceid:"A",pos:[-100,200,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"teapot1",spaceid:"A",pos:[-1,2,4],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot1",mesh:"teapot"});
 
-         gfx.send({msg:"Create",id:"teapot2",spaceid:"A",pos:[100,200,0],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"teapot2",spaceid:"A",pos:[1,2,0],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot2",mesh:"teapot"});
 
-         gfx.send({msg:"Create",id:"teapot3",spaceid:"A",pos:[100,200,800],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"teapot3",spaceid:"A",pos:[1,2,8],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot3",mesh:"teapot"});
 
-         gfx.send({msg:"Create",id:"teapot4",spaceid:"A",pos:[100,0,400],orient:[0,0,0,1],scale:[.1,.5,.1]});
+         gfx.send({msg:"Create",id:"teapot4",spaceid:"A",pos:[1,0,4],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot4",mesh:"teapot"});
 
-         gfx.send({msg:"Create",id:"teapot5",spaceid:"A",pos:[100,-600,400],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Create",id:"teapot5",spaceid:"A",pos:[1,6,4],orient:[0,0,0,1],scale:[1,1,1]});
          gfx.send({msg:"Mesh",id:"teapot5",mesh:"teapot"});
 
       }
