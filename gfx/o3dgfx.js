@@ -41,6 +41,9 @@ o3djs.require('o3djs.arcball');
 o3djs.require('o3djs.dump');
 o3djs.require('o3djs.scene');
 
+/**
+ * Creates a render target for a view info to be stored within
+ */
 function RenderTarget(o3dgfx,element,width,height) {
   this.mO3DGraphics = o3dgfx;
   this.mElement = element;
@@ -50,6 +53,9 @@ function RenderTarget(o3dgfx,element,width,height) {
   this.mViewInfo = null;
 };
 
+/**
+ * Updates the perspective matrix on a render target in case width/height/fov or hither/yon changed
+ */
 RenderTarget.prototype.updateProjection = function() {
   // Create a perspective projection matrix.
   if (this.mCamera) {
@@ -60,9 +66,18 @@ RenderTarget.prototype.updateProjection = function() {
 }
 
 
+/**
+ * Returns the identity location updated at the current time
+ * @return {!Location} an identity object with time set to newDate
+ */
 function LocationIdentityNow() {
-    return LocationIdentity(newDate());
+    return LocationIdentity(new Date());
 };
+/**
+ * Returns the identity location updated passed-in time
+ * @param {!Date} time the time which should be filled in to the location object 
+ * @return {!Location} an identity object with time set to time
+ */
 function LocationIdentity(time){
     return {
       mScale:[1,1,1],
@@ -76,9 +91,21 @@ function LocationIdentity(time){
       mRotVel:0
     };
 };
+/**
+ * Computes the number of seconds between 2 times as a floating point number
+ * @param {!Date} newTime the time farthest in the future to subtract
+ * @param {!Date} oldTime the time farthest in the past to take the difference of
+ * @return {number} number of seconds between the two times
+ */
 function deltaTime(newTime,oldTime) {
     return (curtime.getTime()-atime.getTime())*.001;
 }
+/**
+ * Takes a coordinate, a velocity and a time and extrapolates linearly from the starting location
+ * @param {Array} newTime the time farthest in the future to subtract
+ * @param {number} deltaTime the number of seconds that have elapsed since the coordinate was correct
+ * @return {number} number of seconds between the two times
+ */
 function _helperLocationExtrapolate3vec(a,adel,deltaTime){
     return [a[0]+adel[0]*deltaTime,
             a[1]+adel[1]*deltaTime,
@@ -189,15 +216,50 @@ var LocationExtrapolate=function() {
         };
     }();
 };
+
+
+
+/**
+ * returns a new location that has the default properties where the msg does not specify the values
+ * and uses the messages values where they are specified
+ * @param msg the network message being received
+ * @returns {!Location} a Location class with curLocation augmented with the msg fields that exist
+ */ 
+var LocationSet=function(msg) {
+    if (msg.time==undefined)
+        msg.time=new Date();
+    if (msg.scale==undefined)
+        msg.scale=[1,1,1];
+    if (msg.vel==undefined)
+        msg.vel=[0,0,0];
+    if (msg.rotaxis==undefined)
+        msg.rotaxis=[0,0,1];
+    if (msg.rotvel==undefined)
+        msg.rotvel=0;
+    if (msg.orient==undefined)
+        msg.orient=[0,0,0,1];
+    return {
+      mScale:msg.scale,
+      mScaleTime:msg.time,
+      mPos:msg.pos,  
+      mPosTime:msg.time,
+      mOrient:msg.orient,  
+      mOrientTime:msg.time,
+      mVel:msg.vel,
+      mRotAxis:msg.rotaxis,
+      mRotVel:msg.rotvel
+
+    };
+}
 /**
  * Takes a current and prev location samples and 
  * returns a new location that has the previous location properties where the msg does not specify the values
  * and uses the messages values where they are specified
  *  then the currentLocation is updated with prevLocations values if the would otherwise be the same as curLocation
  * @param msg the network message being received
- * @param curLocation the currently known latest update
- * @param prevLocation the update before the current update
- * @returns a Location class with curLocation augmented with the msg fields that exist
+ * @param {!Location} curLocation the currently known latest update (modified with prevLocation items that have not changed in new update)
+ * @param {!Location} prevLocation the update before the current update
+ * @returns {!Location} a Location class with curLocation augmented with the msg fields that exist
  */ 
 var LocationUpdate=function(msg,curLocation,prevLocation) {
     if (!prevLocation)
@@ -284,29 +346,37 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
     renderTarg.mCamera = this;
     renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= renderTarg.mViewInfo.treeRoot;
     renderTarg.mO3DGraphics.addObjectUpdate(this);
-}
-VWObject.prototype.detachRenderTarget = function() {
+};
+
+VWObject.prototype.stationary = function (curTime) {
+    var v=this.mCurLocation.mVelocity;
+    var a=this.mCurLocation.mAngVel;
+    var t=curTime.getTime();
+    return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.mScaleTime.getTime()>=0&&t-this.mCurLocation.mPosTime.getTime()>=0&&t-this.mCurLocation.mOrientTime.getTime()>=0;
+};
+VWObject.prototype.detachRenderTarget = function(curTime) {
     if (this.mRenderTarg) {
-        this.mRenderTarg.mO3DGraphics.removeObjectUpdate(this);
+        if (this.stationary(curTime))
+            this.mRenderTarg.mO3DGraphics.removeObjectUpdate(this);
         this.mRenderTarg.mCamera = null;
         this.mRenderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= null;
         delete this.mRenderTarg;
     }
-}
+};
 
-var updateTransformation=function(vwObject,date) {
-    vwObject.mNode.identity();
+VWObject.prototype.updateTransformation = function(date) {
+    this.mNode.identity();
     //FIXME need to interpolate
-    vwObject.mNode.translate(vwObject.mPos[0],vwObject.mPos[1],vwObject.mPos[2]);
-    vwObject.mNode.scale(vwObject.mScale[0],vwObject.mScale[1],vwObject.mScale[2]);
-    vwObject.mNode.quaternionRotate(vwObject.mOrient);
+    this.mNode.translate(this.mPos[0],this.mPos[1],this.mPos[2]);
+    this.mNode.scale(this.mScale[0],this.mScale[1],this.mScale[2]);
+    this.mNode.quaternionRotate(this.mOrient);
     
 };
 /**
  * Constructor for O3DGraphics interface.
  *@constructor
  */
-O3DGraphics=function(callbackFunction,parentElement) {
+var O3DGraphics=function(callbackFunction,parentElement) {
     var oldID = parentElement.id;
     var thus = this;
     this.callback=callbackFunction;
@@ -323,7 +393,7 @@ O3DGraphics=function(callbackFunction,parentElement) {
     this.thisRot = o3djs.math.matrix4.identity();
     this.lastRot = o3djs.math.matrix4.identity();
     this.aball = o3djs.arcball.create(100, 100);
-
+    this.mCurTime=new Date();
     this.send=function(obj) {
         this.initEvents.push(obj);
     };
@@ -336,11 +406,11 @@ O3DGraphics=function(callbackFunction,parentElement) {
 
 O3DGraphics.prototype.addObjectUpdate = function(vwObj) {
     this.mObjectUpdates[vwObj.mID] = vwObj;
-}
+};
 
 O3DGraphics.prototype.removeObjectUpdate = function(vwObj) {
     delete this.mObjectUpdates[vwObj.mID];
-}
+};
 
 VWObject.prototype.sceneLoadedCallback = function(renderTarg, lightPosParam, pack, parent, exception) {
     if (exception) {
@@ -443,7 +513,7 @@ VWObject.prototype.destroyMesh = function() {
         this.mMeshPack.destroy();
         delete this.mMeshPack;
     }
-}
+};
 
 O3DGraphics.prototype.asyncInit=function (clientElements) {
     var thus=this;
@@ -516,6 +586,7 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
 };
 
 O3DGraphics.prototype.renderCallback = function() {
+    this.mCurTime=new Date();
     for (var i = 0; i < this.mRenderTargets.length; i++) {
         this.mRenderTargets[i].updateProjection();
     }
@@ -529,7 +600,7 @@ O3DGraphics.prototype.methodTable={};
 O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creates a scene graph node
     var s = msg.spaceid;
     if (!s) {
-        s=""
+        s="";
     }
     if (!(s in this.mSpaceRoots)) {
         this.mSpaceRoots[s]=this.mRenderTargets[0].mElement.client.createPack().createObject('o3d.Transform');
@@ -589,7 +660,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRoot) {
         vwObject.mScale=msg.scale;
         vwObject.mScaleTime=msg.time;
     }
-    updateTransformation(vwObject,new Date());
+    vwObject.updateTransformation(this.mCurTime);
     //FIXME actually translate element
 };
 O3DGraphics.prototype.methodTable["Move"]=function(msg) {
@@ -663,7 +734,7 @@ O3DGraphics.prototype.methodTable["AttachCamera"]=function(msg) {
 O3DGraphics.prototype.methodTable["DetachCamera"]=function(msg) {
     if (msg.id in this.mObjects) {
         var cam = this.mObjects[msg.id];
-        cam.detachRenderTarget();
+        cam.detachRenderTarget(this.mCurTime);
     }
 };
 O3DGraphics.prototype.methodTable["DestroyCamera"]=function(msg) {
@@ -687,7 +758,7 @@ O3DGraphics.prototype.startDragging = function(e) {
   this.aball.click([e.x, e.y]);
 
   this.dragging = true;
-}
+};
 
 O3DGraphics.prototype.drag = function(e) {
   if (this.dragging) {
@@ -701,15 +772,15 @@ O3DGraphics.prototype.drag = function(e) {
     root.localMatrix = m;
     this.mRenderTargets[0].mCamera.updateCamera();
   }
-}
+};
 
 O3DGraphics.prototype.stopDragging = function(e) {
   this.dragging = false;
-}
+};
 
 VWObject.prototype.updateDefault = function() {
   // Update scene graph of moving objects if necessary
-}
+};
 
 VWObject.prototype.updateCamera = function() {
   var mat = o3djs.quaternions.quaternionToRotation(this.mOrient);
@@ -722,7 +793,7 @@ VWObject.prototype.updateCamera = function() {
                                             [0, 1, 0]); // up
 */
   this.updateDefault();
-}
+};
 
 O3DGraphics.prototype.scrollMe = function(e) {
   if (e.deltaY) {
@@ -735,5 +806,5 @@ O3DGraphics.prototype.scrollMe = function(e) {
 
     this.updateCamera();
   }
-}
+};
 
