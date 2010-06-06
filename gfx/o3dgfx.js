@@ -42,14 +42,43 @@ o3djs.require('o3djs.dump');
 o3djs.require('o3djs.scene');
 
 /**
+ * @constructor
+ * @param {!O3DGraphics} o3dgfx The render system for which the render target is created
+ * @param {!Element} element html element/context for which to instantiate the RenderTarget
+ * @param {number} width how many pixels wide to make this (for aspect ratio calcs)
+ * @param {number} height how many pixels tall to make this (for aspect ratio calcs)
  * Creates a render target for a view info to be stored within
  */
 function RenderTarget(o3dgfx,element,width,height) {
+/**
+ * The render system for which the render target is created
+ * @type {!O3DGraphics}
+ */
   this.mO3DGraphics = o3dgfx;
+/**
+ * html element/context for which to instantiate the RenderTarget
+ * @type {!Element} 
+ */
   this.mElement = element;
+/**
+ * how many pixels wide to make this (for aspect ratio calcs)
+ * @type {number}
+ */
   this.mWidth = width;
+/**
+ * how many pixels tall to make this (for aspect ratio calcs)
+ * @type {number}
+ */
   this.mHeight = height;
+/**
+ * The vwObject holding the camera that is attached to this RenderTarget
+ * @type {!VWObject}
+ */
   this.mCamera = null;
+/**
+ * The ViewInfo associated with the o3d createView made for this render target
+ * @type {!o3d.rendergraph.ViewInfo}
+ */
   this.mViewInfo = null;
 };
 
@@ -102,15 +131,22 @@ function deltaTime(newTime,oldTime) {
 }
 /**
  * Takes a coordinate, a velocity and a time and extrapolates linearly from the starting location
- * @param {Array} newTime the time farthest in the future to subtract
+ * @param {Array} a the starting vector at deltaTime=0
+ * @param {Array} adel the velocity on the 3vec a
  * @param {number} deltaTime the number of seconds that have elapsed since the coordinate was correct
- * @return {number} number of seconds between the two times
+ * @return {Array} the extrapolated vector
  */
 function _helperLocationExtrapolate3vec(a,adel,deltaTime){
     return [a[0]+adel[0]*deltaTime,
             a[1]+adel[1]*deltaTime,
             a[2]+adel[2]*deltaTime];
 }
+/**
+ * Takes an axis and an angle and makes a quaternion out of them with [x,y,z,w] as the coordinate layout
+ * @param {Array} aaxis axis 
+ * @param {Array} aangle the angle in radians
+ * @return {Array} the quaternion
+ */
 function _helperQuatFromAxisAngle(aaxis,aangle) {
     var sinHalf=Math.sin(aangle/2.0);
     var cosHalf=Math.cos(aangle/2.0);
@@ -210,7 +246,13 @@ function _helperLocationInterpolateQuaternion(a,avel,aaxis,atime,b,bvel,baxis,bt
     return [x/len,y/len,z/len,w/len];
 }
 
-///interpolates between 2 locations at a time probably between the two, otherwise the newer one is extrapolated
+/**
+ * interpolates between 2 locations at a time probably between the two, otherwise the newer one is extrapolated
+ * @param {!Location} location the newest location update
+ * @param {!Location} prevLoaction the second newest location update
+ * @param {Date} time the time to extrapolate to
+ * @returns {!Location} an param-by-param interpolation of the locations if the time is between the two times for that property, otherwise an extrapolation of the newest location update to the future
+ */
 function LocationInterpolate(location,prevLocation,time) {
     return {
         mScale:_helperLocationInterpolate3vec(location.mScale,[0,0,0],location.mScaleTime,
@@ -229,7 +271,12 @@ function LocationInterpolate(location,prevLocation,time) {
         mVel:location.mVel
     };
 }
-///Extrapolates a location to a future time so that it may be interpolated
+/**
+ * Extrapolates a location to a future time so that it may be interpolated
+ * @param {!Location} location the latest location sample
+ * @param {Date} time the current time for which to extrapolate over
+ * @returns {!Location} a Location class that has the current time set to time but the same velocity and rotation
+ */
 function LocationExtrapolate(location,time) {
     return {
         mScale:location.mScale,
@@ -252,7 +299,7 @@ function LocationExtrapolate(location,time) {
  * @param msg the network message being received
  * @returns {!Location} a Location class with curLocation augmented with the msg fields that exist
  */ 
-var LocationSet=function(msg) {
+function LocationSet(msg) {
     if (msg.time==undefined)
         msg.time=new Date();
     if (msg.scale==undefined)
@@ -371,9 +418,10 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
     this.detachRenderTarget();
     this.mRenderTarg = renderTarg;
     renderTarg.mCamera = this;
-    this.stationary=function(){
+    function returnFalse(time){
         return false;
-    };
+    }
+    this.stationary=returnFalse;
     renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID].parent= renderTarg.mViewInfo.treeRoot;
     renderTarg.mO3DGraphics.addObjectUpdate(this);
 };
@@ -510,9 +558,8 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, lightPosParam, pac
     }
 };
 
-//this.loadScene(this.mRenderTargets[0], path, vwObj.mPack, vwObj.mNode);
+
 VWObject.prototype.createMesh = function(renderTarg, lightPosParam, path) {
-    // FIXME: clientElements[0]?
     if (path == null) {
         throw "loadScene with null path";
     }
