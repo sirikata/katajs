@@ -297,6 +297,7 @@ function _helperLocationInterpolate3vec(a,adel,atime,b,bdel,btime,curtime) {
     if (secondsPassed<0) {
         return b;
     }
+    b=_helperLocationExtrapolate3vec(b,bdel,secondsPassed);//extrapolate first location into the future based on a sample and velocity
     var interp=secondsPassed/sampleDelta;
     var ointerp=1.0-interp;
     return [interp*a[0]+ointerp*b[0],
@@ -324,19 +325,21 @@ function _helperLocationInterpolateQuaternion(a,avel,aaxis,atime,b,bvel,baxis,bt
         return _helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
     }
     var sampleDelta=deltaTime(atime,btime);
+    if (sampleDelta==0) {
+        return _helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
+    }
     secondsPassed+=sampleDelta;
     if (secondsPassed<0) {
         return b;
     }
-    if (sampleDelta==0) {
-        return _helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
-    }
+
+    b=_helperLocationExtrapolateQuaternion(b,bvel,baxis,secondsPassed);
     var interp=secondsPassed/sampleDelta;
     var ointerp=1.0-interp;
     var x=interp*a[0]+ointerp*b[0];
     var y=interp*a[1]+ointerp*b[1];
     var z=interp*a[2]+ointerp*b[2];
-    var w=interp*a[3]+ointer*b[3];
+    var w=interp*a[3]+ointerp*b[3];
     var len=Math.sqrt(w*w+x*x+y*y+z*z);
     if (len<1.0e-20)
         return [x,y,z,w];
@@ -432,7 +435,7 @@ function LocationSet(msg) {
  * @param {!Location} prevLocation the update before the current update
  * @returns {!Location} a Location class with curLocation augmented with the msg fields that exist
  */ 
-var LocationUpdate=function(msg,curLocation,prevLocation) {
+var LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     if (!prevLocation)
         prevLocation=curLocation;
     var retval={
@@ -452,6 +455,13 @@ var LocationUpdate=function(msg,curLocation,prevLocation) {
     }else {
         curLocation.mPos=prevLocation.mPos;
         curLocation.mPosTime=prevLocation.mPosTime;
+        if (msg.vel) {
+            curLocation.mPos=_helperLocationExtrapolate3vec(prevLocation.mPos,prevLocation.mVel,deltaTime(curDate,prevLocation.mPosTime));
+            curLocation.mPosTime=curDate;
+
+            retval.mPos=_helperLocationExtrapolate3vec(curLocation.mPos,curLocation.mVel,deltaTime(msg.time,curLocation.mPosTime));
+            retval.mPosTime=msg.time;
+        }
     }
     if (msg.vel) {
         retval.mVel=msg.vel;
@@ -464,6 +474,13 @@ var LocationUpdate=function(msg,curLocation,prevLocation) {
     }else {
         curLocation.mOrient=prevLocation.mOrient;
         curLocation.mOrientTime=prevLocation.mOrientTime;
+        if (msg.rotvel&&msg.rotaxis) {
+            curLocation.mOrient=_helperLocationExtrapolateQuaternion(prevLocation.mOrient,prevLocation.mRotVel,prevLocation.mRotAxis,deltaTime(curDate,prevLocation.mOrientTime));
+            curLocation.mOrientTime=curDate;
+
+            retval.mOrient=_helperLocationExtrapolateQuaternion(curLocation.mOrient,curLocation.mRotVel,curLocation.mRotAxis,deltaTime(msg.time,curLocation.mOrientTime));
+            retval.mOrientTime=msg.time;
+        }
     }
     if (msg.rotvel&&msg.rotaxis) {
         retval.mRotAxis=msg.rotaxis;
@@ -748,7 +765,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
             //set parent transform
         }
     }
-    var newLoc=LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation);
+    var newLoc=LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation,this.mCurTime);
     vwObject.mPrevLocation=vwObject.mCurLocation;
     vwObject.mCurLocation=newLoc;
     if (!vwObject.stationary(this.mCurTime)) {
