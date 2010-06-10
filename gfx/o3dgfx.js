@@ -515,13 +515,9 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
     this.detachRenderTarget();
     this.mRenderTarg = renderTarg;
     renderTarg.mCamera = this;
-    function returnFalse(time){
-        return false;
-    }
-    this.stationary=returnFalse;
     this.mRenderTarg.mSpaceRoot = renderTarg.mO3DGraphics.mSpaceRoots[this.mSpaceID];
     renderTarg.mSpaceRoot.mRootNode.parent = renderTarg.mViewInfo.treeRoot;
-    renderTarg.mO3DGraphics.addObjectUpdate(this);
+    this.update(renderTarg.mO3DGraphics);
 };
 
 VWObject.prototype.stationary = function (curTime) {
@@ -532,13 +528,12 @@ VWObject.prototype.stationary = function (curTime) {
 };
 VWObject.prototype.detachRenderTarget = function(curTime) {
     if (this.mRenderTarg) {
+        var graphics=this.mRenderTarg.mO3DGraphics;
         this.mRenderTarg.mCamera = null;
         this.mRenderTarg.mSpaceRoot.mRootNode.parent= null;
         this.mRenderTarg.mSpaceRoot = null;
         delete this.mRenderTarg;
-        this.stationary=VWObject.prototype.stationary;
-        if (this.stationary(curTime))
-            this.mRenderTarg.mO3DGraphics.removeObjectUpdate(this);
+        this.update(graphics);
     }
 };
 
@@ -551,8 +546,6 @@ VWObject.prototype.updateTransformation = function(graphics) {
     this.mNode.quaternionRotate(l.mOrient);
     if (this.stationary(graphics.mCurTime)) {
         graphics.removeObjectUpdate(this);        
-    }else{
-//        console.log("not stationary");
     }
 
     return l;
@@ -758,6 +751,9 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
     var newLoc=LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation);
     vwObject.mPrevLocation=vwObject.mCurLocation;
     vwObject.mCurLocation=newLoc;
+    if (!vwObject.stationary(this.mCurTime)) {
+        this.addObjectUpdate(vwObject);
+    }
 /*
     if (msg.pos) {
         vwObject.mPos=msg.pos;
