@@ -204,7 +204,7 @@ function LocationIdentity(time){
       mScaleTime:time,
       mPos:[0,0,0],
       mPosTime:time,
-      mOrient:[1,0,0,0],
+      mOrient:[0,0,0,1],
       mOrientTime:time,
       mVel:[0,0,0],
       mRotAxis:[0,0,1],
@@ -287,9 +287,12 @@ function _helperLocationExtrapolateQuaternion(a,avel,aaxis,deltaTime){
 function _helperLocationInterpolate3vec(a,adel,atime,b,bdel,btime,curtime) {
     var secondsPassed=deltaTime(curtime,atime);
     if (secondsPassed>0) {
-        return _helperLocationExtrapolate3vec(a,adel,deltaTime);
+        return _helperLocationExtrapolate3vec(a,adel,secondsPassed);
     }
     var sampleDelta=deltaTime(atime,btime);
+    if (sampleDelta==0) {
+        return _helperLocationExtrapolate3vec(a,adel,secondsPassed);
+    }
     secondsPassed+=sampleDelta;
     if (secondsPassed<0) {
         return b;
@@ -318,12 +321,15 @@ function _helperLocationInterpolate3vec(a,adel,atime,b,bdel,btime,curtime) {
 function _helperLocationInterpolateQuaternion(a,avel,aaxis,atime,b,bvel,baxis,btime,curtime) {
     var secondsPassed=deltaTime(curtime,atime);
     if (secondsPassed>0) {
-        return _helperLocationExtrapolateQuaternion(a,avel,aaxis,deltaTime);
+        return _helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
     }
     var sampleDelta=deltaTime(atime,btime);
     secondsPassed+=sampleDelta;
     if (secondsPassed<0) {
         return b;
+    }
+    if (sampleDelta==0) {
+        return _helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
     }
     var interp=secondsPassed/sampleDelta;
     var ointerp=1.0-interp;
@@ -470,9 +476,10 @@ var LocationUpdate=function(msg,curLocation,prevLocation) {
         retval.mScale=msg.scale;
         retval.mScaleTime=msg.time;
     }else {
-        curLocation.mScale=prevLocation.mScaleTime;
+        curLocation.mScale=prevLocation.mScale;
         curLocation.mScaleTime=prevLocation.mScaleTime;
     }
+    return retval;
 };
 function VWObject(id,time,spaceid,spaceroot) {
     var pack=spaceroot.mElement.client.createPack();
@@ -482,9 +489,9 @@ function VWObject(id,time,spaceid,spaceroot) {
     this.mPack = pack;
     this.mNode = pack.createObject('o3d.Transform');
     this.mCurLocation=LocationIdentityNow();
-    this.mPrevLocation=this.mCurLocation;
+    this.mPrevLocation=LocationIdentityNow(new Date(0));
     this.mNode.mKataObject=this;
-    this.update = this.updateDefault;
+    this.update = this.updateTransformation;
     this.mSpaceRoot = spaceroot;
 };
 
@@ -499,7 +506,7 @@ VWObject.prototype.destroyCamera = function() {
     delete this.mHither;
     delete this.mYon;
     delete this.mFOV;
-    this.update = this.updateDefault;
+    this.update = this.updateTransformation;
 }
 VWObject.prototype.attachRenderTarget = function(renderTarg) {
     if (renderTarg.mCamera) {
@@ -518,7 +525,7 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
 };
 
 VWObject.prototype.stationary = function (curTime) {
-    var v=this.mCurLocation.mVelocity;
+    var v=this.mCurLocation.mVel;
     var a=this.mCurLocation.mAngVel;
     var t=curTime.getTime();
     return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.mScaleTime.getTime()>=0&&t-this.mCurLocation.mPosTime.getTime()>=0&&t-this.mCurLocation.mOrientTime.getTime()>=0;
@@ -535,15 +542,20 @@ VWObject.prototype.detachRenderTarget = function(curTime) {
     }
 };
 
-VWObject.prototype.updateTransformation = function(date) {
-
-    var l=LocationInterpolate(this.mCurLocation,this.mPrevLocation,date);
+VWObject.prototype.updateTransformation = function(graphics) {
+    var l=LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
     this.mNode.identity();
     //FIXME need to interpolate
     this.mNode.translate(l.mPos[0],l.mPos[1],l.mPos[2]);
     this.mNode.scale(l.mScale[0],l.mScale[1],l.mScale[2]);
     this.mNode.quaternionRotate(l.mOrient);
-    
+    if (this.stationary(graphics.mCurTime)) {
+        graphics.removeObjectUpdate(this);        
+    }else{
+//        console.log("not stationary");
+    }
+
+    return l;
 };
 /**
  * Constructor for O3DGraphics interface.
@@ -688,8 +700,9 @@ O3DGraphics.prototype.renderCallback = function() {
     for (var i in this.mRenderTargets) {
         this.mRenderTargets[i].updateProjection();
     }
-    for (var id in this.mObjectUpdates) {
-        this.mObjectUpdates[id].update();
+    for (var id in this.mObjectUpdates) {        
+        this.mObjectUpdates[id].update(this);
+        
     }
 };
 
@@ -718,7 +731,7 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
     }
     this.moveTo(newObject,msg,spaceRoot.mRootNode);
     this.moveTo(newObject,msg,spaceRoot.mRootNode);
-    newObject.updateTransformation(this.mCurTime);
+    newObject.updateTransformation(this);
 };
 O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
     if (msg.parent!==undefined) {
@@ -743,8 +756,9 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
         }
     }
     var newLoc=LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation);
-    vwObject.prevLocation=vwObject.curLocation;
-    vwObject.curLocation=newLoc;
+    vwObject.mPrevLocation=vwObject.mCurLocation;
+    vwObject.mCurLocation=newLoc;
+/*
     if (msg.pos) {
         vwObject.mPos=msg.pos;
         vwObject.mPosTime=msg.time;
@@ -763,12 +777,13 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
         vwObject.mScale=msg.scale;
         vwObject.mScaleTime=msg.time;
     }
+*/
     //FIXME actually translate element
 };
 O3DGraphics.prototype.methodTable["Move"]=function(msg) {
     var vwObject=this.mObjects[msg.id];
     this.moveTo(vwObject,msg);
-    vwObject.updateTransformation(this.mCurTime);
+    vwObject.updateTransformation(this);
 };
 O3DGraphics.prototype.methodTable["Destroy"]=function(msg) {
     if (msg.id in this.mObjects) {
@@ -893,7 +908,7 @@ O3DGraphics.prototype.drag = function(e) {
     var m = root.localMatrix;
     o3djs.math.matrix4.setUpper3x3(m, this.thisRot);
     root.localMatrix = m;
-    this.mRenderTargets[0].mCamera.updateCamera();
+    this.mRenderTargets[0].mCamera.updateCamera(this);
   }
 };
 
@@ -901,21 +916,18 @@ O3DGraphics.prototype.stopDragging = function(e) {
   this.dragging = false;
 };
 
-VWObject.prototype.updateDefault = function() {
-  // Update scene graph of moving objects if necessary
-};
-
-VWObject.prototype.updateCamera = function() {
-  var mat = o3djs.quaternions.quaternionToRotation(this.mOrient);
+VWObject.prototype.updateCamera = function(graphics) {
+  var location=this.updateTransformation(graphics);
+  
+  var mat = o3djs.quaternions.quaternionToRotation(location.mOrient);
   //console.log(mat);
-  o3djs.math.matrix4.setTranslation(mat, this.mPos);
+  o3djs.math.matrix4.setTranslation(mat, location.mPos);
   this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.inverse(mat);
 /*
   this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.matrix4.lookAt([0, 1, 5],  // eye
                                             [0, 0, 0],  // target
                                             [0, 1, 0]); // up
 */
-  this.updateDefault();
 };
 
 O3DGraphics.prototype.scrollMe = function(e) {
