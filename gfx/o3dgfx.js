@@ -371,6 +371,37 @@ function LocationInterpolate(location,prevLocation,time) {
         mVel:location.mVel
     };
 }
+
+
+/**
+ * interpolates between 2 locations where 3 times are passed in and used to separately interpolate each field
+ * @param {!Location} location the newest location update
+ * @param {!Location} prevLoaction the second newest location update
+ * @param {Date} posTime the time to extrapolate to for positions
+ * @param {Date} orientTime the time to extrapolate to for orientations
+ * @param {Date} scaleTime the time to extrapolate to for scale
+ * @returns {!Location} an param-by-param interpolation of the locations if the time is between the two times for that property, otherwise an extrapolation of the newest location update to the future
+ */
+function LocationTriTimeInterpolate(location,prevLocation,posTime,orientTime,scaleTime) {
+    return {
+        mScale:_helperLocationInterpolate3vec(location.mScale,[0,0,0],location.mScaleTime,
+                                              prevLocation.mScale,[0,0,0],prevLocation.mScaleTime,
+                                              scaleTime),
+        mScaleTime:scaleTime,
+        mPos:_helperLocationInterpolate3vec(location.mPos,location.mVel,location.mPosTime,
+                                            prevLocation.mPos,prevLocation.mVel,prevLocation.mPosTime,posTime),
+        mPosTime:posTime,
+        mOrient:_helperLocationInterpolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,location.mOrientTime,
+                                                     prevLocation.mOrient,prevLocation.mRotVel,prevLocation.mRotAxis,prevLocation.mOrientTime,
+                                                     orientTime),
+        mOrientTime:orientTime,
+        mRotVel:location.mRotVel,
+        mRotAxis:location.mRotAxis,
+        mVel:location.mVel
+    };
+}
+
+
 /**
  * Extrapolates a location to a future time so that it may be interpolated
  * @param {!Location} location the latest location sample
@@ -498,6 +529,54 @@ var LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     }
     return retval;
 };
+
+/**
+ * LocationCompose takes in a location and a prev and cur position for a parent node
+ * and turns it into a single location that represents the current transformation at 
+ * the time snapshots listed in loc
+ * @param {!Location} loc the location to be combined with its parents
+ * @param {!Location} prevParentLoc the parent's previous location
+ * @param {!Location} curParentLoc the parent's current location
+ * @returns{!Location} loc, combined with the appropriate interpolation of cur and prevParentLoc
+ */
+//FIXME write LocationCompose
+
+/**
+ * LocationInverseCompose takes in a location and a prev and cur position for a parent node
+ * and turns it into a single location that represents the current transformation at 
+ * the time snapshots listed in loc as a child transformation of the ParentLocs 
+ * so that it would remain at the same position that it was as a child of prev and 
+ * curParentLoc at its respective timestamps
+ * @param {!Location} loc the location to be combined with its parents
+ * @param {!Location} prevParentLoc the parent's previous location
+ * @param {!Location} curParentLoc the parent's current location
+ * @returns{!Location} loc, combined with the appropriate interpolation of cur and prevParentLoc
+ */
+//FIXME write LocationInverseCompose
+
+/**
+ * takes the loc that is based off of the oldNode and places it as a child of newNode
+ * @param {!Location} loc the location of the object relative to oldNode
+ * @param {Array} oldNodes the previous array of pairs of [prev,cur] Location classes that represent the object with lowest element being farthest from the root of the heirarchy of transforms
+ * @param {Array} newNodes the current array of pairs of [prev,cur] Location classes that represent the object with the first element being farthest from the root of the heirarchy of transforms
+ * @returns {!Location} a Location class that has been composed with oldNode and then the inverse of newNode
+ */ 
+function LocationReparent(loc,oldNode,newNode){
+    var i;
+    for (i=0;i<newNodeLength;i++) {
+        loc =LocationCompose(loc,oldNode[i][0],oldNode[i][1]);
+    }
+    var newNodeLength=newNode.length;
+    for (i=oldNode.length;i>=0;i--) {
+        loc =LocationInverseCompose(loc,newNode[i][0],newNode[i][1]);
+    }
+    return loc;
+}
+function LocationFromO3DTransformation(transformation,time) {
+    var mat=transformation.localMatrix;
+    
+    return LocationSet({time:time,pos:o3djs.math.matrix4.getTranslation(mat),orient:o3djs.quaternions.rotationToQuaternion(mat)});
+}
 function VWObject(id,time,spaceid,spaceroot) {
     var pack=spaceroot.mElement.client.createPack();
 
@@ -730,7 +809,6 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
     var newObject;
     this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,spaceRoot);
     newObject.mNode.parent=spaceRoot.mRootNode;
-
     if (msg.id in this.mUnsetParents) {
         var unset=this.mUnsetParents[msg.id];
         var unsetl=unset.length;
@@ -744,6 +822,7 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
     newObject.updateTransformation(this);
 };
 O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
+    var prevParent=vwObject.mNode.parent;
     if (msg.parent!==undefined) {
         if (vwObject.mUnsetParent) {
             delete this.mUnsetParents[vwObject.mUnsetParent][msg.id];
@@ -762,8 +841,26 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
             }
         }else {
             vwObject.mNode.parent=spaceRoot;
-            //set parent transform
         }
+        function o3dTransformationToLocationList(gfx,node){
+            var retval=[];
+            while(node!=null) {
+                var loc;
+                if (node.mKataObject) {
+                    loc=[node.mKataObject.mPrevLocation,node.mKataObject.mPrevLocation];
+                }else {
+                    var cloc=LocationFromO3DTransformation(node,new Date());
+                    loc=[cloc,cloc];
+                }
+                retval[retval.length]=loc;
+                node=node.parent;
+            }
+            return retval;
+        }
+        var prevParentNode=o3dTransformationToLocationList(this,prevParent);
+        var curParentNode=o3dTransformationToLocationList(this,vwObject.mNode.parent);
+        //FIXME broken vwObject.mPrevLocation=LocationReparent(vwObject.mPrevLocation,prevParentNode,curParentNode);
+        //FIXME broken vwObject.mCurLocation=LocationReparent(vwObject.mCurLocation,prevParentNode,curParentNode);
     }
     var newLoc=LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation,this.mCurTime);
     vwObject.mPrevLocation=vwObject.mCurLocation;
