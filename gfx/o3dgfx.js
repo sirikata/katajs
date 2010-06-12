@@ -715,10 +715,50 @@ function LocationReparent(loc,oldNode,newNode){
     }
     return loc;
 }
+
+function kata3d_RotationToQuaternion(m) {
+    /* Shoemake SIGGRAPH 1987 algorithm */
+    var fTrace = m[0][0]+m[1][1]+m[2][2];
+    if (fTrace == 3.0 ) 
+    {
+        return [0,0,0,1];//optional: identify identity as a common case
+    }
+    if ( fTrace > 0.0 )
+    {
+        // |w| > 1/2, may as well choose w > 1/2
+        var fRoot = Math.sqrt(fTrace + 1.0);  // 2w
+        var ifRoot=0.5/fRoot;// 1/(4w)
+        return [(m[2][1]-m[1][2])*ifRoot,
+                (m[0][2]-m[2][0])*ifRoot,
+                (m[1][0]-m[0][1])*ifRoot,
+                0.5*fRoot];  
+                
+    }
+    else
+    {
+        // |w| <= 1/2
+        var s_iNext=[ 1, 2, 0 ];
+        var i = 0;
+        if ( m[1][1] > m[0][0] )
+            i = 1;
+        if ( m[2][2] > m[i][i] )
+            i = 2;
+        var j = s_iNext[i];
+        var k = s_iNext[j];
+        var fRoot = sqrt(m[i][i]-m[j][j]-m[k][k] + 1.0);
+        var ifRoot=0.5/fRoot;
+        var q=[0,0,0,(m[k][j]-m[j][k])*ifRoot];
+        q[i] = 0.5*fRoot;
+        q[j] = (m[j][i]+m[i][j])*ifRoot;
+        q[k] = (m[k][i]+m[i][k])*ifRoot;
+        return q;
+    }
+}
+
 function LocationFromO3DTransformation(transformation,time) {
     var mat=transformation.localMatrix;
     
-    return LocationSet({time:time,pos:o3djs.math.matrix4.getTranslation(mat),orient:o3djs.quaternions.rotationToQuaternion(mat)});
+    return LocationSet({time:time,pos:o3djs.math.matrix4.getTranslation(mat),orient:kata3d_RotationToQuaternion(mat)});
 }
 function VWObject(id,time,spaceid,spaceroot) {
     var pack=spaceroot.mElement.client.createPack();
@@ -1002,8 +1042,8 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
         }
         var prevParentNode=o3dTransformationToLocationList(this,prevParent);
         var curParentNode=o3dTransformationToLocationList(this,vwObject.mNode.parent);
-        //FIXME enable these vwObject.mPrevLocation=LocationReparent(vwObject.mPrevLocation,prevParentNode,curParentNode);
-        //FIXME enable these vwObject.mCurLocation=LocationReparent(vwObject.mCurLocation,prevParentNode,curParentNode);
+        vwObject.mPrevLocation=LocationReparent(vwObject.mPrevLocation,prevParentNode,curParentNode);
+        vwObject.mCurLocation=LocationReparent(vwObject.mCurLocation,prevParentNode,curParentNode);
     }
     var newLoc=LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation,this.mCurTime);
     vwObject.mPrevLocation=vwObject.mCurLocation;
