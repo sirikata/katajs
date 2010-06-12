@@ -529,7 +529,94 @@ var LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     }
     return retval;
 };
+/**
+ * Multiplies two quaternions.
+ * @param {!o3djs.quaternions.Quaternion} a Operand quaternion.
+ * @param {!o3djs.quaternions.Quaternion} b Operand quaternion.
+ * @return {!o3djs.quaternions.Quaternion} The quaternion product a * b.
+ */
+function QuaternionMulQuaternion(a, b) {
+  var aX = a[0];
+  var aY = a[1];
+  var aZ = a[2];
+  var aW = a[3];
+  var bX = b[0];
+  var bY = b[1];
+  var bZ = b[2];
+  var bW = b[3];
 
+  return [
+      aW * bX + aX * bW + aY * bZ - aZ * bY,
+      aW * bY + aY * bW + aZ * bX - aX * bZ,
+      aW * bZ + aZ * bW + aX * bY - aY * bX,
+      aW * bW - aX * bX - aY * bY - aZ * bZ];
+};
+
+/**
+ * Computes a 4-by-4 rotation matrix (with trivial translation component)
+ * given a quaternion.  We assume the convention that to rotate a vector v by
+ * a quaternion r means to express that vector as a quaternion q by letting
+ * q = [v[0], v[1], v[2], 0] and then obtain the rotated vector by evaluating
+ * the expression (r * q) / r.
+ * @param {!o3djs.quaternions.Quaternion} q The quaternion.
+ * @return {!o3djs.math.Matrix4} A 4-by-4 rotation matrix.
+ */
+function katajs_QuaternionToRotation (q) {
+  var qX = q[0];
+  var qY = q[1];
+  var qZ = q[2];
+  var qW = q[3];
+
+  var qWqW = qW * qW;
+  var qWqX = qW * qX;
+  var qWqY = qW * qY;
+  var qWqZ = qW * qZ;
+  var qXqW = qX * qW;
+  var qXqX = qX * qX;
+  var qXqY = qX * qY;
+  var qXqZ = qX * qZ;
+  var qYqW = qY * qW;
+  var qYqX = qY * qX;
+  var qYqY = qY * qY;
+  var qYqZ = qY * qZ;
+  var qZqW = qZ * qW;
+  var qZqX = qZ * qX;
+  var qZqY = qZ * qY;
+  var qZqZ = qZ * qZ;
+
+  var d = qWqW + qXqX + qYqY + qZqZ;
+
+  return [
+    [(qWqW + qXqX - qYqY - qZqZ) / d,
+     2 * (qWqZ + qXqY) / d,
+     2 * (qXqZ - qWqY) / d, 0],
+    [2 * (qXqY - qWqZ) / d,
+     (qWqW - qXqX + qYqY - qZqZ) / d,
+     2 * (qWqX + qYqZ) / d, 0],
+    [2 * (qWqY + qXqZ) / d,
+     2 * (qYqZ - qWqX) / d,
+     (qWqW - qXqX - qYqY + qZqZ) / d, 0],
+    [0, 0, 0, 1]];
+};
+function Vec3Cross(a,b) {
+    return [a[1]*b[2]-a[2]*b[1],
+            a[2]*b[0]-a[0]*b[2],
+            a[0]*b[1]-a[1]*b[0]];
+}
+function Vec3Add(a,b) {
+    return [a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+}
+function Vec3Sub(a,b) {
+    return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+}
+function Vec3Scale(a,b) {
+    return [a[0]*b,a[1]*b,a[2]*b];
+}
+function Vec3Rotate(a,v0,v1,v2) {
+    return [a[0]*v0[0]+a[1]*v1[0]+a[2]*v2[0],
+            a[0]*v0[1]+a[1]*v1[1]+a[2]*v2[1],
+            a[0]*v0[2]+a[1]*v1[2]+a[2]*v2[2]];
+}
 /**
  * LocationCompose takes in a location and a prev and cur position for a parent node
  * and turns it into a single location that represents the current transformation at 
@@ -539,7 +626,40 @@ var LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
  * @param {!Location} curParentLoc the parent's current location
  * @returns{!Location} loc, combined with the appropriate interpolation of cur and prevParentLoc
  */
-//FIXME write LocationCompose
+function LocationCompose(loc, prevParentLoc, curParentLoc) {
+    var parentLoc=LocationTriTimeInterpolate(curParentLoc,prevParentLoc,loc.mPosTime,loc.mOrientTime,loc.mScaleTime);
+    var rotation=katajs_QuaternionToRotation(parentLoc.mOrient);
+    //First lets get velocity right--we're acting like a lever with a vector of loc.mPos
+    var topLevelVelocity=Vec3Add(Vec3Add(Vec3Scale(Vec3Cross(parentLoc.mRotAxis,
+                                                             loc.mPos),
+                                                   parentLoc.mRotVel),
+                                         parentLoc.mVel),
+                                 Vec3Rotate(loc.mVel,rotation[0],rotation[1],rotation[2]));
+    var topLevelAxis=Vec3Rotate(loc.mRotAxis,rotation[0],rotation[1],rotation[2]);
+    var topLevelPos=Vec3Add(Vec3Rotate(loc.mPos,rotation[0],rotation[1],rotation[2]),
+                            parentLoc.mPos);
+    
+    var topLevelOrient=QuaternionMulQuaternion(parentLoc.mOrient,loc.mOrient);
+    var topLevelScale=loc.mScale;//FIXME what's right to do here--is it a rigid body or not!
+    return {mPos:topLevelPos,
+            mOrient:topLevelOrient,
+            mScale:topLevelScale,
+            mRotAxis:topLevelAxis,
+            mRotVel:loc.mRotVel,
+            mVel:topLevelVelocity,
+            mPosTime:loc.mPosTime,
+            mOrientTime:loc.mOrientTime,
+            mScaleTime:loc.mScaleTime};
+}
+function katajs_QuaternionInverse(q) {
+  var q0 = q[0];
+  var q1 = q[1];
+  var q2 = q[2];
+  var q3 = q[3];
+
+  var d = 1 / (q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
+  return [-q0 * d, -q1 * d, -q2 * d, q3 * d];
+}
 
 /**
  * LocationInverseCompose takes in a location and a prev and cur position for a parent node
@@ -552,8 +672,31 @@ var LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
  * @param {!Location} curParentLoc the parent's current location
  * @returns{!Location} loc, combined with the appropriate interpolation of cur and prevParentLoc
  */
-//FIXME write LocationInverseCompose
-
+function LocationInverseCompose(loc, prevParentLoc, curParentLoc) {
+    var parentLoc=LocationTriTimeInterpolate(curParentLoc,prevParentLoc,loc.mPosTime,loc.mOrientTime,loc.mScaleTime);
+    var inverseRotation=katajs_QuaternionInverse(parentLoc.mOrient);
+    var rotation=katajs_QuaternionToRotation(inverseRotation);
+    //First lets get velocity right--we're acting like a lever with a vector of loc.mPos
+    var innerVelocity=Vec3Rotate(Vec3Add(Vec3Sub(Vec3Scale(Vec3Cross(parentLoc.mRotAxis,
+                                                                     loc.mPos),
+                                                           -parentLoc.mRotVel),
+                                                 parentLoc.mVel),
+                                         loc.mVel),rotation[0],rotation[1],rotation[2]);
+    var innerAxis=Vec3Rotate(loc.mRotAxis,rotation[0],rotation[1],rotation[2]);
+    var innerPos=Vec3Rotate(Vec3Sub(loc.mPos,parentLoc.mPos),rotation[0],rotation[1],rotation[2]);
+    
+    var innerOrient=QuaternionMulQuaternion(loc.mOrient,inverseRotation);
+    var innerScale=loc.mScale;//FIXME what's right to do here--is it a rigid body or not!
+    return {mPos:innerPos,
+            mOrient:innerOrient,
+            mScale:innerScale,
+            mRotAxis:innerAxis,
+            mRotVel:loc.mRotVel,
+            mVel:innerVelocity,
+            mPosTime:loc.mPosTime,
+            mOrientTime:loc.mOrientTime,
+            mScaleTime:loc.mScaleTime};
+}
 /**
  * takes the loc that is based off of the oldNode and places it as a child of newNode
  * @param {!Location} loc the location of the object relative to oldNode
@@ -563,11 +706,11 @@ var LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
  */ 
 function LocationReparent(loc,oldNode,newNode){
     var i;
-    for (i=0;i<newNodeLength;i++) {
+    var oldNodeLength=oldNode.length;
+    for (i=0;i<oldNodeLength;i++) {
         loc =LocationCompose(loc,oldNode[i][0],oldNode[i][1]);
     }
-    var newNodeLength=newNode.length;
-    for (i=oldNode.length;i>=0;i--) {
+    for (i=newNode.length-1;i>=0;i--) {
         loc =LocationInverseCompose(loc,newNode[i][0],newNode[i][1]);
     }
     return loc;
@@ -859,8 +1002,8 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
         }
         var prevParentNode=o3dTransformationToLocationList(this,prevParent);
         var curParentNode=o3dTransformationToLocationList(this,vwObject.mNode.parent);
-        //FIXME broken vwObject.mPrevLocation=LocationReparent(vwObject.mPrevLocation,prevParentNode,curParentNode);
-        //FIXME broken vwObject.mCurLocation=LocationReparent(vwObject.mCurLocation,prevParentNode,curParentNode);
+        //FIXME enable these vwObject.mPrevLocation=LocationReparent(vwObject.mPrevLocation,prevParentNode,curParentNode);
+        //FIXME enable these vwObject.mCurLocation=LocationReparent(vwObject.mCurLocation,prevParentNode,curParentNode);
     }
     var newLoc=LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation,this.mCurTime);
     vwObject.mPrevLocation=vwObject.mCurLocation;
