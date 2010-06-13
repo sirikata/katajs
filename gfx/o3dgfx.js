@@ -218,7 +218,7 @@ function LocationIdentity(time){
  * @return {number} number of seconds between the two times
  */
 function deltaTime(newTime,oldTime) {
-    return (newTime.getTime()-oldTime.getTime())*.001;
+    return (newTime/*.getTime()*/-oldTime/*.getTime()*/)*.001;
 }
 /**
  * Takes a coordinate, a velocity and a time and extrapolates linearly from the starting location
@@ -802,8 +802,8 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
 VWObject.prototype.stationary = function (curTime) {
     var v=this.mCurLocation.mVel;
     var a=this.mCurLocation.mAngVel;
-    var t=curTime.getTime();
-    return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.mScaleTime.getTime()>=0&&t-this.mCurLocation.mPosTime.getTime()>=0&&t-this.mCurLocation.mOrientTime.getTime()>=0;
+    var t=curTime;//.getTime();
+    return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.mScaleTime/*.getTime()*/>=0&&t-this.mCurLocation.mPosTime/*.getTime()*/>=0&&t-this.mCurLocation.mOrientTime/*.getTime()*/>=0;
 };
 VWObject.prototype.detachRenderTarget = function(curTime) {
     if (this.mRenderTarg) {
