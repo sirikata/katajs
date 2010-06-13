@@ -915,7 +915,6 @@ VWObject.prototype.createMesh = function(lightPosParam, path) {
                     thus.sceneLoadedCallback(
                         renderTarg, lightPosParam,
                         p, par, exc);
-                    par.parent = this.mNode;
                 }
             });
     } catch (e) {
