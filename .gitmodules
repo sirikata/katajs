@@ -7,3 +7,9 @@
 [submodule "externals/web-socket-js"]
 	path = externals/web-socket-js
 	url = git://github.com/gimite/web-socket-js.git
+[submodule "externals/o3d-webgl"]
+	path = externals/o3d-webgl
+	url = git://github.com/sirikata/o3d-webgl.git
+[submodule "externals/o3djs"]
+	path = externals/o3djs
+	url = git://github.com/sirikata/o3djs.git

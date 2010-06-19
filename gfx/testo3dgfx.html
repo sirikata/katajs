@@ -1,0 +1,89 @@
+<!-- katajs Javascript Utilities
+ test.html
+
+ Copyright (c) 2010, Patrick Reiter Horn
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+ * Neither the name of katajs nor the names of its contributors may
+   be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kata Network Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../externals/o3djs/base.js"></script>
+    <script type="text/javascript" src="../externals/o3d-webgl/base.js"></script>
+    <script type="text/javascript" src="o3dgfx.js"></script>
+    <script type="text/javascript">
+      documentLoaded=function() {
+         var gfx=new O3DGraphics(function(obj){},document.getElementById("container"));
+         gfx.send({msg:"Create",id:"cam",spaceid:"B",time:(new Date()).getTime(),pos:[1,2,4],vel:[0,1,0],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Camera",id:"cam"});
+         gfx.send({msg:"Move",id:"cam",time:(new Date((new Date()).getTime()+10000)).getTime(),pos:[1,0,4],vel:[0,-.01,0],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"AttachCamera",id:"cam",target:0});
+
+         gfx.send({msg:"Create",id:"cam2",spaceid:"A",time:(new Date()).getTime(),pos:[3,14,12],orient:[-.5,0,0,.86],scale:[1,1,1]});
+         gfx.send({msg:"Camera",id:"cam2"});
+         gfx.send({msg:"AttachCamera",id:"cam2",target:1});
+
+
+         gfx.send({msg:"Create",id:"teapot0",spaceid:"A",time:(new Date()).getTime(),pos:[3,2,4],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot0",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot1",spaceid:"A",time:(new Date()).getTime(),pos:[-1,2,4],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot1",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot2",spaceid:"B",time:(new Date()).getTime(),pos:[1,2,0],orient:[0,0,0,1],scale:[1,1,1],rotaxis:[0,1,0],rotvel:-1});
+         gfx.send({msg:"Move",id:"teapot2",time:(new Date((new Date())).getTime()+20000),scale:[1,1,1],rotaxis:[0,1,0],rotvel:1});
+         gfx.send({msg:"Move",id:"teapot2",time:(new Date((new Date())).getTime()+25000),pos:[1,.5,0],vel:[0,-.0099,0]});
+         gfx.send({msg:"Mesh",id:"teapot2",mesh:"teapot"});
+         gfx.send({msg:"Create",id:"teapotSub",spaceid:"B",time:(new Date()).getTime(),pos:[1,-.5,.5],orient:[0,.86,0,-.5],scale:[.5,.5,.5],rotaxis:[1,0,0],vel:[0,0,0],rotvel:.25,parent:"teapot2"});
+         gfx.send({msg:"Mesh",id:"teapotSub",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot3",spaceid:"A",time:(new Date()).getTime(),pos:[1,2,8],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot3",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot4",spaceid:"A",time:(new Date()).getTime(),pos:[1,0,4],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot4",mesh:"teapot"});
+
+         gfx.send({msg:"Create",id:"teapot5",spaceid:"A",time:(new Date()).getTime(),pos:[1,6,4],orient:[0,0,0,1],scale:[1,1,1]});
+         gfx.send({msg:"Mesh",id:"teapot5",mesh:"teapot"});
+      }
+    </script>
+
+  </head>
+  
+  <body onload="documentLoaded();">
+    <h1>Under construction</h1>
+	<div style="width:800px;height:600px;margin:auto;position:relative" id="container">
+    </div>
+    <h1>
+
+	<div style="width:800px;height:600px;margin:auto;position:relative" id="o3dxxx">
+    </div>
+
+  </body>
+</html>

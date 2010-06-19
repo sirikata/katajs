@@ -171,7 +171,8 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
             delete this.mQueryTracker;
             if (this.mLocationPendingRequests===undefined) {
                 thus.sendToSimulation({msg:"Destroy",
-                                       id:this.mID
+                                       id:this.mID,
+                                       spaceid:this.mSpace
                                       });
             }
             this.mDestroyed=true;
@@ -216,6 +217,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         if (meshScale.value) {
             this.sendToSimulation({msg: "Move",
                                    id: this.mID,
+                                   spaceid:this.mSpace,
                                    time: new Date().getTime(),
                                    scale: meshScale.value
                                   });
@@ -229,6 +231,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         }else {
             //send item to graphics system
             this.sendToSimulation({msg:"Mesh",
+                                   spaceid:this.mSpace,
                                    id:this.mID,
                                    mesh:meshURI.value
                                   });
@@ -242,6 +245,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         }else {
             this.sendToSimulation({msg:"IFrame",
                                    id:this.mID,
+                                   spaceid:this.mSpace,
                                    mesh:webURI.value
                                   });
         }
@@ -251,6 +255,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         lightProp.ParseFromStream(new PROTO.ByteArrayStream(newdata));
         this.sendToSimulation({msg:"Light",
                                id:this.mID,
+                               spaceid:this.mSpace,
                                diffuse_color:lightProp.diffuse_color,
                                specular_color:lightProp.specular_color,
                                ambient_color:lightProp.ambient_color,
@@ -265,7 +270,13 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
     };
     Sirikata.ProxyObject.prototype._setCamera = function(newdata) {
         this.sendToSimulation({msg:"Camera",
-                               id:this.mID
+                               id:this.mID,
+                               spaceid:this.mSpace
+                              });
+        this.sendToSimulation({msg:"AttachCamera",
+                               id:this.mID,
+                               spaceid:this.mSpace,
+                               target:0
                               });
     };
     Sirikata.ProxyObject.prototype._setLocation = function(newdata) {
@@ -273,6 +284,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         oloc.ParseFromStream(new PROTO.ByteArrayStream(newdata));
         var movemsg = {msg: "Move",
                        id: this.mID,
+                       spaceid:this.mSpace,
                        time: oloc.timestamp||(new Date().getTime())};
         if (oloc.position) {
             movemsg.pos = oloc.position;
@@ -401,7 +413,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
         // Ports.LOC
         var header = new Sirikata.Protocol.Header;
         header.destination_object = SPACE_OBJECT;
-        //header.destination_space = this.mSpace;
+        var spaceid = this.mSpace;
         header.destination_port = Ports.LOC;
         var message = new Sirikata.QueryTracker.Message(header, sentBody);
         var thus = this;
@@ -411,6 +423,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 var createMsg = {
                     msg: "Create",
                     id: object_reference,//private ID for gfx (we can narrow it)
+                    spaceid:spaceid,
                     time:new Date().getTime(),
                     pos:[0,0,0],
                     vel:[0,0,0],
@@ -681,6 +694,7 @@ Kata.include("sirikata/protocol/Subscription.pbj.js");
                 this.mObjectHost.sendToSimulation({
                     msg: "Create",
                     id: this.mID,//private ID for gfx (we can narrow it)
+                    spaceid:this.mSpace,
                     time:retObj.location.timestamp,
                     pos:retObj.location.position,
                     vel:retObj.location.velocity,
