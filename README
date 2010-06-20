@@ -1,0 +1,10 @@
+katajs
+------
+
+katajs is a browser-based platform for virtual worlds based on the
+Sirikata platform. An object host runs in the browser and connects to
+a server with Web Sockets. Display is handled through WebGL. A simple
+local server is provided as well for standalone applications.
+
+Code: http://github.com/sirikata/katajs
+Web: http://www.sirikata.com
