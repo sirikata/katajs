@@ -29,6 +29,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("gfx/ray_tri.js")
+
 KJS = {}
 
 KJS.addProtoSafely = function (cls, proto, func){

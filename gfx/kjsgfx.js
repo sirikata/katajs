@@ -1,3 +1,5 @@
+Kata.include("gfx/kata.js")
+
 kjsgfx_camera_id = null
 kjsgfx_id_map = {}
 kjsgfx_mesh_map = {}
