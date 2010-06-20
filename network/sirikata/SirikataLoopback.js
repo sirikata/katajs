@@ -506,13 +506,13 @@ Kata.include("network/sirikata/protocol/Subscription.pbj.js");
     Sirikata.Loopback.Substream.prototype.close = function () {
     };
 
-
+/*
     Kata.ObjectHost.sProtocols["skloop"] = {
         name: "skloop",
         default_port: 0,
         protocol_class: Sirikata.Loopback,
         object_class: Sirikata.HostedObject
     };
-
+*/
 
 })();

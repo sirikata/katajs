@@ -1,7 +1,7 @@
-/*  Kata Javascript Network Layer
- *  HostedObject.js
+/*  Kata Javascript
+ *  BootstrapScript.js
  *
- *  Copyright (c) 2010, Patrick Reiter Horn
+ *  Copyright (c) 2010, Ewen Cheslack-Postava
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -30,42 +30,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("network/ObjectHost.js");
+Kata.include("katajs/core/Channel.js");
 
 (function() {
+     /** A FilterChannel wraps another Channel and gives a callback a
+      * chance to filter the message before passing it on to
+      * listeners.
+      *
+      * @constructor
+      * @param {Kata.Channel} channel the channel which feeds this one
+      * @param {function} filter the filter to apply. Takes the same
+      * form as a listener but returns a boolean indicating whether to
+      * deliver to listeners
+      */
+     Kata.FilterChannel = function(channel, filter) {
+         this._channel = channel;
+         this._filter = filter;
+     };
+     SUPER = Kata.Channel.prototype;
+     Kata.extend(Kata.FilterChannel, SUPER);
 
-    /** Base class for protocol-specific HostedObject implementations.
-     * @constructor
-     * @param {Kata.ObjectHost} objectHost Pointer to controlling object host.
-     * @param {string} id Some identifier for this object. It may not be
-     *     meaningful to the underlying protocol?
-     */
-    Kata.HostedObject = function (objectHost, id) {
-        this.mObjectHost = objectHost;
-        this.mID = id;
-    };
+     Kata.FilterChannel.prototype.callListeners = function (data) {
+         if (this._filter(this, data)) {
+             SUPER.callListeners.apply(this, data);
+         }
+     };
 
-    /**
-     * @return Pointer to controlling object host as passed in constructor.
-     */
-    Kata.HostedObject.prototype.getObjectHost = function () {
-        return this.mObjectHost;
-    };
-
-    /**
-     * @return Pointer to identifier passed in constructor.
-     */
-    Kata.HostedObject.prototype.getID = function () {
-        return this.mID;
-    };
-
-    /** A simulation sent a message to this object via the object host.
-     *
-     * @param {Kata.Channel} channel  Channel of the sending simulation.
-     * @param {object} data  Data from the simulation (at the moment, in
-     *     JavascriptGraphicsApi format, as well as protocol-specific messages)
-     */
-    Kata.HostedObject.prototype.messageFromSimulation = function (channel, data) {
-    };
-
-})();
+     Kata.FilterChannel.prototype.sendMessage = function (data) {
+         this._channel.sendMessage(data);
+     };
+ })();

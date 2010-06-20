@@ -52,6 +52,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<script type="text/javascript" src="../../network/GraphicsSimulation.js"></script>
 	<script type="text/javascript" src="../../network/MainThread.js"></script>
 	<script type="text/javascript" src="../../katajs/gfx/TextGraphics.js"></script>
+<!-- "Plugins" - load files which add specific implementations. This
+is left up to the user since some may be expensive to load.
+-->
+	<script type="text/javascript" src="../../katajs/oh/LoopbackSpaceConnection.js"></script>
 
 	<script type="text/javascript" src="../../externals/GLGE/glge_math.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge.js"></script>
@@ -77,13 +81,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             window.kata.getChannel().sendMessage({
                 msg: "RegisterSpace",
                 spaceid: defaultSpace,
-                server: "skloop://" // Loopback space
+                server: "loop://" // Loopback space
             });
             window.kata.getChannel().sendMessage({
                 msg: "Create",
-                spaceid: defaultSpace,
                 script:"examples/simple_script/BlessedScript.js",
-                method:"Sirikata.BlessedScript",
+                method:"Example.BlessedScript",
                 args:{spaceid:defaultSpace}
             });
         }

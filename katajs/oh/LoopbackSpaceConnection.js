@@ -1,7 +1,7 @@
-/*  Kata Javascript Network Layer
- *  MainThread.js
+/*  KataJS
+ *  LoopbackSpaceConnection.js
  *
- *  Copyright (c) 2010, Patrick Reiter Horn
+ *  Copyright (c) 2010, Ewen Cheslack-Postava
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -30,37 +30,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("network/MainThread.js");
-Kata.include("katajs/core/Channel.js");
-Kata.include("katajs/core/WebWorker.js");
+Kata.include("katajs/oh/SpaceConnection.js");
+Kata.include("katajs/oh/ObjectHost.js");
 
 (function() {
 
-    /** MainThread is a class to instantiate an ObjectHost thread and hold onto
-     * the multiplexed channel coming from it. This channel can be used to
-     * spawn Kata.GraphicsSimulation objects, or to communicate to the OH.
-     * @constructor
-     */
-    Kata.MainThread = function () {
-        this.mObjectHostWorker = new Kata.WebWorker("katajs/oh/ObjectHostWorker.js", "Kata.ObjectHostWorker", []);
-        this.mObjectHostChannel = this.mObjectHostWorker.getChannel();
-        this.mObjectHostChannel.registerListener(Kata.bind(this.receivedMessage, this));
-        this.mObjectHostWorker.go();
-    };
+     /** Kata.LoopbackSpaceConnection is an implementation of
+      * Kata.SpaceConnection which connects to a local space server,
+      * i.e. one running in a WebWorker in the same browser.
+      *
+      * @constructor
+      */
+     Kata.LoopbackSpaceConnection = function () {
+     };
+     Kata.extend(Kata.LoopbackSpaceConnection, Kata.SpaceConnection.prototype);
 
-    /**
-     * @return {Kata.Channel} Some channel to talk to ObjectHost. This should
-     *     be multiplexed but isn't at the moment...
-     */
-    Kata.MainThread.prototype.getChannel = function() {
-        return this.mObjectHostChannel;
-    };
 
-    /**
-     * Not really useful. May be for multiplexing the OH channel?
-     */
-    Kata.MainThread.prototype.receivedMessage = function(channel, data) {
-        //console.log("Kata.MainThread received ObjectHost message:",data);
-    };
-
+     Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
 })();

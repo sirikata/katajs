@@ -30,10 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("network/ObjectHost.js");
-// HACK:
-Kata.include("network/sirikata/SirikataLoopback.js");
-Kata.include("network/sirikata/SstService.js");
+Kata.include("katajs/oh/ObjectHost.js");
 
 (function() {
 
@@ -52,6 +49,6 @@ Kata.include("network/sirikata/SstService.js");
         //this.mPhysicsWorker = new WebWorker("PhysicsSimulation.js", "PhysicsSimulation");
         //var physicsChannel = new WebWorkerChannel(this.mPhysicsWorker);
         //this.mObjectHost.registerSimulation(physicsChannel, "physics");
-    }
+    };
 
 })();

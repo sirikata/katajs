@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("katajs/oh/HostedObject.js");
+
 (function() {
 
     var NUM_STREAMS = 1; //FIXME: Test with more than one.
@@ -48,7 +50,31 @@
         if (network_debug) console.log("ObjectHosted!");
     };
 
-    Kata.ObjectHost.sProtocols = {};
+     /** Register a protocol handler which is used to create
+      *  connections to spaces for a protocol.
+      *
+      * @param {string} protocol the protocol this constructor
+      * handles, e.g. the protocol part of a URL such as http in http://host/
+      * @param {} conn_const a constructor for a SpaceConnection
+      */
+     Kata.ObjectHost.registerProtocolHandler = function(protocol, conn_const) {
+         if (! this._protocols)
+             this._protocols = {};
+
+         if (this._protocols[protocol])
+             Kata.warn("Overwriting protocol handler for " + protocol);
+
+         this._protocols[protocol] = conn_const;
+     };
+
+     /** Lookup the handler for the specified protocol.
+      *  @param {string} protocol the protocol to handle.
+      */
+     Kata.ObjectHost._getProtocolHandler = function(protocol) {
+         if (! this._protocols)
+             return undefined;
+         return this._protocols[protocol];
+     };
 
     /** Notifies the ObjectHost about a new simulation.
      * @param {Kata.Channel} channel  The corresponding simulation's channel.
@@ -103,18 +129,15 @@
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
         var privid = this.privateIdGenerator();
         if (channel == this.mSimulationsByName["graphics"]||data.msg=="Create") {
-            var spaceid = data.spaceid;
             switch (data.msg) {
             case "RegisterSpace":
+                var spaceid = data.spaceid;
                 this.registerSpace(spaceid, data.server);
                 return;
             case "Create":{
-                var createdObject=this.createObject(spaceid, privid, data);
-                if (data.script) {
-                    data.msg="Script";
-                }
-                createdObject.messageFromSimulation(channel, data);
-                // Don't send ConnectToSpace until you have set all properties.
+                var createdObject = this.createObject(privid);
+                if (data.script && data.method && data.args)
+                    createdObject.createScript(data.script, data.method, data.args);
                 return;
             }
             default:
@@ -142,11 +165,10 @@
             Kata.error("registerSpace missing protocol for server "+server);
         }
         var protoname = server.substr(0, colon);
-        var proto = Kata.ObjectHost.sProtocols[protoname];
-        if (!proto) {
+        var protoClass = Kata.ObjectHost._getProtocolHandler(protoname);
+        if (!protoClass) {
             Kata.error("Protocol "+protoname+" is not registered.");
         }
-        var ProtoClass = proto.protocol_class;
         server = server.substr(colon+3);
         var slash = server.indexOf("/");
         if (slash != -1) {
@@ -156,28 +178,23 @@
         var host, port;
         if (colon == -1) {
             host = server;
-            port = proto.default_port;
+            port = null;
         } else {
             host = server.substr(0, colon);
             port = server.substr(colon+1);
         }
-        this.mSpaceMap[spacename] = {protocol: proto, host: host, port: port};
+        this.mSpaceMap[spacename] = {protocol: protoClass, host: host, port: port};
     };
 
     /** Creates a new instance of a Kata.HostedObject for a specific protocol.
-     * @param {string} spacename  A space id for which to create this object.
-     *     Since HostedObject is protocol-specific, you need to know which type
-     *     of space you wish to connect to to create the object.
      * @param {string} id  A unique name for this object. You can use this to
      *     lookup the object within the object host, and it gets passed to the
      *     object's constructor.
-     * @param {object} msg  The creation message, which may contain extra data.
      * @return {Kata.HostedObject} A pointer to the new object.
      */
-    Kata.ObjectHost.prototype.createObject = function(spacename, id, msg) {
-        if (network_debug) console.log("Creating Object "+id+" for space "+spacename+"!");
-        var HostedClass = this.mSpaceMap[spacename].protocol.object_class;
-        this.mObjects[id] = new HostedClass(this, id, msg);
+    Kata.ObjectHost.prototype.createObject = function(id) {
+        if (network_debug) console.log("Creating Object "+id);
+        this.mObjects[id] = new Kata.HostedObject(this, id);
         return this.mObjects[id];
     };
 

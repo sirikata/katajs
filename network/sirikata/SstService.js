@@ -36,7 +36,7 @@ Kata.include("network/Service.js");
 Kata.include("network/Port.js");
 Kata.include("network/TCPSST.js");
 Kata.include("network/sirikata/SirikataHostedObject.js");
-Kata.include("network/ObjectHost.js");
+Kata.include("katajs/oh/ObjectHost.js");
 Kata.include("externals/protojs/protobuf.js");
 Kata.include("externals/protojs/pbj.js");
 Kata.include("network/sirikata/protocol/MessageHeader.pbj.js");
@@ -155,12 +155,12 @@ Kata.include("network/sirikata/protocol/MessageHeader.pbj.js");
         this.mService.send(header, bodyunser);
     };
 
-
+/*
     Kata.ObjectHost.sProtocols["sirikata"] = {
         name: "sirikata",
         default_port: 5943,
         protocol_class: Kata.TCPSST,
         object_class: Sirikata.HostedObject
     };
-
+*/
 })();
