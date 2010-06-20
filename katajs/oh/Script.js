@@ -30,8 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("network/ScriptProtocol.js");
-Kata.include("network/Presence.js");
+Kata.include("katajs/oh/ScriptProtocol.js");
+Kata.include("katajs/oh/Presence.js");
 
 (function() {
 
