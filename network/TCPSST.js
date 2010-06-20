@@ -31,6 +31,7 @@
  */
 
 Kata.include("network/Channel.js");
+Kata.include("katajs/core/Math.uuid.js");
 
 (function() {
 
@@ -224,4 +225,3 @@ Kata.include("network/Channel.js");
     }
 
 })();
-
