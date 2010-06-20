@@ -1,4 +1,4 @@
-Kata.include("gfx/kata.js")
+Kata.include("katajs/gfx/kata.js")
 
 kjsgfx_camera_id = null
 kjsgfx_id_map = {}

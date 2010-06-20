@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("gfx/ray_tri.js")
+Kata.include("katajs/gfx/ray_tri.js")
 
 KJS = {}
 
