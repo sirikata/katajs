@@ -16,7 +16,7 @@ Kata.include("network/sirikata/scripts/CameraScript.js");
                                  script:"network/sirikata/scripts/DeferScript.js",
                                  method:"Sirikata.DeferScript",
                                  args:{
-                                     mesh:"cube",          
+                                     mesh:"../content/teapot",
                                      creator:message.object_reference,
                                      creatorport:64,
                                      nickname:"pretty print object A",                       
@@ -36,7 +36,7 @@ Kata.include("network/sirikata/scripts/CameraScript.js");
                                  method:"Sirikata.DeferScript",
                                  args:{
                                      deferscale:[.1,.1,.1],
-                                     mesh:"cube",          
+                                     mesh:"../content/teapot",
                                      creator:message.object_reference,
                                      creatorport:64,
                                      nickname:"pretty print object B",                                     
