@@ -33,7 +33,7 @@
 if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
 Kata.include("network/sirikata/SirikataHostedObject.js");
-Kata.include("network/Channel.js");
+Kata.include("katajs/core/Channel.js");
 Kata.include("katajs/core/Math.uuid.js");
 Kata.include("externals/protojs/protobuf.js");
 Kata.include("externals/protojs/pbj.js");

@@ -30,7 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("network/SimpleChannel.js");
+Kata.include("katajs/core/SimpleChannel.js");
 
 (function() {
     /** @variable {boolean} If true, uses Workers on supported Javascript

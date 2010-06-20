@@ -30,7 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("network/Channel.js");
+Kata.include("katajs/core/Channel.js");
 
 (function() {
 

@@ -77,7 +77,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
         for (var i = 0; i < scripttags.length; i++) {
             var src = scripttags[i].getAttribute("src");
             if (src) {
-                var rootindex = src.indexOf("network/Core.js");
+                var rootindex = src.indexOf("katajs/core/Core.js");
                 if (rootindex != -1) {
                     var sroot = src.substr(0, rootindex);
                     if (sroot.length > 0 && sroot.slice(-1) != '/')

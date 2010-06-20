@@ -31,8 +31,8 @@
  */
 
 Kata.include("network/MainThread.js");
-Kata.include("network/Channel.js");
-Kata.include("network/WebWorker.js");
+Kata.include("katajs/core/Channel.js");
+Kata.include("katajs/core/WebWorker.js");
 
 (function() {
 
