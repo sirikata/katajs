@@ -69,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
         doc.onLoad = function() {
             window.kata = new Kata.MainThread();
-            graphics = new Kata.GraphicsSimulation(window.kata.getChannel(), document.getElementById("container"));
+            graphics = new Kata.GraphicsSimulation("katajs", window.kata.getChannel(), document.getElementById("container"));
             // Use a real space server.
             /*
              window.kata.getChannel().sendMessage({

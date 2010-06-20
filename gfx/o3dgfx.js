@@ -1235,3 +1235,7 @@ O3DGraphics.prototype.scrollMe = function(e) {
   }
 };
 
+// Register as a GraphicsSimulation if possible.
+if (Kata.GraphicsSimulation) {
+    Kata.GraphicsSimulation.registerDriver("o3d", O3DGraphics);
+}

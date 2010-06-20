@@ -39,18 +39,28 @@ Kata.include("Simulation.js");
      * Because there is only one main thread (and hence only one channel to the
      * ObjectHost thread), this channel should be multiplexed to allow multiple
      * simulations on the main thread.
-     * 
+     *
      * @constructor
      * @extends {Kata.Simulation}
+     * @param {string} driver Graphics driver to use for the simulation.
      * @param {Kata.Channel} channel  Communication with the object host.
      * @param {HTMLElement} domElement  Some parent element to display inside.
      */
-    Kata.GraphicsSimulation = function (channel, domElement) {
+    Kata.GraphicsSimulation = function (driver, channel, domElement) {
         SUPER.constructor.call(this, channel);
         this.mElement = domElement;
-//        this.mGFX = new TextGraphics(function(obj){},domElement.parentNode);
-//        this.mGFX = new KatajsGraphics(function(obj){},document.body);
-        this.mGFX = new O3DGraphics(function(obj){},domElement);
+
+        var cons = this.constructor;
+        if (cons._drivers == undefined) {
+            Kata.error("No graphics drivers available.");
+        }
+
+        drv = cons._drivers[driver];
+        if (drv == undefined) {
+            Kata.error('No graphics driver called "' + driver + '" available.');
+        }
+
+        this.mGFX = new drv(function(obj){},domElement);
     };
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 
@@ -66,4 +76,14 @@ Kata.include("Simulation.js");
         this.mGFX.send(data);
     };
 
+     /** Register a class as a type of underlying driver.
+      *  @param {string} type string describing the type of driver
+      *  @param {object} klass constructor for the driver
+      */
+     Kata.GraphicsSimulation.registerDriver = function(type, klass) {
+         if (this._drivers == undefined) {
+             this._drivers = {};
+         }
+         this._drivers[type] = klass;
+     };
 })();

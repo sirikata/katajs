@@ -211,4 +211,10 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		}
     }
     this.destroy=function(){}
+
+};
+
+// Register as a GraphicsSimulation if possible.
+if (Kata.GraphicsSimulation) {
+    Kata.GraphicsSimulation.registerDriver("katajs", KatajsGraphics);
 }
