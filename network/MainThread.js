@@ -30,9 +30,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("MainThread.js");
-Kata.include("Channel.js");
-Kata.include("WebWorker.js");
+Kata.include("network/MainThread.js");
+Kata.include("network/Channel.js");
+Kata.include("network/WebWorker.js");
 
 (function() {
 
@@ -42,7 +42,7 @@ Kata.include("WebWorker.js");
      * @constructor
      */
     Kata.MainThread = function () {
-        this.mObjectHostWorker = new Kata.WebWorker("ObjectHostWorker.js", "Kata.ObjectHostWorker", []);
+        this.mObjectHostWorker = new Kata.WebWorker("network/ObjectHostWorker.js", "Kata.ObjectHostWorker", []);
         this.mObjectHostChannel = this.mObjectHostWorker.getChannel();
         this.mObjectHostChannel.registerListener(Kata.bind(this.receivedMessage, this));
         this.mObjectHostWorker.go();

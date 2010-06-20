@@ -30,7 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("ObjectHost.js");
+Kata.include("network/ObjectHost.js");
 
 (function() {
 

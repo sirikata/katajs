@@ -42,7 +42,7 @@ self.onmessage = function (ev) {
     var scriptroot = data[0];
     //scriptroot+
     importScripts("Core.js");
-    Kata.include("WebWorker.js");
+    Kata.include("network/WebWorker.js");
     //Kata.scriptRoot = scriptroot
 
     // Fetch classname to instanciate and arguments.

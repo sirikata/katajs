@@ -39,14 +39,14 @@ if (0) {
 }
 if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
-Kata.include("HostedObject.js");
-Kata.include("sirikata/QueryTracker.js");
-Kata.include("../externals/protojs/protobuf.js");
-Kata.include("../externals/protojs/pbj.js");
-Kata.include("sirikata/protocol/MessageHeader.pbj.js");
-Kata.include("sirikata/protocol/Persistence.pbj.js");
-Kata.include("sirikata/protocol/Sirikata.pbj.js");
-Kata.include("sirikata/protocol/Subscription.pbj.js");
+Kata.include("network/HostedObject.js");
+Kata.include("network/sirikata/QueryTracker.js");
+Kata.include("externals/protojs/protobuf.js");
+Kata.include("externals/protojs/pbj.js");
+Kata.include("network/sirikata/protocol/MessageHeader.pbj.js");
+Kata.include("network/sirikata/protocol/Persistence.pbj.js");
+Kata.include("network/sirikata/protocol/Sirikata.pbj.js");
+Kata.include("network/sirikata/protocol/Subscription.pbj.js");
 
 (function() {
 

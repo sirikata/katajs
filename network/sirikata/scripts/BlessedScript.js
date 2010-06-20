@@ -1,8 +1,8 @@
 
-Kata.include("../externals/protojs/protobuf.js");
-Kata.include("../externals/protojs/pbj.js");
-Kata.include("sirikata/scripts/BasicScript.js");
-Kata.include("sirikata/scripts/CameraScript.js");
+Kata.include("externals/protojs/protobuf.js");
+Kata.include("externals/protojs/pbj.js");
+Kata.include("network/sirikata/scripts/BasicScript.js");
+Kata.include("network/sirikata/scripts/CameraScript.js");
 (function() {
     var SUPER = Sirikata.CameraScript.prototype;
     Sirikata.BlessedScript = function(channel,args){
@@ -13,7 +13,7 @@ Kata.include("sirikata/scripts/CameraScript.js");
             
             channel.sendMessage({msg: "Create",
                                  spaceid: args.spaceid,
-                                 script:"sirikata/scripts/DeferScript.js",
+                                 script:"network/sirikata/scripts/DeferScript.js",
                                  method:"Sirikata.DeferScript",
                                  args:{
                                      mesh:"cube",          
@@ -32,7 +32,7 @@ Kata.include("sirikata/scripts/CameraScript.js");
             //make object 1
             channel.sendMessage({msg: "Create",
                                  spaceid: defaultSpace,
-                                 script:"sirikata/scripts/DeferScript.js",
+                                 script:"network/sirikata/scripts/DeferScript.js",
                                  method:"Sirikata.DeferScript",
                                  args:{
                                      deferscale:[.1,.1,.1],

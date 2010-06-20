@@ -32,15 +32,15 @@
 
 if (typeof Sirikata == "undefined") { Sirikata = {}; }
 
-Kata.include("sirikata/SirikataHostedObject.js");
-Kata.include("Channel.js");
-Kata.include("../Math.uuid.js");
-Kata.include("../externals/protojs/protobuf.js");
-Kata.include("../externals/protojs/pbj.js");
-Kata.include("sirikata/protocol/MessageHeader.pbj.js");
-Kata.include("sirikata/protocol/Persistence.pbj.js");
-Kata.include("sirikata/protocol/Sirikata.pbj.js");
-Kata.include("sirikata/protocol/Subscription.pbj.js");
+Kata.include("network/sirikata/SirikataHostedObject.js");
+Kata.include("network/Channel.js");
+Kata.include("Math.uuid.js");
+Kata.include("externals/protojs/protobuf.js");
+Kata.include("externals/protojs/pbj.js");
+Kata.include("network/sirikata/protocol/MessageHeader.pbj.js");
+Kata.include("network/sirikata/protocol/Persistence.pbj.js");
+Kata.include("network/sirikata/protocol/Sirikata.pbj.js");
+Kata.include("network/sirikata/protocol/Subscription.pbj.js");
 
 (function() {
 

@@ -30,10 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("ObjectHost.js");
+Kata.include("network/ObjectHost.js");
 // HACK:
-Kata.include("sirikata/SirikataLoopback.js");
-Kata.include("sirikata/SstService.js");
+Kata.include("network/sirikata/SirikataLoopback.js");
+Kata.include("network/sirikata/SstService.js");
 
 (function() {
 

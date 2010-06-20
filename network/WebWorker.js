@@ -30,7 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("SimpleChannel.js");
+Kata.include("network/SimpleChannel.js");
 
 (function() {
     /** @variable {boolean} If true, uses Workers on supported Javascript
@@ -59,7 +59,7 @@ Kata.include("SimpleChannel.js");
          * @param {*} args  Primitive data to instantiate the class with.
          */
         Kata.WebWorker = function (jsFile, clsName, args) {
-            this.mWorker = new Worker(Kata.scriptRoot+"GenericWorker.js");
+            this.mWorker = new Worker(Kata.scriptRoot+"network/GenericWorker.js");
             this.mWorker.onerror = getErrorCallback(this);
             this.mInitialMessage = [
                 Kata.scriptRoot,

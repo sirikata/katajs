@@ -1,7 +1,7 @@
 
-Kata.include("sirikata/QueryTracker.js");
-Kata.include("../externals/protojs/protobuf.js");
-Kata.include("../externals/protojs/pbj.js");
+Kata.include("network/sirikata/QueryTracker.js");
+Kata.include("externals/protojs/protobuf.js");
+Kata.include("externals/protojs/pbj.js");
 (function() {
      var connectionAttempt=2;
      Sirikata.BasicScript = function(channel,args){

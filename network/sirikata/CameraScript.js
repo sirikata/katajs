@@ -1,7 +1,7 @@
 
-Kata.include("../externals/protojs/protobuf.js");
-Kata.include("../externals/protojs/pbj.js");
-Kata.include("sirikata/BasicScript.js");
+Kata.include("externals/protojs/protobuf.js");
+Kata.include("externals/protojs/pbj.js");
+Kata.include("network/sirikata/BasicScript.js");
 (function() {
     var SUPER = Sirikata.BasicScript.prototype;
     Sirikata.CameraScript = function(channel,args){
