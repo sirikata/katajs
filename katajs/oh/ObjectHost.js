@@ -31,6 +31,7 @@
  */
 
 Kata.include("katajs/oh/HostedObject.js");
+Kata.include("katajs/core/URL.js");
 
 (function() {
 
@@ -160,30 +161,14 @@ Kata.include("katajs/oh/HostedObject.js");
      * @param {string} server  A URI (protocol, host, port) to connect to.
      */
     Kata.ObjectHost.prototype.registerSpace = function (spacename, server) {
-        var colon = server.indexOf("://");
-        if (colon == -1) {
-            Kata.error("registerSpace missing protocol for server "+server);
-        }
-        var protoname = server.substr(0, colon);
-        var protoClass = Kata.ObjectHost._getProtocolHandler(protoname);
+        Kata.warn("Deprecated: ObjectHost.registerSpace");
+        var serverURL = new Kata.URL(server);
+
+        var protoClass = Kata.ObjectHost._getProtocolHandler(serverURL.protocol);
         if (!protoClass) {
-            Kata.error("Protocol "+protoname+" is not registered.");
+            Kata.error("Protocol " + serverURL.protocol + " is not registered.");
         }
-        server = server.substr(colon+3);
-        var slash = server.indexOf("/");
-        if (slash != -1) {
-            server = server.substr(0, slash);
-        }
-        colon = server.indexOf(":");
-        var host, port;
-        if (colon == -1) {
-            host = server;
-            port = null;
-        } else {
-            host = server.substr(0, colon);
-            port = server.substr(colon+1);
-        }
-        this.mSpaceMap[spacename] = {protocol: protoClass, host: host, port: port};
+        this.mSpaceMap[spacename] = {protocol: protoClass, host: serverURL.host, port: serverURL.port};
     };
 
     /** Creates a new instance of a Kata.HostedObject for a specific protocol.
@@ -198,6 +183,28 @@ Kata.include("katajs/oh/HostedObject.js");
         return this.mObjects[id];
     };
 
+     /** Attempts to connect the object to the specified space.
+      *
+      * @param {Kata.HostedObject} ho the HostedObject to connect
+      * @param {string} space URL of space to connect to
+      * @param {} auth authentication information for the space
+      */
+     Kata.ObjectHost.prototype.connect = function(ho, space, auth) {
+         var spaceURL = new Kata.URL(space);
+
+         // Look up or create a connection
+         var space_conn = this.mSpaceConnections[spaceURL.toString()];
+         if (!space_conn) {
+             var protoClass = Kata.ObjectHost._getProtocolHandler(spaceURL.protocol);
+             if (!protoClass)
+                 Kata.error("Unknown space protocol: " + spaceURL.protocol);
+             space_conn = new protoClass(this);
+         }
+
+         // And try to connect
+         space_conn.connectObject(ho, auth);
+     };
+
     /** Connects to a space registered using registerSpace.
      * @param {string} spacename  The name of a space (from registerSpace).
      * @param {Kata.ObjectHost.TopLevelStream=} channel  A channel to register
@@ -206,6 +213,7 @@ Kata.include("katajs/oh/HostedObject.js");
      *     the space represented by spacename.
      */
     Kata.ObjectHost.prototype.connectToSpace = function(spacename, channel) {
+        Kata.warn("Deprecated: ObjectHost.connectToSpace");
         var topLevelStream = channel;
         if (topLevelStream) {
             this.mSpaceConnections[spacename] = channel;

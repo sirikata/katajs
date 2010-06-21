@@ -31,6 +31,8 @@
  */
 
 Kata.include("katajs/oh/ObjectHost.js");
+Kata.include("katajs/oh/impl/ScriptProtocol.js");
+Kata.include("katajs/core/MessageDispatcher.js");
 
 (function() {
 
@@ -43,6 +45,13 @@ Kata.include("katajs/oh/ObjectHost.js");
     Kata.HostedObject = function (objectHost, id) {
         this.mObjectHost = objectHost;
         this.mID = id;
+
+        var scriptHandlers = {};
+        var scriptTypes = Kata.ScriptProtocol.FromScript.Types;
+        scriptHandlers[scriptTypes.Connect] = Kata.bind(this._handleConnect, this);
+        scriptHandlers[scriptTypes.Disconnect] = Kata.bind(this._handleDisconnect, this);
+
+        this.mScriptMessageDispatcher = new Kata.MessageDispatcher(scriptHandlers);
     };
 
     /**
@@ -60,7 +69,15 @@ Kata.include("katajs/oh/ObjectHost.js");
     };
 
      Kata.HostedObject.prototype.messageFromScript = function (channel, data) {
-         return this.messageFromSimulation(channel,data);//probably want to just forward messages to space?
+         this.mScriptMessageDispatcher.dispatch(channel, data);
+     };
+
+     Kata.HostedObject.prototype._handleConnect = function (channel, request) {
+         this.mObjectHost.connect(this, request.space, request.auth);
+     };
+
+     Kata.HostedObject.prototype._handleDisconnect = function (channel, request) {
+         Kata.warn("Disconnect request.");
      };
 
     /** A simulation sent a message to this object via the object host.

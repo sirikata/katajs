@@ -55,18 +55,28 @@
 
          FromScript : {
 
+             Types : {
+                 Connect : 1,
+                 Disconnect : 2,
+                 Location : 3,
+                 Visual : 4
+             },
+
              Connect : function(space, auth) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Connect;
                  this.space = space;
                  this.auth = auth;
              },
 
              Disconnect : function(space) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Disconnect;
                  this.space = space;
              },
 
              /** Location update.  Providing a subset of the information is permitted.
               */
              Location : function(space, position, velocity, acceleration, bounds) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Location;
                  this.space = space;
                  this.position = position;
                  this.velocity = velocity;
@@ -75,6 +85,7 @@
              },
 
              Visual : function(space, url) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Visual;
                  this.space = space;
                  this.url = url;
              }
@@ -82,16 +93,25 @@
 
          ToScript : {
 
+             Types : {
+                 Connected : 1,
+                 Disconnected : 2,
+                 Presence : 3
+             },
+
              Connected : function(space, id) {
+                 this.__type = Kata.ScriptProtocol.ToScript.Types.Connected;
                  this.space = space;
                  this.id = id;
              },
 
              Disconnected : function(space) {
+                 this.__type = Kata.ScriptProtocol.ToScript.Types.Disconnected;
                  this.space = space;
              },
 
              Presence : function(space, payload) {
+                 this.__type = Kata.ScriptProtocol.ToScript.Types.Presence;
                  this.space = space;
                  this.payload = payload;
              }

@@ -35,13 +35,15 @@ Kata.include("katajs/oh/ObjectHost.js");
 
 (function() {
 
+     var SUPER = Kata.SpaceConnection.prototype;
      /** Kata.LoopbackSpaceConnection is an implementation of
       * Kata.SpaceConnection which connects to a local space server,
       * i.e. one running in a WebWorker in the same browser.
       *
       * @constructor
       */
-     Kata.LoopbackSpaceConnection = function () {
+     Kata.LoopbackSpaceConnection = function (oh) {
+         SUPER.constructor.call(this, oh);
      };
      Kata.extend(Kata.LoopbackSpaceConnection, Kata.SpaceConnection.prototype);
 

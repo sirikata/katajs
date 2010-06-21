@@ -8,7 +8,10 @@ Kata.include("katajs/oh/Script.js");
      Example.BlessedScript = function(channel, args) {
          SUPER.constructor.call(this, channel, args);
 
-         Kata.warn("Blessed script initialized.");
+         this.connect(args.space, null, Kata.bind(this.connected, this));
      };
      Kata.extend(Example.BlessedScript, SUPER);
+
+     Example.BlessedScript.prototype.connected = function() {
+     };
 })();

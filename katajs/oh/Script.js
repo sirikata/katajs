@@ -55,12 +55,14 @@ Kata.include("katajs/oh/Presence.js");
          this.mChannel = channel;
          this.mChannel.registerListener( Kata.bind(this._handleHostedObjectMessage, this));
 
-         this.mPresences = {}; // FIXME real hash table
+         this.mPresences = {};
+
+         this.mConnectRequests = {};
      };
 
      /** Send a message to the HostedObject.
       */
-     Kata.Presence.prototype._sendHostedObjectMessage = function (data) {
+     Kata.Script.prototype._sendHostedObjectMessage = function (data) {
          return this.mChannel.sendMessage(data);
      };
 
@@ -71,7 +73,9 @@ Kata.include("katajs/oh/Presence.js");
       *  @param {} cb callback to invoke upon completion
       */
      Kata.Script.prototype.connect = function(space, auth, cb) {
-         Kata.notImplemented();
+         var msg = new Kata.ScriptProtocol.FromScript.Connect(space, auth);
+         this.mConnectRequests[space] = msg;
+         this._sendHostedObjectMessage(msg);
      };
 
      /** Request a callback after the specified amount of time.  If

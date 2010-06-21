@@ -71,13 +71,6 @@ is left up to the user since some may be expensive to load.
             window.kata = new Kata.MainThread();
             graphics = new Kata.GraphicsSimulation("text", window.kata.getChannel(), document.getElementById("container"));
             // Use a real space server.
-            /*
-             window.kata.getChannel().sendMessage({
-             msg: "RegisterSpace",
-             spaceid: defaultSpace,
-             server: "sirikata://localhost" // Remote space
-             });
-             */
             window.kata.getChannel().sendMessage({
                 msg: "RegisterSpace",
                 spaceid: defaultSpace,
@@ -87,7 +80,7 @@ is left up to the user since some may be expensive to load.
                 msg: "Create",
                 script:"examples/simple_script/BlessedScript.js",
                 method:"Example.BlessedScript",
-                args:{spaceid:defaultSpace}
+                args:{ space : "loop://" + defaultSpace }
             });
         }
         doc.load("scene.xml")

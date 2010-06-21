@@ -1,5 +1,5 @@
 /*  KataJS
- *  SpaceConnection.js
+ *  MessageDispatcher.js
  *
  *  Copyright (c) 2010, Ewen Cheslack-Postava
  *  All rights reserved.
@@ -30,31 +30,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/ObjectHost.js");
-
 (function() {
 
-     /** Kata.SpaceConnection is a connection to a space. It provides
-      * functionality for connecting to a space (as an object host)
-      * and session management for individual objects.
+     /** Constructs a dispatcher for messages. The caller provides a
+      *  dictionary from Types to handler functions.
       *
-      * Implementations should register themselves as protocol
-      * handlers using Kata.ObjectHost.registerProtocolHandler.
+      * This is intended to tidy up classes that do a lot of message
+      * handling.  There are two benefits.  First, instead of massive
+      * switch statements in message reception methods, you set up a
+      * mapping at construction time.  This makes it clear, up front,
+      * exactly what type of messages you're handling. Second, if
+      * necessary, new handlers can be added dynamically, which isn't
+      * possible with big switch statements.
       *
-      * @constructor
-      * @param {Kata.ObjectHost} oh the object host that owns this
-      * connection. Used to provide callbacks.
+      * @param {object} handlers map from Types (which should be ints
+      * under the hood) to handler functions
       */
-     Kata.SpaceConnection = function (oh) {
-         this.mObjectHost = oh;
+     Kata.MessageDispatcher = function(handlers) {
+         this._handlers = handlers;
      };
 
-     /** Attempt to connect the object to the space using the
-      * authentication information.
-      * @param {} id identifier for this object, only used internally
-      * @param {} auth authentication information for the object
-      */
-     Kata.SpaceConnection.prototype.connectObject = function(id, auth) {
-         Kata.notImplemented("SpaceConnection.connectObject");
+     Kata.MessageDispatcher.prototype.add = function(type, handler) {
+         this._handlers[type] = handler;
      };
+
+     Kata.MessageDispatcher.prototype.dispatch = function(channel, msg) {
+         var mtype = msg.__type;
+         if (!this._handlers[mtype])
+             return;
+         this._handlers[mtype](channel,msg);
+     };
+
 })();

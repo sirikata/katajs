@@ -1,5 +1,5 @@
 /*  KataJS
- *  SpaceConnection.js
+ *  URL.js
  *
  *  Copyright (c) 2010, Ewen Cheslack-Postava
  *  All rights reserved.
@@ -30,31 +30,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/ObjectHost.js");
-
 (function() {
 
-     /** Kata.SpaceConnection is a connection to a space. It provides
-      * functionality for connecting to a space (as an object host)
-      * and session management for individual objects.
+     /** The URL class provides utilities for operating on a URL.  The
+      * constructor accepts a string URL or a Kata.URL.
       *
-      * Implementations should register themselves as protocol
-      * handlers using Kata.ObjectHost.registerProtocolHandler.
-      *
-      * @constructor
-      * @param {Kata.ObjectHost} oh the object host that owns this
-      * connection. Used to provide callbacks.
+      * The components of the URL are available in the fields
+      * protocol, host, and (possibly) port.
       */
-     Kata.SpaceConnection = function (oh) {
-         this.mObjectHost = oh;
+     Kata.URL = function(url) {
+         // If its a URL object, just copy its fields
+         if (url.protocol && url.host) {
+             this.protocol = url.protocol;
+             this.host = url.host;
+             if (url.port)
+                 this.port = url.port;
+         }
+         else { // Parse string URL
+             var colon = url.indexOf("://");
+             if (colon == -1) {
+                 Kata.error("Invalid URL: " + url);
+             }
+             this.protocol = url.substr(0, colon);
+
+             var no_proto = url.substr(colon+3);
+             var slash = no_proto.indexOf("/");
+             if (slash != -1)
+                 no_proto = no_proto.substr(0, slash);
+             colon = no_proto.indexOf(":");
+
+             if (colon == -1) {
+                 this.host = no_proto;
+             } else {
+                 this.host = no_proto.substr(0, colon);
+                 this.port = no_proto.substr(colon+1);
+             }
+         }
      };
 
-     /** Attempt to connect the object to the space using the
-      * authentication information.
-      * @param {} id identifier for this object, only used internally
-      * @param {} auth authentication information for the object
-      */
-     Kata.SpaceConnection.prototype.connectObject = function(id, auth) {
-         Kata.notImplemented("SpaceConnection.connectObject");
+     Kata.URL.prototype.toString = function() {
+         var as_string = this.protocol + "://" + this.host;
+         if (this.port)
+             as_string = as_string + ":" +  this.port;
+         return as_string;
      };
 })();
