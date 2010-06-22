@@ -46,13 +46,15 @@ Kata.include("katajs/core/Channel.js");
      Kata.FilterChannel = function(channel, filter) {
          this._channel = channel;
          this._filter = filter;
+
+         this._channel.registerListener( Kata.bind(this.callListeners, this) );
      };
      SUPER = Kata.Channel.prototype;
      Kata.extend(Kata.FilterChannel, SUPER);
 
      Kata.FilterChannel.prototype.callListeners = function (data) {
-         if (this._filter(this, data)) {
-             SUPER.callListeners.apply(this, data);
+         if (!this._filter(this, data)) {
+             SUPER.callListeners.apply(this, [data]);
          }
      };
 

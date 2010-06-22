@@ -96,8 +96,7 @@
              Types : {
                  Connected : 1,
                  ConnectionFailed : 2,
-                 Disconnected : 3,
-                 Presence : 4
+                 Disconnected : 3
              },
 
              Connected : function(space, id) {
@@ -115,14 +114,7 @@
              Disconnected : function(space) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.Disconnected;
                  this.space = space;
-             },
-
-             Presence : function(space, payload) {
-                 this.__type = Kata.ScriptProtocol.ToScript.Types.Presence;
-                 this.space = space;
-                 this.payload = payload;
              }
-
          }
      };
 

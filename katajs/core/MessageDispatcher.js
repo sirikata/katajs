@@ -54,11 +54,15 @@
          this._handlers[type] = handler;
      };
 
+     /** Try to dispatch the message.  Return true if successfully
+      *  dispatched or false if no handler was registered for it.
+      */
      Kata.MessageDispatcher.prototype.dispatch = function(channel, msg) {
          var mtype = msg.__type;
          if (!this._handlers[mtype])
-             return;
+             return false;
          this._handlers[mtype](channel,msg);
+         return true;
      };
 
 })();

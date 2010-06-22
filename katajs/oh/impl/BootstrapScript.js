@@ -31,6 +31,7 @@
  */
 
 Kata.include("katajs/core/FilterChannel.js");
+Kata.include("katajs/core/MessageDispatcher.js");
 
 (function() {
      /** Bootstraps an object's script, enabling it to communicate
@@ -49,8 +50,7 @@ Kata.include("katajs/core/FilterChannel.js");
       * object
       */
      Kata.BootstrapScript = function(channel,args) {
-         this.mChannel=channel;
-         channel.registerListener(Kata.bind(this.receiveMessage,this));
+         this.mChannel = channel;
 
          Kata.include(args.realScript);
 
@@ -64,12 +64,31 @@ Kata.include("katajs/core/FilterChannel.js");
          // Create a filtered channel, so we get first crack at any messages
          var filtered_channel = new Kata.FilterChannel(channel, Kata.bind(this.receiveMessage, this));
          this.mScript = new cls(filtered_channel, args.realArgs);
+
+         // Setup dispatcher and register handlers
+         var handlers = {};
+         var msgTypes = Kata.ScriptProtocol.ToScript.Types;
+         handlers[msgTypes.Connected] = Kata.bind(this._handleConnected, this);
+         handlers[msgTypes.ConnectionFailed] = Kata.bind(this._handleConnectFailed, this);
+         handlers[msgTypes.Disconnected] = Kata.bind(this._handleDisconnect, this);
+         this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
+
      };
 
      Kata.BootstrapScript.prototype.receiveMessage = function(channel, msg) {
-         Kata.warn("Received message.");
-         return true;
+         return this.mMessageDispatcher.dispatch(channel, msg);
      };
 
+     Kata.BootstrapScript.prototype._handleConnected = function(msg) {
+         Kata.warn("Connected.");
+     };
+
+     Kata.BootstrapScript.prototype._handleConnectFailed = function(msg) {
+         Kata.warn("Connection failed.");
+     };
+
+     Kata.BootstrapScript.prototype._handleDisconnect = function(msg) {
+         Kata.warn("Disconnected.");
+     };
 
  })();
