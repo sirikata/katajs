@@ -33,6 +33,11 @@
 Kata.include("katajs/oh/SpaceConnection.js");
 Kata.include("katajs/oh/ObjectHost.js");
 
+// See note about how connections work. Generally connection classes
+// shouldn't include anything from a space implementation (and
+// generally can't since the space implementation is not available.
+Kata.include("katajs/space/loop/Space.js");
+
 (function() {
 
      var SUPER = Kata.SpaceConnection.prototype;
@@ -41,11 +46,38 @@ Kata.include("katajs/oh/ObjectHost.js");
       * i.e. one running in a WebWorker in the same browser.
       *
       * @constructor
+      * @param {Kata.ObjectHost} oh the owner ObjectHost.
+      * @param {Kata.URL} spaceurl URL of the space to connect to
       */
-     Kata.LoopbackSpaceConnection = function (oh) {
+     Kata.LoopbackSpaceConnection = function (oh, spaceurl) {
          SUPER.constructor.call(this, oh);
+
+         // LoopbackSpaceConnection uses an unusual mechanism for
+         // connections. Since they are local, there's no network
+         // connection we can create to connect to the space.  Instead,
+         // the space registers itself in a global variable (within
+         // Kata.LoopbackSpace). We just lookup that object and make async
+         // calls to it.
+         this.mSpace = Kata.LoopbackSpace.spaces[spaceurl.host];
+         this.mSpaceURL = spaceurl;
+         if (!this.mSpace)
+             Kata.error("Couldn't find loopback space: " + spaceurl.toString());
      };
      Kata.extend(Kata.LoopbackSpaceConnection, Kata.SpaceConnection.prototype);
+
+     Kata.LoopbackSpaceConnection.prototype.connectObject = function(id, auth) {
+         this.mSpace.connectObject(
+             id,
+             Kata.bind(this.connectResponse, this)
+         );
+     };
+
+     Kata.LoopbackSpaceConnection.prototype.connectResponse = function(id, object) {
+         if (object) // FIXME real presence_id below
+             this.mObjectHost.connectionResponse(id, true, {space : this.mSpaceURL, object : object});
+         else
+             this.mObjectHost.connectionResponse(id, false);
+     };
 
 
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);

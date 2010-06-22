@@ -131,10 +131,6 @@ Kata.include("katajs/core/URL.js");
         var privid = this.privateIdGenerator();
         if (channel == this.mSimulationsByName["graphics"]||data.msg=="Create") {
             switch (data.msg) {
-            case "RegisterSpace":
-                var spaceid = data.spaceid;
-                this.registerSpace(spaceid, data.server);
-                return;
             case "Create":{
                 var createdObject = this.createObject(privid);
                 if (data.script && data.method && data.args)
@@ -151,24 +147,6 @@ Kata.include("katajs/core/URL.js");
             console.log("ObjectHost message for unknown object: "+privid);
             console.log("List of known objects:",this.mObjects);
         }
-    };
-
-    /** Registers a space server in a map. This server is not connected yet.
-     * Does not handle spaces with multiple IP addresses, so this isn't very
-     * useful.
-     *
-     * @param {string} spacename  The name (or UUID) of a space server.
-     * @param {string} server  A URI (protocol, host, port) to connect to.
-     */
-    Kata.ObjectHost.prototype.registerSpace = function (spacename, server) {
-        Kata.warn("Deprecated: ObjectHost.registerSpace");
-        var serverURL = new Kata.URL(server);
-
-        var protoClass = Kata.ObjectHost._getProtocolHandler(serverURL.protocol);
-        if (!protoClass) {
-            Kata.error("Protocol " + serverURL.protocol + " is not registered.");
-        }
-        this.mSpaceMap[spacename] = {protocol: protoClass, host: serverURL.host, port: serverURL.port};
     };
 
     /** Creates a new instance of a Kata.HostedObject for a specific protocol.
@@ -198,11 +176,28 @@ Kata.include("katajs/core/URL.js");
              var protoClass = Kata.ObjectHost._getProtocolHandler(spaceURL.protocol);
              if (!protoClass)
                  Kata.error("Unknown space protocol: " + spaceURL.protocol);
-             space_conn = new protoClass(this);
+             space_conn = new protoClass(this, spaceURL);
          }
 
          // And try to connect
-         space_conn.connectObject(ho, auth);
+         space_conn.connectObject(ho.getID(), auth);
+     };
+
+     /** Indicate a connection response to the ObjectHost.  Should
+      *  only be called by SpaceConnections.
+      *  @param {} id
+      *  @param {boolean} success
+      *  @param {} presence_id the identifier for the presence, or
+      *  null if the connection wasn't successful.
+      */
+     Kata.ObjectHost.prototype.connectionResponse = function(id, success, presence_id) {
+         var obj = this.mObjects[id];
+         if (!obj) {
+             Kata.warn("Got connection response for unknown object: " + id);
+             return;
+         }
+
+         obj.connectionResponse(success, presence_id);
      };
 
     /** Connects to a space registered using registerSpace.

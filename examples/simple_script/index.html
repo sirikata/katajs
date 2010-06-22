@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 is left up to the user since some may be expensive to load.
 -->
 	<script type="text/javascript" src="../../katajs/oh/LoopbackSpaceConnection.js"></script>
+	<script type="text/javascript" src="../../katajs/space/loop/Space.js"></script>
 
 	<script type="text/javascript" src="../../externals/GLGE/glge_math.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge.js"></script>
@@ -66,21 +67,19 @@ is left up to the user since some may be expensive to load.
     <script type="text/javascript">
         doc = new GLGE.Document();
         var kata, graphics;
-        var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
+        var defaultSpace = "loop://localhost";
         doc.onLoad = function() {
             window.kata = new Kata.MainThread();
             graphics = new Kata.GraphicsSimulation("text", window.kata.getChannel(), document.getElementById("container"));
-            // Use a real space server.
-            window.kata.getChannel().sendMessage({
-                msg: "RegisterSpace",
-                spaceid: defaultSpace,
-                server: "loop://" // Loopback space
-            });
+
+            // Simulated local space
+            loopspace = new Kata.LoopbackSpace( new Kata.URL(defaultSpace) );
+
             window.kata.getChannel().sendMessage({
                 msg: "Create",
                 script:"examples/simple_script/BlessedScript.js",
                 method:"Example.BlessedScript",
-                args:{ space : "loop://" + defaultSpace }
+                args:{ space : defaultSpace }
             });
         }
         doc.load("scene.xml")

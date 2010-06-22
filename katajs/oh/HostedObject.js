@@ -46,6 +46,8 @@ Kata.include("katajs/core/MessageDispatcher.js");
         this.mObjectHost = objectHost;
         this.mID = id;
 
+        this.mScriptChannel = null;
+
         var scriptHandlers = {};
         var scriptTypes = Kata.ScriptProtocol.FromScript.Types;
         scriptHandlers[scriptTypes.Connect] = Kata.bind(this._handleConnect, this);
@@ -68,12 +70,30 @@ Kata.include("katajs/core/MessageDispatcher.js");
         return this.mID;
     };
 
+     Kata.HostedObject.prototype.sendScriptMessage = function(msg) {
+         if (!this.mScriptChannel) {
+             Kata.warn("Couldn't send script message: no script.");
+             return;
+         }
+
+         this.mScriptChannel.sendMessage(msg);
+     };
+
      Kata.HostedObject.prototype.messageFromScript = function (channel, data) {
          this.mScriptMessageDispatcher.dispatch(channel, data);
      };
 
      Kata.HostedObject.prototype._handleConnect = function (channel, request) {
          this.mObjectHost.connect(this, request.space, request.auth);
+     };
+
+     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id) {
+         var msg = null;
+         if (success)
+             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object);
+         else
+             msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object);
+         this.sendScriptMessage(msg);
      };
 
      Kata.HostedObject.prototype._handleDisconnect = function (channel, request) {

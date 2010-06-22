@@ -1,5 +1,5 @@
-/*  Kata Javascript
- *  BootstrapScript.js
+/*  KataJS
+ *  Space.js
  *
  *  Copyright (c) 2010, Ewen Cheslack-Postava
  *  All rights reserved.
@@ -30,46 +30,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/FilterChannel.js");
+Kata.include("katajs/oh/SpaceConnection.js");
+Kata.include("katajs/core/Math.uuid.js");
 
 (function() {
-     /** Bootstraps an object's script, enabling it to communicate
-      *  with the HostedObject it was instantiated for.  This also
-      *  sets up creation/destruction of Presences and makes sure they
-      *  get to handle events before the script itself.
-      *
-      *  Since this is just a bootstrap, the real data for
-      *  constructing the script is contained in the args parameter,
-      *  in args.realScript, args.realClass, and args.realArgs.
+
+     /** A simple loopback space.  To simulate a network, the loopback
+      * space delays all calls with a timeout.
       *
       * @constructor
-      * @param {Kata.Channel} channel the channel used to communicate
-      * with the HostedObject this script belongs to
-      * @param {} args additional arguments passed by the creating
-      * object
+      * @param {Kata.URL} spaceurl the URL of this space
       */
-     Kata.BootstrapScript = function(channel,args) {
-         this.mChannel=channel;
-         channel.registerListener(Kata.bind(this.receiveMessage,this));
+     Kata.LoopbackSpace = function(spaceurl) {
+         // First try to add to central registery
+         if (Kata.LoopbackSpace.spaces[spaceurl.host])
+             Kata.warn("Overwriting static LoopbackSpace map entry for " + spaceurl);
+         Kata.LoopbackSpace.spaces[spaceurl.host] = this;
 
-         Kata.include(args.realScript);
+         this.netdelay = 10; // Constant delay, in milliseconds
 
-         // Try to find the class
-         var clsTree = args.realClass.split(".");
-         var cls = self;
-         for (var i = 0; cls && i < clsTree.length; i++) {
-             cls = cls[clsTree[i]];
-         }
-
-         // Create a filtered channel, so we get first crack at any messages
-         var filtered_channel = new Kata.FilterChannel(channel, Kata.bind(this.receiveMessage, this));
-         this.mScript = new cls(filtered_channel, args.realArgs);
+         this.mObjects = {};
      };
 
-     Kata.BootstrapScript.prototype.receiveMessage = function(channel, msg) {
-         Kata.warn("Received message.");
-         return true;
+     /** Static map of local spaces, used to allow
+      *  LoopbackSpaceConnection to discover these spaces.
+      *  See LoopbackSpaceConnection.js for details on this use.
+      */
+     Kata.LoopbackSpace.spaces = {};
+
+     /** Request an object to be connected, and call cb on completion.
+      */
+     Kata.LoopbackSpace.prototype.connectObject = function(id, cb) {
+         self = this;
+         setTimeout(
+             function() {
+                 self._connectObject(id, cb);
+             },
+             this.netdelay
+         );
+     };
+     Kata.LoopbackSpace.prototype._connectObject = function(id, cb) {
+         var uuid = Math.uuid();
+         this.mObjects[uuid] = uuid;
+         cb(id, uuid);
      };
 
-
- })();
+})();
