@@ -33,6 +33,7 @@
 Kata.include("katajs/oh/SpaceConnection.js");
 Kata.include("katajs/core/Math.uuid.js");
 Kata.include("katajs/space/loop/Loc.js");
+Kata.include("katajs/space/loop/EveryoneProx.js");
 
 (function() {
 
@@ -52,6 +53,7 @@ Kata.include("katajs/space/loop/Loc.js");
 
          this.mObjects = {};
          this.mLoc = new Kata.Loopback.Loc();
+         this.mProx = new Kata.Loopback.EveryoneProx(this);
      };
 
      /** Static map of local spaces, used to allow
@@ -60,7 +62,9 @@ Kata.include("katajs/space/loop/Loc.js");
       */
      Kata.LoopbackSpace.spaces = {};
 
-     /** Request an object to be connected, and call cb on completion.
+     /** Request an object to be connected. cb is an object whose
+      * fields are callbacks for particular events: connect, prox,
+      * etc.
       */
      Kata.LoopbackSpace.prototype.connectObject = function(id, cb) {
          self = this;
@@ -89,9 +93,14 @@ Kata.include("katajs/space/loop/Loc.js");
          };
 
          this.mLoc.add(uuid, obj_loc.pos, obj_loc.vel, obj_loc.acc, obj_loc.bounds);
+         this.mProx.addObject(uuid);
 
-         this.mObjects[uuid] = obj;
-         cb(id, uuid, obj_loc, obj_bounds); // FIXME clone these so they aren't shared
+         this.mObjects[uuid] = cb;
+         cb.connected(id, uuid, obj_loc, obj_bounds); // FIXME clone these so they aren't shared
      };
 
+     Kata.LoopbackSpace.prototype.proxResult = function(querier, observed, entered) {
+         Kata.warn("" + querier + " observed " + observed + ": " + entered);
+         // var cb = this.mObjects[querier]; cb.prox(observed, entered);
+     };
 })();

@@ -68,7 +68,10 @@ Kata.include("katajs/space/loop/Space.js");
      Kata.LoopbackSpaceConnection.prototype.connectObject = function(id, auth) {
          this.mSpace.connectObject(
              id,
-             Kata.bind(this.connectResponse, this)
+             {
+                 connected : Kata.bind(this.connectResponse, this),
+                 prox : Kata.bind(this.proxEvent, this)
+             }
          );
      };
 
@@ -79,6 +82,9 @@ Kata.include("katajs/space/loop/Space.js");
              this.mObjectHost.connectionResponse(id, false);
      };
 
+     Kata.LoopbackSpaceConnection.prototype.proxEvent = function(id, entered) {
+         this.mObjectHost.proxEvent(id, entered);
+     };
 
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
 })();

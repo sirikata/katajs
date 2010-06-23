@@ -30,8 +30,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/SpaceConnection.js");
-
 (function() {
 
      if (typeof(Kata.Loopback) == "undefined") { Kata.Loopback = {}; }
