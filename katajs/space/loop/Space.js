@@ -32,6 +32,7 @@
 
 Kata.include("katajs/oh/SpaceConnection.js");
 Kata.include("katajs/core/Math.uuid.js");
+Kata.include("katajs/space/loop/Loc.js");
 
 (function() {
 
@@ -50,6 +51,7 @@ Kata.include("katajs/core/Math.uuid.js");
          this.netdelay = 10; // Constant delay, in milliseconds
 
          this.mObjects = {};
+         this.mLoc = new Kata.Loopback.Loc();
      };
 
      /** Static map of local spaces, used to allow
@@ -73,21 +75,23 @@ Kata.include("katajs/core/Math.uuid.js");
          var uuid = Math.uuid();
          var obj =
              {
-                 uuid : uuid,
-                 loc : {
-                     pos : [0, 0, 0],
-                     vel : [0, 0, 0],
-                     acc : [0, 0, 0]
-                 },
-                 bounds : {
-                     min : [0, 0, 0],
-                     max : [0, 0, 0]
-                 }
+                 uuid : uuid
              };
+
+         var obj_loc = {
+             pos : [0, 0, 0],
+             vel : [0, 0, 0],
+             acc : [0, 0, 0]
+         };
+         var obj_bounds = {
+             min : [0, 0, 0],
+             max : [0, 0, 0]
+         };
+
+         this.mLoc.add(uuid, obj_loc.pos, obj_loc.vel, obj_loc.acc, obj_loc.bounds);
+
          this.mObjects[uuid] = obj;
-         var obj_loc = obj.loc; // FIXME clone
-         var obj_bounds = obj.bounds; // FIXME clone
-         cb(id, uuid, obj_loc, obj_bounds);
+         cb(id, uuid, obj_loc, obj_bounds); // FIXME clone these so they aren't shared
      };
 
 })();
