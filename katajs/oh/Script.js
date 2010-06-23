@@ -74,8 +74,30 @@ Kata.include("katajs/oh/Presence.js");
       */
      Kata.Script.prototype.connect = function(space, auth, cb) {
          var msg = new Kata.ScriptProtocol.FromScript.Connect(space, auth);
-         this.mConnectRequests[space] = msg;
+         this.mConnectRequests[space] = cb;
          this._sendHostedObjectMessage(msg);
+     };
+
+     Kata.Script.prototype.newPresence = function(presence) {
+         this.mPresences[presence.space()] = presence;
+
+         var cb = this.mConnectRequests[presence.space()];
+         if (cb) {
+             delete this.mConnectRequests[presence.space()];
+             cb(presence);
+         }
+     };
+     Kata.Script.prototype.connectFailure = function(space, reason) {
+         var cb = this.mConnectRequests[space];
+         if (cb) {
+             delete this.mConnectRequests[space];
+             cb(space, reason);
+         }
+     };
+     Kata.Script.prototype.presenceInvalidated = function(presence, reason) {
+         if (this.mPresences[presence.space()]) {
+             delete this.mPresences[presence.space()];
+         }
      };
 
      /** Request a callback after the specified amount of time.  If
@@ -125,10 +147,6 @@ Kata.include("katajs/oh/Presence.js");
          // anything else?
      };
 
-
-     Kata.Script.prototype._handlePresenceEvent = function(data) {
-         // this.mPresences[data.PresenceID].handleSpaceEvent(Disconnected, data.reason);
-     };
 
      Kata.Script.prototype._handleStorageEvent = function(data) {
      };

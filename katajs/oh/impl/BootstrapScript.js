@@ -32,6 +32,7 @@
 
 Kata.include("katajs/core/FilterChannel.js");
 Kata.include("katajs/core/MessageDispatcher.js");
+Kata.include("katajs/oh/Presence.js");
 
 (function() {
      /** Bootstraps an object's script, enabling it to communicate
@@ -73,22 +74,30 @@ Kata.include("katajs/core/MessageDispatcher.js");
          handlers[msgTypes.Disconnected] = Kata.bind(this._handleDisconnect, this);
          this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
 
+         this.mPresences = {};
      };
 
      Kata.BootstrapScript.prototype.receiveMessage = function(channel, msg) {
          return this.mMessageDispatcher.dispatch(channel, msg);
      };
 
-     Kata.BootstrapScript.prototype._handleConnected = function(msg) {
-         Kata.warn("Connected.");
+     Kata.BootstrapScript.prototype._handleConnected = function(channel, msg) {
+         var presence = new Kata.Presence(this.mScript, msg.space, msg.id, msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, null);
+
+         this.mPresences[msg.space] = presence;
+         this.mScript.newPresence(presence);
      };
 
-     Kata.BootstrapScript.prototype._handleConnectFailed = function(msg) {
-         Kata.warn("Connection failed.");
+     Kata.BootstrapScript.prototype._handleConnectFailed = function(channel, msg) {
+         this.mScript.connectFailure(msg.space, msg.reason);
      };
 
-     Kata.BootstrapScript.prototype._handleDisconnect = function(msg) {
-         Kata.warn("Disconnected.");
+     Kata.BootstrapScript.prototype._handleDisconnect = function(channel, msg) {
+         var invalidated = this.mPresences[msg.space];
+         if (!invalidated) return;
+
+         delete this.mPresences[msg.space];
+         this.mScript.presenceInvalidated(msg, "Disconnected.");
      };
 
  })();

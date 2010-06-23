@@ -47,7 +47,7 @@ Kata.include("katajs/core/Channel.js");
          this._channel = channel;
          this._filter = filter;
 
-         this._channel.registerListener( Kata.bind(this.callListeners, this) );
+         this._channel.registerListener( Kata.bind(this._filterMessage, this) );
      };
      SUPER = Kata.Channel.prototype;
      Kata.extend(Kata.FilterChannel, SUPER);
@@ -61,4 +61,9 @@ Kata.include("katajs/core/Channel.js");
      Kata.FilterChannel.prototype.sendMessage = function (data) {
          this._channel.sendMessage(data);
      };
- })();
+
+     Kata.FilterChannel.prototype._filterMessage = function(channel, msg) {
+         this.callListeners(msg);
+     };
+
+})();

@@ -189,15 +189,17 @@ Kata.include("katajs/core/URL.js");
       *  @param {boolean} success
       *  @param {} presence_id the identifier for the presence, or
       *  null if the connection wasn't successful.
+      *  @param {LocUpdate} loc initial location information for the object
+      *  @param {BoundsUpdate} bounds initial bounds information for the object
       */
-     Kata.ObjectHost.prototype.connectionResponse = function(id, success, presence_id) {
+     Kata.ObjectHost.prototype.connectionResponse = function(id, success, presence_id, loc, bounds) {
          var obj = this.mObjects[id];
          if (!obj) {
              Kata.warn("Got connection response for unknown object: " + id);
              return;
          }
 
-         obj.connectionResponse(success, presence_id);
+         obj.connectionResponse(success, presence_id, loc, bounds);
      };
 
     /** Connects to a space registered using registerSpace.

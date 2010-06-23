@@ -13,5 +13,6 @@ Kata.include("katajs/oh/Script.js");
      Kata.extend(Example.BlessedScript, SUPER);
 
      Example.BlessedScript.prototype.connected = function() {
+         Kata.warn("Got connected callback.");
      };
 })();

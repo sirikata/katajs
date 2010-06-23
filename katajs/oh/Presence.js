@@ -91,6 +91,13 @@
          return this.mID;
      };
 
+     /** Get the space this presence resides in.
+      *  @returns {Kata.URL} space URL
+      */
+     Kata.Presence.prototype.space = function() {
+         return this.mSpace;
+     };
+
      /** Short hand for sending a message to the owning HostedObject.
       *  Note that the channel this is sent via is shared by all
       *  Presences and the Script itself.

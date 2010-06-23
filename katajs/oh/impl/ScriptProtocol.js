@@ -99,10 +99,11 @@
                  Disconnected : 3
              },
 
-             Connected : function(space, id) {
+             Connected : function(space, id, loc, bounds) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.Connected;
                  this.space = space;
                  this.id = id;
+                 this.loc = loc;
              },
 
              ConnectionFailed : function(space, reason) {

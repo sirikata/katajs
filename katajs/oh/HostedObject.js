@@ -87,10 +87,10 @@ Kata.include("katajs/core/MessageDispatcher.js");
          this.mObjectHost.connect(this, request.space, request.auth);
      };
 
-     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id) {
+     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, loc, bounds) {
          var msg = null;
          if (success)
-             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object);
+             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, loc, bounds);
          else
              msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object);
          this.sendScriptMessage(msg);
