@@ -53,6 +53,8 @@ Kata.include("katajs/core/MessageDispatcher.js");
         scriptHandlers[scriptTypes.Connect] = Kata.bind(this._handleConnect, this);
         scriptHandlers[scriptTypes.Disconnect] = Kata.bind(this._handleDisconnect, this);
 
+        scriptHandlers[scriptTypes.CreateObject] = Kata.bind(this._handleCreateObject, this);
+
         this.mScriptMessageDispatcher = new Kata.MessageDispatcher(scriptHandlers);
     };
 
@@ -98,6 +100,11 @@ Kata.include("katajs/core/MessageDispatcher.js");
 
      Kata.HostedObject.prototype._handleDisconnect = function (channel, request) {
          Kata.warn("Disconnect request.");
+     };
+
+
+     Kata.HostedObject.prototype._handleCreateObject = function (channel, request) {
+         this.mObjectHost.createObject(request.script, request.constructor, request.args);
      };
 
     /** A simulation sent a message to this object via the object host.

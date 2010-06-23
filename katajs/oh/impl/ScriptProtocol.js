@@ -59,7 +59,9 @@
                  Connect : 1,
                  Disconnect : 2,
                  Location : 3,
-                 Visual : 4
+                 Visual : 4,
+
+                 CreateObject : 100
              },
 
              Connect : function(space, auth) {
@@ -88,6 +90,14 @@
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Visual;
                  this.space = space;
                  this.url = url;
+             },
+
+
+             CreateObject : function(script, cons, args) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.CreateObject;
+                 this.script = script;
+                 this.constructor = cons;
+                 this.args = args;
              }
          },
 

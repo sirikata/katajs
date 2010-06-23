@@ -67,10 +67,10 @@ Kata.include("katajs/space/loop/EveryoneProx.js");
       * etc.
       */
      Kata.LoopbackSpace.prototype.connectObject = function(id, cb) {
-         self = this;
+         var spaceself = this;
          setTimeout(
              function() {
-                 self._connectObject(id, cb);
+                 spaceself._connectObject(id, cb);
              },
              this.netdelay
          );

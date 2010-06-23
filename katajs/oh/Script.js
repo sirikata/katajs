@@ -116,6 +116,16 @@ Kata.include("katajs/oh/Presence.js");
          return null;
      };
 
+     /** Have the object host instantiate a new object.
+      * @param {} script the script to execute for the object
+      * @param {} cons the constructor for the object
+      * @param {} args the arguments for the constructor
+      */
+     Kata.Script.prototype.createObject = function(script, cons, args) {
+         var msg = new Kata.ScriptProtocol.FromScript.CreateObject(script, cons, args);
+         this._sendHostedObjectMessage(msg);
+     };
+
 
      Kata.Script.prototype.Persistence = {};
      /** Request the given data be read.

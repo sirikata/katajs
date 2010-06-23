@@ -122,31 +122,32 @@ Kata.include("katajs/core/URL.js");
             return ""+retval;
         };
     }();
+
+     Kata.ObjectHost.prototype.createObject = function(script, cons, args) {
+         var privid = this.privateIdGenerator();
+         var createdObject = this.generateObject(privid);
+         if (script && cons && args)
+             createdObject.createScript(script, cons, args);
+     };
+
     /** Sends a message to some simulation.
      * @param {Kata.Channel} channel  The sending simulation.
      * @param {string|object} data  A message (often an object formatted as
      *     JavascriptGraphicsApi)
      */
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
-        var privid = this.privateIdGenerator();
         if (channel == this.mSimulationsByName["graphics"]||data.msg=="Create") {
             switch (data.msg) {
             case "Create":{
-                var createdObject = this.createObject(privid);
-                if (data.script && data.method && data.args)
-                    createdObject.createScript(data.script, data.method, data.args);
+                this.createObject(data.script, data.method, data.args);
                 return;
             }
             default:
                 break;
             }
         }
-        if (privid in this.mObjects) {
-            this.mObjects[privid].messageFromSimulation(channel, data);
-        } else {
-            console.log("ObjectHost message for unknown object: "+privid);
-            console.log("List of known objects:",this.mObjects);
-        }
+        console.log("ObjectHost message for unknown object: "+privid);
+        console.log("List of known objects:",this.mObjects);
     };
 
     /** Creates a new instance of a Kata.HostedObject for a specific protocol.
@@ -155,7 +156,7 @@ Kata.include("katajs/core/URL.js");
      *     object's constructor.
      * @return {Kata.HostedObject} A pointer to the new object.
      */
-    Kata.ObjectHost.prototype.createObject = function(id) {
+    Kata.ObjectHost.prototype.generateObject = function(id) {
         if (network_debug) console.log("Creating Object "+id);
         this.mObjects[id] = new Kata.HostedObject(this, id);
         return this.mObjects[id];
