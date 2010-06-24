@@ -99,8 +99,26 @@ Kata.include("katajs/space/loop/EveryoneProx.js");
          cb.connected(id, uuid, obj_loc, obj_bounds); // FIXME clone these so they aren't shared
      };
 
+     Kata.LoopbackSpace.prototype.registerProxQuery = function(id, sa) {
+         var spaceself = this;
+         setTimeout(
+             function() {
+                 spaceself._registerProxQuery(id, sa);
+             },
+             this.netdelay
+         );
+     };
+     Kata.LoopbackSpace.prototype._registerProxQuery = function(id, sa) {
+         this.mProx.addQuery(id);
+     };
+
      Kata.LoopbackSpace.prototype.proxResult = function(querier, observed, entered) {
-         Kata.warn("" + querier + " observed " + observed + ": " + entered);
-         // var cb = this.mObjects[querier]; cb.prox(observed, entered);
+         var querier_cb = this.mObjects[querier];
+         if (!querier_cb) {
+             Kata.warn("LoopbackSpace got query result for non-existant object: " + querier);
+             return;
+         }
+
+         querier_cb.prox(observed, entered);
      };
 })();

@@ -32,6 +32,7 @@
 
 Kata.include("katajs/oh/impl/ScriptProtocol.js");
 Kata.include("katajs/oh/Presence.js");
+Kata.include("katajs/oh/RemotePresence.js");
 
 (function() {
 
@@ -56,8 +57,14 @@ Kata.include("katajs/oh/Presence.js");
          this.mChannel.registerListener( Kata.bind(this._handleHostedObjectMessage, this));
 
          this.mPresences = {};
+         this.mRemotePresences = {};
 
          this.mConnectRequests = {};
+
+         var handlers = {};
+         var msgTypes = Kata.ScriptProtocol.ToScript.Types;
+         handlers[msgTypes.QueryEvent] = Kata.bind(this._handleQueryEvent, this);
+         this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
      };
 
      /** Send a message to the HostedObject.
@@ -145,18 +152,29 @@ Kata.include("katajs/oh/Presence.js");
      /** Handle messages received from the HostedObject.  This just
       * parses and dispatches to individual handler functions.
       */
-     Kata.Script.prototype._handleHostedObjectMessage = function(data) {
-         Kata.notImplemented();
-         // _handlePresenceEvent (dispatched to Presence, which does
-         // finer-grained interpretation)
-         //
-         // _handleStorageEvent (for object host local storage,
-         // although it isn't clear what this will mean
-         //
-         // timers? cdn requests? external requests (e.g. xmlhttp)?
-         // anything else?
+     Kata.Script.prototype._handleHostedObjectMessage = function(channel, data) {
+         this.mMessageDispatcher.dispatch(channel, data);
      };
 
+     Kata.Script.prototype._handleQueryEvent = function(channel, msg) {
+         var presence = this.mPresences[msg.space];
+         if (msg.entered) {
+             // New object, create presence and notify
+             var remote = new Kata.RemotePresence(msg.space, msg.observed);
+             this.mRemotePresences[msg.observed] = remote;
+             presence.remotePresence(remote, true);
+         }
+         else {
+             // Object exited, invalidate presence and notify
+             var remote = this.mRemotePresences[msg.observed];
+             if (!remote) {
+                 Kata.warn("Got removal prox event for unknown object.");
+                 return;
+             }
+             delete this.mRemotePresences[msg.observed];
+             presence.remotePresence(remote, false);
+         }
+     };
 
      Kata.Script.prototype._handleStorageEvent = function(data) {
      };

@@ -82,6 +82,7 @@
          this.mVisual = vis;
 
          this.mQuery = null;
+         this.mQueryHander = null;
      };
 
      /** Get the unique ID associated with this Presence.
@@ -132,7 +133,7 @@
 
      /** Get the current interest query's value. */
      Kata.Presence.prototype.query = function() {
-         Kata.notImplemented();
+         return this.mQuery;
      };
 
 
@@ -220,10 +221,27 @@
      };
 
      /** Request the interest query parameters be updated. */
-     Kata.Presence.prototype.setQuery = function(val) {
-         Kata.notImplemented();
+     Kata.Presence.prototype.setQuery = function(sa) {
+         this.mQuery = sa;
+         this._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Query(this.mSpace, this.mID, sa)
+         );
      };
 
+     /** Set the query handler.  Should support calls of handler(presence, entered). */
+     Kata.Presence.prototype.setQueryHandler = function(cb) {
+         this.mQueryHandler = cb;
+     };
+
+     /** Notify the presence of an event on a remote presence, either
+      * added or removed from a result set.  The Presence remains
+      * valid (since the user might still want to communicate with the
+      * object), but will not be kept alive by the system any longer.
+      */
+     Kata.Presence.prototype.remotePresence = function(remote, added) {
+         if (this.mQueryHandler)
+             this.mQueryHandler(remote, added);
+     };
 
      // Space Listening Events (public API used by Scripts to register
      // to listen for particular types of events).

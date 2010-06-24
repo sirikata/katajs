@@ -1,5 +1,5 @@
-/*  KataJS
- *  EveryoneProx.js
+/*  Kata Javascript Network Layer
+ *  RemotePresence.js
  *
  *  Copyright (c) 2010, Ewen Cheslack-Postava
  *  All rights reserved.
@@ -32,52 +32,28 @@
 
 (function() {
 
-     if (typeof(Kata.Loopback) == "undefined") { Kata.Loopback = {}; }
-
-     /** A simple prox implementation that returns everyone to all queriers. */
-     Kata.Loopback.EveryoneProx = function(space) {
+     /** A RemotePresence represents another object in the world you
+      * can interact with.  It will keep a shadow copy of basic
+      * information like location and mesh as well as allow you to
+      * send messages to the object.
+      */
+     Kata.RemotePresence = function (space, id) {
          this.mSpace = space;
-
-         this.mObjects = {};
-         this.mQueriers = {};
+         this.mID = id;
      };
 
-     Kata.Loopback.EveryoneProx.prototype.addObject = function(uuid) {
-         if (this.mObjects[uuid]) return;
-
-         this.mObjects[uuid] = uuid;
-
-         for(var querier in this.mQueriers) {
-             if (querier == uuid) continue;
-             this.mSpace.proxResult(querier, uuid, true);
-         }
+     /** Get the unique ID associated with this RemotePresence.
+      *  @returns {Kata.PresenceID} RemotePresenceID for this RemotePresence (combination of SpaceID and ObjectID)
+      */
+     Kata.RemotePresence.prototype.id = function() {
+         return this.mID;
      };
 
-     Kata.Loopback.EveryoneProx.prototype.removeObject = function(uuid) {
-         if (!this.mObjects[uuid]) return;
-
-         delete this.mObjects[uuid];
-
-         for(var querier in this.mQueriers) {
-             if (querier == uuid) continue;
-             this.mSpace.proxResult(querier, uuid, false);
-         }
-     };
-
-     Kata.Loopback.EveryoneProx.prototype.addQuery = function(querier) {
-         if (this.mQueriers[querier]) return;
-
-         this.mQueriers[querier] = querier;
-
-         for(var seen in this.mObjects) {
-             if (querier == seen) continue;
-             this.mSpace.proxResult(querier, seen, true);
-         }
-     };
-
-     Kata.Loopback.EveryoneProx.prototype.removeQuery = function(querier) {
-         if (this.mQueriers[querier])
-             delete this.mQueriers[querier];
+     /** Get the space this presence resides in.
+      *  @returns {Kata.URL} space URL
+      */
+     Kata.RemotePresence.prototype.space = function() {
+         return this.mSpace;
      };
 
 })();

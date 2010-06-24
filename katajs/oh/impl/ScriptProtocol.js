@@ -60,6 +60,7 @@
                  Disconnect : 2,
                  Location : 3,
                  Visual : 4,
+                 Query : 5,
 
                  CreateObject : 100
              },
@@ -92,6 +93,13 @@
                  this.url = url;
              },
 
+             Query : function(space, id, sa) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Query;
+                 this.space = space;
+                 this.id = id;
+                 this.sa = sa;
+             },
+
 
              CreateObject : function(script, cons, args) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.CreateObject;
@@ -106,7 +114,8 @@
              Types : {
                  Connected : 1,
                  ConnectionFailed : 2,
-                 Disconnected : 3
+                 Disconnected : 3,
+                 QueryEvent : 4
              },
 
              Connected : function(space, id, loc, bounds) {
@@ -125,7 +134,15 @@
              Disconnected : function(space) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.Disconnected;
                  this.space = space;
+             },
+
+             QueryEvent : function(space, observed, entered) {
+                 this.__type = Kata.ScriptProtocol.ToScript.Types.QueryEvent;
+                 this.space = space;
+                 this.observed = observed;
+                 this.entered = entered;
              }
+
          }
      };
 

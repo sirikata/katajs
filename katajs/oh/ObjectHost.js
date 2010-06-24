@@ -178,6 +178,7 @@ Kata.include("katajs/core/URL.js");
              if (!protoClass)
                  Kata.error("Unknown space protocol: " + spaceURL.protocol);
              space_conn = new protoClass(this, spaceURL);
+             this.mSpaceConnections[spaceURL.toString()] = space_conn;
          }
 
          // And try to connect
@@ -200,32 +201,22 @@ Kata.include("katajs/core/URL.js");
              return;
          }
 
+         // Swap which ID we're tracking the object with
+         delete this.mObjects[id];
+         this.mObjects[presence_id.object] = obj;
+
          obj.connectionResponse(success, presence_id, loc, bounds);
      };
 
-    /** Connects to a space registered using registerSpace.
-     * @param {string} spacename  The name of a space (from registerSpace).
-     * @param {Kata.ObjectHost.TopLevelStream=} channel  A channel to register
-     *     to a new space. Omitted if a new connection is to be made instead.
-     * @return {Kata.ObjectHost.TopLevelStream}  A top-level stream to talk to
-     *     the space represented by spacename.
-     */
-    Kata.ObjectHost.prototype.connectToSpace = function(spacename, channel) {
-        Kata.warn("Deprecated: ObjectHost.connectToSpace");
-        var topLevelStream = channel;
-        if (topLevelStream) {
-            this.mSpaceConnections[spacename] = channel;
-        } else {
-            topLevelStream = this.mSpaceConnections[spacename];
-        }
-        if (!topLevelStream) {
-            var server = this.mSpaceMap[spacename];
-            var ProtoClass = server.protocol.protocol_class;
-            topLevelStream = new ProtoClass(server.host, server.port, NUM_STREAMS);
-            this.mSpaceConnections[spacename] = topLevelStream;
-        }
-        return topLevelStream;
-    };
+     Kata.ObjectHost.prototype.registerProxQuery = function(space, id, sa) {
+         var space_conn = this.mSpaceConnections[space];
+         space_conn.registerProxQuery(id, sa);
+     };
+
+     Kata.ObjectHost.prototype.proxEvent = function(space, querier, observed, entered) {
+         var obj = this.mObjects[querier];
+         obj.proxEvent(space, observed, entered);
+     };
 
     /**
      * A top-level connection to a remote server. It is not yet bound to a

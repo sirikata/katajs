@@ -76,14 +76,19 @@ Kata.include("katajs/space/loop/Space.js");
      };
 
      Kata.LoopbackSpaceConnection.prototype.connectResponse = function(id, object, loc, bounds) {
+         this.mObjectID = object;
          if (object) // FIXME real presence_id below
              this.mObjectHost.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, loc, bounds);
          else
              this.mObjectHost.connectionResponse(id, false);
      };
 
+     Kata.LoopbackSpaceConnection.prototype.registerProxQuery = function(id, sa) {
+         this.mSpace.registerProxQuery(id, sa);
+     };
+
      Kata.LoopbackSpaceConnection.prototype.proxEvent = function(id, entered) {
-         this.mObjectHost.proxEvent(id, entered);
+         this.mObjectHost.proxEvent(this.mSpaceURL, this.mObjectID, id, entered);
      };
 
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);

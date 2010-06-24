@@ -52,6 +52,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
         var scriptTypes = Kata.ScriptProtocol.FromScript.Types;
         scriptHandlers[scriptTypes.Connect] = Kata.bind(this._handleConnect, this);
         scriptHandlers[scriptTypes.Disconnect] = Kata.bind(this._handleDisconnect, this);
+        scriptHandlers[scriptTypes.Query] = Kata.bind(this._handleQuery, this);
 
         scriptHandlers[scriptTypes.CreateObject] = Kata.bind(this._handleCreateObject, this);
 
@@ -102,6 +103,14 @@ Kata.include("katajs/core/MessageDispatcher.js");
          Kata.warn("Disconnect request.");
      };
 
+     Kata.HostedObject.prototype._handleQuery = function (channel, request) {
+         this.mObjectHost.registerProxQuery(request.space, request.id, request.sa);
+     };
+
+     Kata.HostedObject.prototype.proxEvent = function(space, observed, entered) {
+         var msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered);
+         this.sendScriptMessage(msg);
+     };
 
      Kata.HostedObject.prototype._handleCreateObject = function (channel, request) {
          this.mObjectHost.createObject(request.script, request.constructor, request.args);

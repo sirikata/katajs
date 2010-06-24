@@ -57,4 +57,8 @@ Kata.include("katajs/oh/ObjectHost.js");
      Kata.SpaceConnection.prototype.connectObject = function(id, auth) {
          Kata.notImplemented("SpaceConnection.connectObject");
      };
+
+     Kata.SpaceConnection.prototype.registerQuery = function(id, auth) {
+         Kata.notImplemented("SpaceConnection.registerQuery");
+     };
 })();
