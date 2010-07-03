@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Really simple SST stream test</title>
+<script type="text/javascript" src="../../externals/protojs/protobuf.js"></script>
+<script type="text/javascript" src="../../externals/protojs/pbj.js"></script>
+<script type="text/javascript" src="../../katajs/core/Core.js"></script>
+<script type="text/javascript" src="SSTTest.js"></script>
+<!-- not necessary, but shows line number of errors -->
+<script type="text/javascript" src="../SSTImpl.js"></script>
+<script>
+var sst = new SSTTest();
+sst.createTestObjects({objectId:function(){return "AAAA"}},{objectId:function(){return "BBBB"}});
+setInterval(serviceConnectionsSST, 100);
+</script>
+</head>
+<body>
+</body>
+</html>
