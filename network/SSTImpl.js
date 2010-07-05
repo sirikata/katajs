@@ -1,4 +1,43 @@
+/*  katajs SST over ODP implementation
+ *  SSTImpl.js
+ *
+ *  Copyright (c) 2010, Daniel Reiter Horn
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are
+ *  met:
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *  * Neither the name of katajs nor the names of its contributors may
+ *    be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
+Protocol = Sirikata.Protocol;
+KataDequePushBack = function(x,y){x.push_back(y);}
+KataDequePopFront = function(x){return x.pop_front();}
+KataDequeFront = function(x){return x.front();}
+KataDequeLength = function(x){return x.size();}
+KataDequeEmpty = function(x){return x.empty();}
+KataDequeIndex = function(x,y){return x.index(y);}
+KataDequeClear = function(x){return x.clear();}
 
 /**
  * @constructor
@@ -45,11 +84,13 @@ var EndPointSST = function(endPoint, port) {
 };
 
 EndPointSST.prototype.uid=function() {
-    return ""+endPoint.id+this.port;
+    return ""+this.endPoint+":"+this.port;
 };
 
+EndPointSST.prototype.toString=EndPointSST.prototype.uid;
+
 EndPointSST.prototype.objectId=function() {
-    return endPoint.id;
+    return this.endPoint;
 };
 
 /** 
@@ -151,7 +192,7 @@ BaseDatagramLayer.prototype.receiveMessage=function(msg)  {
                             msg.payload);
 };
 BaseDatagramLayer.prototype.dispatcher=function() {
-    return mDispatcher;
+    return this.mDispatcher;
 };
 
 BaseDatagramLayer.prototype.getAvailablePort=function() {
@@ -269,7 +310,7 @@ function ConnectionSST(localEndPoint,remoteEndPoint){
     /**
      * @type {number}
      */
-    this.mRTOMilliseconds(1000);
+    this.mRTOMilliseconds=1000;
     /**
      * @type {boolean}
      */
@@ -350,15 +391,15 @@ ConnectionSST.prototype.serviceConnection=function (curTime) {
       this.numSegmentsSent = 0;
 
       for (var i = 0; (!KataDequeEmpty(this.mQueuedSegments)) && i < this.mCwnd; i++) {
-	      var segment = KataDequeFront(mQueuedSegments);
+	      var segment = KataDequeFront(this.mQueuedSegments);
 
 	      var sstMsg=new Protocol.SST.SSTChannelHeader();
-	      sstMsg.set_channel_id( this.mRemoteChannelID );
-	      sstMsg.set_transmit_sequence_number(segment.mChannelSequenceNumber);
-	      sstMsg.set_ack_count(1);
-	      sstMsg.set_ack_sequence_number(segment.mAckSequenceNumber);
+	      sstMsg.channel_id = this.mRemoteChannelID;
+	      sstMsg.transmit_sequence_number = segment.mChannelSequenceNumber;
+	      sstMsg.ack_count = 1;
+	      sstMsg.ack_sequence_number = segment.mAckSequenceNumber;
 
-	      sstMsg.set_payload(segment.mBuffer);
+	      sstMsg.payload = segment.mBuffer;
 
 	      /*printf("%s sending packet from data sending loop to %s\n",
 	       mLocalEndPoint.endPoint.readableHexData().c_str()
@@ -367,9 +408,9 @@ ConnectionSST.prototype.serviceConnection=function (curTime) {
 	      this.sendSSTChannelPacket(sstMsg);
 
 	      segment.mTransmitTime = curTime;
-	      KataDequePushBack(mOutstandingSegments,segment);
+	      KataDequePushBack(this.mOutstandingSegments,segment);
 
-	      KataDequePopFront(mQueuedSegments);
+	      KataDequePopFront(this.mQueuedSegments);
 
 	      this.numSegmentsSent++;
 
@@ -390,8 +431,8 @@ ConnectionSST.prototype.serviceConnection=function (curTime) {
 
       var all_sent_packets_acked = true;
       var no_packets_acked = true;
-      for (var i=0; i < mOutstandingSegments.size(); i++) {
-          var segment = KataDequeIndex(mOutstandingSegments,i);
+      for (var i=0; i < this.mOutstandingSegments.size(); i++) {
+          var segment = KataDequeIndex(this.mOutstandingSegments,i);
 
           if (segment.mAckTime == null) {
               all_sent_packets_acked = false;
@@ -403,7 +444,7 @@ ConnectionSST.prototype.serviceConnection=function (curTime) {
                   this.mFirstRTO = false;
               }
               else {
-                  this.mRTOMilliseconds = CC_ALPHA_SST * mRTOMilliseconds +
+                  this.mRTOMilliseconds = CC_ALPHA_SST * this.mRTOMilliseconds +
                       (1.0-CC_ALPHA_SST) * (segment.mAckTime.getTime() - segment.mTransmitTime.getTime());
               }
           }
@@ -447,7 +488,7 @@ var sConnectionMapSST = {};
 var MAX_DATAGRAM_SIZE_SST=1000;
 var MAX_PAYLOAD_SIZE_SST=1300;
 var MAX_QUEUED_SEGMENTS_SST=300;
-var CC_ALPHA=0.8;
+var CC_ALPHA_SST=0.8;
 
 var CONNECTION_DISCONNECTED_SST = 1;      // no network connectivity for this connection.
                               // It has either never been connected or has
@@ -460,10 +501,15 @@ var CONNECTION_PENDING_RECEIVE_CONNECT_SST = 3;// connection received an initial
                                               // channel negotiation request, but the
                                               // negotiation has not completed yet.
 
-var CONNECTION_CONNECTED=4;           // The connection is connected to a remote end
+var CONNECTION_CONNECTED_SST=4;           // The connection is connected to a remote end
                               // point.
-var CONNECTION_PENDING_DISCONNECT=5;  // The connection is in the process of
+var CONNECTION_PENDING_DISCONNECT_SST=5;  // The connection is in the process of
                               // disconnecting from the remote end point.
+
+function getConnectionSST(endPoint) {
+    var endPointUid=endPoint.uid();
+    return sConnectionMapSST[endPointUid];
+}
 
 /** Creates a connection for the application to a remote
  *    endpoint. The EndPoint argument specifies the location of the remote
@@ -490,7 +536,7 @@ var CONNECTION_PENDING_DISCONNECT=5;  // The connection is in the process of
  * @returns false if it's not possible to create this connection, e.g. if another connection
  *     is already using the same local endpoint; true otherwise.
  */
-function createConnectionSST(localEndPoint,remoteEndPoint,cb,scb){
+function createConnectionSST(localEndPoint,remoteEndPoint,cb){
     var endPointUid=localEndPoint.uid();
     if (endPointUid in sConnectionMapSST) {
         Kata.log("mConnectionMap.find failed for " +localEndPoint.uid());
@@ -504,7 +550,7 @@ function createConnectionSST(localEndPoint,remoteEndPoint,cb,scb){
     conn.setState(CONNECTION_PENDING_CONNECT_SST);
 
 
-    var channelid=getAvailableChannel();
+    var channelid=getDatagramLayerSST(localEndPoint).getAvailableChannel();
     var payload=[channelid&255,((channelid>>8)&255)];    
 
     conn.setLocalChannelID(channelid);
@@ -582,7 +628,7 @@ ConnectionSST.prototype.stream=function (cb, initial_data,
     var usid = Math.uuid();
     var lsid = this.getNewLSID();
 
-    var stream = new Stream(parentLSID, this, local_port, remote_port,  usid, lsid,
+    var stream = new StreamSST(parentLSID, this, local_port, remote_port,  usid, lsid,
 				            initial_data, false, 0, cb);
 
     this.mOutgoingSubstreamMap[lsid]=stream;
@@ -615,8 +661,7 @@ ConnectionSST.prototype.sendData=function(data, sstStreamHeaderTypeIsAck){
 
     if ( !sstStreamHeaderTypeIsAck ) {
       if (KataDequeLength(this.mQueuedSegments) < MAX_QUEUED_SEGMENTS_SST) {
-	      KataDequePushBack(mQueuedSegments,new ChannelSegment(data,
-                                                               length,
+	      KataDequePushBack(this.mQueuedSegments,new ChannelSegmentSST(data,
                                                                this.mTransmitSequenceNumber,
                                                                this.mLastReceivedSequenceNumber) );
 	      pushedIntoQueue = true;
@@ -676,45 +721,37 @@ ConnectionSST.prototype.markAcknowledgedPacket=function(receivedAckNum){
 /**
  * @param {Array} recv_buff the data  to be received
  */
-ConnectionSST.prototype.receiveMessage=function(recv_buff) {
-
-    var received_msg = new Protocol.SST.SSTChannelHeader();
-    var parsed = received_msg.ParseFromArray(recv_buff);
+ConnectionSST.prototype.receiveMessage=function(received_msg) {
 
     this.mLastReceivedSequenceNumber = received_msg.transmit_sequence_number;
 
     var receivedAckNum = received_msg.ack_sequence_number;
 
-    markAcknowledgedPacket(receivedAckNum);
+    this.markAcknowledgedPacket(receivedAckNum);
 
     if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
         this.mState = CONNECTION_CONNECTED_SST;
         
         var originalListeningEndPoint=new EndPointSST(this.mRemoteEndPoint.endPoint, this.mRemoteEndPoint.port);
         
-        setRemoteChannelID(received_msg.payload.data[0]+received_msg.payload.data[1]*256);
+        this.setRemoteChannelID(received_msg.payload[0]+received_msg.payload[1]*256);
         
-        this.mRemoteEndPoint.port = received_msg.payload.data[2]+received_msg.payload.data[3]*256;
+        this.mRemoteEndPoint.port = received_msg.payload[2]+received_msg.payload[3]*256;
         
         this.sendData( [], false/*not an ack*/ );
         var localEndPointId=this.mLocalEndPoint.uid();
         var connectionCallback=sConnectionReturnCallbackMapSST[localEndPointId];
         if (connectionCallback)
         {
-            var conn=this.sConnectionMapSST[localEndPointId];
-	        if (conn) {
-	            connectionCallback(SUCCESS_SST, conn);
-	        }else {
-                Kata.log("Failed to call connection callback because conn for "+localEndPointId+"is notin map ");
-            }
             delete sConnectionReturnCallbackMapSST[localEndPointId];
+            connectionCallback(SUCCESS_SST, this);
         }
     }
     else if (this.mState == CONNECTION_PENDING_RECEIVE_CONNECT_SST) {
       this.mState = CONNECTION_CONNECTED_SST;
     }
     else if (this.mState == CONNECTION_CONNECTED_SST) {
-        if (received_msg.payload.length > 0) {
+        if (received_msg.payload && received_msg.payload.length > 0) {
 	        this.parsePacket(received_msg);
         }
     }
@@ -802,7 +839,7 @@ ConnectionSST.prototype.handleReplyPacket=function(received_stream_msg) {
           this.mIncomingSubstreamMap[incomingLsid] = stream;
 
         if (stream.mStreamReturnCallback){
-          stream.mStreamReturnCallback(SUCCESS, stream);
+          stream.mStreamReturnCallback(SUCCESS_SST, stream);
           stream.receiveData(received_stream_msg, received_stream_msg.payload,
                               received_stream_msg.bsn);
         }
@@ -886,10 +923,10 @@ ConnectionSST.prototype.finalize=function() {
     mDatagramLayer.dispatcher().unregisterObjectMessageRecipient(this.mLocalEndPoint.port, this);
 
 
-    if (this.mState != CONNECTION_DISCONNECTED) {
+    if (this.mState != CONNECTION_DISCONNECTED_SST) {
       // Setting mState to CONNECTION_DISCONNECTED implies close() is being
       //called from the destructor.
-      this.mState = CONNECTION_DISCONNECTED;
+      this.mState = CONNECTION_DISCONNECTED_SST;
       this.close(true);
 
 
@@ -905,7 +942,7 @@ function closeConnectionsSST() {
 function serviceConnectionsSST() {
     var curTime = new Date();
 
-    for (it in smConnectionMapSST)
+    for (it in sConnectionMapSST)
     {
       var conn = sConnectionMapSST[it];
       var connState = conn.mState;
@@ -954,7 +991,7 @@ ConnectionSST.prototype.datagram=function(data, local_port, remote_port,cb) {
      || this.mState == CONNECTION_PENDING_DISCONNECT_SST)
     {
       if (cb) {
-        cb(FAILURE, data);
+        cb(FAILURE_SST, data);
       }
       return false;
     }
@@ -984,7 +1021,7 @@ ConnectionSST.prototype.datagram=function(data, local_port, remote_port,cb) {
 
     if (cb) {
       //invoke the callback function
-      cb(SUCCESS, data);
+      cb(SUCCESS_SST, data);
     }
 
     return true;
@@ -1040,14 +1077,14 @@ ConnectionSST.prototype.close=function( force) {
     /* (this.mState != CONNECTION_DISCONNECTED_SST) implies close() wasnt called
        through the destructor. */
     if (this.mState != CONNECTION_DISCONNECTED_SST) {
-      delete sConnectionMapSST[mLocalEndPoint.uid()];
+      delete sConnectionMapSST[this.mLocalEndPoint.uid()];
     }
 
     if (force) {
-      this.mState = CONNECTION_DISCONNECTED;
+      this.mState = CONNECTION_DISCONNECTED_SST;
     }
     else  {
-      this.mState = CONNECTION_PENDING_DISCONNECT;
+      this.mState = CONNECTION_PENDING_DISCONNECT_SST;
     }
   };
 
@@ -1129,12 +1166,12 @@ function StreamBuffer (data, offset) {
     this.mOffset=offset;
 }
 
-var MAX_PAYLOAD_SIZE_STREAM=1000;
-var MAX_QUEUE_LENGTH_STREAM=4000000;
-var MAX_RECEIVE_WINDOW_STREAM=15000;
-var FL_ALPHA_STREAM=0.8;
-var INV_FL_ALPHA_STREAM=1.0-FL_ALPHA_STREAM;
-var MAX_INIT_RETRANSMISSIONS_STREAM=5;
+var MAX_PAYLOAD_SIZE_STREAM_SST=1000;
+var MAX_QUEUE_LENGTH_STREAM_SST=4000000;
+var MAX_RECEIVE_WINDOW_STREAM_SST=15000;
+var FL_ALPHA_STREAM_SST=0.8;
+var INV_FL_ALPHA_STREAM_SST=1.0-FL_ALPHA_STREAM_SST;
+var MAX_INIT_RETRANSMISSIONS_STREAM_SST=5;
 var DISCONNECTED_STREAM_SST = 1;
 var CONNECTED_STREAM_SST=2;
 var PENDING_DISCONNECT_STREAM_SST=3;
@@ -1150,12 +1187,12 @@ var sStreamReturnCallbackMapSST={};
  */
 function connectStreamSST(localEndPoint,remoteEndPoint,cb) {
     var localEndPointId=localEndPoint.uid();
-    if (sStreamReturnCallbackMap[localEndPointId]) {
+    if (sStreamReturnCallbackMapSST[localEndPointId]) {
         return false;
     }
-    sStreamReturnCallbackMap[localEndPointId]=cb;
+    sStreamReturnCallbackMapSST[localEndPointId]=cb;
     
-    return createConnectionSST(localEndPoint,remoteEndPoint,connectionCreatedSST,cb);
+    return createConnectionSST(localEndPoint,remoteEndPoint,connectionCreatedStreamSST);
 }
 
 
@@ -1221,11 +1258,11 @@ function StreamSST (parentLSID, conn,
     /**
      * @type {number}
      */
-    this.mTransmitWindowSize=MAX_RECEIVE_WINDOW_STREAM;
+    this.mTransmitWindowSize=MAX_RECEIVE_WINDOW_STREAM_SST;
     /**
      * @type {number}
      */
-    this.mReceiveWindowSize=MAX_RECEIVE_WINDOW_STREAM;
+    this.mReceiveWindowSize=MAX_RECEIVE_WINDOW_STREAM_SST;
     /**
      * @type {number}
      */
@@ -1256,11 +1293,11 @@ function StreamSST (parentLSID, conn,
     }
 
     
-    if (initialData) {
-        if (initial_data.length<=MAX_PAYLOAD_SIZE_STREAM) {
-            this.mInitialData=initialData;
+    if (initial_data) {
+        if (initial_data.length<=MAX_PAYLOAD_SIZE_STREAM_SST) {
+            this.mInitialData=initial_data;
         }else{
-            this.mInitialData=initialData.slice(0,MAX_PAYLOAD_SIZE_STREAM);
+            this.mInitialData=initial_data.slice(0,MAX_PAYLOAD_SIZE_STREAM_SST);
         }
     }else {
         this.mInitialData=[];
@@ -1268,11 +1305,11 @@ function StreamSST (parentLSID, conn,
 /**
  * @type {Array} of uint8
  */
-    this.mReceiveBuffer=new Array(mReceiveWindowSize);
+    this.mReceiveBuffer=new Array(this.mReceiveWindowSize);
 /**
  * @type {Array} of boolean whether the data is there
  */
-    this.mReceiveBitmap=new Array(mReceiveWindowSize);
+    this.mReceiveBitmap=new Array(this.mReceiveWindowSize);
 /**
  * @type {!KataDeque} deque of StreamBuffer data that is queued
  */
@@ -1299,7 +1336,7 @@ function StreamSST (parentLSID, conn,
 /**
  * @type {number} number of bytes put to the wire
  */
-    this.mNumBytesSent=mInitialDataLength;
+    this.mNumBytesSent=this.mInitialDataLength;
     if (initial_data.length>this.mInitialData.length){
         this.write(initial_data.slice(this.mInitialData.length,initial_data.length));
     }
@@ -1333,7 +1370,7 @@ StreamSST.prototype.listenSubstream=function(port, scb) {
              occurred
   */
 StreamSST.prototype.write=function(data) {
-    if (this.mState == DISCONNECTED || this.mState == PENDING_DISCONNECT) {
+    if (this.mState == DISCONNECTED_SST || this.mState == PENDING_DISCONNECT_SST) {
       return -1;
     }
 
@@ -1341,8 +1378,8 @@ StreamSST.prototype.write=function(data) {
 
 
 
-    if (len <= MAX_PAYLOAD_SIZE_STREAM) {
-      if (this.mCurrentQueueLength+len > MAX_QUEUE_LENGTH_STREAM) {
+    if (len <= MAX_PAYLOAD_SIZE_STREAM_SST) {
+      if (this.mCurrentQueueLength+len > MAX_QUEUE_LENGTH_STREAM_SST) {
         return 0;
       }
       KataDequePushBack(this.mQueuedBuffers,new StreamBuffer(data, data.length, this.mNumBytesSent));
@@ -1354,11 +1391,11 @@ StreamSST.prototype.write=function(data) {
     else {
       var currOffset = 0;
       while (currOffset < len) {
-        var buffLen = (len-currOffset > MAX_PAYLOAD_SIZE_STREAM) ?
-                      MAX_PAYLOAD_SIZE_STREAM :
+        var buffLen = (len-currOffset > MAX_PAYLOAD_SIZE_STREAM_SST) ?
+                      MAX_PAYLOAD_SIZE_STREAM_SST :
                       (len-currOffset);
 
-        if (this.mCurrentQueueLength + buffLen > MAX_QUEUE_LENGTH_STREAM) {
+        if (this.mCurrentQueueLength + buffLen > MAX_QUEUE_LENGTH_STREAM_SST) {
           return currOffset;
         }
 
@@ -1409,11 +1446,11 @@ StreamSST.prototype.write=function(data) {
 StreamSST.prototype.close=function(force) {
     if (force) {
       this.mConnected = false;
-      this.mState = DISCONNECTED;
+      this.mState = DISCONNECTED_SST;
       return true;
     }
-    else if (this.mState!=DISCONNECTED) {
-      this.mState = PENDING_DISCONNECT;
+    else if (this.mState!=DISCONNECTED_SST) {
+      this.mState = PENDING_DISCONNECT_SST;
       return true;
     }else return false;
 };
@@ -1482,7 +1519,7 @@ StreamSST.prototype.localEndPoint=function()  {
 
     @return the remote endpoint.
   */
-this.StreamSST.prototype.remoteEndPoint=function()  {
+StreamSST.prototype.remoteEndPoint=function()  {
     return new EndPointSST(this.mConnection.remoteEndPoint().endPoint, this.mRemotePort);
 };
 
@@ -1493,51 +1530,34 @@ this.StreamSST.prototype.remoteEndPoint=function()  {
  */
 function connectionCreatedStreamSST( errCode, c) {
     //boost::mutex::scoped_lock lock(mStreamCreationMutex.getMutex());
-    var localEndPoint=c.localEndPoint();
+    var localEndPoint=c.mLocalEndPoint;
     var localEndPointId=localEndPoint.uid();
+    var cb = sStreamReturnCallbackMapSST[localEndPointId];
+    delete sStreamReturnCallbackMapSST[localEndPointId];
+
+    if(!cb){
+      Kata.error("Callback not defined for connectionCreatedStreamSST, "+localEndPointId);
+    }
     if (errCode != SUCCESS_SST) {
-
-
-        
-      var cb = this.mStreamReturnCallbackMap[localEndPointId];
-      delete this.mStreamReturnCallbackMap[localEndPointId];
-
       cb(FAILURE_SST, null );
-
       return;
     }
-    
-    if(!sStreamReturnCallbackMapSST[localEndPointId]){
-        Kata.log("Fatal error");
-    }
     //Empty array? the original code has some sort of pointless loop on 1505 that makes an array of size 0
-    c.stream(sStreamReturnCallbackMap[localEndPointId], new Array() , 
-	      localEndPoint.port, c.remoteEndPoint().port);
-
-    delete mStreamReturnCallbackMap[localEndPointId];
+    c.stream(cb, new Array(), localEndPoint.port, c.mRemoteEndPoint.port);
   }
 
-function PROTOI64Hash(i64){
-    if(i64.sign!=1) {
-        return i64.sign+":"+i64.msw+"_"+i64.lsw;
-    }
-    return i64.msw+"_"+i64.lsw;
-}
-function PROTOI64Equals(a,b){
-    return a.sign==b.sign&&a.msw==b.msw&&a.lsw==b.lsw;
-}
 /**
  * @param {Date} curTime 
  */
 StreamSST.prototype.serviceStream=function(curTime) {
     if (this.mState != CONNECTED_STREAM_SST && this.mState != DISCONNECTED_STREAM_SST) {
 
-      if (!this.mConnected && this.mNumInitRetransmissions < MAX_INIT_RETRANSMISSIONS_STREAM ) {
-        if ( this.mLastSendTime && (curTime.getTime() - this.mLastSendTime.getTime()) < 2*mStreamRTOMilliseconds) {
+      if (!this.mConnected && this.mNumInitRetransmissions < MAX_INIT_RETRANSMISSIONS_STREAM_SST ) {
+        if ( this.mLastSendTime && (curTime.getTime() - this.mLastSendTime.getTime()) < 2*this.mStreamRTOMilliseconds) {
           return true;
         }
 
-        this.sendInitPacket(mInitialData);
+        this.sendInitPacket(this.mInitialData);
 
         this.mLastSendTime = curTime;
 
@@ -1549,7 +1569,7 @@ StreamSST.prototype.serviceStream=function(curTime) {
       this.mInitialDataLength = 0;
 
       if (!this.mConnected) {
-        delete sStreamReturnCallbackMap[mConnection.localEndPoint().uid()];
+        delete sStreamReturnCallbackMapSST[this.mConnection.mLocalEndPoint.uid()];
 
         // If this is the root stream that failed to connect, close the
         // connection associated with it as well.
@@ -1588,7 +1608,7 @@ StreamSST.prototype.serviceStream=function(curTime) {
             KataDequeEmpty(this.mQueuedBuffers)  &&
             mapEmpty(this.mChannelToBufferMap) )
         {
-            this.mState = DISCONNECTED;
+            this.mState = DISCONNECTED_SST;
 
             return true;
         }
@@ -1604,7 +1624,7 @@ StreamSST.prototype.serviceStream=function(curTime) {
                                          buffer.mOffset);
 
           buffer.mTransmitTime = curTime;
-          var key=PROTOI64Hash(channelID);
+          var key=channelID.hash();
           if ( !this.mChannelToBufferMap[key]) {
             this.mChannelToBufferMap[key] = buffer;
           }
@@ -1686,8 +1706,8 @@ StreamSST.prototype.sendToApp=function(skipLength) {
       this.mNextByteExpected = mLastContiguousByteReceived.unsigned_add(ONE64BITSST);
 
       memset(mReceiveBitmap, 0, readyBufferSize);
-      memmove(mReceiveBitmap, mReceiveBitmap + readyBufferSize, MAX_RECEIVE_WINDOW - readyBufferSize);
-      memmove(mReceiveBuffer, mReceiveBuffer + readyBufferSize, MAX_RECEIVE_WINDOW - readyBufferSize);
+      memmove(mReceiveBitmap, mReceiveBitmap + readyBufferSize, MAX_RECEIVE_WINDOW_SST - readyBufferSize);
+      memmove(mReceiveBuffer, mReceiveBuffer + readyBufferSize, MAX_RECEIVE_WINDOW_SST - readyBufferSize);
 
       this.mReceiveWindowSize += readyBufferSize;
     }
@@ -1705,7 +1725,7 @@ StreamSST.prototype.receiveData=function(streamMsg,
       this.mConnected = true;
     }
     else if (streamMsg.type == Protocol.SST.SSTStreamHeader.ACK) {
-      var offsetHash=PROTOI64Hash(offset);
+      var offsetHash=offset.hash();
       var channelBuffer=this.mChannelToBufferMap[offset];
       if (channelBuffer) {
         var dataOffset = channelBuffer.mOffset;
@@ -1752,9 +1772,9 @@ StreamSST.prototype.receiveData=function(streamMsg,
 
       //printf("offset=%d,  mLastContiguousByteReceived=%d, mNextByteExpected=%d\n", (int)offset,  (int)mLastContiguousByteReceived, (int)mNextByteExpected);
 
-      if ( PROTOI64Equals(offset,this.mNextByteExpected)) {
+      if ( offset.equals(this.mNextByteExpected)) {
         var offsetInBuffer = (offset.sub(mLastContiguousByteReceived)).lsw-1;//duplicate code in else
-        if (offsetInBuffer + buffer.length <= MAX_RECEIVE_WINDOW) {
+        if (offsetInBuffer + buffer.length <= MAX_RECEIVE_WINDOW_SST) {
             var len=buffer.length;
             this.mReceiveWindowSize -= len;
             for (var i=0;i<len;++i) {
@@ -1784,7 +1804,7 @@ StreamSST.prototype.receiveData=function(streamMsg,
           Kata.log("Acking packet which we had already received previously\n");
           sendAckPacket();
         }
-        else if (offsetInBuffer + len <= MAX_RECEIVE_WINDOW) {
+        else if (offsetInBuffer + len <= MAX_RECEIVE_WINDOW_SST) {
           if (offsetInBuffer + len <= 0){
               Kata.log("Assertion failed: Offset in buffer "+offsetInBuffer+"+"+len+"<=0");
           }
@@ -1826,8 +1846,8 @@ StreamSST.prototype.updateRTO=function(){
     }
     else {
 
-      this.mStreamRTOMilliseconds = FL_ALPHA_STREAM * this.mStreamRTOMilliseconds +
-        (INV_FL_ALPHA_STREAM) * (set-sst);
+      this.mStreamRTOMilliseconds = FL_ALPHA_STREAM_SST * this.mStreamRTOMilliseconds +
+        (INV_FL_ALPHA_STREAM_SST) * (set-sst);
     }
   };
 }();

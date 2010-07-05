@@ -10,7 +10,7 @@
 <script type="text/javascript" src="../SSTImpl.js"></script>
 <script>
 var sst = new SSTTest();
-sst.createTestObjects({objectId:function(){return "AAAA"}},{objectId:function(){return "BBBB"}});
+sst.createTestObjects(new EndPointSST("AAAA", 1234), new EndPointSST("BBBB", 1234));
 setInterval(serviceConnectionsSST, 100);
 </script>
 </head>
