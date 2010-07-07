@@ -9,7 +9,7 @@
 </mesh>
 
 <material id="box" specular="0.00">
-    <texture id="cratet" src="images/crate.jpg" />
+    <texture id="cratet" src="../../externals/GLGE/examples/pickingdemo/images/crate.jpg" />
     <material_layer texture="#cratet" mapinput="UV1" mapto="M_COLOR" />
 </material>
 
