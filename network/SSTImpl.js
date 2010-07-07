@@ -31,13 +31,16 @@
  */
 
 Protocol = Sirikata.Protocol;
-KataDequePushBack = function(x,y){x.push_back(y);}
-KataDequePopFront = function(x){return x.pop_front();}
-KataDequeFront = function(x){return x.front();}
-KataDequeLength = function(x){return x.size();}
-KataDequeEmpty = function(x){return x.empty();}
-KataDequeIndex = function(x,y){return x.index(y);}
-KataDequeClear = function(x){return x.clear();}
+KataDequePushBack = function(x,y){x.push_back(y);};
+KataDequePushFront = function(x,y){return x.push_front(y);};
+KataDequePopBack = function(x){return x.pop_back();};
+KataDequePopFront = function(x){return x.pop_front();};
+KataDequeBack = function(x){return x.back();};
+KataDequeFront = function(x){return x.front();};
+KataDequeLength = function(x){return x.size();};
+KataDequeEmpty = function(x){return x.empty();};
+KataDequeIndex = function(x,y){return x.index(y);};
+KataDequeClear = function(x){return x.clear();};
 
 /**
  * @constructor
@@ -60,7 +63,8 @@ ObjectMessageDispatcherSST.prototype.unregisterObjectMessageRecipient = function
 ObjectMessageDispatcherSST.prototype.dispatchMessage = function(msg) {
     if (msg.dest_port in this.mObjectMessageRecipients) {
         var recipient = this.mObjectMessageRecipients[msg.dest_port];
-        recipient.recieveMessage(msg);
+        // BaseDatagramLayer
+        recipient.receiveMessage(msg);
     }
 };
 
@@ -110,8 +114,8 @@ var BaseDatagramLayer=function(router,dispatcher) {
      */
     this.mDispatcher=dispatcher;
 
-    this.mMinAvailableChannel=1;
-    this.mMinAvailablePort=2049;
+    this.mMinAvailableChannels=1;
+    this.mMinAvailablePorts=2049;
     this.mAvailableChannels=[];
     this.mAvailablePorts=[];
 };
@@ -186,9 +190,9 @@ BaseDatagramLayer.prototype.send=function(src,dest,data) {
  * @param {!Protocol.Object.ObjectMessage} msg 
 */
 BaseDatagramLayer.prototype.receiveMessage=function(msg)  {
-    connectionHandleReceiveSST(this.mRouter,
-                            new EndPointSST(msg.source_object(), msg.source_port()),
-                            new EndPointSST(msg.dest_object(), msg.dest_port()),
+    connectionHandleReceiveSST(this,
+                            new EndPointSST(msg.source_object, msg.source_port),
+                            new EndPointSST(msg.dest_object, msg.dest_port),
                             msg.payload);
 };
 BaseDatagramLayer.prototype.dispatcher=function() {
@@ -294,11 +298,11 @@ function ConnectionSST(localEndPoint,remoteEndPoint){
     /**
      * @type {!PROTO.I64}
      */
-    this.mTransmitSequenceNumber=PROTO.I64.fromNumber(1);
+    this.mTransmitSequenceNumber=PROTO.I64.ONE;
     /**
      * @type {!PROTO.I64}
      */
-    this.mLastReceivedSequenceNumber=PROTO.I64.fromNumber(1);
+    this.mLastReceivedSequenceNumber=PROTO.I64.ONE;
     /**
      * @type {number}
      */
@@ -589,7 +593,7 @@ ConnectionSST.prototype.releaseLSID=function(lsid){
  * @param {function} scb StreamReturnCallbackFunction == void(int, boost::shared_ptr< Stream<UUID> >)
  */
 ConnectionSST.prototype.listenStream=function(port,scb){
-  this.sListeningStreamsCallbackMap[port]=scb;
+  this.mListeningStreamsCallbackMap[port]=scb;
 };
   /** Creates a stream on top of this connection. The function also queues
      up any initial data that needs to be sent on the stream. The function
@@ -638,10 +642,8 @@ ConnectionSST.prototype.stream=function (cb, initial_data,
 function streamHeaderTypeIsAckSST(data){
     var stream_msg = new Protocol.SST.SSTStreamHeader();
     var parsed = stream_msg.ParseFromArray(data);
-    return stream_msg.type==Protocol.SST.SSTStreamHeader.ACK;
+    return stream_msg.type==Protocol.SST.SSTStreamHeader.StreamPacketType.ACK;
 }
-var ONE64BITSST=new PROTO.I64.fromNumber(1);
-var ZERO64BITSST=new PROTO.I64.fromNumber(0);
 /**
  * @param {Array} data Array of uint8 data
  * @returns {PROTO.I64} sequence number of sent data
@@ -669,7 +671,7 @@ ConnectionSST.prototype.sendData=function(data, sstStreamHeaderTypeIsAck){
     }
     else {
       var sstMsg=new Protocol.SST.SSTChannelHeader();
-      sstMsg.channel_id= mRemoteChannelID;
+      sstMsg.channel_id= this.mRemoteChannelID;
       sstMsg.transmit_sequence_number=this.mTransmitSequenceNumber;
       sstMsg.ack_count=1;
       sstMsg.ack_sequence_number=this.mLastReceivedSequenceNumber;
@@ -679,7 +681,7 @@ ConnectionSST.prototype.sendData=function(data, sstStreamHeaderTypeIsAck){
       this.sendSSTChannelPacket(sstMsg);
     }
 
-    this.mTransmitSequenceNumber=this.mTransmitSequenceNumber.unsigned_add(ONE64BITSST);
+    this.mTransmitSequenceNumber=this.mTransmitSequenceNumber.unsigned_add(PROTO.I64.ONE);
 
     return transmitSequenceNumber;
 };
@@ -709,7 +711,7 @@ ConnectionSST.prototype.setRemoteChannelID=function(channelID) {
 ConnectionSST.prototype.markAcknowledgedPacket=function(receivedAckNum){
     var len=KataDequeLength(this.mOutstandingSegments);
     for (var i = 0; i < len; i++) {
-        var segment=KataDequeIndex(mOutstandingSegments,i);
+        var segment=KataDequeIndex(this.mOutstandingSegments,i);
         if (segment.mChannelSequenceNumber.equals(receivedAckNum)) {
 	        segment.mAckTime = new Date();
             return true;
@@ -719,9 +721,12 @@ ConnectionSST.prototype.markAcknowledgedPacket=function(receivedAckNum){
 };
 
 /**
- * @param {Array} recv_buff the data  to be received
+ * @param {Protocol.Object.ObjectMessage} object_message the data to be received
  */
-ConnectionSST.prototype.receiveMessage=function(received_msg) {
+ConnectionSST.prototype.receiveMessage=function(object_message) {
+    var recv_buff = object_message.payload;
+    var received_msg = new Protocol.SST.SSTChannelHeader;
+    received_msg.ParseFromArray(recv_buff);
 
     this.mLastReceivedSequenceNumber = received_msg.transmit_sequence_number;
 
@@ -752,33 +757,33 @@ ConnectionSST.prototype.receiveMessage=function(received_msg) {
     }
     else if (this.mState == CONNECTION_CONNECTED_SST) {
         if (received_msg.payload && received_msg.payload.length > 0) {
-	        this.parsePacket(received_msg);
+	        this.parsePacket(received_msg, object_message.source_port, object_message.dest_port);
         }
     }
 };
 /**
  * @param{!Protcol.SST.SSTChannelHeader} received_channel_msg
  */
-ConnectionSST.prototype.parsePacket=function(received_channel_msg) {
+ConnectionSST.prototype.parsePacket=function(received_channel_msg, source_port, dest_port) {
 
     var received_stream_msg = new Protocol.SST.SSTStreamHeader();
     
     var parsed = received_stream_msg.ParseFromArray(received_channel_msg.payload);
 
 
-    if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.INIT) {
-      this.handleInitPacket(received_stream_msg);
+    if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
+      this.handleInitPacket(received_stream_msg, source_port, dest_port);
     }
-    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.REPLY) {
+    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
       this.handleReplyPacket(received_stream_msg);
     }
-    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.DATA) {
+    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.DATA) {
       this.handleDataPacket(received_stream_msg);
     }
-    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.ACK) {
+    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
       this.handleAckPacket(received_channel_msg, received_stream_msg);
     }
-    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.DATAGRAM) {
+    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.DATAGRAM) {
       this.handleDatagram(received_stream_msg);
     }
 };
@@ -787,28 +792,28 @@ ConnectionSST.prototype.parsePacket=function(received_channel_msg) {
  * @returns {string} a textual description of the header
  */
 ConnectionSST.prototype.headerToStringDebug=function(received_stream_msg) {
-    return "Source Port:"+recevied_stream_msg.source_port+" Dest Port:"+received_stream_msg.dest_port+" LSID:"+received_stream_msg.lsid;
+    return this.mLocalEndPoint+"-> "+this.mRemoteEndPoint+" LSID:"+received_stream_msg.lsid;
 };
 
 /**
  * @param {!Protocol.SST.SSTStreamHeader} received_stream_msg
  */
-ConnectionSST.prototype.handleInitPacket=function (received_stream_msg) {
+ConnectionSST.prototype.handleInitPacket=function (received_stream_msg, source_port, dest_port) {
     var incomingLsid = received_stream_msg.lsid;
     
     if (!(incomingLsid in this.mIncomingSubstreamMap)){
-        var listeningStreamsCallback=this.mListeningStreamsCallbackMap[received_stream_msg.dest_port];
+        var listeningStreamsCallback=this.mListeningStreamsCallbackMap[dest_port];
       if (listeningStreamsCallback)
       {
         //create a new stream
         var usid = Math.uuid();
         var newLSID = this.getNewLSID();
 
-        var stream = new Stream (received_stream_msg.psid, this,
-                                     received_stream_msg.dest_port,
-                                     received_stream_msg.src_port,
+        var stream = new StreamSST (received_stream_msg.psid, this,
+                                     dest_port,
+                                     source_port,
                                      usid, newLSID,
-                                     null, 0, true, incomingLsid, null);
+                                     [], true, incomingLsid, null);
         this.mOutgoingSubstreamMap[newLSID] = stream;
         this.mIncomingSubstreamMap[incomingLsid] = stream;
 
@@ -881,7 +886,7 @@ ConnectionSST.prototype.handleAckPacket=function(received_channel_msg,
 
       stream_ptr.receiveData( received_stream_msg,
 			       received_stream_msg.payload,
-			       received_channel_msg.ack_sequence_number());
+			       received_channel_msg.ack_sequence_number);
     }
 };
 
@@ -911,7 +916,7 @@ ConnectionSST.prototype.handleDatagram=function(received_stream_msg) {
 
     this.sendSSTChannelPacket(sstMsg);
 
-    this.mTransmitSequenceNumber=this.mTransmitSequenceNumber.unsigned_add(ONE64BITSST);
+    this.mTransmitSequenceNumber=this.mTransmitSequenceNumber.unsigned_add(PROTO.I64.ONE);
 };
 
 /**
@@ -953,10 +958,9 @@ function serviceConnectionsSST() {
 
         if (connState == CONNECTION_PENDING_CONNECT_SST) {
           var localEndPointId=conn.mLocalEndPoint.uid();
-          var cb = mConnectionReturnCallbackMap[localEndPointId];
+          var cb = sConnectionReturnCallbackMapSST[localEndPointId];
 
-          mConnectionReturnCallbackMap.erase(conn.mLocalEndPoint.uid());
-
+          delete sConnectionReturnCallbackMapSST[localEndPointId];
           delete sConnectionMapSST[it];//FIXME does this invalidate map?
 
           cb(FAILURE_SST, conn);
@@ -1005,9 +1009,12 @@ ConnectionSST.prototype.datagram=function(data, local_port, remote_port,cb) {
 
       var sstMsg=new Protocol.SST.SSTStreamHeader();
       sstMsg.lsid= lsid ;
-      sstMsg.type=Protocol.SST.SSTStreamHeader.DATAGRAM;
+      sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.DATAGRAM;
       sstMsg.flags=0;        
       sstMsg.window=10;
+      // FIXME: Why does it need src/dest_port two layers down from ObjectMessage?!?!
+      // Applies to all places that uses Protocol.SST.SSTStreamHeader
+      // Need to fix C++
       sstMsg.src_port=local_port;
       sstMsg.dest_port=remote_port;
 
@@ -1128,7 +1135,7 @@ function connectionHandleReceiveSST(datagramLayer, remoteEndPoint,localEndPoint,
             var conn = new ConnectionSST(newLocalEndPoint, remoteEndPoint);
 
                 conn.listenStream(newLocalEndPoint.port,
-                              sListeningConnectionsCallbackMap[localEndPoint]);
+                              sListeningConnectionsCallbackMapSST[localEndPoint]);
             sConnectionMapSST[newLocalEndPoint.uid()] = conn;
 
             conn.setLocalChannelID(availableChannel);
@@ -1141,7 +1148,7 @@ function connectionHandleReceiveSST(datagramLayer, remoteEndPoint,localEndPoint,
                            (availablePort>>8)&255],false/*not an ack*/);
       }
       else {
-        Kata.log("No one listening on this connection\n"+localEndpointId);
+        Kata.log("No one listening on this connection\n"+localEndPointId);
       }
     }
 }
@@ -1270,11 +1277,11 @@ function StreamSST (parentLSID, conn,
     /**
      * @type {number}
      */
-    this.mNextByteExpected=0;
+    this.mNextByteExpected=PROTO.I64.ZERO;
     /**
      * @type {number}
      */
-    this.mLastContiguousByteReceived=-1;
+    this.mLastContiguousByteReceived=PROTO.I64.fromNumber(-1);
     /**
      * @type {Date}
      */
@@ -1370,12 +1377,12 @@ StreamSST.prototype.listenSubstream=function(port, scb) {
              occurred
   */
 StreamSST.prototype.write=function(data) {
-    if (this.mState == DISCONNECTED_SST || this.mState == PENDING_DISCONNECT_SST) {
+    if (this.mState == DISCONNECTED_STREAM_SST || this.mState == PENDING_DISCONNECT_STREAM_SST) {
       return -1;
     }
 
     var count = 0;
-
+    var len = data.length;
 
 
     if (len <= MAX_PAYLOAD_SIZE_STREAM_SST) {
@@ -1446,11 +1453,11 @@ StreamSST.prototype.write=function(data) {
 StreamSST.prototype.close=function(force) {
     if (force) {
       this.mConnected = false;
-      this.mState = DISCONNECTED_SST;
+      this.mState = DISCONNECTED_STREAM_SST;
       return true;
     }
-    else if (this.mState!=DISCONNECTED_SST) {
-      this.mState = PENDING_DISCONNECT_SST;
+    else if (this.mState!=DISCONNECTED_STREAM_SST) {
+      this.mState = PENDING_DISCONNECT_STREAM_SST;
       return true;
     }else return false;
 };
@@ -1608,7 +1615,7 @@ StreamSST.prototype.serviceStream=function(curTime) {
             KataDequeEmpty(this.mQueuedBuffers)  &&
             mapEmpty(this.mChannelToBufferMap) )
         {
-            this.mState = DISCONNECTED_SST;
+            this.mState = DISCONNECTED_STREAM_SST;
 
             return true;
         }
@@ -1620,7 +1627,7 @@ StreamSST.prototype.serviceStream=function(curTime) {
             break;
           }
 
-          var channelID = sendDataPacket(buffer.mBuffer,
+          var channelID = this.sendDataPacket(buffer.mBuffer,
                                          buffer.mOffset);
 
           buffer.mTransmitTime = curTime;
@@ -1629,7 +1636,7 @@ StreamSST.prototype.serviceStream=function(curTime) {
             this.mChannelToBufferMap[key] = buffer;
           }
 
-          KataPopFront(this.mQueuedBuffers);
+          KataDequePopFront(this.mQueuedBuffers);
           this.mCurrentQueueLength -= buffer.mBuffer.length;
           this.mLastSendTime = curTime;
 
@@ -1647,11 +1654,17 @@ StreamSST.prototype.serviceStream=function(curTime) {
 
 StreamSST.prototype.resendUnackedPackets=function() {
 
+    function mapEmpty(m) {
+        for (var i in m) {
+            return false;
+        }
+        return true;
+    }
     for(var it in this.mChannelToBufferMap)
     {
         var buffer=this.mChannelToBufferMap[it];
         var bufferLength=buffer.mBuffer.length;
-        KataPushFront(this.mQueuedBuffers,buffer);
+        KataDequePushFront(this.mQueuedBuffers,buffer);
         this.mCurrentQueueLength += bufferLength;
 
         //printf("On %d, resending unacked packet at offset %d:%d\n", (int)mLSID, (int)it->first, (int)(it->second->mOffset));
@@ -1687,7 +1700,7 @@ StreamSST.prototype.resendUnackedPackets=function() {
 StreamSST.prototype.sendToApp=function(skipLength) {
     var readyBufferSize = skipLength;
 
-    for (var i=skipLength; i < MAX_RECEIVE_WINDOW_SST; i++) {
+    for (var i=skipLength; i < MAX_RECEIVE_WINDOW_STREAM_SST; i++) {
       if (this.mReceiveBitmap[i] == 1) {
         readyBufferSize++;
       }
@@ -1702,12 +1715,12 @@ StreamSST.prototype.sendToApp=function(skipLength) {
       this.mReadCallback(this.mReceiveBuffer, readyBufferSize);
 
       //now move the window forward...
-      this.mLastContiguousByteReceived = mLastContiguousByteReceived.unsigned_add(PROTO.I64.fromNumber(readyBufferSize));
-      this.mNextByteExpected = mLastContiguousByteReceived.unsigned_add(ONE64BITSST);
+      this.mLastContiguousByteReceived = mLastContiguousByteReceived.add(PROTO.I64.fromNumber(readyBufferSize));
+      this.mNextByteExpected = mLastContiguousByteReceived.add(PROTO.I64.ONE);
 
       memset(mReceiveBitmap, 0, readyBufferSize);
-      memmove(mReceiveBitmap, mReceiveBitmap + readyBufferSize, MAX_RECEIVE_WINDOW_SST - readyBufferSize);
-      memmove(mReceiveBuffer, mReceiveBuffer + readyBufferSize, MAX_RECEIVE_WINDOW_SST - readyBufferSize);
+      memmove(mReceiveBitmap, mReceiveBitmap + readyBufferSize, MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize);
+      memmove(mReceiveBuffer, mReceiveBuffer + readyBufferSize, MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize);
 
       this.mReceiveWindowSize += readyBufferSize;
     }
@@ -1721,10 +1734,10 @@ StreamSST.prototype.sendToApp=function(skipLength) {
 StreamSST.prototype.receiveData=function(streamMsg,
                     buffer, offset )
   {
-    if (streamMsg.type == Protocol.SST.SSTStreamHeader.REPLY) {
+    if (streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
       this.mConnected = true;
     }
-    else if (streamMsg.type == Protocol.SST.SSTStreamHeader.ACK) {
+    else if (streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
       var offsetHash=offset.hash();
       var channelBuffer=this.mChannelToBufferMap[offset];
       if (channelBuffer) {
@@ -1763,18 +1776,20 @@ StreamSST.prototype.receiveData=function(streamMsg,
           Kata.log("unknown packet corresponding to offset "+offsetHash+" not found in map");
       }
     }
-    else if (streamMsg.type == Protocol.SST.SSTStreamHeader.DATA || streamMsg.type == Protocol.SST.SSTStreamHeader.INIT) {
+    else if (streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.DATA || streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
 
-      if ( pow(2.0, streamMsg.window) - this.mNumOutstandingBytes < .5){
+      if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes < .5){
           Kata.log("Assertion failed: 2^"+streamMsg.window+" <= "+this.mNumOutstandingBytes);
       }
-      this.mTransmitWindowSize = round(pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
+      this.mTransmitWindowSize = Math.round(Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
 
       //printf("offset=%d,  mLastContiguousByteReceived=%d, mNextByteExpected=%d\n", (int)offset,  (int)mLastContiguousByteReceived, (int)mNextByteExpected);
 
-      if ( offset.equals(this.mNextByteExpected)) {
-        var offsetInBuffer = (offset.sub(mLastContiguousByteReceived)).lsw-1;//duplicate code in else
-        if (offsetInBuffer + buffer.length <= MAX_RECEIVE_WINDOW_SST) {
+      var lastContigByteMSW = this.mLastContiguousByteReceived.msw;
+      var offset64 = new PROTO.I64(lastContigByteMSW, offset, 1);
+      var offsetInBuffer = (offset64.sub(this.mLastContiguousByteReceived)).lsw-1;
+      if ( offset == this.mNextByteExpected.lsw) {
+        if (offsetInBuffer + buffer.length <= MAX_RECEIVE_WINDOW_STREAM_SST) {
             var len=buffer.length;
             this.mReceiveWindowSize -= len;
             for (var i=0;i<len;++i) {
@@ -1795,18 +1810,21 @@ StreamSST.prototype.receiveData=function(streamMsg,
       }
       else {
         var len=buffer.length;
-        var offsetInBuffer = (offset.sub(mLastContiguousByteReceived)).lsw-1;//duplicate code in if
         
         //std::cout << offsetInBuffer << "  ,  " << offsetInBuffer+len << "\n";
-        var lastByteInBuffer=offset.add(PROTO.I64.fromNumber(len-1));
-        var byteDifference=this.mLastContiguousByteReceived.sub(lastByteInBuffer);
-        if ( byteDifference.sign>=0 ) {
-          Kata.log("Acking packet which we had already received previously\n");
-          sendAckPacket();
+        var lastByteInBuffer=offset+len-1;
+        var beforeWindow=lastByteInBuffer - this.mLastContiguousByteReceived.lsw;
+        // is 2 billion the right number?
+        if (Math.abs(beforeWindow) > (1<<31)) {
+            beforeWindow = -beforeWindow;
         }
-        else if (offsetInBuffer + len <= MAX_RECEIVE_WINDOW_SST) {
+        if (beforeWindow <= 0) {
+          Kata.log("Acking packet which we had already received previously\n");
+          this.sendAckPacket();
+        }
+        else if (offsetInBuffer + len <= MAX_RECEIVE_WINDOW_STREAM_SST) {
           if (offsetInBuffer + len <= 0){
-              Kata.log("Assertion failed: Offset in buffer "+offsetInBuffer+"+"+len+"<=0");
+              Kata.log("Assertion failed: Offset in Buffer "+offsetInBuffer+"+"+len+"<=0");
           }
 
           this.mReceiveWindowSize -= len;
@@ -1859,7 +1877,7 @@ StreamSST.prototype.sendInitPacket = function(data) {
 
     var sstMsg=new Protocol.SST.SSTStreamHeader();
     sstMsg.lsid= this.mLSID;
-    sstMsg.type=Protocol.SST.SSTStreamHeader.INIT;
+    sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.INIT;
     sstMsg.flags=0;
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;
@@ -1878,7 +1896,7 @@ StreamSST.prototype.sendInitPacket = function(data) {
 StreamSST.prototype.sendAckPacket=function() {
     var sstMsg= new Protocol.SST.SSTStreamHeader();
     sstMsg.lsid= this.mLSID ;
-    sstMsg.type=Protocol.SST.SSTStreamHeader.ACK;
+    sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.ACK;
     sstMsg.flags=0;
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;
@@ -1897,7 +1915,7 @@ StreamSST.prototype.sendAckPacket=function() {
 StreamSST.prototype.sendDataPacket=function( data, offset) {
     var sstMsg= new Protocol.SST.SSTStreamHeader();
     sstMsg.lsid= this.mLSID ;
-    sstMsg.type=Protocol.SST.SSTStreamHeader.DATA;
+    sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.DATA;
     sstMsg.flags=0;
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;
@@ -1908,7 +1926,7 @@ StreamSST.prototype.sendDataPacket=function( data, offset) {
     sstMsg.payload=data;
 
     var buffer = sstMsg.SerializeToArray();
-    this.mConnection.sendData(  buffer, false/*not an ack packet!*/);
+    return this.mConnection.sendData(  buffer, false/*not an ack packet!*/);
   };
 
 /**
@@ -1920,7 +1938,7 @@ StreamSST.prototype.sendReplyPacket=function(data, remoteLSID) {
 
     var sstMsg= new Protocol.SST.SSTStreamHeader();
     sstMsg.lsid= this.mLSID ;
-    sstMsg.type=Protocol.SST.SSTStreamHeader.REPLY;
+    sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY;
     sstMsg.flags=0;
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;

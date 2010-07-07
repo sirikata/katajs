@@ -8,9 +8,10 @@
 <script type="text/javascript" src="SSTTest.js"></script>
 <!-- not necessary, but shows line number of errors -->
 <script type="text/javascript" src="../SSTImpl.js"></script>
+<script type="text/javascript" src="../../katajs/core/KataDeque.js"></script>
 <script>
 var sst = new SSTTest();
-sst.createTestObjects(new EndPointSST("AAAA", 1234), new EndPointSST("BBBB", 1234));
+sst.createTestObjects(new EndPointSST("aaaa0000-0000-0000-0000-000000000000", 1234), new EndPointSST("bbbb0000-0000-0000-0000-000000000000", 2468));
 setInterval(serviceConnectionsSST, 100);
 </script>
 </head>
