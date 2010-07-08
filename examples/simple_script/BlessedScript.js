@@ -20,8 +20,8 @@ Kata.include("network/sirikata/scripts/CameraScript.js");
                                      creator:message.object_reference,
                                      creatorport:64,
                                      nickname:"pretty print object A",                       
-                                     pos:[0,0,-10],//Warning current code does not respect movement settings before proxies discovered: so you need to set defer pos
-                                     deferscale:[.5,.5,.5],
+                                     pos:[3,0,-10],//Warning current code does not respect movement settings before proxies discovered: so you need to set defer pos
+                                     deferscale:[.25,.5,.25],
                                      scale:[.25,.25,.25],//Warning current code does not respect scale settings before proxies discovered: so you need to set defer pos
                                      spaceid: args.spaceid,
                                      defertime:2000
@@ -35,13 +35,13 @@ Kata.include("network/sirikata/scripts/CameraScript.js");
                                  script:"network/sirikata/scripts/DeferScript.js",
                                  method:"Sirikata.DeferScript",
                                  args:{
-                                     deferscale:[.1,.1,.1],
+                                     deferscale:[.5,.25,.25],
                                      mesh:"../content/teapot",
                                      creator:message.object_reference,
                                      creatorport:64,
                                      nickname:"pretty print object B",                                     
-                                     pos:[0,0,10],//Warning current code does not respect movement settings before proxies discovered: so you need to set defer pos
-                                     scale:[.1,.1,.1],//Warning current code does not respect scale settings before proxies discovered: so you need to set defer pos
+                                     pos:[-3,0,-10],//Warning current code does not respect movement settings before proxies discovered: so you need to set defer pos
+                                     scale:[.25,.25,.25],//Warning current code does not respect scale settings before proxies discovered: so you need to set defer pos
                                  spaceid: args.spaceid,
                                  defertime:3000
                              }
