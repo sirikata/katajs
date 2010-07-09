@@ -819,8 +819,10 @@ VWObject.prototype.detachRenderTarget = function(curTime) {
 VWObject.prototype.updateTransformation = function(graphics) {
     var l=LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
     this.mNode.identity();
-    //FIXME need to interpolate
-    this.mNode.translate(l.mPos[0],l.mPos[1],l.mPos[2]);
+	// FIXME: dbm: interpolate doesn't seem to work for pos, tho scale does (not sure orient)
+//    this.mNode.translate(l.mPos[0],l.mPos[1],l.mPos[2]);
+	var loc = this.mCurLocation.mPos
+    this.mNode.translate(loc[0],loc[1],loc[2]);
     this.mNode.scale(l.mScale[0],l.mScale[1],l.mScale[2]);
     this.mNode.quaternionRotate(l.mOrient);
     if (this.stationary(graphics.mCurTime)) {
@@ -939,6 +941,7 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     this.mViewWidth=1.0/clientElements.length;
 
     this.send=function(obj) {
+//		console.log("o3dgfx dispatching msg:", obj.msg)
         return this.methodTable[obj.msg].call(this, obj);
     };
     this.destroy=function(){}
@@ -1004,6 +1007,7 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
     newObject.updateTransformation(this);
 };
 O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
+	console.log("moveTo scale:", msg.scale)
     var prevParent=vwObject.mNode.parent;
     if (msg.parent!==undefined) {
         if (vwObject.mUnsetParent) {
@@ -1050,6 +1054,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
     if (!vwObject.stationary(this.mCurTime)) {
         this.addObjectUpdate(vwObject);
     }
+	//FIXME: why are things working even without this code?
 /*
     if (msg.pos) {
         vwObject.mPos=msg.pos;
@@ -1075,6 +1080,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
 O3DGraphics.prototype.methodTable["Move"]=function(msg) {
     var vwObject=this.mObjects[msg.id];
     this.moveTo(vwObject,msg);
+	if (msg.pos) console.log ("********** Move pos:", msg.pos, "obj:", vwObject)
     vwObject.updateTransformation(this);
 };
 O3DGraphics.prototype.methodTable["Destroy"]=function(msg) {

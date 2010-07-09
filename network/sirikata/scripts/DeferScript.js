@@ -11,10 +11,14 @@ Kata.include("network/sirikata/scripts/BasicScript.js");
                                args,
                                function(){
                                    setTimeout(function(){                       
-                                                  if (args.deferpos)
-                                                      args.pos=args.deferpos;
-                                                  if (args.deferscale)
-                                                      args.scale=args.deferscale;
+                                                  if (args.deferpos) {
+												  	args.pos = args.deferpos;
+													console.log("deferpos:", args.deferpos)
+												  }
+                                                  if (args.deferscale) {
+												  	args.scale = args.deferscale;
+													console.log("deferscale:", args.deferscale)
+												  }
                                                   if (args.deferorient)
                                                       args.orient=args.deferorient;
                                                   args.msg="Move";
