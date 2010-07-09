@@ -58,6 +58,9 @@ is left up to the user since some may be expensive to load.
 	<script type="text/javascript" src="../../katajs/oh/LoopbackSpaceConnection.js"></script>
 	<script type="text/javascript" src="../../katajs/space/loop/Space.js"></script>
 
+	<script type="text/javascript" src="../../externals/o3d-webgl/base.js"></script>
+	<script type="text/javascript" src="../../externals/o3djs/base.js"></script>
+	<script type="text/javascript" src="../../katajs/gfx/o3dgfx.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge_math.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge_input.js"></script>
@@ -65,12 +68,12 @@ is left up to the user since some may be expensive to load.
 	<script type="text/javascript" src="../../katajs/gfx/kjsgfx.js"></script>
 
     <script type="text/javascript">
-        doc = new GLGE.Document();
         var kata, graphics;
         var defaultSpace = "loop://localhost";
-        doc.onLoad = function() {
+        var driver = "o3d"; // "text" or "glge"
+        function loadGFX() {
             window.kata = new Kata.MainThread();
-            graphics = new Kata.GraphicsSimulation("text", window.kata.getChannel(), document.getElementById("container"));
+            graphics = new Kata.GraphicsSimulation(driver, window.kata.getChannel(), document.getElementById("container"));
 
             // Simulated local space
             loopspace = new Kata.LoopbackSpace( new Kata.URL(defaultSpace) );
@@ -82,7 +85,13 @@ is left up to the user since some may be expensive to load.
                 args:{ space : defaultSpace }
             });
         }
-        doc.load("scene.xml")
+        if (driver == "glge") {
+            doc = new GLGE.Document;
+            doc.onLoad = loadGFX;
+            doc.load("scene.xml");
+        } else {
+            window.onload = loadGFX;
+        }
     </script>
 
   </head>
@@ -91,6 +100,7 @@ is left up to the user since some may be expensive to load.
 	<div></div>
 	<div style="width:900px;margin:auto;position:relative" id="container">
 	katagfx test
+        </div>
 	<canvas id="canvas" width="900" height="500"></canvas>
 	<div id="debug"></div>
 	<div id="dbg0"></div>
@@ -104,6 +114,5 @@ is left up to the user since some may be expensive to load.
 	<div id="dbg8"></div>
 	<div id="dbg9"></div>
 	<div id="dbg"></div>
-        </div>
   </body>
 </html>

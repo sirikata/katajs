@@ -131,6 +131,7 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 		}
 		else {
 			var el = doc.getElement(msg.mesh, true)
+			if (!el) el = doc.getElement("cube", true)
 			if (el) {
 				obj = new GLGE.Object()
 				obj.setId(msg.id)
@@ -218,5 +219,5 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 
 // Register as a GraphicsSimulation if possible.
 if (Kata.GraphicsSimulation) {
-    Kata.GraphicsSimulation.registerDriver("katajs", KatajsGraphics);
+    Kata.GraphicsSimulation.registerDriver("glge", KatajsGraphics);
 }
