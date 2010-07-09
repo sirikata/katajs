@@ -8,6 +8,7 @@ Kata.include("katajs/oh/Script.js");
      Example.TestScript = function(channel, args) {
          SUPER.constructor.call(this, channel, args);
 
+         this.mNearby = {};
          this.connect(args.space, null, Kata.bind(this.connected, this));
      };
      Kata.extend(Example.TestScript, SUPER);

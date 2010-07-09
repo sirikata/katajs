@@ -70,7 +70,7 @@ is left up to the user since some may be expensive to load.
     <script type="text/javascript">
         var kata, graphics;
         var defaultSpace = "loop://localhost";
-        var driver = "o3d"; // "text" or "glge"
+        var driver = "text"; // "o3d" or "glge"
         function loadGFX() {
             window.kata = new Kata.MainThread();
             graphics = new Kata.GraphicsSimulation(driver, window.kata.getChannel(), document.getElementById("container"));
