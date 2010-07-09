@@ -819,12 +819,13 @@ VWObject.prototype.detachRenderTarget = function(curTime) {
 VWObject.prototype.updateTransformation = function(graphics) {
     var l=LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
     this.mNode.identity();
-	// FIXME: dbm: interpolate doesn't seem to work for pos, tho scale does (not sure orient)
+	// FIXME: dbm: interpolate doesn't seem to work for pos, orient; tho scale does
 //    this.mNode.translate(l.mPos[0],l.mPos[1],l.mPos[2]);
-	var loc = this.mCurLocation.mPos
-    this.mNode.translate(loc[0],loc[1],loc[2]);
+	var pos = this.mCurLocation.mPos
+    this.mNode.translate(pos[0],pos[1],pos[2]);
     this.mNode.scale(l.mScale[0],l.mScale[1],l.mScale[2]);
-    this.mNode.quaternionRotate(l.mOrient);
+//    this.mNode.quaternionRotate(l.mOrient);
+    this.mNode.quaternionRotate(this.mCurLocation.mOrient);
     if (this.stationary(graphics.mCurTime)) {
         graphics.removeObjectUpdate(this);        
     }

@@ -36,6 +36,7 @@ Kata.include("network/sirikata/scripts/CameraScript.js");
                                  args:{
                                      deferscale:[1.5,1.25,1.25],
                                      deferpos:[-3,0,-10],
+                                     deferorient:[.5,.5,.5,.5],
                                      mesh:"../content/happybox",
                                      creator:message.object_reference,
                                      creatorport:64,
