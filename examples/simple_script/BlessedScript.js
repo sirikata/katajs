@@ -35,13 +35,13 @@ Kata.include("network/sirikata/scripts/CameraScript.js");
                                  script:"network/sirikata/scripts/DeferScript.js",
                                  method:"Sirikata.DeferScript",
                                  args:{
-                                     deferscale:[.5,.25,.25],
-                                     mesh:"../content/teapot",
+                                     deferscale:[1.5,1.25,1.25],
+                                     mesh:"../content/happybox",
                                      creator:message.object_reference,
                                      creatorport:64,
                                      nickname:"pretty print object B",                                     
                                      pos:[-3,0,-10],//Warning current code does not respect movement settings before proxies discovered: so you need to set defer pos
-                                     scale:[.25,.25,.25],//Warning current code does not respect scale settings before proxies discovered: so you need to set defer pos
+                                     scale:[1,1,1],//Warning current code does not respect scale settings before proxies discovered: so you need to set defer pos
                                  spaceid: args.spaceid,
                                  defertime:3000
                              }
