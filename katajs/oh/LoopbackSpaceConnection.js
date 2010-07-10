@@ -62,6 +62,9 @@ Kata.include("katajs/space/loop/Space.js");
          this.mSpaceURL = spaceurl;
          if (!this.mSpace)
              Kata.error("Couldn't find loopback space: " + spaceurl.toString());
+
+         this.mObjectID = {}; // local -> space
+         this.mLocalID = {}; // space -> local
      };
      Kata.extend(Kata.LoopbackSpaceConnection, Kata.SpaceConnection.prototype);
 
@@ -76,7 +79,8 @@ Kata.include("katajs/space/loop/Space.js");
      };
 
      Kata.LoopbackSpaceConnection.prototype.connectResponse = function(id, object, loc, bounds, visual) {
-         this.mObjectID = object;
+         this.mObjectID[id] = object;
+         this.mLocalID[object] = id;
          if (object) // FIXME real presence_id below
              this.mObjectHost.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, loc, bounds, visual);
          else
@@ -88,7 +92,11 @@ Kata.include("katajs/space/loop/Space.js");
      };
 
      Kata.LoopbackSpaceConnection.prototype.proxEvent = function(id, entered, properties) {
-         this.mObjectHost.proxEvent(this.mSpaceURL, this.mObjectID, id, entered, properties);
+         this.mObjectHost.proxEvent(this.mSpaceURL, id, id, entered, properties);
+     };
+
+     Kata.LoopbackSpaceConnection.prototype.locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
+         this.mSpace.locUpdateRequest(id, pos, vel, acc, bounds, visual);
      };
 
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);

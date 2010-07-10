@@ -53,6 +53,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
         scriptHandlers[scriptTypes.Connect] = Kata.bind(this._handleConnect, this);
         scriptHandlers[scriptTypes.Disconnect] = Kata.bind(this._handleDisconnect, this);
         scriptHandlers[scriptTypes.Query] = Kata.bind(this._handleQuery, this);
+        scriptHandlers[scriptTypes.Location] = Kata.bind(this._handleLocUpdateRequest, this);
 
         scriptHandlers[scriptTypes.CreateObject] = Kata.bind(this._handleCreateObject, this);
 
@@ -114,6 +115,18 @@ Kata.include("katajs/core/MessageDispatcher.js");
 
      Kata.HostedObject.prototype._handleCreateObject = function (channel, request) {
          this.mObjectHost.createObject(request.script, request.constructor, request.args);
+     };
+
+     Kata.HostedObject.prototype._handleLocUpdateRequest = function (channel, request) {
+         this.mObjectHost.locUpdateRequest(
+             request.space,
+             request.id,
+             request.position,
+             request.velocity,
+             request.acceleration,
+             request.bounds,
+             request.visual
+         );
      };
 
     /** A simulation sent a message to this object via the object host.

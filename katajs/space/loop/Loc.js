@@ -53,7 +53,7 @@
 
      Kata.Loopback.Loc.prototype.add = function(uuid, pos, vel, acc, bounds, visual) {
          if (this.mObjects[uuid])
-             Kata.warn("Loopback.Loc trying to remove unknown object." + uuid);
+             Kata.warn("Loopback.Loc trying to add an existing object." + uuid);
 
          this.mObjects[uuid] = {
              pos : pos,
@@ -65,20 +65,21 @@
      };
 
      Kata.Loopback.Loc.prototype._checkExists = function(uuid) {
-         if (!this.mObjects[uuid]) {
-             Kata.warn("Loopback.Loc trying to remove unknown object." + uuid);
+         if (!this.mObjects[uuid])
              return false;
-         }
          return true;
      };
 
      Kata.Loopback.Loc.prototype.remove = function(uuid) {
-         if (!this._checkExists()) return;
+         if (!this._checkExists(uuid)) {
+             Kata.warn("Loopback.Loc trying to remove unknown object." + uuid);
+             return;
+         }
          delete this.mObjects[uuid];
      };
 
      Kata.Loopback.Loc.prototype.update = function(uuid, pos, vel, acc, bounds, visual) {
-         if (!this._checkExists()) return;
+         if (!this._checkExists(uuid)) return;
          if (pos) this.mObjects[uuid].pos = pos;
          if (vel) this.mObjects[uuid].vel = vel;
          if (acc) this.mObjects[uuid].acc = acc;

@@ -78,19 +78,15 @@
 
              /** Location update.  Providing a subset of the information is permitted.
               */
-             Location : function(space, position, velocity, acceleration, bounds) {
+             Location : function(space, id, position, velocity, acceleration, bounds, vis) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Location;
                  this.space = space;
+                 this.id = id;
                  this.position = position;
                  this.velocity = velocity;
                  this.acceleration = acceleration;
                  this.bounds = bounds;
-             },
-
-             Visual : function(space, url) {
-                 this.__type = Kata.ScriptProtocol.FromScript.Types.Visual;
-                 this.space = space;
-                 this.url = url;
+                 this.vis = vis;
              },
 
              Query : function(space, id, sa) {

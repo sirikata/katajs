@@ -17,6 +17,7 @@ Kata.include("katajs/oh/Script.js");
          this.mPresence = presence;
          this.mPresence.setQueryHandler(Kata.bind(this.proxEvent, this));
          this.mPresence.setQuery(0);
+         presence.setPosition({x: 1, y: 1, z: 1});
      };
 
      Example.TestScript.prototype.proxEvent = function(presence, added) {

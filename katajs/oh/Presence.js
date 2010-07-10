@@ -112,6 +112,28 @@ Kata.include("katajs/oh/RemotePresence.js");
          this.mQueryHandler = cb;
      };
 
+     Kata.Presence.prototype.setPosition = function(val) {
+         this._setLocation(val, undefined, undefined, undefined, undefined);
+     };
+     Kata.Presence.prototype.setVelocity = function(val) {
+         this._setLocation(undefined, val, undefined, undefined, undefined);
+     };
+     Kata.Presence.prototype.setAcceleration = function(val) {
+         this._setLocation(undefined, undefined, val, undefined, undefined);
+     };
+     Kata.Presence.prototype.setBounds = function(val) {
+         this._setLocation(undefined, undefined, undefined, val, undefined);
+     };
+     Kata.Presence.prototype.setVisual = function(val) {
+         this._setLocation(undefined, undefined, undefined, undefined, val);
+     };
+
+     Kata.Presence.prototype._setLocation = function(pos, vel, acc, bounds, vis) {
+         this._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, pos, vel, acc, bounds, vis)
+         );
+     };
+
      /** Notify the presence of an event on a remote presence, either
       * added or removed from a result set.  The Presence remains
       * valid (since the user might still want to communicate with the

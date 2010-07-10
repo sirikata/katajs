@@ -219,15 +219,9 @@ Kata.include("katajs/core/URL.js");
          obj.proxEvent(space, observed, entered, properties);
      };
 
-    /**
-     * A top-level connection to a remote server. It is not yet bound to a
-     * specific HostedObject.
-     * @interface
-     */
-    Kata.ObjectHost.TopLevelStream = function() {};
-    /**
-     * @return {Kata.Channel} A connection bound to a specific hosted object.
-     */
-    Kata.ObjectHost.TopLevelStream.prototype.clone = function() {};
-
+     /** Send an update request to the space. */
+     Kata.ObjectHost.prototype.locUpdateRequest = function(space, id, pos, vel, acc, bounds, visual) {
+         var space_conn = this.mSpaceConnections[space];
+         space_conn.locUpdateRequest(id, pos, vel, acc, bounds, visual);
+     };
 })();
