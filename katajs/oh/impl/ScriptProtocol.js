@@ -118,11 +118,13 @@
                  QueryEvent : 4
              },
 
-             Connected : function(space, id, loc, bounds) {
+             Connected : function(space, id, loc, bounds, visual) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.Connected;
                  this.space = space;
                  this.id = id;
                  this.loc = loc;
+                 this.bounds = bounds;
+                 this.visual = visual;
              },
 
              ConnectionFailed : function(space, reason) {
@@ -136,11 +138,14 @@
                  this.space = space;
              },
 
-             QueryEvent : function(space, observed, entered) {
+             QueryEvent : function(space, observed, entered, loc, bounds, visual) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.QueryEvent;
                  this.space = space;
                  this.observed = observed;
                  this.entered = entered;
+                 this.loc = loc;
+                 this.bounds = bounds;
+                 this.visual = visual;
              }
 
          }

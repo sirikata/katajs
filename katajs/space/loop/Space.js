@@ -91,12 +91,13 @@ Kata.include("katajs/space/loop/EveryoneProx.js");
              min : [0, 0, 0],
              max : [0, 0, 0]
          };
+         var visual = "bogus";
 
-         this.mLoc.add(uuid, obj_loc.pos, obj_loc.vel, obj_loc.acc, obj_loc.bounds);
+         this.mLoc.add(uuid, obj_loc.pos, obj_loc.vel, obj_loc.acc, obj_loc.bounds, visual);
          this.mProx.addObject(uuid);
 
          this.mObjects[uuid] = cb;
-         cb.connected(id, uuid, obj_loc, obj_bounds); // FIXME clone these so they aren't shared
+         cb.connected(id, uuid, obj_loc, obj_bounds, visual); // FIXME clone these so they aren't shared
      };
 
      Kata.LoopbackSpace.prototype.registerProxQuery = function(id, sa) {
@@ -119,6 +120,16 @@ Kata.include("katajs/space/loop/EveryoneProx.js");
              return;
          }
 
-         querier_cb.prox(observed, entered);
+         var observed_loc = this.mLoc.lookup(observed);
+         var observed_properties = {
+             loc : {
+                 pos : observed_loc.pos,
+                 vel : observed_loc.vel,
+                 acc : observed_loc.acc
+             },
+             bounds : observed_loc.bounds,
+             visual : observed_loc.visual
+         };
+         querier_cb.prox(observed, entered, observed_properties);
      };
 })();

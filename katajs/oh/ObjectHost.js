@@ -193,8 +193,9 @@ Kata.include("katajs/core/URL.js");
       *  null if the connection wasn't successful.
       *  @param {LocUpdate} loc initial location information for the object
       *  @param {BoundsUpdate} bounds initial bounds information for the object
+      *  @param {} visual a reference to the visual description of the object
       */
-     Kata.ObjectHost.prototype.connectionResponse = function(id, success, presence_id, loc, bounds) {
+     Kata.ObjectHost.prototype.connectionResponse = function(id, success, presence_id, loc, bounds, visual) {
          var obj = this.mObjects[id];
          if (!obj) {
              Kata.warn("Got connection response for unknown object: " + id);
@@ -205,7 +206,7 @@ Kata.include("katajs/core/URL.js");
          delete this.mObjects[id];
          this.mObjects[presence_id.object] = obj;
 
-         obj.connectionResponse(success, presence_id, loc, bounds);
+         obj.connectionResponse(success, presence_id, loc, bounds, visual);
      };
 
      Kata.ObjectHost.prototype.registerProxQuery = function(space, id, sa) {
@@ -213,9 +214,9 @@ Kata.include("katajs/core/URL.js");
          space_conn.registerProxQuery(id, sa);
      };
 
-     Kata.ObjectHost.prototype.proxEvent = function(space, querier, observed, entered) {
+     Kata.ObjectHost.prototype.proxEvent = function(space, querier, observed, entered, properties) {
          var obj = this.mObjects[querier];
-         obj.proxEvent(space, observed, entered);
+         obj.proxEvent(space, observed, entered, properties);
      };
 
     /**

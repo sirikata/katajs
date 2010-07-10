@@ -37,9 +37,16 @@
       * information like location and mesh as well as allow you to
       * send messages to the object.
       */
-     Kata.RemotePresence = function (space, id) {
+     Kata.RemotePresence = function (space, id, pos, vel, acc, bounds, vis) {
          this.mSpace = space;
          this.mID = id;
+
+         this.mPosition = pos;
+         this.mVelocity = vel;
+         this.mAcceleration = acc;
+         this.mBounds = bounds;
+
+         this.mVisual = vis;
      };
 
      /** Get the unique ID associated with this RemotePresence.
@@ -54,6 +61,27 @@
       */
      Kata.RemotePresence.prototype.space = function() {
          return this.mSpace;
+     };
+
+     /** Get the current estimate of this object's position. */
+     Kata.RemotePresence.prototype.position = function() {
+         return this.mPosition;
+     };
+     /** Get the current estimate of this object's velocity. */
+     Kata.RemotePresence.prototype.velocity = function() {
+         return this.mVelocity;
+     };
+     /** Get the current estimate of this object's acceleration. */
+     Kata.RemotePresence.prototype.acceleration = function() {
+         return this.mAcceleration;
+     };
+     /** Get the current estimate of this object's bounds. */
+     Kata.RemotePresence.prototype.bounds = function() {
+         return this.mBounds;
+     };
+     /** Get the current estimate of this object's visual representation (e.g. mesh). */
+     Kata.RemotePresence.prototype.visual = function() {
+         return this.mVisual;
      };
 
 })();

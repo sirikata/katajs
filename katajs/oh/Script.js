@@ -160,7 +160,7 @@ Kata.include("katajs/oh/RemotePresence.js");
          var presence = this.mPresences[msg.space];
          if (msg.entered) {
              // New object, create presence and notify
-             var remote = new Kata.RemotePresence(msg.space, msg.observed);
+             var remote = new Kata.RemotePresence(msg.space, msg.observed, msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
              this.mRemotePresences[msg.observed] = remote;
              presence.remotePresence(remote, true);
          }

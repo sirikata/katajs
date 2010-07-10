@@ -90,10 +90,10 @@ Kata.include("katajs/core/MessageDispatcher.js");
          this.mObjectHost.connect(this, request.space, request.auth);
      };
 
-     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, loc, bounds) {
+     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, loc, bounds, visual) {
          var msg = null;
          if (success)
-             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, loc, bounds);
+             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, loc, bounds, visual);
          else
              msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object);
          this.sendScriptMessage(msg);
@@ -107,8 +107,8 @@ Kata.include("katajs/core/MessageDispatcher.js");
          this.mObjectHost.registerProxQuery(request.space, request.id, request.sa);
      };
 
-     Kata.HostedObject.prototype.proxEvent = function(space, observed, entered) {
-         var msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered);
+     Kata.HostedObject.prototype.proxEvent = function(space, observed, entered, properties) {
+         var msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered, properties.loc, properties.bounds, properties.visual);
          this.sendScriptMessage(msg);
      };
 
