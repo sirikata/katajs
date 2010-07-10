@@ -30,8 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("katajs/oh/RemotePresence.js");
+
 (function() {
 
+     var SUPER=Kata.RemotePresence.prototype;
      /** Presences live in the same thread as the script and maintain
       * the most up-to-date knowledge about the space. It maintains
       * the object's best information both about itself (and handles
@@ -58,6 +61,10 @@
       * is more convenient to allow synchronous allocation via the
       * Presence which lives in the same thread as the Script itself.
       *
+      * Much of the "read" part of the API is in the RemotePresence
+      * superclass; Presence has a strict superset of the
+      * RemotePresence functionality.
+      *
       * Note: This constructor should only be invoked by the script
       * itself in response to a NewPresence message.  This should be
       * handled automatically by the base script class.
@@ -70,9 +77,9 @@
       * the space.
       */
      Kata.Presence = function (script, space, id, pos, vel, acc, bounds, vis) {
+         SUPER.constructor.call(this, space, id);
+
          this.mScript = script;
-         this.mSpace = space;
-         this.mID = id;
 
          this.mPosition = pos;
          this.mVelocity = vel;
@@ -84,20 +91,7 @@
          this.mQuery = null;
          this.mQueryHander = null;
      };
-
-     /** Get the unique ID associated with this Presence.
-      *  @returns {Kata.PresenceID} PresenceID for this Presence (combination of SpaceID and ObjectID)
-      */
-     Kata.Presence.prototype.id = function() {
-         return this.mID;
-     };
-
-     /** Get the space this presence resides in.
-      *  @returns {Kata.URL} space URL
-      */
-     Kata.Presence.prototype.space = function() {
-         return this.mSpace;
-     };
+     Kata.extend(Kata.Presence, SUPER);
 
      /** Short hand for sending a message to the owning HostedObject.
       *  Note that the channel this is sent via is shared by all
