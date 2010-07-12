@@ -49,6 +49,7 @@
          this.mVisual = vis;
      };
 
+
      /** Get the unique ID associated with this RemotePresence.
       *  @returns {Kata.PresenceID} RemotePresenceID for this RemotePresence (combination of SpaceID and ObjectID)
       */

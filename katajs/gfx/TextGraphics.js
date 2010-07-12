@@ -1,4 +1,4 @@
-
+Kata.include("network/GraphicsSimulation.js");
 
 /**
  *@constructor
@@ -165,6 +165,6 @@ TextGraphics=function(callbackFunction,parentElement) {
 }
 
 // Register as a GraphicsSimulation if possible.
-if (Kata.GraphicsSimulation) {
-    Kata.GraphicsSimulation.registerDriver("text", TextGraphics);
-}
+Kata.defer(function() {
+               Kata.GraphicsSimulation.registerDriver("text", TextGraphics);
+           });

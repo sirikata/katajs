@@ -1139,7 +1139,7 @@ O3DGraphics.prototype.methodTable["AttachCamera"]=function(msg) {
             spaceView = this.mSpaceRoots[cam.mSpaceID];
         } else {
             spaceView = new SpaceDrawList(this, this.mClientElement);
-            this.mSpaceRoots[cam.MSpaceID] = spaceView;
+            this.mSpaceRoots[cam.mSpaceID] = spaceView;
         }
 
         renderTarg = this.mRenderTargets[msg.target];
@@ -1236,6 +1236,6 @@ O3DGraphics.prototype.scrollMe = function(e) {
 };
 
 // Register as a GraphicsSimulation if possible.
-if (Kata.GraphicsSimulation) {
-    Kata.GraphicsSimulation.registerDriver("o3d", O3DGraphics);
-}
+Kata.defer(function() {
+               Kata.GraphicsSimulation.registerDriver("o3d", O3DGraphics);
+           });

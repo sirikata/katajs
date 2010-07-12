@@ -106,7 +106,6 @@ Kata.include("katajs/oh/RemotePresence.js");
              delete this.mPresences[presence.space()];
          }
      };
-
      /** Request a callback after the specified amount of time.  If
       * repeat is true, will repeat every freq period.
       *
@@ -155,27 +154,35 @@ Kata.include("katajs/oh/RemotePresence.js");
      Kata.Script.prototype._handleHostedObjectMessage = function(channel, data) {
          this.mMessageDispatcher.dispatch(channel, data);
      };
-
+     /**
+      * STATIC function to create a key for remote presence
+      */
+     Kata.Script.remotePresenceKey=function(space,objectid) {
+         return space+objectid;
+     }
      Kata.Script.prototype._handleQueryEvent = function(channel, msg) {
          var presence = this.mPresences[msg.space];
+         var remote=null;
+         var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
          if (msg.entered) {
              // New object, create presence and notify
-             var remote = new Kata.RemotePresence(msg.space, msg.observed, msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
-             this.mRemotePresences[msg.observed] = remote;
+             remote = new Kata.RemotePresence(msg.space, msg.observed, msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
+             this.mRemotePresences[key] = remote;
              presence.remotePresence(remote, true);
          }
          else {
              // Object exited, invalidate presence and notify
-             var remote = this.mRemotePresences[msg.observed];
+             remote = this.mRemotePresences[key];
              if (!remote) {
                  Kata.warn("Got removal prox event for unknown object.");
-                 return;
+                 return remote;
              }
-             delete this.mRemotePresences[msg.observed];
+             delete this.mRemotePresences[key];
              presence.remotePresence(remote, false);
          }
+         return remote;
      };
-
+     
      Kata.Script.prototype._handleStorageEvent = function(data) {
      };
 

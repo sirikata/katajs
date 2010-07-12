@@ -32,7 +32,7 @@
 
 Kata.include("katajs/oh/RemotePresence.js");
 
-(function() {
+Kata.defer(function() {
 
      var SUPER=Kata.RemotePresence.prototype;
      /** Presences live in the same thread as the script and maintain
@@ -219,6 +219,5 @@ Kata.include("katajs/oh/RemotePresence.js");
      /** Handle an received ODP message. */
      Kata.Presence.prototype._handleODPEvent = function(data) {
          Kata.notImplemented();
-     };
-
-})();
+     };     
+});

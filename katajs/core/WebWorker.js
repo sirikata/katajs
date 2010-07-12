@@ -41,7 +41,7 @@ Kata.include("katajs/core/SimpleChannel.js");
     function getErrorCallback(thus) {
         return function(ev) {
             thus.gotError(ev.message, ev.filename, ev.lineno);
-        }
+        };
     }
 
     if (Kata.WEB_WORKERS_ENABLED && typeof(Worker)!="undefined") {
@@ -59,7 +59,7 @@ Kata.include("katajs/core/SimpleChannel.js");
          * @param {*} args  Primitive data to instantiate the class with.
          */
         Kata.WebWorker = function (jsFile, clsName, args) {
-            this.mWorker = new Worker(Kata.scriptRoot+"network/GenericWorker.js");
+            this.mWorker = new Worker(Kata.scriptRoot+"katajs/core/GenericWorker.js");
             this.mWorker.onerror = getErrorCallback(this);
             this.mInitialMessage = [
                 Kata.scriptRoot,
@@ -93,7 +93,7 @@ Kata.include("katajs/core/SimpleChannel.js");
         Kata.WebWorker = function (jsFile, clsName, args) {
             this.mChannel = new Kata.SimpleChannel;
             var clsTree = clsName.split(".");
-            Kata.include(jsFile);
+            Kata.evalInclude(jsFile);
             var cls = self;
             for (var i = 0; cls && i < clsTree.length; i++) {
                 cls = cls[clsTree[i]];

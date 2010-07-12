@@ -38,7 +38,7 @@ Kata.include("katajs/oh/ObjectHost.js");
 // generally can't since the space implementation is not available.
 Kata.include("katajs/space/loop/Space.js");
 
-(function() {
+Kata.defer(function() {
 
      var SUPER = Kata.SpaceConnection.prototype;
      /** Kata.LoopbackSpaceConnection is an implementation of
@@ -100,4 +100,4 @@ Kata.include("katajs/space/loop/Space.js");
      };
 
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
-})();
+});

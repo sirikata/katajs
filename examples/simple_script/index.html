@@ -49,25 +49,54 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	    }
 	</script>
 -->
-	<script type="text/javascript" src="../../network/GraphicsSimulation.js"></script>
-	<script type="text/javascript" src="../../network/MainThread.js"></script>
-	<script type="text/javascript" src="../../katajs/gfx/TextGraphics.js"></script>
-<!-- "Plugins" - load files which add specific implementations. This
-is left up to the user since some may be expensive to load.
--->
-	<script type="text/javascript" src="../../katajs/oh/LoopbackSpaceConnection.js"></script>
-	<script type="text/javascript" src="../../katajs/space/loop/Space.js"></script>
-
-	<script type="text/javascript" src="../../externals/o3d-webgl/base.js"></script>
 	<script type="text/javascript" src="../../externals/o3djs/base.js"></script>
-	<script type="text/javascript" src="../../katajs/gfx/o3dgfx.js"></script>
+	<script type="text/javascript" src="../../externals/o3d-webgl/base.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge_math.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge_input.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge_collada.js"></script>
-	<script type="text/javascript" src="../../katajs/gfx/kjsgfx.js"></script>
-
+    
     <script type="text/javascript">
+
+      Kata.include("network/MainThread.js");
+// "Plugins" - load files which add specific implementations. This is left up to the user since some may be expensive to load.
+	Kata.include("katajs/oh/SpaceConnection.js");
+	Kata.include("katajs/oh/LoopbackSpaceConnection.js");
+	Kata.include("katajs/space/loop/Space.js");
+	Kata.include("network/Simulation.js");
+	Kata.include("network/GraphicsSimulation.js");
+	Kata.include("katajs/gfx/kjsgfx.js");
+	Kata.include("katajs/gfx/TextGraphics.js");
+	Kata.include("katajs/gfx/o3dgfx.js");
+	Kata.include("katajs/oh/Script.js");
+	Kata.include("katajs/oh/ObjectHost.js");
+	Kata.include("katajs/oh/impl/BootstrapScript.js");
+	Kata.include("katajs/oh/GraphicsScript.js");
+	Kata.include("network/MainThread.js");
+	Kata.include("examples/simple_script/BlessedScript.js");
+	Kata.include("examples/simple_script/TestScript.js");
+    </script>
+
+<!-- "Plugins" - load files which add specific implementations. This
+is left up to the user since some may be expensive to load.
+-->
+<!--
+    <script type="text/javascript" src="../../network/MainThread.js"></script>
+	<script type="text/javascript" src="../../katajs/oh/LoopbackSpaceConnection.js"></script>
+	<script type="text/javascript" src="../../katajs/space/loop/Space.js"></script>
+
+	<script type="text/javascript" 	src="../../katajs/gfx/o3dgfx.js"></script>
+
+	<script type="text/javascript" src="../../katajs/gfx/kjsgfx.js"></script>
+	<script type="text/javascript" src="../../katajs/gfx/TextGraphics.js"></script>
+	<script type="text/javascript" src="../../katajs/oh/Script.js"></script>
+	<script type="text/javascript" src="../../katajs/oh/ObjectHost.js"></script>
+	<script type="text/javascript" src="../../katajs/oh/impl/BootstrapScript.js"></script>
+	<script type="text/javascript" src="../../katajs/oh/GraphicsScript.js"></script>
+	<script type="text/javascript" src="../../examples/simple_script/BlessedScript.js"></script>
+-->
+    <script>
+       
         var kata, graphics;
         var defaultSpace = "loop://localhost";
         var driver = "text"; // "o3d" or "glge"
@@ -90,10 +119,10 @@ is left up to the user since some may be expensive to load.
             doc.onLoad = loadGFX;
             doc.load("scene.xml");
         } else {
-            window.onload = loadGFX;
+           window.onload=loadGFX;
         }
+        Kata.resolveDeferredHeaders();
     </script>
-
   </head>
 
   <body>

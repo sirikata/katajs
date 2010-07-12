@@ -70,7 +70,9 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             }
             includedscripts[scriptfile] = true;
             importScripts(Kata.scriptRoot+scriptfile);
-        }
+        };
+        Kata.eval=Kata.include;
+        Kata.defer = function (f){if (f) f();};
     } else if (typeof(document) != "undefined" && document.write) {
         var scripttags = document.getElementsByTagName("script");
         var headTag = document.getElementsByTagName("head")[0];
@@ -86,6 +88,28 @@ if (typeof(JSON) == "undefined") {JSON = {};}
                 }
             }
         }
+        Kata.defer = 
+            (function() { 
+                 var deferList=[];
+                 return function (f) {
+                     if (f) {
+                         deferList.push(f);
+                     }else {
+                         for (var i=0;i<deferList.length;++i) {
+                             deferList[i]();
+                             Kata.include=Kata.evalInclude;//flip it back
+                         }
+                     }
+                 };})();
+        Kata.resolveDeferredHeaders=function() {
+            Kata.defer(null);
+        };
+        Kata.alreadyIncluded = function(scriptfile) {
+            if (includedscripts[scriptfile]) {
+                return;
+            }
+            includedscripts[scriptfile] = true;
+        };
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
          * @param {string} scriptfile  A script to include only once.
          *
@@ -102,11 +126,14 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             scriptTag.setAttribute("type","text/javascript");
             headTag.appendChild(scriptTag);
             */
-            /*
             document.write("<script type='text/javascript' src='"+
                 Kata.scriptRoot+scriptfile+"'></scr"+"ipt>");
-            */
+            
             //console.log("importing script "+scriptfile+"...");
+        };
+        Kata.evalInclude = function (scriptfile) {
+            if (includedscripts[scriptfile]) return;
+            includedscripts[scriptfile]=true;
             var xhr = new XMLHttpRequest();
             xhr.open("GET", Kata.scriptRoot+scriptfile, false);
             xhr.send();
@@ -122,7 +149,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
                     xhr.getResponseHeader("Content-Type"));
             }
             //console.log("done importing script "+scriptfile);
-        }
+        };
     } else {
         // Running without dom?
     }
@@ -251,7 +278,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             console.error && console.error(error);
             console.trace && console.trace();
         }
-        throw error;
+//        throw error;
     };
 
     /** Log a warning.

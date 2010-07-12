@@ -31,7 +31,7 @@
  */
 Kata.include("network/Simulation.js");
 
-(function() {
+Kata.defer(function() {
 
     var SUPER = Kata.Simulation.prototype;
     /** GraphicsSimulation is a wrapper around katajs. It must be instantiated
@@ -86,4 +86,4 @@ Kata.include("network/Simulation.js");
          }
          this._drivers[type] = klass;
      };
-})();
+});

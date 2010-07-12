@@ -42,14 +42,14 @@ self.onmessage = function (ev) {
     var scriptroot = data[0];
     //scriptroot+
     importScripts("Core.js");
-    Kata.include("network/WebWorker.js");
+    Kata.evalInclude("network/WebWorker.js");
     //Kata.scriptRoot = scriptroot
 
     // Fetch classname to instanciate and arguments.
     var jsFile = data[1];
     var clsName = data[2].split(".");
     var args = data[3];
-    Kata.include(jsFile);
+    Kata.evalInclude(jsFile);
     // Our class name can be in a namespace heirarchy.
     var cls = self;
     for (var i = 0; i < clsName.length; i++) {

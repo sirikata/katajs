@@ -1,4 +1,5 @@
-Kata.include("katajs/gfx/kata.js")
+Kata.include("katajs/gfx/kata.js");
+Kata.include("network/GraphicsSimulation.js");
 
 kjsgfx_camera_id = null
 kjsgfx_id_map = {}
@@ -218,6 +219,6 @@ KatajsGraphics=function(callbackFunction,parentElement) {
 };
 
 // Register as a GraphicsSimulation if possible.
-if (Kata.GraphicsSimulation) {
-    Kata.GraphicsSimulation.registerDriver("glge", KatajsGraphics);
-}
+Kata.defer(function() {
+               Kata.GraphicsSimulation.registerDriver("glge", KatajsGraphics);
+           });

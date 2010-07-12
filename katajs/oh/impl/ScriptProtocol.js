@@ -61,8 +61,9 @@
                  Location : 3,
                  Visual : 4,
                  Query : 5,
-
-                 CreateObject : 100
+                 
+                 CreateObject : 100,
+                 GraphicsMessage : 101
              },
 
              Connect : function(space, auth) {
@@ -102,6 +103,65 @@
                  this.script = script;
                  this.constructor = cons;
                  this.args = args;
+             },
+             GFXCreateNode : function(space, observer, remotePresence) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="Create";
+                 this.space = space+observer;
+                 this.id = remotePresence.id();
+                 this.pos=remotePresence.position();
+                 this.vel=remotePresence.vel;
+                 this.orient=[1,0,0,0];//fixme
+                 this.rotvel=0;
+                 this.rotaxis=[0,0,1];
+                 
+             },
+             GFXDestroyNode : function(space, observer, remotePresence) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 
+                 this.space = space+observer;
+                 this.msg="Destroy";
+                 this.id = remotePresence.id();
+             },
+             generateGFXUpdateVisualMessages : function(space, observer, remotePresence) {
+                 var messageList=[];
+                 if (remotePresence.mVisual) {
+                     messageList.push(new GFXUpdateVisualMesh(space, observer, remotePresence.mVisual));
+                 }else {
+                    //MIGHT be a light or somesuch
+                 }
+                 return messageList;
+             },
+             // Generates either a Mesh, Light, WebView, or Camera message, or the Destroy variants.
+             GFXUpdateVisualMesh : function(space, observer, mesh) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.space = space+observer;
+                 this.id = remotePresence.id();
+                 if (mesh == null) {
+                     this.msg = "DestroyMesh";
+                 } else {
+                     this.msg = "Mesh";
+                     this.mesh = mesh;
+                 }
+             },
+             GFXAttachCamera : function(space, observer, id, canvasId) {
+                 Kata.ScriptProtocol.FromScript.GraaphicsMessage.call(this, space, observer, id);
+
+                 this.target=canvasId;
+             },
+             GFXAttachCameraTexture : function(space, observer, id, textureObjectSpace, textureObjectID, texture) {
+                 Kata.ScriptProtocol.FromScript.GraphicsMessage.constructor.call(this, space, observer, id);
+
+                 this.space = space+observer;
+                 this.id = id;
+                 this.texobjid=textureObjectId;
+                 this.texobjspace=textureObjectSpace;
+                 this.texname=textureName;
+             },
+             GFXDetachCamera : function(space, observer, id) {             
+                 Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
+                 this.space = space+observer;
+                 this.id = id;
              }
          },
 
@@ -130,6 +190,7 @@
              },
 
              Disconnected : function(space) {
+
                  this.__type = Kata.ScriptProtocol.ToScript.Types.Disconnected;
                  this.space = space;
              },

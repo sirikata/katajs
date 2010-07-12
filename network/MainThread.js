@@ -30,11 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("network/MainThread.js");
 Kata.include("katajs/core/Channel.js");
 Kata.include("katajs/core/WebWorker.js");
 
-(function() {
+Kata.defer(function() {
 
     /** MainThread is a class to instantiate an ObjectHost thread and hold onto
      * the multiplexed channel coming from it. This channel can be used to
@@ -63,4 +62,4 @@ Kata.include("katajs/core/WebWorker.js");
         //console.log("Kata.MainThread received ObjectHost message:",data);
     };
 
-})();
+});
