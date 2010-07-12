@@ -224,4 +224,14 @@ Kata.include("katajs/core/URL.js");
          var space_conn = this.mSpaceConnections[space];
          space_conn.locUpdateRequest(id, pos, vel, acc, bounds, visual);
      };
+
+     Kata.ObjectHost.prototype.subscribe = function(space, id, observed) {
+         var space_conn = this.mSpaceConnections[space];
+         space_conn.subscribe(id, observed);
+     };
+
+     Kata.ObjectHost.prototype.unsubscribe = function(space, id, observed) {
+         var space_conn = this.mSpaceConnections[space];
+         space_conn.unsubscribe(id, observed);
+     };
 })();

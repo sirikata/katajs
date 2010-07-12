@@ -34,6 +34,7 @@ Kata.include("katajs/oh/SpaceConnection.js");
 Kata.include("katajs/core/Math.uuid.js");
 Kata.include("katajs/space/loop/Loc.js");
 Kata.include("katajs/space/loop/EveryoneProx.js");
+Kata.include("katajs/space/loop/Subscription.js");
 
 (function() {
 
@@ -54,6 +55,7 @@ Kata.include("katajs/space/loop/EveryoneProx.js");
          this.mObjects = {};
          this.mLoc = new Kata.Loopback.Loc();
          this.mProx = new Kata.Loopback.EveryoneProx(this);
+         this.mSubscription = new Kata.Loopback.Subscription(this);
      };
 
      /** Static map of local spaces, used to allow
@@ -95,6 +97,7 @@ Kata.include("katajs/space/loop/EveryoneProx.js");
 
          this.mLoc.add(uuid, obj_loc.pos, obj_loc.vel, obj_loc.acc, obj_loc.bounds, visual);
          this.mProx.addObject(uuid);
+         this.mSubscription.addObject(uuid);
 
          this.mObjects[uuid] = cb;
          cb.connected(id, uuid, obj_loc, obj_bounds, visual); // FIXME clone these so they aren't shared
@@ -145,6 +148,33 @@ Kata.include("katajs/space/loop/EveryoneProx.js");
      };
      Kata.LoopbackSpace.prototype._locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
          this.mLoc.update(id, pos, vel, acc, bounds, visual);
+     };
+
+     /** Handle subscription updates.
+      * @param id the object subscribing for updates
+      * @param observed the object to get updates from
+      * @param enable if true, enables updates, if false disables them
+      */
+     Kata.LoopbackSpace.prototype.subscriptionRequest = function(id, observed, enable) {
+         var spaceself = this;
+         setTimeout(
+             function() {
+                 spaceself._subscriptionRequest(id, observed, enable);
+             },
+             this.netdelay
+         );
+     };
+     Kata.LoopbackSpace.prototype._subscriptionRequest = function(id, observed, enable) {
+         if (enable)
+             this.mSubscription.subscribe(id, observed);
+         else
+             this.mSubscription.unsubscribe(id, observed);
+     };
+
+
+     Kata.LoopbackSpace.prototype.sendMessage = function(from, to, payload) {
+         var receiver_cb = this.mObjects[receiver];
+         receiver_cb.message(from, to, payload);
      };
 
 })();

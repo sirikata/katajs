@@ -21,8 +21,10 @@ Kata.include("katajs/oh/Script.js");
      };
 
      Example.TestScript.prototype.proxEvent = function(presence, added) {
-         if (added)
+         if (added) {
+             presence.track();
              this.mNearby[presence.id()] = presence;
+         }
          else
              delete this.mNearby[presence.id()];
      };

@@ -99,5 +99,14 @@ Kata.defer(function() {
          this.mSpace.locUpdateRequest(id, pos, vel, acc, bounds, visual);
      };
 
+     Kata.LoopbackSpaceConnection.prototype.subscribe = function(id, observed) {
+         this.mSpace.subscriptionRequest(id, observed, true);
+     };
+
+     Kata.LoopbackSpaceConnection.prototype.unsubscribe = function(id, observed) {
+         this.mSpace.subscriptionRequest(id, observed, false);
+     };
+
+
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
 });

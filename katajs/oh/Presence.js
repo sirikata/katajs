@@ -77,7 +77,9 @@ Kata.defer(function() {
       * the space.
       */
      Kata.Presence = function (script, space, id, pos, vel, acc, bounds, vis) {
-         SUPER.constructor.call(this, space, id, pos, vel, acc, bounds, vis);
+         // Note the second parameter is the RemotePresence's parent,
+         // which in this special case is just the Presence itself
+         SUPER.constructor.call(this, this, space, id, pos, vel, acc, bounds, vis);
 
          this.mScript = script;
 
@@ -142,6 +144,18 @@ Kata.defer(function() {
      Kata.Presence.prototype.remotePresence = function(remote, added) {
          if (this.mQueryHandler)
              this.mQueryHandler(remote, added);
+     };
+
+     Kata.Presence.prototype.subscribe = function(observed) {
+         this.mParent._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Subscription(this.mSpace, this.mID, observed, true)
+         );
+     };
+
+     Kata.Presence.prototype.unsubscribe = function(observed) {
+         this.mParent._sendHostedObjectMessage(
+             new Kata.ScriptProtocol.FromScript.Subscription(this.mSpace, this.mID, observed, false)
+         );
      };
 
      // Space Listening Events (public API used by Scripts to register

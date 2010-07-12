@@ -37,7 +37,9 @@
       * information like location and mesh as well as allow you to
       * send messages to the object.
       */
-     Kata.RemotePresence = function (space, id, pos, vel, acc, bounds, vis) {
+     Kata.RemotePresence = function (parent, space, id, pos, vel, acc, bounds, vis) {
+         this.mParent = parent; // Parent Presence
+
          this.mSpace = space;
          this.mID = id;
 
@@ -47,6 +49,9 @@
          this.mBounds = bounds;
 
          this.mVisual = vis;
+
+         // Indicates whether we're tracking this object, i.e. if a subscription was submitted.
+         this.mTracking = false;
      };
 
 
@@ -62,6 +67,27 @@
       */
      Kata.RemotePresence.prototype.space = function() {
          return this.mSpace;
+     };
+
+     /** Enable tracking for this RemotePresence, i.e. subscribe it
+      * for updates.
+      */
+     Kata.RemotePresence.prototype.track = function() {
+         if (this.mTracking)
+             return;
+
+         this.mParent.subscribe(this.mID);
+         this.mTracking = true;
+     };
+     /** Disable tracking for this RemotePresence, i.e. unsubscribe it
+      * from updates.
+      */
+     Kata.RemotePresence.prototype.untrack = function() {
+         if (!this.mTracking)
+             return;
+
+         this.mParent.unsubscribe(this.mID);
+         this.mTracking = false;
      };
 
      /** Get the current estimate of this object's position. */

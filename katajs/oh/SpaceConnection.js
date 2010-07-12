@@ -65,4 +65,22 @@ Kata.include("katajs/oh/ObjectHost.js");
      Kata.SpaceConnection.prototype.locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
          Kata.notImplemented("SpaceConnection.locUpdateRequest");
      };
+
+     /** Send a subscription request to the space.
+      * @param id the identifier of the subscriber
+      * @param observed the identifier of the object to listen for
+      * updates from
+      */
+     Kata.SpaceConnection.prototype.subscribe = function(id, observed) {
+         Kata.notImplemented("SpaceConnection.subscribe");
+     };
+
+     /** Send an unsubscription request to the space.
+      * @param id the identifier of the subscriber
+      * @param observed the identifier of the object to stop getting updates from.
+      */
+     Kata.SpaceConnection.prototype.unsubscribe = function(id, observed) {
+         Kata.notImplemented("SpaceConnection.unsubscribe");
+     };
+
 })();

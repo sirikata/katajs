@@ -54,6 +54,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
         scriptHandlers[scriptTypes.Disconnect] = Kata.bind(this._handleDisconnect, this);
         scriptHandlers[scriptTypes.Query] = Kata.bind(this._handleQuery, this);
         scriptHandlers[scriptTypes.Location] = Kata.bind(this._handleLocUpdateRequest, this);
+        scriptHandlers[scriptTypes.Subscription] = Kata.bind(this._handleSubscriptionRequest, this);
 
         scriptHandlers[scriptTypes.CreateObject] = Kata.bind(this._handleCreateObject, this);
         scriptHandlers[scriptTypes.GraphicsMessage] = Kata.bind(this._handleGraphicsMessage, this);
@@ -132,6 +133,13 @@ Kata.include("katajs/core/MessageDispatcher.js");
 
      Kata.HostedObject.prototype._handleGraphicsMessage = function (channel, request) {
          this.mObjectHost.sendGraphicsMessage(request);
+     };
+
+     Kata.HostedObject.prototype._handleSubscriptionRequest = function (channel, request) {
+         if (request.enable)
+             this.mObjectHost.subscribe(request.space, request.id, request.observed);
+         else
+             this.mObjectHost.unsubscribe(request.space, request.id, request.observed);
      };
 
     /** A simulation sent a message to this object via the object host.

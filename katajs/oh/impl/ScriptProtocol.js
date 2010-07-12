@@ -61,7 +61,8 @@
                  Location : 3,
                  Visual : 4,
                  Query : 5,
-                 
+                 Subscription : 6,
+
                  CreateObject : 100,
                  GraphicsMessage : 101
              },
@@ -97,6 +98,14 @@
                  this.sa = sa;
              },
 
+             Subscription : function(space, id, observed, enable) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Subscription;
+                 this.space = space;
+                 this.id = id;
+                 this.observed = observed;
+                 this.enable = enable;
+             },
+
 
              CreateObject : function(script, cons, args) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.CreateObject;
@@ -114,11 +123,11 @@
                  this.orient=[1,0,0,0];//fixme
                  this.rotvel=0;
                  this.rotaxis=[0,0,1];
-                 
+
              },
              GFXDestroyNode : function(space, observer, remotePresence) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
-                 
+
                  this.space = space+observer;
                  this.msg="Destroy";
                  this.id = remotePresence.id();
@@ -158,7 +167,7 @@
                  this.texobjspace=textureObjectSpace;
                  this.texname=textureName;
              },
-             GFXDetachCamera : function(space, observer, id) {             
+             GFXDetachCamera : function(space, observer, id) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
                  this.space = space+observer;
                  this.id = id;

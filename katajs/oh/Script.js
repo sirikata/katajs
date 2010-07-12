@@ -159,14 +159,15 @@ Kata.include("katajs/oh/RemotePresence.js");
       */
      Kata.Script.remotePresenceKey=function(space,objectid) {
          return space+objectid;
-     }
+     };
+
      Kata.Script.prototype._handleQueryEvent = function(channel, msg) {
          var presence = this.mPresences[msg.space];
          var remote=null;
          var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
          if (msg.entered) {
              // New object, create presence and notify
-             remote = new Kata.RemotePresence(msg.space, msg.observed, msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
+             remote = new Kata.RemotePresence(presence, msg.space, msg.observed, msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
              this.mRemotePresences[key] = remote;
              presence.remotePresence(remote, true);
          }
