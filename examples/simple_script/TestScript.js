@@ -35,7 +35,7 @@ Kata.include("katajs/oh/Script.js");
          if (!this.mPresence) return;
 
          var pos = this.mPresence.position();
-         pos.x += 1;
+         pos[0] += 1;
          this.mPresence.setPosition(pos);
 
          setTimeout(
