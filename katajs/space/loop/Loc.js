@@ -79,7 +79,10 @@
      };
 
      Kata.Loopback.Loc.prototype.update = function(uuid, pos, vel, acc, bounds, visual) {
-         if (!this._checkExists(uuid)) return;
+         if (!this._checkExists(uuid)) {
+             Kata.warn("Trying to update location for non-existant object: " + uuid);
+             return;
+         }
          if (pos) this.mObjects[uuid].pos = pos;
          if (vel) this.mObjects[uuid].vel = vel;
          if (acc) this.mObjects[uuid].acc = acc;

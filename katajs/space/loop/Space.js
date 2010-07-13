@@ -133,7 +133,7 @@ Kata.include("katajs/space/loop/Subscription.js");
              bounds : observed_loc.bounds,
              visual : observed_loc.visual
          };
-         querier_cb.prox(observed, entered, observed_properties);
+         querier_cb.prox(querier, observed, entered, observed_properties);
      };
 
      // Handle location (and visual) updates

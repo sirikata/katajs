@@ -50,7 +50,7 @@
       * @param id the object to be tracked
       */
      Kata.Loopback.Subscription.prototype.addObject = function(id) {
-         this.mSubscribers[id] = [];
+         this.mSubscribers[id] = {};
      };
 
      /** Subscribe the object with the given id for updates from observed.
@@ -76,9 +76,8 @@
       */
      Kata.Loopback.Subscription.prototype.notify = function(observed, cb, self) {
          var subscribers = this.mSubscribers[observed];
-         for(var i = 0; i < subscribers.length; i += 1) {
-             cb(subscribers[i]);
-         }
+         for(var subscriber in subscribers)
+             cb(subscriber);
          if (self)
              cb(observed);
      };

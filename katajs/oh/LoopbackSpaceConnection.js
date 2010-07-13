@@ -92,8 +92,8 @@ Kata.defer(function() {
          this.mSpace.registerProxQuery(id, sa);
      };
 
-     Kata.LoopbackSpaceConnection.prototype.proxEvent = function(id, entered, properties) {
-         this.mObjectHost.proxEvent(this.mSpaceURL, id, id, entered, properties);
+     Kata.LoopbackSpaceConnection.prototype.proxEvent = function(id, observed, entered, properties) {
+         this.mObjectHost.proxEvent(this.mSpaceURL, id, observed, entered, properties);
      };
 
      Kata.LoopbackSpaceConnection.prototype.locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
