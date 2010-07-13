@@ -225,6 +225,16 @@ Kata.include("katajs/core/URL.js");
          space_conn.locUpdateRequest(id, pos, vel, acc, bounds, visual);
      };
 
+     /** Should be invoked by SpaceConnection classes when a location
+      *  update for a presence is available.
+      *  @param from
+      *  @param to
+      */
+     Kata.ObjectHost.prototype.presenceLocUpdate = function(space, from, to, pos, vel, acc, bounds, visual) {
+         var obj = this.mObjects[to];
+         obj.presenceLocUpdate(space, from, pos, vel, acc, bounds, visual);
+     };
+
      Kata.ObjectHost.prototype.subscribe = function(space, id, observed) {
          var space_conn = this.mSpaceConnections[space];
          space_conn.subscribe(id, observed);
@@ -234,4 +244,6 @@ Kata.include("katajs/core/URL.js");
          var space_conn = this.mSpaceConnections[space];
          space_conn.unsubscribe(id, observed);
      };
+
+
 })();

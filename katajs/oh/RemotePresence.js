@@ -111,4 +111,17 @@
          return this.mVisual;
      };
 
+
+     /** Method that should only be used by the Script base class to
+      * update internal state.  Presence should override this to deal
+      * with conflicts between outstanding requests and old loc
+      * updates.
+      */
+     Kata.RemotePresence.prototype._updateLoc = function (pos, vel, acc, bounds, visual) {
+         this.mPosition = pos;
+         this.mVelocity = vel;
+         this.mAcceleration = acc;
+         this.mBounds = bounds;
+         this.mVisual = visual;
+     };
 })();

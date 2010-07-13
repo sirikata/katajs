@@ -131,6 +131,21 @@ Kata.include("katajs/core/MessageDispatcher.js");
          );
      };
 
+     Kata.HostedObject.prototype.presenceLocUpdate = function(space, from, pos, vel, acc, bounds, visual) {
+         var msg = new Kata.ScriptProtocol.ToScript.PresenceLocUpdate(
+             space, from,
+             {
+                 pos : pos,
+                 vel : vel,
+                 acc : acc
+             },
+             bounds,
+             visual
+         );
+         this.sendScriptMessage(msg);
+     };
+
+
      Kata.HostedObject.prototype._handleGraphicsMessage = function (channel, request) {
          this.mObjectHost.sendGraphicsMessage(request);
      };

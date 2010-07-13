@@ -73,7 +73,8 @@ Kata.defer(function() {
              id,
              {
                  connected : Kata.bind(this.connectResponse, this),
-                 prox : Kata.bind(this.proxEvent, this)
+                 prox : Kata.bind(this.proxEvent, this),
+                 presenceLocUpdate : Kata.bind(this.presenceLocUpdate, this)
              }
          );
      };
@@ -107,6 +108,10 @@ Kata.defer(function() {
          this.mSpace.subscriptionRequest(id, observed, false);
      };
 
+     // Invoked by LoopbackSpace when a loc update for a tracked object occurs.
+     Kata.LoopbackSpaceConnection.prototype.presenceLocUpdate = function(from, to, pos, vel, acc, bounds, visual) {
+         this.mObjectHost.presenceLocUpdate(this.mSpaceURL, from, to, pos, vel, acc, bounds, visual);
+     };
 
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
 });

@@ -180,7 +180,8 @@
                  Connected : 1,
                  ConnectionFailed : 2,
                  Disconnected : 3,
-                 QueryEvent : 4
+                 QueryEvent : 4,
+                 PresenceLocUpdate : 5
              },
 
              Connected : function(space, id, loc, bounds, visual) {
@@ -209,6 +210,15 @@
                  this.space = space;
                  this.observed = observed;
                  this.entered = entered;
+                 this.loc = loc;
+                 this.bounds = bounds;
+                 this.visual = visual;
+             },
+
+             PresenceLocUpdate : function(space, observed, loc, bounds, visual) {
+                 this.__type = Kata.ScriptProtocol.ToScript.Types.PresenceLocUpdate;
+                 this.space = space;
+                 this.observed = observed;
                  this.loc = loc;
                  this.bounds = bounds;
                  this.visual = visual;

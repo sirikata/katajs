@@ -148,6 +148,15 @@ Kata.include("katajs/space/loop/Subscription.js");
      };
      Kata.LoopbackSpace.prototype._locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
          this.mLoc.update(id, pos, vel, acc, bounds, visual);
+         var spaceself = this;
+         this.mSubscription.notify(id,
+                                   function(to) {
+                                       var receiver_cb = spaceself.mObjects[to];
+                                       receiver_cb.presenceLocUpdate(
+                                           id, to,
+                                           pos, vel, acc, bounds, visual);
+                                   },
+                                   true);
      };
 
      /** Handle subscription updates.
@@ -171,10 +180,7 @@ Kata.include("katajs/space/loop/Subscription.js");
              this.mSubscription.unsubscribe(id, observed);
      };
 
-
      Kata.LoopbackSpace.prototype.sendMessage = function(from, to, payload) {
-         var receiver_cb = this.mObjects[receiver];
-         receiver_cb.message(from, to, payload);
      };
 
 })();

@@ -71,13 +71,16 @@
 
      /** Sends an update (payload) to all subscribers of the specified object.
       * @param observed object whose subscribers should receive the update
-      * @param body the body of the update
+      * @param cb function to invoke; should take one parameter: the notified object
+      * @param self if true, send the update back to the observed object as well
       */
-     Kata.Loopback.Subscription.prototype.notify = function(observed, payload) {
+     Kata.Loopback.Subscription.prototype.notify = function(observed, cb, self) {
          var subscribers = this.mSubscribers[observed];
          for(var i = 0; i < subscribers.length; i += 1) {
-             this.mSpace.sendMessage(observed, subscribers[i], payload);
+             cb(subscribers[i]);
          }
+         if (self)
+             cb(observed);
      };
 
 })();

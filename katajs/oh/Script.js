@@ -64,6 +64,7 @@ Kata.include("katajs/oh/RemotePresence.js");
          var handlers = {};
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
          handlers[msgTypes.QueryEvent] = Kata.bind(this._handleQueryEvent, this);
+         handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);
          this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
      };
 
@@ -183,7 +184,24 @@ Kata.include("katajs/oh/RemotePresence.js");
          }
          return remote;
      };
-     
+
+     Kata.Script.prototype._handlePresenceLocUpdate = function(channel, msg) {
+         var presence = this.mPresences[msg.space];
+
+         if (presence.id() === msg.observed) {
+             Kata.warn("Self loc update: " + presence.id());
+             presence._updateLoc(msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
+         }
+         else {
+             var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
+             var remote = this.mRemotePresences[key];
+             Kata.warn("Remote presence loc update: " + key);
+             if (remote)
+                 remote._updateLoc(msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
+         }
+
+     };
+
      Kata.Script.prototype._handleStorageEvent = function(data) {
      };
 

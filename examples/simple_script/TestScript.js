@@ -17,7 +17,9 @@ Kata.include("katajs/oh/Script.js");
          this.mPresence = presence;
          this.mPresence.setQueryHandler(Kata.bind(this.proxEvent, this));
          this.mPresence.setQuery(0);
-         presence.setPosition({x: 1, y: 1, z: 1});
+
+         // Start periodic movements
+         this.move();
      };
 
      Example.TestScript.prototype.proxEvent = function(presence, added) {
@@ -27,5 +29,18 @@ Kata.include("katajs/oh/Script.js");
          }
          else
              delete this.mNearby[presence.id()];
+     };
+
+     Example.TestScript.prototype.move = function() {
+         if (!this.mPresence) return;
+
+         var pos = this.mPresence.position();
+         pos.x += 1;
+         this.mPresence.setPosition(pos);
+
+         setTimeout(
+             Kata.bind(this.move, this),
+             5000
+         );
      };
 })();
