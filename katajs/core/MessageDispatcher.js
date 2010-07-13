@@ -43,6 +43,7 @@
       * necessary, new handlers can be added dynamically, which isn't
       * possible with big switch statements.
       *
+      * @constructor
       * @param {object} handlers map from Types (which should be ints
       * under the hood) to handler functions
       */

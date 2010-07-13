@@ -36,6 +36,8 @@
       * can interact with.  It will keep a shadow copy of basic
       * information like location and mesh as well as allow you to
       * send messages to the object.
+      *
+      * @constructor
       */
      Kata.RemotePresence = function (parent, space, id, pos, vel, acc, bounds, vis) {
          this.mParent = parent; // Parent Presence

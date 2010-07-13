@@ -34,7 +34,7 @@ network_debug = false
 if (0) {
     // JSDoc hack
     /** Top-level namespace for KataJS.
-     * @constructor
+     * @namespace
      */
     Kata = function(){};
 }

@@ -37,6 +37,8 @@
       *
       * The components of the URL are available in the fields
       * protocol, host, and (possibly) port.
+      *
+      * @constructor
       */
      Kata.URL = function(url) {
          // If its a URL object, just copy its fields

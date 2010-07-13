@@ -50,9 +50,14 @@
       * objects in a way that supports updates, improvements, and
       * refactoring in the future, instead of specifying objects
       * directly in javascript.
+      *
+      * @namespace
       */
      Kata.ScriptProtocol = {
 
+         /** Messages from a script to the ObjectHost or related services.
+          * @namespace
+          */
          FromScript : {
 
              Types : {
@@ -174,6 +179,9 @@
              }
          },
 
+         /** Messages to a script from the ObjectHost or related services.
+          * @namespace
+          */
          ToScript : {
 
              Types : {
