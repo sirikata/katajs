@@ -4,7 +4,7 @@ Kata.include("katajs/oh/Script.js");
 (function() {
      if (typeof(Example) === "undefined") { Example = {}; }
 
-     var SUPER = Kata.Script.prototype;
+     var SUPER = Kata.GraphicsScript.prototype;
      Example.BlessedScript = function(channel, args) {
          SUPER.constructor.call(this, channel, args);
 
@@ -19,8 +19,17 @@ Kata.include("katajs/oh/Script.js");
          }
      };
      Kata.extend(Example.BlessedScript, SUPER);
+     Example.BlessedScript.prototype.proxEvent = function (remote,added) {
+         if (added)
+             Kata.warn("Camera Discover object.");
+         else
+             Kata.warn("Camera Wiped object.");
+     };
+     Example.BlessedScript.prototype.connected = function(presence) {
+         this.enableGraphicsViewport(presence,0);
+         presence.setQueryHandler(Kata.bind(this.proxEvent, this));
+         presence.setQuery(0);
 
-     Example.BlessedScript.prototype.connected = function() {
          Kata.warn("Got connected callback.");
      };
 })();

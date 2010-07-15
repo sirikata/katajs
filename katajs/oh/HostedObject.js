@@ -147,7 +147,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
 
 
      Kata.HostedObject.prototype._handleGraphicsMessage = function (channel, request) {
-         this.mObjectHost.sendGraphicsMessage(request);
+         this.mObjectHost.sendToSimulation(request);//FIXME: broadcasts to all simulations, not just gfx
      };
 
      Kata.HostedObject.prototype._handleSubscriptionRequest = function (channel, request) {

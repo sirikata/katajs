@@ -59,7 +59,7 @@ Kata.include("katajs/oh/RemotePresence.js");
          this.mGraphicsTimer=null;
          this.mNumGraphicsSystems=0;
      };
-
+     Kata.extend(Kata.GraphicsScript, SUPER);
      /**
       * Enables graphics on the main canvas viewport. 
       * @param {Kata.Presence} presence The presence that graphics should be enabled for
@@ -87,15 +87,15 @@ Kata.include("katajs/oh/RemotePresence.js");
      Kata.GraphicsScript.prototype.renderRemotePresence = function(presence,remotePresence) {
          //in our space, add to the new graphics subsystem;
          var msg = new Kata.ScriptProtocol.FromScript.GFXCreateNode(presence.space(),presence.id(),remotePresence);
-         this._sendObjectHostMessage(msg);
+         this._sendHostedObjectMessage(msg);
          //in our space, add to the new graphics subsystem;
          var messages=Kata.ScriptProtocol.FromScript.generateGFXUpdateVisualMessages(presence.space(),presence.id(),remotePresence);
          var len=messages.length;
          for (var i=0;i<len;++i) {
-             this._sendObjectHostMessage(messages[i]);
+             this._sendHostedObjectMessage(messages[i]);
          }
          remotePresence.inGFXSceneGraph=true;
-         this.appearanceRemotePresence(presence, remotePresence);
+         //FIXME: not sure what this line was trying to accomplishthis.appearanceRemotePresence(presence, remotePresence);
      };
      /**
       * Removess a remote presence to the graphics system from consideration for rendering
@@ -103,7 +103,7 @@ Kata.include("katajs/oh/RemotePresence.js");
       */
      Kata.GraphicsScript.prototype.unrenderRemotePresence = function(presence,remotePresence) {
          var msg = new Kata.Script.GFXDestroyNode(presence.space(),presence.id(),remotePresence);
-         this._sendObjectHostMessage(msg);
+         this._sendHostedObjectMessage(msg);
          delete remotePresence.inGFXSceneGraph;
      };
      /**
@@ -123,9 +123,13 @@ Kata.include("katajs/oh/RemotePresence.js");
              }
          }
          var msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
-         this._sendObjectHostMessage(msg);
-         if (this.mNumGraphicsSystems++==0)
-             this.mGraphicsTimer=this.timer(Kata.Duration.seconds(2),Kata.bind(Kata.GraphicsScript.processRenderables,this),true);
+         this._sendHostedObjectMessage(msg);
+         if (this.mNumGraphicsSystems++==0) {
+             var duration=new Date(0);
+             duration.setSeconds(2);
+             this.mGraphicsTimer=this.timer(duration,Kata.bind(this.processRenderables,this),true);             
+         }
+
      };
 
      /**
@@ -134,11 +138,11 @@ Kata.include("katajs/oh/RemotePresence.js");
       * If it shouldn't be but is in the scene graph it marks it as unrenderable and removes from gfx thread
       * If it is no longer being shown by the cameras
       */
-     Kata.GraphicsScript.processRenderables=function() {
-         var len=this.mRenderablerRemotePresence.length;
+     Kata.GraphicsScript.prototype.processRenderables=function() {
+         var len=this.mRenderableRemotePresences.length;
          if (len) {
              this.mRenderableRemotePresenceIndex%=len;             
-             var remotePresenceName=this.mRenderableRemotePresence[this.mRenderableRemotePresenceIndex];
+             var remotePresenceName=this.mRenderableRemotePresences[this.mRenderableRemotePresenceIndex];
              var remotePresence=this.mRemotePresences[remotePresenceName];
              if (remotePresence) {
                  var presence = this.mPresences[remotePresence.space()];
@@ -153,7 +157,7 @@ Kata.include("katajs/oh/RemotePresence.js");
                  this.mRenderableRemotePresenceIndex++;
              }else {
                  this.mRemotePresences[this.mRenderableRemotePresenceIndex]=this.mRemotePresences[len];
-                 this.mRemotePresences.pop();
+                 --this.mRemotePresences.length;//FIXME: does this clear the item itself
              }
          }
      };
@@ -163,13 +167,13 @@ Kata.include("katajs/oh/RemotePresence.js");
      Kata.GraphicsScript.prototype.disableGraphics = function (presence) {
          {
              var msg = new Kata.ScriptProtocol.FromScript.GFXDetachCamera(presence.space(),presence.id(),presence.id());
-             this._sendObjectHostMessage(msg);
+             this._sendHostedObjectMessage(msg);
     
          }
          var space=presence.space();
          var len = this.mRenderableRemotePresences.length;
          var msg = unrenderRemotePresence(presence,presence);
-         this._sendObjectHostMessage(msg);
+         this._sendHostedObjectMessage(msg);
          for (var i=0;i<len;) {
              var remotePresence=this.mRemotePresences[this.mRenderableRemotePresences[i]];
              if (remotePresence && remotePresence.space()==space) {
@@ -191,13 +195,12 @@ Kata.include("katajs/oh/RemotePresence.js");
      /**
       *
       */
-     Kata.GraphicsScript.prototype._handleQueryEvent=function(data) {
-         var remotePresence=SUPER.handleQueryEvent.call(this,data);
+     Kata.GraphicsScript.prototype._handleQueryEvent=function(channel,data) {
+         var remotePresence=SUPER._handleQueryEvent.call(this,channel,data);
          if (remotePresence) {
-             var key=Kata.Script.remotePresenceKey(msg.space,msg.observed);
-             var presence=this.mPresences[key];
+             var presence=this.mPresences[data.space];
              if (presence.inGFXSceneGraph) {//if this particular presence has gfx enabled
-                 if (msg.entered) {
+                 if (data.entered) {
                      this.mRenderableRemotePresences.push(remotePresence);
                      if (this.shouldRender(presence,remotePresence)) {
                          this.renderRemotePresence(presence,remotePresence);
@@ -209,6 +212,7 @@ Kata.include("katajs/oh/RemotePresence.js");
                  }
              }
          }
+         this.processRenderables();//garbage collect dead renderables;
          return remotePresence;
      };
      /**
