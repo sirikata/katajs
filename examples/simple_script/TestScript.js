@@ -4,7 +4,7 @@ Kata.include("katajs/oh/Script.js");
 (function() {
      if (typeof(Example) === "undefined") { Example = {}; }
 
-     var SUPER = Kata.Script.prototype;
+     var SUPER = Kata.GraphicsScript.prototype;
      Example.TestScript = function(channel, args) {
          SUPER.constructor.call(this, channel, args);
 
