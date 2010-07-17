@@ -124,7 +124,7 @@ TextGraphics=function(callbackFunction,parentElement) {
         }        
     }
     this.methodTable["AttachCamera"]=function(msg) {
-        if (msg.camid) {
+        if (msg.id) {
             var div=returnObjById(msg.id);
             if (div) {
                 var q=getOrCreateP(msg.texname+"CameraAttachment"+msg.id);
