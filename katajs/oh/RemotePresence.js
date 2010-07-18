@@ -94,19 +94,19 @@
 
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.position = function() {
-         return this.mPosition;
+         return this.mPosition.concat();
      };
      /** Get the current estimate of this object's velocity. */
      Kata.RemotePresence.prototype.velocity = function() {
-         return this.mVelocity;
+         return this.mVelocity.concat();
      };
      /** Get the current estimate of this object's acceleration. */
      Kata.RemotePresence.prototype.acceleration = function() {
-         return this.mAcceleration;
+         return this.mAcceleration.concat();
      };
      /** Get the current estimate of this object's bounds. */
      Kata.RemotePresence.prototype.bounds = function() {
-         return this.mBounds;
+         return this.mBounds.concat();
      };
      /** Get the current estimate of this object's visual representation (e.g. mesh). */
      Kata.RemotePresence.prototype.visual = function() {
