@@ -139,12 +139,18 @@ Kata.include("katajs/space/loop/Subscription.js");
      // Handle location (and visual) updates
      Kata.LoopbackSpace.prototype.locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
          var spaceself = this;
+
+		 // until we get subscription loc updates working, I need to do this right away so gfx gets
+		 // objects with initial positions set
+         spaceself._locUpdateRequest(id, pos, vel, acc, bounds, visual);
+		 /*
          setTimeout(
              function() {
                  spaceself._locUpdateRequest(id, pos, vel, acc, bounds, visual);
              },
              this.netdelay
          );
+         */
      };
      Kata.LoopbackSpace.prototype._locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
          this.mLoc.update(id, pos, vel, acc, bounds, visual);

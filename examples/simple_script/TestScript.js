@@ -35,12 +35,15 @@ Kata.include("katajs/oh/Script.js");
          if (!this.mPresence) return;
 
          var pos = this.mPresence.position();
-         pos[0] += 1;
+         pos[0] += 3;
          this.mPresence.setPosition(pos);
 
+		 // disabled until updates work
+		 /*
          setTimeout(
              Kata.bind(this.move, this),
              5000
          );
+         */
      };
 })();
