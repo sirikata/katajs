@@ -987,7 +987,7 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
     if (!(s in this.mSpaceRoots)) {
         this.mSpaceRoots[s] = new SpaceDrawList(this, this.mClientElement);
     }
-    var spaceRoot=this.mSpaceRoots[msg.spaceid];
+    var spaceRoot=this.mSpaceRoots[s];
     var newObject;
     this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,spaceRoot);
     newObject.mNode.parent=spaceRoot.mRootNode;
