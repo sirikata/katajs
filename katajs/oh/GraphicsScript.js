@@ -84,17 +84,25 @@ Kata.include("katajs/oh/RemotePresence.js");
       * Sends a remote presence to the graphics system to be considered for rendering
       * Marks the item as being on the graphics thread
       */
-     Kata.GraphicsScript.prototype.renderRemotePresence = function(presence,remotePresence) {
-         //in our space, add to the new graphics subsystem;
+     Kata.GraphicsScript.prototype.renderRemotePresence = function(presence,remotePresence, noMesh) {
+         //in our space, create
          var msg = new Kata.ScriptProtocol.FromScript.GFXCreateNode(presence.space(),presence.id(),remotePresence);
+		 // FIXME FIXME FIXME random crap:
+		 msg.orient = [0,0,0,1]
+		 msg.rotaxis = [1,0,0]
+		 msg.vel = [0,0,0]
+		 msg.scale = [1,1,1]
+		 if(noMesh) msg.scale = [0,0,0]
          this._sendHostedObjectMessage(msg);
-         //in our space, add to the new graphics subsystem;
-         var messages=Kata.ScriptProtocol.FromScript.generateGFXUpdateVisualMessages(presence.space(),presence.id(),remotePresence);
-         var len=messages.length;
-         for (var i=0;i<len;++i) {
-             this._sendHostedObjectMessage(messages[i]);
-         }
-         remotePresence.inGFXSceneGraph=true;
+         //in our space, add Mesh to the new graphics subsystem;
+		 if (!noMesh) {
+		 	var messages = Kata.ScriptProtocol.FromScript.generateGFXUpdateVisualMessages(presence.space(), presence.id(), remotePresence);
+		 	var len = messages.length;
+		 	for (var i = 0; i < len; ++i) {
+		 		this._sendHostedObjectMessage(messages[i]);
+		 	}
+		 }
+         remotePresence.inGFXSceneGraph = true;
          //FIXME: not sure what this line was trying to accomplishthis.appearanceRemotePresence(presence, remotePresence);
      };
      /**
@@ -112,7 +120,8 @@ Kata.include("katajs/oh/RemotePresence.js");
       */
      Kata.GraphicsScript.prototype._enableGraphics = function (presence,canvasId,textureObjectSpace, textureObjectUUID,textureName) {
          var space=presence.space();
-         this.renderRemotePresence(presence,presence);
+		 // don't give camera a mesh
+         this.renderRemotePresence(presence,presence,true);
          for (var remotePresenceId in this.mRemotePresences) {
              var remotePresence=this.mRemotePresences[remotePresenceId];
              if (remotePresence.space()==space) { 
@@ -123,6 +132,9 @@ Kata.include("katajs/oh/RemotePresence.js");
              }
          }
          var msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
+		 msg.msg = "Camera"
+         this._sendHostedObjectMessage(msg);
+         msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
          this._sendHostedObjectMessage(msg);
          if (this.mNumGraphicsSystems++==0) {
              var duration=new Date(0);

@@ -93,7 +93,7 @@ Kata.include("katajs/space/loop/Subscription.js");
              min : [0, 0, 0],
              max : [0, 0, 0]
          };
-         var visual = "bogus";
+         var visual = "../content/teapot";
 
          this.mLoc.add(uuid, obj_loc.pos, obj_loc.vel, obj_loc.acc, obj_loc.bounds, visual);
          this.mProx.addObject(uuid);

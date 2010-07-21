@@ -74,7 +74,7 @@ SpaceDrawList.prototype.initializeDrawList = function(viewInfo) {
 function RenderTarget(o3dgfx,spaceRoot,cam) {
   this.mO3DGraphics = o3dgfx;
   this.mSpaceRoot = spaceRoot;
-  console.log(spaceRoot.mElement);
+  console.log("spaceRoot.mElement:", spaceRoot.mElement);
   this.mElement = spaceRoot.mElement;
   this.mWidth = 0 + this.mElement.width;
   this.mHeight = 0 + this.mElement.height;
@@ -819,10 +819,13 @@ VWObject.prototype.detachRenderTarget = function(curTime) {
 VWObject.prototype.updateTransformation = function(graphics) {
     var l=LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
     this.mNode.identity();
-    //FIXME need to interpolate
-    this.mNode.translate(l.mPos[0],l.mPos[1],l.mPos[2]);
+	// FIXME: dbm: interpolate doesn't seem to work for pos, orient; tho scale does
+//    this.mNode.translate(l.mPos[0],l.mPos[1],l.mPos[2]);
+	var pos = this.mCurLocation.mPos
+    this.mNode.translate(pos[0],pos[1],pos[2]);
     this.mNode.scale(l.mScale[0],l.mScale[1],l.mScale[2]);
-    this.mNode.quaternionRotate(l.mOrient);
+//    this.mNode.quaternionRotate(l.mOrient);
+    this.mNode.quaternionRotate(this.mCurLocation.mOrient);
     if (this.stationary(graphics.mCurTime)) {
         graphics.removeObjectUpdate(this);        
     }
@@ -1000,10 +1003,12 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
         }
     }
     this.moveTo(newObject,msg,spaceRoot.mRootNode);
-    this.moveTo(newObject,msg,spaceRoot.mRootNode);
     newObject.updateTransformation(this);
 };
 O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
+	if (!msg.scale) msg.scale = [1,2,3]
+	if (!msg.time) msg.time = new Date().getMilliseconds()
+	console.log("moveTo pos:", msg.pos, msg)
     var prevParent=vwObject.mNode.parent;
     if (msg.parent!==undefined) {
         if (vwObject.mUnsetParent) {
@@ -1050,6 +1055,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
     if (!vwObject.stationary(this.mCurTime)) {
         this.addObjectUpdate(vwObject);
     }
+	//FIXME: why are things working even without this code?
 /*
     if (msg.pos) {
         vwObject.mPos=msg.pos;
@@ -1134,7 +1140,7 @@ O3DGraphics.prototype.methodTable["AttachCamera"]=function(msg) {
     if (msg.id in this.mObjects && msg.target !== undefined) {
         var cam = this.mObjects[msg.id];
         var spaceView;
-        console.log(cam.mSpaceID);
+        console.log("cam.mSpaceID:", cam.mSpaceID);
         if (cam.mSpaceID in this.mSpaceRoots) {
             spaceView = this.mSpaceRoots[cam.mSpaceID];
         } else {

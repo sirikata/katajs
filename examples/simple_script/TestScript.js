@@ -10,6 +10,8 @@ Kata.include("katajs/oh/Script.js");
 
          this.mNearby = {};
          this.connect(args.space, null, Kata.bind(this.connected, this));
+		 this.instance = Example.TestScript.instance
+		 Example.TestScript.instance+=1
      };
      Kata.extend(Example.TestScript, SUPER);
 
@@ -35,7 +37,8 @@ Kata.include("katajs/oh/Script.js");
          if (!this.mPresence) return;
 
          var pos = this.mPresence.position();
-         pos[0] += 3;
+         pos[0] = this.instance*3;
+		 pos[2] = -10
          this.mPresence.setPosition(pos);
 
 		 // disabled until updates work
@@ -46,4 +49,5 @@ Kata.include("katajs/oh/Script.js");
          );
          */
      };
+	 Example.TestScript.instance=0;
 })();

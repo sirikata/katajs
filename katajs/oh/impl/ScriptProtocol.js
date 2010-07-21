@@ -123,6 +123,7 @@
                  this.msg="Create";
                  this.space = space+observer;
                  this.id = remotePresence.id();
+				 this.spaceid = this.space;
                  this.pos=remotePresence.position();
                  this.vel=remotePresence.vel;
                  this.orient=[1,0,0,0];//fixme
@@ -149,6 +150,7 @@
              GraphicsMessage:function(space,observer,id) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
                  this.space = space+observer;
+				 this.spaceid = this.space;
                  this.id = id;
              },
              // Generates either a Mesh, Light, WebView, or Camera message, or the Destroy variants.
