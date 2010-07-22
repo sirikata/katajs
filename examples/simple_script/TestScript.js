@@ -10,7 +10,8 @@ Kata.include("katajs/oh/Script.js");
 
          this.mNearby = {};
          this.connect(args.space, null, Kata.bind(this.connected, this));
-		 this.instance = Example.TestScript.instance
+		 this.instance = Example.TestScript.instance;
+		 this.movecount=1
 		 Example.TestScript.instance+=1
      };
      Kata.extend(Example.TestScript, SUPER);
@@ -38,16 +39,18 @@ Kata.include("katajs/oh/Script.js");
 
          var pos = this.mPresence.position();
          pos[0] = this.instance*3;
+		 pos[1] = this.movecount*3
 		 pos[2] = -10
          this.mPresence.setPosition(pos);
 
 		 // disabled until updates work
-		 /*
-         setTimeout(
-             Kata.bind(this.move, this),
-             5000
-         );
-         */
+         if (this.movecount) {
+    		 console.log("REPEAT");
+		 	 this.movecount--;
+		 	 setTimeout(Kata.bind(this.move, this), 8000);
+		 }
+		 else 
+		     console.log("DONE");
      };
 	 Example.TestScript.instance=0;
 })();
