@@ -1,0 +1,5 @@
+load("env.rhino.1.2.js");
+alert = function (s) { print("ALERT: " + s) }
+Envjs.scriptTypes['text/javascript'] = true;
+window.location="../../examples/simple_script/index.html";
+
