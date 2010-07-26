@@ -99,7 +99,7 @@ is left up to the user since some may be expensive to load.
        
         var kata, graphics;
         var defaultSpace = "loop://localhost";
-        var driver = "text"; // "o3d" or "glge"
+        var driver = "o3d"; // "o3d" or "glge"
         function loadGFX() {
             window.kata = new Kata.MainThread();
             graphics = new Kata.GraphicsSimulation(driver, window.kata.getChannel(), document.getElementById("container"));
