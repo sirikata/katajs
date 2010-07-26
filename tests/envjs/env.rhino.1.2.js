@@ -1595,7 +1595,8 @@ Envjs.connection = function(xhr, responseHandler, data){
         }
 
         xhr.readyState = 4;
-        xhr.status = parseInt(connection.responseCode,10) || undefined;
+//        xhr.status = parseInt(connection.responseCode,10) || undefined;
+        xhr.status = parseInt(connection.responseCode,10) || 0;             /// dbm: this tracks expected behavior with file:///
         xhr.statusText = connection.responseMessage || "";
 
         contentEncoding = connection.getContentEncoding() || "utf-8";
