@@ -14,7 +14,10 @@ console.show = function(obj, prefix, maxdepth, depth){
     if (depth == null) 
         depth = 1;
     
-    //    console.log("-----------------------------------depth:",depth)
+    //    console.log("-----------------------------------depth:",depth)    
+    if (depth==1) {
+        console.log(prefix + "---------------------------------------")
+    }
     var indent = prefix
     for (i = 0; i < depth; i++) 
         indent += "  ";
