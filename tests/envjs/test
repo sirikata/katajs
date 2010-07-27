@@ -1,2 +1,17 @@
-#!/bin/bash
-rhino -debug < test.txt
+#!/usr/bin/python
+import os, subprocess
+f = open("test.txt")
+p = subprocess.Popen(["rhino", "-debug"], stdin=f, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+p.wait()
+o, e = p.stdout, p.stderr
+oo = o.readlines()
+responses = ["0,0,0", "0,0,-10", "3,0,-10", "0,3,-10", "3,3,-10"]
+fail=False
+for i in oo:
+    if "TextGraphics.send" in i:
+        w = i.split()
+        if "pos:" in w:
+            if w[2] != responses.pop(0):
+                fail=True
+                print "failure on:", w[2], responses
+print "FAILURE" if fail else "SUCCESS"
