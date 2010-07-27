@@ -199,7 +199,7 @@ Kata.include("katajs/oh/RemotePresence.js");
              if (remote)
                  remote._updateLoc(msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
          }
-
+         return remote;
      };
 
      Kata.Script.prototype._handleStorageEvent = function(data) {

@@ -20,7 +20,6 @@ Kata.include("katajs/oh/Script.js");
     Kata.extend(Example.TestScript, SUPER);
     
     Example.TestScript.prototype.connected = function(presence){
-        console.log("debug TestScript connected presence:", presence.id())
         this.mPresence = presence;
         // Start periodic movements
         this.move();

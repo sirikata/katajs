@@ -124,6 +124,8 @@
          this.mVelocity = vel;
          this.mAcceleration = acc;
          this.mBounds = bounds;
-         this.mVisual = visual;
+         if (visual) {
+             this.mVisual = visual;
+         }
      };
 })();

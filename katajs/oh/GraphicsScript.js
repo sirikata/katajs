@@ -228,6 +228,27 @@ Kata.include("katajs/oh/RemotePresence.js");
          return remotePresence;
      };
      /**
+      * Override Script._handlePresenceLocUpdate
+      */
+     Kata.GraphicsScript.prototype._handlePresenceLocUpdate = function(channel, data){
+         var remotePresence = SUPER._handlePresenceLocUpdate.call(this, channel, data);
+         if (remotePresence) {
+             var presence = this.mPresences[data.space];
+             if (presence.inGFXSceneGraph) {//if this particular presence has gfx enabled
+                 var msg = new Kata.ScriptProtocol.FromScript.GraphicsMessage(this.mPresence.space(), this.mPresence.id(), remotePresence.id());
+                 msg.msg = "Move"
+                 msg.pos = data.loc.pos;
+                 msg.orient = data.loc.orient;
+                 msg.vel = data.loc.vel;
+                 msg.angvel = data.loc.rotvel;
+                 msg.rotaxis = data.loc.rotaxis;
+                 // FIXME: acceleration, other things??
+                 this._sendHostedObjectMessage(msg)
+             }
+         }
+         return remotePresence;
+     }
+     /**
       * Overridable function that indicates whether a given remotePresence 
       * should be rendered for the given presence.
       */
