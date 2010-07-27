@@ -116,7 +116,7 @@ Envjs.scriptTypes = {
  * @param {Object} e
  */
 Envjs.onScriptLoadError = function(script, e){
-    console.log('error loading script %s %s', script, e);
+    console.log('error loading script %s\n at line %s: %s %s', e.fileName, e.lineNumber, script, e);
 };
 
 
@@ -211,7 +211,7 @@ Envjs.loadLocalScript = function(script){
         };
         xhr.send(null, false);
     } catch(e) {
-        console.log("could not load script %s \n %s", filename, e );
+//        console.log("could not load script %s \n %s", filename, e );
         Envjs.onScriptLoadError(script, e);
         return false;
     }

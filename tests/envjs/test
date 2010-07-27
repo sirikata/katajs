@@ -1,2 +1,2 @@
 #!/bin/bash
-rhino -opt 1 -debug < test.txt
+rhino -debug < test.txt
