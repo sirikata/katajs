@@ -159,6 +159,8 @@ TextGraphics=function(callbackFunction,parentElement) {
     }
     
     this.send=function(obj) {
+        console.log("TextGraphics.send:", obj.msg, "--------------------")
+        console.show && console.show(obj, "TextGraphics.send:")
         return this.methodTable[obj.msg](obj);
     }
     this.destroy=function(){}
