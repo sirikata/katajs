@@ -114,26 +114,30 @@ Kata.defer(function() {
          this.mQueryHandler = cb;
      };
 
-     Kata.Presence.prototype.setPosition = function(val) {
-         this._setLocation(val, undefined, undefined, undefined, undefined);
+     Kata.Presence.prototype.setPosition = function(val){
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         msg.position = val;
+         this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVelocity = function(val) {
-         this._setLocation(undefined, val, undefined, undefined, undefined);
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         msg.velocity = val;
+         this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setAcceleration = function(val) {
-         this._setLocation(undefined, undefined, val, undefined, undefined);
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         msg.acceleration = val;
+         this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setBounds = function(val) {
-         this._setLocation(undefined, undefined, undefined, val, undefined);
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         msg.bounds = val;
+         this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {
-         this._setLocation(undefined, undefined, undefined, undefined, val);
-     };
-
-     Kata.Presence.prototype._setLocation = function(pos, vel, acc, bounds, vis) {
-         this._sendHostedObjectMessage(
-             new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, pos, vel, acc, bounds, vis)
-         );
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         msg.vis = val;
+         this._sendHostedObjectMessage(msg);
      };
 
      /** Notify the presence of an event on a remote presence, either

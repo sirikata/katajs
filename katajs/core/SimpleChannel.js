@@ -67,6 +67,7 @@ Kata.include("katajs/core/Channel.js");
      * Sends a message to the partner SimpleChannel.
      * @param {string|object} data  Any data to be sent to the partner.
      */
+    /// dbm: this is what's being used presently for local message passing (as of 7/27/10)
     Kata.SimpleChannel.prototype.sendMessage = function (data) {
         this.mPartner.callListeners(data);
     };
