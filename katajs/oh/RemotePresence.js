@@ -37,6 +37,12 @@
       * information like location and mesh as well as allow you to
       * send messages to the object.
       *
+      * @param {Kata.Presence} parent 
+      * @param {Kata.URL} space
+      * @param {Kata.PresenceID} id
+      * @param {Location} location
+      * @param bounds <-- unknown representaiton
+      * @param {Kata.URL} vis
       * @constructor
       */
      Kata.RemotePresence = function (parent, space, id, pos, vel, acc, bounds, vis) {
