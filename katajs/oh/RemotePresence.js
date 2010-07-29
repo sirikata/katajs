@@ -45,16 +45,21 @@
       * @param {Kata.URL} vis
       * @constructor
       */
-     Kata.RemotePresence = function (parent, space, id, pos, vel, acc, bounds, vis) {
+     Kata.RemotePresence = function (parent, space, id, location, bounds, vis) {
          this.mParent = parent; // Parent Presence
 
          this.mSpace = space;
          this.mID = id;
 
+<<<<<<< HEAD
          this.rPosition = pos;
          this.rVelocity = vel;
          this.rAcceleration = acc;
          this.rBounds = bounds;
+=======
+         this.mLoction = location;
+         this.mBounds = bounds;
+>>>>>>> on the road to switching a scattered location model to the same one that graphics has been using, which is now moved into katajs/core
 
          this.mVisual = vis;
 
@@ -98,6 +103,44 @@
          this.mTracking = false;
      };
 
+<<<<<<< HEAD
+=======
+     /** Get the current estimate of this object's position. */
+     Kata.RemotePresence.prototype.position = function(time) {
+         if (time===undefined) console.log("inaccurate read of orientation");
+         return this.mLocation.mPos.concat();
+     };
+     /** Get the current estimate of this object's velocity. */
+     Kata.RemotePresence.prototype.velocity = function() {
+         return this.mLocation.mVel.concat();
+     };
+     /** Get the current estimate of this object's acceleration. */
+     Kata.RemotePresence.prototype.orientation = function(time) {
+         if (time===undefined) console.log("inaccurate read of orientation");
+         return this.mLocation.mOrient.concat();
+     };
+     /** Get the current estimate of this object's acceleration. */
+     Kata.RemotePresence.prototype.angularSpeed = function() {
+         return this.mLocation.mAngVel.concat();
+     };
+     /** Get the current estimate of this object's acceleration. */
+     Kata.RemotePresence.prototype.rotationalAxis = function() {
+         return this.mLocation.mRotAxis.concat();
+     };
+     /** Get the current estimate of this object's position. */
+     Kata.RemotePresence.prototype.location = function() {
+         return this.mLocation.concat();
+     };
+     /** Get the current estimate of this object's bounds. */
+     Kata.RemotePresence.prototype.bounds = function() {
+         return this.mBounds.concat();
+     };
+     /** Get the current estimate of this object's visual representation (e.g. mesh). */
+     Kata.RemotePresence.prototype.visual = function() {
+         return this.mVisual;
+     };
+
+>>>>>>> on the road to switching a scattered location model to the same one that graphics has been using, which is now moved into katajs/core
 
      /** Method that should only be used by the Script base class to
       * update internal state.  Presence should override this to deal

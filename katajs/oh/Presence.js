@@ -76,10 +76,10 @@ Kata.defer(function() {
       * @param {Kata.PresenceID} id Unique identifier of this object in
       * the space.
       */
-     Kata.Presence = function (script, space, id, pos, vel, acc, bounds, vis) {
+     Kata.Presence = function (script, space, id, location, bounds, vis) {
          // Note the second parameter is the RemotePresence's parent,
          // which in this special case is just the Presence itself
-         SUPER.constructor.call(this, this, space, id, pos, vel, acc, bounds, vis);
+         SUPER.constructor.call(this, this, space, id, location, bounds, vis);
 
          this.mScript = script;
 
@@ -116,17 +116,30 @@ Kata.defer(function() {
 
      Kata.Presence.prototype.setPosition = function(val){
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.position = val.slice(0);
+         msg.posTime=Kata.now(this.mSpace);
+         msg.pos = val;
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVelocity = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.velocity = val.slice(0);
+         msg.vel = val.slice(0);
          this._sendHostedObjectMessage(msg);
      };
-     Kata.Presence.prototype.setAcceleration = function(val) {
+     Kata.Presence.prototype.setOrientation = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.acceleration = val.slice(0);
+         msg.orientTime=Kata.now(this.mSpace);
+         msg.orient = val.slice(0);
+         this._sendHostedObjectMessage(msg);
+     };
+     Kata.Presence.prototype.setAngularRotation = function(axis,angle) {
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         msg.mAngVel=angle;
+         msg.mRotAxis = axis;
+         this._sendHostedObjectMessage(msg);
+     };
+     Kata.Presence.prototype.setLocation = function(location) {
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         Kata.copyLocation(msg,location);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setBounds = function(val) {
