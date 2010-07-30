@@ -35,8 +35,7 @@ Kata.include("katajs/oh/Script.js");
         pos[2] = -10
         console.log("move mPresence.setPosition:", pos[0], pos[1], pos[2])
         this.mPresence.setPosition(pos);
-        
-        // disabled until updates work
+
         if (this.movecount < this.movemax) {
             this.movecount++;
             setTimeout(Kata.bind(this.move, this), 2000);
