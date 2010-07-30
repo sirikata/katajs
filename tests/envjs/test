@@ -11,7 +11,13 @@ for i in oo:
     if "TextGraphics.send" in i:
         w = i.split()
         if "pos:" in w:
+            if len(responses)==0:
+                fail=True
+                break
             if w[2] != responses.pop(0):
                 fail=True
                 print "failure on:", w[2], responses
+                break
+if len(responses): fail=True
 print "FAILURE" if fail else "SUCCESS"
+
