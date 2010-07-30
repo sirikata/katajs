@@ -271,10 +271,10 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
 };
 
 VWObject.prototype.stationary = function (curTime) {
-    var v=this.mCurLocation.mVel;
+    var v=this.mCurLocation.vel;
     var a=this.mCurLocation.mAngVel;
     var t=curTime;//.getTime();
-    return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.mScaleTime/*.getTime()*/>=0&&t-this.mCurLocation.mPosTime/*.getTime()*/>=0&&t-this.mCurLocation.mOrientTime/*.getTime()*/>=0;
+    return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.scaleTime/*.getTime()*/>=0&&t-this.mCurLocation.posTime/*.getTime()*/>=0&&t-this.mCurLocation.orientTime/*.getTime()*/>=0;
 };
 VWObject.prototype.detachRenderTarget = function(curTime) {
     if (this.mRenderTarg) {
@@ -291,12 +291,12 @@ VWObject.prototype.updateTransformation = function(graphics) {
     var l=Kata.LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
     this.mNode.identity();
 	// FIXME: dbm: interpolate doesn't seem to work for pos, orient; tho scale does
-//    this.mNode.translate(l.mPos[0],l.mPos[1],l.mPos[2]);
-	var pos = this.mCurLocation.mPos;
+//    this.mNode.translate(l.pos[0],l.pos[1],l.pos[2]);
+	var pos = this.mCurLocation.pos;
     this.mNode.translate(pos[0],pos[1],pos[2]);
-    this.mNode.scale(l.mScale[0],l.mScale[1],l.mScale[2]);
-//    this.mNode.quaternionRotate(l.mOrient);
-    this.mNode.quaternionRotate(this.mCurLocation.mOrient);
+    this.mNode.scale(l.scale[0],l.scale[1],l.scale[2]);
+//    this.mNode.quaternionRotate(l.orient);
+    this.mNode.quaternionRotate(this.mCurLocation.orient);
     if (this.stationary(graphics.mCurTime)) {
         graphics.removeObjectUpdate(this);        
     }
@@ -529,22 +529,22 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
 	//FIXME: why are things working even without this code?
 /*
     if (msg.pos) {
-        vwObject.mPos=msg.pos;
-        vwObject.mPosTime=msg.time;
+        vwObject.pos=msg.pos;
+        vwObject.posTime=msg.time;
     }
     if (msg.vel)
-        vwObject.mVel=msg.vel;
+        vwObject.vel=msg.vel;
     if (msg.orient) {
-        vwObject.mOrient=msg.orient;
-        vwObject.mOrientTime=msg.time;
+        vwObject.orient=msg.orient;
+        vwObject.orientTime=msg.time;
     }
     if (msg.rotaxis)
-        vwObject.mRotAxis=msg.rotaxis;
+        vwObject.rotaxis=msg.rotaxis;
     if (msg.rotvel)
-        vwObject.mRotVel=msg.rotvel;
+        vwObject.rotvel=msg.rotvel;
     if (msg.scale) {
-        vwObject.mScale=msg.scale;
-        vwObject.mScaleTime=msg.time;
+        vwObject.scale=msg.scale;
+        vwObject.scaleTime=msg.time;
     }
 */
     //FIXME actually translate element
@@ -688,9 +688,9 @@ O3DGraphics.prototype.stopDragging = function(e) {
 VWObject.prototype.updateCamera = function(graphics) {
   var location=this.updateTransformation(graphics);
   
-  var mat = o3djs.quaternions.quaternionToRotation(location.mOrient);
+  var mat = o3djs.quaternions.quaternionToRotation(location.orient);
   //console.log(mat);
-  o3djs.math.matrix4.setTranslation(mat, location.mPos);
+  o3djs.math.matrix4.setTranslation(mat, location.pos);
   this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.inverse(mat);
 /*
   this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.matrix4.lookAt([0, 1, 5],  // eye

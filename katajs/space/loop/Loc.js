@@ -51,14 +51,12 @@
          }
      };
 
-     Kata.Loopback.Loc.prototype.add = function(uuid, pos, vel, acc, bounds, visual) {
+     Kata.Loopback.Loc.prototype.add = function(uuid, pos, loc, visual) {
          if (this.mObjects[uuid])
              Kata.warn("Loopback.Loc trying to add an existing object." + uuid);
 
          this.mObjects[uuid] = {
-             pos : pos,
-             vel : vel,
-             acc : acc,
+             loc : loc,
              bounds : bounds,
              visual : visual
          };
@@ -78,37 +76,39 @@
          delete this.mObjects[uuid];
      };
 
-     Kata.Loopback.Loc.prototype.update = function(uuid, pos, vel, acc, bounds, visual) {
+     Kata.Loopback.Loc.prototype.update = function(uuid, loc, visual) {
          if (!this._checkExists(uuid)) {
              Kata.warn("Trying to update location for non-existant object: " + uuid);
              return;
          }
-         if (pos) this.mObjects[uuid].pos = pos;
-         if (vel) this.mObjects[uuid].vel = vel;
-         if (acc) this.mObjects[uuid].acc = acc;
-         if (bounds) this.mObjects[uuid].bounds = bounds;
-         if (visual) this.mObjects[uuid].visual = visual;
-         this._notify(uuid, pos, vel, acc, bounds, visual);
+         Kata.LocationReset(loc,this.mObjects[uuid].loc);
+         if (visual) 
+             this.mObjects[uuid].visual = visual;
+         this._notify(uuid, loc, visual);
      };
 
-     Kata.Loopback.Loc.prototype.updatePosition = function(uuid, pos) {
-         this.update(uuid, pos, undefined, undefined, undefined, undefined);
+     Kata.Loopback.Loc.prototype.updatePosition = function(uuid, pos, time) {
+         this.update(uuid, {pos:pos,time:time});
      };
 
      Kata.Loopback.Loc.prototype.updateVelocity = function(uuid, vel) {
-         this.update(uuid, undefined, vel, undefined, undefined, undefined);
+         this.update(uuid, {vel:vel});
      };
 
-     Kata.Loopback.Loc.prototype.updateAcceleration = function(uuid, acc) {
-         this.update(uuid, undefined, undefined, acc, undefined, undefined);
+     Kata.Loopback.Loc.prototype.updateOrientation = function(uuid, orient, time) {
+         this.update(uuid, {orient:orient,time:time});
      };
 
-     Kata.Loopback.Loc.prototype.updateBounds = function(uuid, bounds) {
-         this.update(uuid, undefined, undefined, undefined, bounds, undefined);
+     Kata.Loopback.Loc.prototype.updateAngularVelocity = function(uuid, angvel, angaxis) {
+         this.update(uuid, {angvel:angvel,angaxis:angaxis});
+     };
+
+     Kata.Loopback.Loc.prototype.updateBounds = function(uuid, scale, time) {
+         this.update(uuid, {scale:scale,time:time});
      };
 
      Kata.Loopback.Loc.prototype.updateVisual = function(uuid, visual) {
-         this.update(uuid, undefined, undefined, undefined, undefined, visual);
+         this.update(uuid, {}, visual);
      };
 
      Kata.Loopback.Loc.prototype.lookup = function(uuid) {

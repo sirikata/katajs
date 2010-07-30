@@ -191,11 +191,10 @@ Kata.include("katajs/core/URL.js");
       *  @param {boolean} success
       *  @param {} presence_id the identifier for the presence, or
       *  null if the connection wasn't successful.
-      *  @param {LocUpdate} loc initial location information for the object
-      *  @param {BoundsUpdate} bounds initial bounds information for the object
+      *  @param {Kata.Location} loc initial location information for the object
       *  @param {} visual a reference to the visual description of the object
       */
-     Kata.ObjectHost.prototype.connectionResponse = function(id, success, presence_id, loc, bounds, visual) {
+     Kata.ObjectHost.prototype.connectionResponse = function(id, success, presence_id, loc, visual) {
          var obj = this.mObjects[id];
          if (!obj) {
              Kata.warn("Got connection response for unknown object: " + id);
@@ -206,7 +205,7 @@ Kata.include("katajs/core/URL.js");
          delete this.mObjects[id];
          this.mObjects[presence_id.object] = obj;
 
-         obj.connectionResponse(success, presence_id, loc, bounds, visual);
+         obj.connectionResponse(success, presence_id, loc, visual);
      };
 
      Kata.ObjectHost.prototype.registerProxQuery = function(space, id, sa) {
@@ -220,9 +219,9 @@ Kata.include("katajs/core/URL.js");
      };
 
      /** Send an update request to the space. */
-     Kata.ObjectHost.prototype.locUpdateRequest = function(space, id, pos, vel, acc, bounds, visual) {
+     Kata.ObjectHost.prototype.locUpdateRequest = function(space, id, loc, visual) {
          var space_conn = this.mSpaceConnections[space];
-         space_conn.locUpdateRequest(id, pos, vel, acc, bounds, visual);
+         space_conn.locUpdateRequest(id, loc, visual);
      };
 
      /** Should be invoked by SpaceConnection classes when a location
@@ -230,9 +229,9 @@ Kata.include("katajs/core/URL.js");
       *  @param from
       *  @param to
       */
-     Kata.ObjectHost.prototype.presenceLocUpdate = function(space, from, to, pos, vel, acc, bounds, visual) {
+     Kata.ObjectHost.prototype.presenceLocUpdate = function(space, from, to, pos, loc, visual) {
          var obj = this.mObjects[to];
-         obj.presenceLocUpdate(space, from, pos, vel, acc, bounds, visual);
+         obj.presenceLocUpdate(space, from, loc, visual);
      };
 
      Kata.ObjectHost.prototype.subscribe = function(space, id, observed) {

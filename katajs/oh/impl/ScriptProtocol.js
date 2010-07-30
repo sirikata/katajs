@@ -218,22 +218,20 @@
                  this.space = space;
              },
 
-             QueryEvent : function(space, observed, entered, loc, bounds, visual) {
+             QueryEvent : function(space, observed, entered, loc, visual) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.QueryEvent;
                  this.space = space;
                  this.observed = observed;
                  this.entered = entered;
                  this.loc = loc;
-                 this.bounds = bounds;
                  this.visual = visual;
              },
 
-             PresenceLocUpdate : function(space, observed, loc, bounds, visual) {
+             PresenceLocUpdate : function(space, observed, loc, visual) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.PresenceLocUpdate;
                  this.space = space;
                  this.observed = observed;
                  this.loc = loc;
-                 this.bounds = bounds;
                  this.visual = visual;
              }
 

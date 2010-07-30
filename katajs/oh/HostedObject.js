@@ -93,10 +93,10 @@ Kata.include("katajs/core/MessageDispatcher.js");
          this.mObjectHost.connect(this, request.space, request.auth);
      };
 
-     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, loc, bounds, visual) {
+     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, loc, visual) {
          var msg = null;
          if (success)
-             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, loc, bounds, visual);
+             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, loc, visual);
          else
              msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object);
          this.sendScriptMessage(msg);
@@ -111,7 +111,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
      };
 
      Kata.HostedObject.prototype.proxEvent = function(space, observed, entered, properties) {
-         var msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered, properties.loc, properties.bounds, properties.visual);
+         var msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered, properties.loc, properties.visual);
          this.sendScriptMessage(msg);
      };
 
@@ -123,24 +123,14 @@ Kata.include("katajs/core/MessageDispatcher.js");
          this.mObjectHost.locUpdateRequest(
              request.space,
              request.id,
-             request.position,
-             request.velocity,
-             request.acceleration,
-             request.bounds,
+             request.loc,
              request.visual
          );
      };
 
-     Kata.HostedObject.prototype.presenceLocUpdate = function(space, from, pos, vel, acc, bounds, visual) {
+     Kata.HostedObject.prototype.presenceLocUpdate = function(space, from, loc, visual) {
          var msg = new Kata.ScriptProtocol.ToScript.PresenceLocUpdate(
-             space, from,
-             {
-                 pos : pos,
-                 vel : vel,
-                 acc : acc
-             },
-             bounds,
-             visual
+             space, from, loc, visual
          );
          this.sendScriptMessage(msg);
      };

@@ -87,12 +87,7 @@ Kata.include("katajs/oh/RemotePresence.js");
      Kata.GraphicsScript.prototype.renderRemotePresence = function(presence,remotePresence, noMesh) {
          //in our space, create
          var msg = new Kata.ScriptProtocol.FromScript.GFXCreateNode(presence.space(),presence.id(),remotePresence);
-		 // FIXME FIXME FIXME random crap:
-		 msg.orient = [0,0,0,1]
-		 msg.rotaxis = [1,0,0]
-		 msg.vel = [0,0,0]
-		 msg.scale = [1,1,1]
-		 if(noMesh) msg.scale = [0,0,0]
+         Kata.LocationCopyUnifyTime(msg,remotePresence.mLocation);
          this._sendHostedObjectMessage(msg);
          //in our space, add Mesh to the new graphics subsystem;
 		 if (!noMesh) {
@@ -132,7 +127,7 @@ Kata.include("katajs/oh/RemotePresence.js");
              }
          }
          var msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
-		 msg.msg = "Camera"
+		 msg.msg = "Camera";
          this._sendHostedObjectMessage(msg);
          msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
          this._sendHostedObjectMessage(msg);
@@ -236,18 +231,13 @@ Kata.include("katajs/oh/RemotePresence.js");
              var presence = this.mPresences[data.space];
              if (presence.inGFXSceneGraph) {//if this particular presence has gfx enabled
                  var msg = new Kata.ScriptProtocol.FromScript.GraphicsMessage(this.mPresence.space(), this.mPresence.id(), remotePresence.id());
-                 msg.msg = "Move"
-                 msg.pos = data.loc.pos;
-                 msg.orient = data.loc.orient;
-                 msg.vel = data.loc.vel;
-                 msg.angvel = data.loc.rotvel;
-                 msg.rotaxis = data.loc.rotaxis;
-                 // FIXME: acceleration, other things??
-                 this._sendHostedObjectMessage(msg)
+                 msg.msg = "Move";
+                 Kata.LocationCopyUnifyTime(msg,data);
+                 this._sendHostedObjectMessage(msg);
              }
          }
          return remotePresence;
-     }
+     };
      /**
       * Overridable function that indicates whether a given remotePresence 
       * should be rendered for the given presence.

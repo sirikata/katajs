@@ -44,15 +44,15 @@ Kata.LocationIdentityNow=function() {
  */
 Kata.LocationIdentity=function(time){
     return {
-      mScale:[1,1,1],
-      mScaleTime:time,
-      mPos:[0,0,0],
-      mPosTime:time,
-      mOrient:[0,0,0,1],
-      mOrientTime:time,
-      mVel:[0,0,0],
-      mRotAxis:[0,0,1],
-      mRotVel:0
+      scale:[1,1,1],
+      scaleTime:time,
+      pos:[0,0,0],
+      posTime:time,
+      orient:[0,0,0,1],
+      orientTime:time,
+      vel:[0,0,0],
+      rotaxis:[0,0,1],
+      rotvel:0
     };
 };
 /**
@@ -199,20 +199,20 @@ Kata._helperLocationInterpolateQuaternion=function(a,avel,aaxis,atime,b,bvel,bax
  */
 Kata.LocationInterpolate=function(location,prevLocation,time) {
     return {
-        mScale:Kata._helperLocationInterpolate3vec(location.mScale,[0,0,0],location.mScaleTime,
-                                              prevLocation.mScale,[0,0,0],prevLocation.mScaleTime,
+        scale:Kata._helperLocationInterpolate3vec(location.scale,[0,0,0],location.scaleTime,
+                                              prevLocation.scale,[0,0,0],prevLocation.scaleTime,
                                               time),
-        mScaleTime:time,
-        mPos:Kata._helperLocationInterpolate3vec(location.mPos,location.mVel,location.mPosTime,
-                                            prevLocation.mPos,prevLocation.mVel,prevLocation.mPosTime,time),
-        mPosTime:time,
-        mOrient:Kata._helperLocationInterpolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,location.mOrientTime,
-                                                     prevLocation.mOrient,prevLocation.mRotVel,prevLocation.mRotAxis,prevLocation.mOrientTime,
+        scaleTime:time,
+        pos:Kata._helperLocationInterpolate3vec(location.pos,location.vel,location.posTime,
+                                            prevLocation.pos,prevLocation.vel,prevLocation.posTime,time),
+        posTime:time,
+        orient:Kata._helperLocationInterpolateQuaternion(location.orient,location.rotvel,location.rotaxis,location.orientTime,
+                                                     prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,prevLocation.orientTime,
                                                      time),
-        mOrientTime:time,
-        mRotVel:location.mRotVel,
-        mRotAxis:location.mRotAxis,
-        mVel:location.mVel
+        orientTime:time,
+        rotvel:location.rotvel,
+        rotaxis:location.rotaxis,
+        vel:location.vel
     };
 };
 
@@ -228,20 +228,20 @@ Kata.LocationInterpolate=function(location,prevLocation,time) {
  */
 Kata.LocationTriTimeInterpolate=function(location,prevLocation,posTime,orientTime,scaleTime) {
     return {
-        mScale:Kata._helperLocationInterpolate3vec(location.mScale,[0,0,0],location.mScaleTime,
-                                              prevLocation.mScale,[0,0,0],prevLocation.mScaleTime,
+        scale:Kata._helperLocationInterpolate3vec(location.scale,[0,0,0],location.scaleTime,
+                                              prevLocation.scale,[0,0,0],prevLocation.scaleTime,
                                               scaleTime),
-        mScaleTime:scaleTime,
-        mPos:Kata._helperLocationInterpolate3vec(location.mPos,location.mVel,location.mPosTime,
-                                            prevLocation.mPos,prevLocation.mVel,prevLocation.mPosTime,posTime),
-        mPosTime:posTime,
-        mOrient:Kata._helperLocationInterpolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,location.mOrientTime,
-                                                     prevLocation.mOrient,prevLocation.mRotVel,prevLocation.mRotAxis,prevLocation.mOrientTime,
+        scaleTime:scaleTime,
+        pos:Kata._helperLocationInterpolate3vec(location.pos,location.vel,location.posTime,
+                                            prevLocation.pos,prevLocation.vel,prevLocation.posTime,posTime),
+        posTime:posTime,
+        orient:Kata._helperLocationInterpolateQuaternion(location.orient,location.rotvel,location.rotaxis,location.orientTime,
+                                                     prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,prevLocation.orientTime,
                                                      orientTime),
-        mOrientTime:orientTime,
-        mRotVel:location.mRotVel,
-        mRotAxis:location.mRotAxis,
-        mVel:location.mVel
+        orientTime:orientTime,
+        rotvel:location.rotvel,
+        rotaxis:location.rotaxis,
+        vel:location.vel
     };
 };
 
@@ -254,19 +254,77 @@ Kata.LocationTriTimeInterpolate=function(location,prevLocation,posTime,orientTim
  */
 Kata.LocationExtrapolate=function(location,time) {
     return {
-        mScale:location.mScale,
-        mScaleTime:time,
-        mPos:Kata._helperLocationExtrapolate3vec(location.mPos,location.mVel,deltaTime(time,location.mPosTime)),
-        mPosTime:time,
-        mOrient:Kata._helperLocationExtrapolateQuaternion(location.mOrient,location.mRotVel,location.mRotAxis,deltaTime(time,location.mOrientTime)),
-        mOrientTime:time,
-        mRotVel:location.mRotVel,
-        mRotAxis:location.mRotAxis,
-        mVel:location.mVel
+        scale:location.scale,
+        scaleTime:time,
+        pos:Kata._helperLocationExtrapolate3vec(location.pos,location.vel,deltaTime(time,location.posTime)),
+        posTime:time,
+        orient:Kata._helperLocationExtrapolateQuaternion(location.orient,location.rotvel,location.rotaxis,deltaTime(time,location.orientTime)),
+        orientTime:time,
+        rotvel:location.rotvel,
+        rotaxis:location.rotaxis,
+        vel:location.vel
     };
 };
 
-
+Kata.LocationCopyUnifyTime= function(destination, source) {
+    if (source.time!==undefined) {
+        destination.time=source.time;
+        if (source.scale!==undefined){
+            destination.scale=source.scale;
+        }
+        if (source.pos!==undefined){
+                destination.pos=source.pos;
+        }
+        if (destination.orient!==undefined) {            
+            destination.orient=source.orient;
+        }
+        if (source.angvel!==undefined && source.rotaxis!==undefined) {
+            destination.angvel=source.angvel;
+            destination.angvel=source.angvel;
+        }
+        if (source.vel!==undefined){
+            destination.vel=source.vel;
+        }        
+    }else{
+        var t=source.scaleTime;
+        if (t===undefined||source.posTime>t)
+            t=source.posTime;
+        if (t===undefined||source.orientTime>t)
+            t=source.orientTime;
+        if (source.scale!==undefined){
+            destination.scale=source.scale;
+        }
+        if (source.pos!==undefined){
+            if (source.vel&&source.posTime) {
+                destination.pos=Kata._helperLocationExtrapolate3vec(source.pos,
+                                                                    source.vel,
+                                                                    deltaTime(t,
+                                                                              source.posTime));                
+            }else {
+                destination.pos=source.pos;
+            }
+        }
+        if (source.orient!==undefined){
+            if (source.angvel&&source.rotaxis&&source.orientTime) {
+                destination.pos
+                    =Kata._helperLocationExtrapolateQuaternion(source.orient,
+                                                               source.angvel,
+                                                               source.rotaxis,
+                                                               deltaTime(t,
+                                                                         source.orientTime));
+            }else {
+                destination.orient=source.orient;
+            }
+        }
+        if (source.angvel!==undefined && source.rotaxis!==undefined) {
+            destination.angvel=source.angvel;
+            destination.angvel=source.angvel;
+        }
+        if (source.vel!==undefined){
+            destination.vel=source.vel;
+        }
+    }
+};
 
 /**
  * returns a new location that has the default properties where the msg does not specify the values
@@ -288,15 +346,15 @@ Kata.LocationSet=function(msg) {
     if (msg.orient==undefined)
         msg.orient=[0,0,0,1];
     return {
-      mScale:msg.scale,
-      mScaleTime:msg.time,
-      mPos:msg.pos,  
-      mPosTime:msg.time,
-      mOrient:msg.orient,  
-      mOrientTime:msg.time,
-      mVel:msg.vel,
-      mRotAxis:msg.rotaxis,
-      mRotVel:msg.rotvel
+      scale:msg.scale,
+      scaleTime:msg.time,
+      pos:msg.pos,  
+      posTime:msg.time,
+      orient:msg.orient,  
+      orientTime:msg.time,
+      vel:msg.vel,
+      rotaxis:msg.rotaxis,
+      rotvel:msg.rotvel
 
     };
 };
@@ -314,65 +372,93 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     if (!prevLocation)
         prevLocation=curLocation;
     var retval={
-      mScale:curLocation.mScale,
-      mScaleTime:curLocation.mScaleTime,
-      mPos:curLocation.mPos,  
-      mPosTime:curLocation.mPosTime,
-      mOrient:curLocation.mOrient,  
-      mOrientTime:curLocation.mOrientTime,
-      mVel:curLocation.mVel,
-      mRotAxis:curLocation.mRotAxis,
-      mRotVel:curLocation.mRotVel
+      scale:curLocation.scale,
+      scaleTime:curLocation.scaleTime,
+      pos:curLocation.pos,  
+      posTime:curLocation.posTime,
+      orient:curLocation.orient,  
+      orientTime:curLocation.orientTime,
+      vel:curLocation.vel,
+      rotaxis:curLocation.rotaxis,
+      rotvel:curLocation.rotvel
     };
     if (msg.pos) {
-        retval.mPos=msg.pos;
-        retval.mPosTime=msg.time;
+        retval.pos=msg.pos;
+        retval.posTime=msg.time;
     }else {
-        curLocation.mPos=prevLocation.mPos;
-        curLocation.mPosTime=prevLocation.mPosTime;
+        curLocation.pos=prevLocation.pos;
+        curLocation.posTime=prevLocation.posTime;
         if (msg.vel) {
-            curLocation.mPos=Kata._helperLocationExtrapolate3vec(prevLocation.mPos,prevLocation.mVel,deltaTime(curDate,prevLocation.mPosTime));
-            curLocation.mPosTime=curDate;
+            curLocation.pos=Kata._helperLocationExtrapolate3vec(prevLocation.pos,prevLocation.vel,deltaTime(curDate,prevLocation.posTime));
+            curLocation.posTime=curDate;
 
-            retval.mPos=Kata._helperLocationExtrapolate3vec(curLocation.mPos,curLocation.mVel,deltaTime(msg.time,curLocation.mPosTime));
-            retval.mPosTime=msg.time;
+            retval.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,deltaTime(msg.time,curLocation.posTime));
+            retval.posTime=msg.time;
         }
     }
     if (msg.vel) {
-        retval.mVel=msg.vel;
+        retval.vel=msg.vel;
     }else {
-        curLocation.mVel=prevLocation.mVel;
+        curLocation.vel=prevLocation.vel;
     }
     if (msg.orient) {
-        retval.mOrient=msg.orient;
-        retval.mOrientTime=msg.time;
+        retval.orient=msg.orient;
+        retval.orientTime=msg.time;
     }else {
-        curLocation.mOrient=prevLocation.mOrient;
-        curLocation.mOrientTime=prevLocation.mOrientTime;
+        curLocation.orient=prevLocation.orient;
+        curLocation.orientTime=prevLocation.orientTime;
         if (msg.rotvel&&msg.rotaxis) {
-            curLocation.mOrient=Kata._helperLocationExtrapolateQuaternion(prevLocation.mOrient,prevLocation.mRotVel,prevLocation.mRotAxis,Kata.deltaTime(curDate,prevLocation.mOrientTime));
-            curLocation.mOrientTime=curDate;
+            curLocation.orient=Kata._helperLocationExtrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
+            curLocation.orientTime=curDate;
 
-            retval.mOrient=Kata._helperLocationExtrapolateQuaternion(curLocation.mOrient,curLocation.mRotVel,curLocation.mRotAxis,Kata.deltaTime(msg.time,curLocation.mOrientTime));
-            retval.mOrientTime=msg.time;
+            retval.orient=Kata._helperLocationExtrapolateQuaternion(curLocation.orient,curLocation.rotvel,curLocation.rotaxis,Kata.deltaTime(msg.time,curLocation.orientTime));
+            retval.orientTime=msg.time;
         }
     }
     if (msg.rotvel&&msg.rotaxis) {
-        retval.mRotAxis=msg.rotaxis;
-        retval.mRotVel=msg.rotvel;
+        retval.rotaxis=msg.rotaxis;
+        retval.rotvel=msg.rotvel;
     }else {
-        curLocation.mRotAxis=prevLocation.mRotAxis;
-        curLocation.mRotVel=prevLocation.mRotVel;
+        curLocation.rotaxis=prevLocation.rotaxis;
+        curLocation.rotvel=prevLocation.rotvel;
     }
     if (msg.scale) {
-        retval.mScale=msg.scale;
-        retval.mScaleTime=msg.time;
+        retval.scale=msg.scale;
+        retval.scaleTime=msg.time;
     }else {
-        curLocation.mScale=prevLocation.mScale;
-        curLocation.mScaleTime=prevLocation.mScaleTime;
+        curLocation.scale=prevLocation.scale;
+        curLocation.scaleTime=prevLocation.scaleTime;
     }
     return retval;
 };
+
+/**
+ * Takes a current location and updates it with all fields and timestamps that have changed
+ * @param msg the network message being received
+ * @param {!Location} curLocation the currently known latest update (modified with prevLocation items that have not changed in new update)
+ */ 
+Kata.LocationReset=function(msg,curLocation) {
+    if (msg.scale!==undefined) {
+        curLocation.scale=msg.scale;
+        curLocation.scaleTime=msg.time;
+    }
+    if (msg.pos!==undefined) {
+        curLocation.pos=msg.pos;
+        curLocation.posTime=msg.time;
+    }
+    if (msg.vel!==undefined) {
+        curLocation.vel=msg.vel;
+    }
+    if (msg.angvel!==undefined && msg.rotaxis !==undefined) {
+        curLocation.rotaxis=msg.rotaxis;
+    }
+    if (msg.orient!==undefined) {
+        curLocation.orient=msg.orient;
+        curLocation.orientTime=msg.time;
+    }
+};
+
+
 /**
  * Multiplies two quaternions.
  * @param {!o3djs.quaternions.Quaternion} a Operand quaternion.
@@ -471,29 +557,29 @@ Kata.Vec3Rotate=function(a,v0,v1,v2) {
  * @returns{!Location} loc, combined with the appropriate interpolation of cur and prevParentLoc
  */
 Kata.LocationCompose=function(loc, prevParentLoc, curParentLoc) {
-    var parentLoc=Kata.LocationTriTimeInterpolate(curParentLoc,prevParentLoc,loc.mPosTime,loc.mOrientTime,loc.mScaleTime);
-    var rotation=Kata.QuaternionToRotation(parentLoc.mOrient);
-    //First lets get velocity right--we're acting like a lever with a vector of loc.mPos
-    var topLevelVelocity=Kata.Vec3Add(Kata.Vec3Add(Kata.Vec3Scale(Kata.Vec3Cross(parentLoc.mRotAxis,
-                                                             loc.mPos),
-                                                   parentLoc.mRotVel),
-                                         parentLoc.mVel),
-                                 Kata.Vec3Rotate(loc.mVel,rotation[0],rotation[1],rotation[2]));
-    var topLevelAxis=Kata.Vec3Rotate(loc.mRotAxis,rotation[0],rotation[1],rotation[2]);
-    var topLevelPos=Kata.Vec3Add(Vec3Rotate(loc.mPos,rotation[0],rotation[1],rotation[2]),
-                            parentLoc.mPos);
+    var parentLoc=Kata.LocationTriTimeInterpolate(curParentLoc,prevParentLoc,loc.posTime,loc.orientTime,loc.scaleTime);
+    var rotation=Kata.QuaternionToRotation(parentLoc.orient);
+    //First lets get velocity right--we're acting like a lever with a vector of loc.pos
+    var topLevelVelocity=Kata.Vec3Add(Kata.Vec3Add(Kata.Vec3Scale(Kata.Vec3Cross(parentLoc.rotaxis,
+                                                             loc.pos),
+                                                   parentLoc.rotvel),
+                                         parentLoc.vel),
+                                 Kata.Vec3Rotate(loc.vel,rotation[0],rotation[1],rotation[2]));
+    var topLevelAxis=Kata.Vec3Rotate(loc.rotaxis,rotation[0],rotation[1],rotation[2]);
+    var topLevelPos=Kata.Vec3Add(Vec3Rotate(loc.pos,rotation[0],rotation[1],rotation[2]),
+                            parentLoc.pos);
     
-    var topLevelOrient=Kata.QuaternionMulQuaternion(parentLoc.mOrient,loc.mOrient);
-    var topLevelScale=loc.mScale;//FIXME what's right to do here--is it a rigid body or not!
-    return {mPos:topLevelPos,
-            mOrient:topLevelOrient,
-            mScale:topLevelScale,
-            mRotAxis:topLevelAxis,
-            mRotVel:loc.mRotVel,
-            mVel:topLevelVelocity,
-            mPosTime:loc.mPosTime,
-            mOrientTime:loc.mOrientTime,
-            mScaleTime:loc.mScaleTime};
+    var topLevelOrient=Kata.QuaternionMulQuaternion(parentLoc.orient,loc.orient);
+    var topLevelScale=loc.scale;//FIXME what's right to do here--is it a rigid body or not!
+    return {pos:topLevelPos,
+            orient:topLevelOrient,
+            scale:topLevelScale,
+            rotaxis:topLevelAxis,
+            rotvel:loc.rotvel,
+            vel:topLevelVelocity,
+            posTime:loc.posTime,
+            orientTime:loc.orientTime,
+            scaleTime:loc.scaleTime};
 };
 Kata.QuaternionInverse=function(q) {
   var q0 = q[0];
@@ -517,29 +603,29 @@ Kata.QuaternionInverse=function(q) {
  * @returns{!Location} loc, combined with the appropriate interpolation of cur and prevParentLoc
  */
 Kata.LocationInverseCompose=function(loc, prevParentLoc, curParentLoc) {
-    var parentLoc=Kata.LocationTriTimeInterpolate(curParentLoc,prevParentLoc,loc.mPosTime,loc.mOrientTime,loc.mScaleTime);
-    var inverseRotation=Kata.QuaternionInverse(parentLoc.mOrient);
+    var parentLoc=Kata.LocationTriTimeInterpolate(curParentLoc,prevParentLoc,loc.posTime,loc.orientTime,loc.scaleTime);
+    var inverseRotation=Kata.QuaternionInverse(parentLoc.orient);
     var rotation=Kata.QuaternionToRotation(inverseRotation);
-    //First lets get velocity right--we're acting like a lever with a vector of loc.mPos
-    var innerVelocity=Kata.Vec3Rotate(Kata.Vec3Add(Kata.Vec3Sub(Kata.Vec3Scale(Kata.Vec3Cross(parentLoc.mRotAxis,
-                                                                     loc.mPos),
-                                                           -parentLoc.mRotVel),
-                                                 parentLoc.mVel),
-                                         loc.mVel),rotation[0],rotation[1],rotation[2]);
-    var innerAxis=Kata.Vec3Rotate(loc.mRotAxis,rotation[0],rotation[1],rotation[2]);
-    var innerPos=Kata.Vec3Rotate(Kata.Vec3Sub(loc.mPos,parentLoc.mPos),rotation[0],rotation[1],rotation[2]);
+    //First lets get velocity right--we're acting like a lever with a vector of loc.pos
+    var innerVelocity=Kata.Vec3Rotate(Kata.Vec3Add(Kata.Vec3Sub(Kata.Vec3Scale(Kata.Vec3Cross(parentLoc.rotaxis,
+                                                                     loc.pos),
+                                                           -parentLoc.rotvel),
+                                                 parentLoc.vel),
+                                         loc.vel),rotation[0],rotation[1],rotation[2]);
+    var innerAxis=Kata.Vec3Rotate(loc.rotaxis,rotation[0],rotation[1],rotation[2]);
+    var innerPos=Kata.Vec3Rotate(Kata.Vec3Sub(loc.pos,parentLoc.pos),rotation[0],rotation[1],rotation[2]);
     
-    var innerOrient=Kata.QuaternionMulQuaternion(loc.mOrient,inverseRotation);
-    var innerScale=loc.mScale;//FIXME what's right to do here--is it a rigid body or not!
-    return {mPos:innerPos,
-            mOrient:innerOrient,
-            mScale:innerScale,
-            mRotAxis:innerAxis,
-            mRotVel:loc.mRotVel,
-            mVel:innerVelocity,
-            mPosTime:loc.mPosTime,
-            mOrientTime:loc.mOrientTime,
-            mScaleTime:loc.mScaleTime};
+    var innerOrient=Kata.QuaternionMulQuaternion(loc.orient,inverseRotation);
+    var innerScale=loc.scale;//FIXME what's right to do here--is it a rigid body or not!
+    return {pos:innerPos,
+            orient:innerOrient,
+            scale:innerScale,
+            rotaxis:innerAxis,
+            rotvel:loc.rotvel,
+            vel:innerVelocity,
+            posTime:loc.posTime,
+            orientTime:loc.orientTime,
+            scaleTime:loc.scaleTime};
 };
 /**
  * takes the loc that is based off of the oldNode and places it as a child of newNode

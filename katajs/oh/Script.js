@@ -168,7 +168,7 @@ Kata.include("katajs/oh/RemotePresence.js");
          var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
          if (msg.entered) {
              // New object, create presence and notify
-             remote = new Kata.RemotePresence(presence, msg.space, msg.observed, msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
+             remote = new Kata.RemotePresence(presence, msg.space, msg.observed, msg.loc, msg.visual);
              this.mRemotePresences[key] = remote;
              presence.remotePresence(remote, true);
          }
@@ -190,14 +190,14 @@ Kata.include("katajs/oh/RemotePresence.js");
 
          if (presence.id() === msg.observed) {
              Kata.warn("Self loc update: " + presence.id());
-             presence._updateLoc(msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
+             presence._updateLoc(msg.loc, msg.visual);
          }
          else {
              var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
              var remote = this.mRemotePresences[key];
              Kata.warn("Remote presence loc update: " + key);
              if (remote)
-                 remote._updateLoc(msg.loc.pos, msg.loc.vel, msg.loc.acc, msg.bounds, msg.visual);
+                 remote._updateLoc(msg.loc, msg.visual);
          }
          return remote;
      };

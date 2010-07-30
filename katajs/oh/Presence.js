@@ -76,10 +76,10 @@ Kata.defer(function() {
       * @param {Kata.PresenceID} id Unique identifier of this object in
       * the space.
       */
-     Kata.Presence = function (script, space, id, location, bounds, vis) {
+     Kata.Presence = function (script, space, id, location, vis) {
          // Note the second parameter is the RemotePresence's parent,
          // which in this special case is just the Presence itself
-         SUPER.constructor.call(this, this, space, id, location, bounds, vis);
+         SUPER.constructor.call(this, this, space, id, location, vis);
 
          this.mScript = script;
 
@@ -134,7 +134,7 @@ Kata.defer(function() {
      Kata.Presence.prototype.setAngularRotation = function(axis,angle) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
          msg.mAngVel=angle;
-         msg.mRotAxis = axis;
+         msg.mRotAxis = axis.slice(0);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setLocation = function(location) {
@@ -144,11 +144,11 @@ Kata.defer(function() {
      };
      Kata.Presence.prototype.setBounds = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.bounds = val.slice(0);
+         msg.scale = val.slice(0);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         var msg = new Kata.ScriptProtocol.FromScript.Visual(this.mSpace, this.mID);
          msg.vis = val;
          this._sendHostedObjectMessage(msg);
      };
@@ -228,8 +228,8 @@ Kata.defer(function() {
 
      /** Handle a location update event received from the space.  This
       * may be an update to our own location or to other objects.
-      * Note that location encompasses position, velocity, possibly
-      * acceleration, and bounding region.
+      * Note that location encompasses position, velocity, orientation
+      * possibly angular velocity, and bounding region.
       */
      Kata.Presence.prototype._handleLocEvent = function(data) {
          Kata.notImplemented();
