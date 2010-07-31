@@ -126,12 +126,10 @@
       * updates.
       */
      Kata.RemotePresence.prototype._updateLoc = function (pos, vel, acc, bounds, visual) {
-         this.mPosition = pos;
-         this.mVelocity = vel;
-         this.mAcceleration = acc;
-         this.mBounds = bounds;
-         if (visual) {
-             this.mVisual = visual;
-         }
+         if (pos) this.rPosition = pos;
+         if (vel != null) this.rVelocity = vel;
+         if (acc) this.rAcceleration = acc;
+         if (bounds) this.rBounds = bounds;
+         if (visual) this.mVisual = visual;
      };
 })();
