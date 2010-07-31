@@ -29,7 +29,7 @@ Kata.include("katajs/oh/Script.js");
         if (!this.mPresence) 
             return;
         
-        var pos = this.mPresence.position();
+        var pos = this.mPresence.rPosition;
         pos[0] = this.instance * 3;
         pos[1] = this.movecount * 3
         pos[2] = -10

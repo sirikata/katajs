@@ -61,15 +61,15 @@
          FromScript : {
 
              Types : {
-                 Connect : 1,
-                 Disconnect : 2,
-                 Location : 3,
-                 Visual : 4,
-                 Query : 5,
-                 Subscription : 6,
+                 Connect : "fcon",
+                 Disconnect : "fdis",
+                 Location : "floc",
+                 Visual : "fvis",
+                 Query : "fque",
+                 Subscription : "fsub",
 
-                 CreateObject : 100,
-                 GraphicsMessage : 101
+                 CreateObject : "fcre",
+                 GraphicsMessage : "fgfm"
              },
 
              Connect : function(space, auth) {
@@ -89,11 +89,11 @@
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Location;
                  this.space = space;
                  this.id = id;
-                 this.position = position;
-                 this.velocity = velocity;
-                 this.acceleration = acceleration;
-                 this.bounds = bounds;
-                 this.vis = vis;
+                 if(position) this.position = position;
+                 if(velocity!=null) this.velocity = velocity;
+                 if(acceleration) this.acceleration = acceleration;
+                 if(bounds) this.bounds = bounds;
+                 if(vis) this.vis = vis;
              },
 
              Query : function(space, id, sa) {
@@ -124,7 +124,7 @@
                  this.space = space+observer;
                  this.id = remotePresence.id();
 				 this.spaceid = this.space;
-                 this.pos=remotePresence.position();
+                 this.pos=remotePresence.rPosition;
                  this.vel=remotePresence.vel;
                  this.orient=[1,0,0,0];//fixme
                  this.rotvel=0;
@@ -190,11 +190,11 @@
          ToScript : {
 
              Types : {
-                 Connected : 1,
-                 ConnectionFailed : 2,
-                 Disconnected : 3,
-                 QueryEvent : 4,
-                 PresenceLocUpdate : 5
+                 Connected : "tcon",
+                 ConnectionFailed : "tfyl",
+                 Disconnected : "tdis",
+                 QueryEvent : "tque",
+                 PresenceLocUpdate : "tloc"
              },
 
              Connected : function(space, id, loc, bounds, visual) {

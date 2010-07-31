@@ -116,7 +116,7 @@ Kata.defer(function() {
 
      Kata.Presence.prototype.setPosition = function(val){
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.position = val;
+         msg.position = val.slice(0);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVelocity = function(val) {
@@ -126,12 +126,12 @@ Kata.defer(function() {
      };
      Kata.Presence.prototype.setAcceleration = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.acceleration = val;
+         msg.acceleration = val.slice(0);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setBounds = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.bounds = val;
+         msg.bounds = val.slice(0);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {
