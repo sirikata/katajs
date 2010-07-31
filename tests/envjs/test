@@ -36,9 +36,10 @@ for i in oo:
                 fail=True
                 print "failure: no more responses to check against"
                 break
-            if i != responses.pop(0):
+            r = responses.pop(0)
+            if i != r:
                 fail=True
-                print "failure on:", w[2], responses
+                print "failure: expected", i, "|got|", r
                 break
 if len(responses):
     print "failure: responses remaining"
