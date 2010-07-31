@@ -7,22 +7,23 @@ f = open("test.txt")
 p = subprocess.Popen(["rhino", "-debug"], stdin=f, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 p.wait()
 oo = p.stdout.readlines()
-responses = ["0,0,0", "0,0,-10", "3,0,-10", "0,3,-10", "3,3,-10"]
+responses = ["0,0,0", "0,0,-10", "3,0,-10", "0,3,-10", "3,3,-10","","","","","","","","",""]
 fail=False
 for i in oo:
     if verbose:
         print i.rstrip()
     if "TextGraphics.send" in i:
         w = i.split()
-        if "pos:" in w:
+        if "pos:" in w or "vel:" in w:
+            print "response:", w
             if len(responses)==0:
                 fail=True
                 print "failure: no more responses to check against"
-                break
+##                break
             if w[2] != responses.pop(0):
                 fail=True
                 print "failure on:", w[2], responses
-                break
+    ##                break
 if len(responses):
     print "failure: responses remaining"
     fail=True

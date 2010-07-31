@@ -121,7 +121,7 @@ Kata.defer(function() {
      };
      Kata.Presence.prototype.setVelocity = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.velocity = val;
+         msg.velocity = val.slice(0);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setAcceleration = function(val) {
