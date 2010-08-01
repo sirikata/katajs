@@ -265,6 +265,27 @@ Kata.LocationExtrapolate=function(location,time) {
         vel:location.vel
     };
 };
+Kata.LocationCopy = function(destination, source) {
+    if (source.scale!==undefined){
+        destination.scaleTime=source.scaleTime!==undefined?source.scaleTime:source.time;
+        destination.scale=source.scale;
+    }
+    if (source.pos!==undefined){
+        destination.posTime=source.posTime!==undefined?source.posTime:source.time;
+        destination.pos=source.pos;
+    }
+    if (destination.orient!==undefined) {            
+        destination.orientTime=source.orientTime!==undefined?source.orientTime:source.time;
+        destination.orient=source.orient.slice(0);
+    }
+    if (source.angvel!==undefined && source.rotaxis!==undefined) {
+        destination.angvel=source.angvel;
+        destination.rotaxis=source.rotaxis.slice(0);
+    }
+    if (source.vel!==undefined){
+        destination.vel=source.vel.slice(0);
+    }        
+};
 
 Kata.LocationCopyUnifyTime= function(destination, source) {
     if (source.time!==undefined) {

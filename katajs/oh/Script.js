@@ -187,19 +187,9 @@ Kata.include("katajs/oh/RemotePresence.js");
 
      Kata.Script.prototype._handlePresenceLocUpdate = function(channel, msg) {
          var presence = this.mPresences[msg.space];
-
-         if (presence.id() === msg.observed) {
-             Kata.warn("Self loc update: " + presence.id());
-             presence._updateLoc(msg.loc, msg.visual);
-         }
-         else {
-             var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
-             var remote = this.mRemotePresences[key];
-             Kata.warn("Remote presence loc update: " + key);
-             if (remote)
-                 remote._updateLoc(msg.loc, msg.visual);
-         }
-         return remote;
+         if (presence) {
+             return presence._handleLocEvent(msg);
+         }else return presence;
      };
 
      Kata.Script.prototype._handleStorageEvent = function(data) {

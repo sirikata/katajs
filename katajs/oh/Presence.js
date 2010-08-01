@@ -139,7 +139,7 @@ Kata.defer(function() {
      };
      Kata.Presence.prototype.setLocation = function(location) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         Kata.copyLocation(msg,location);
+         Kata.LocationCopy(msg,location);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setBounds = function(val) {
@@ -230,9 +230,22 @@ Kata.defer(function() {
       * may be an update to our own location or to other objects.
       * Note that location encompasses position, velocity, orientation
       * possibly angular velocity, and bounding region.
+      * @returns {Kata.RemotePresence} the remote presence that the loc event was meant for
       */
      Kata.Presence.prototype._handleLocEvent = function(data) {
-         Kata.notImplemented();
+         if (presence.id() === msg.observed) {
+             Kata.warn("Self loc update: " + presence.id());
+             presence._updateLoc(msg.loc, msg.visual);
+             return this;
+         }
+         else {
+             var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
+             var remote = this.mRemotePresences[key];
+             Kata.warn("Remote presence loc update: " + key);
+             if (remote)
+                 remote._updateLoc(msg.loc, msg.visual);
+             return remote;
+         }
      };
 
      /** Handle an update to the visual representation of objects
