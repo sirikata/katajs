@@ -49,7 +49,7 @@ Kata.include("katajs/space/loop/Subscription.js");
          if (Kata.LoopbackSpace.spaces[spaceurl.host])
              Kata.warn("Overwriting static LoopbackSpace map entry for " + spaceurl);
          Kata.LoopbackSpace.spaces[spaceurl.host] = this;
-
+         this.mID=spaceurl;
          this.netdelay = 10; // Constant delay, in milliseconds
 
          this.mObjects = {};
@@ -69,6 +69,7 @@ Kata.include("katajs/space/loop/Subscription.js");
       * etc.
       */
      Kata.LoopbackSpace.prototype.connectObject = function(id, cb) {
+//FIXME drh this function should take initial position
          var spaceself = this;
          setTimeout(
              function() {
@@ -83,19 +84,11 @@ Kata.include("katajs/space/loop/Subscription.js");
              {
                  uuid : uuid
              };
-
-         var obj_loc = {
-             pos : [0, 0, 0],
-             vel : [0, 0, 0],
-             acc : [0, 0, 0]
-         };
-         var obj_bounds = {
-             min : [0, 0, 0],
-             max : [0, 0, 0]
-         };
+         var obj_loc =IdentityPosition(Kata.now(this.mID));
+         //FIXME: update with initial position
          var visual = "../content/teapot";
 
-         this.mLoc.add(uuid, obj_loc.pos, obj_loc.vel, obj_loc.acc, obj_loc.bounds, visual);
+         this.mLoc.add(uuid, obj_loc, visual);
          this.mProx.addObject(uuid);
          this.mSubscription.addObject(uuid);
 
@@ -126,41 +119,38 @@ Kata.include("katajs/space/loop/Subscription.js");
          var observed_loc = this.mLoc.lookup(observed);
          var observed_properties = {
              loc : {
-                 pos : observed_loc.pos,
-                 vel : observed_loc.vel,
-                 acc : observed_loc.acc
              },
-             bounds : observed_loc.bounds,
              visual : observed_loc.visual
          };
+         Kata.LocationCopyUnifyTime(observed_properties.loc, observed.loc);
          querier_cb.prox(querier, observed, entered, observed_properties);
      };
 
      // Handle location (and visual) updates
-     Kata.LoopbackSpace.prototype.locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
+     Kata.LoopbackSpace.prototype.locUpdateRequest = function(id, loc, visual) {
          var spaceself = this;
 
 		 // until we get subscription loc updates working, I need to do this right away so gfx gets
 		 // objects with initial positions set
-         spaceself._locUpdateRequest(id, pos, vel, acc, bounds, visual);
+         spaceself._locUpdateRequest(id, loc, visual);
 		 /*
          setTimeout(
              function() {
-                 spaceself._locUpdateRequest(id, pos, vel, acc, bounds, visual);
+                 spaceself._locUpdateRequest(id, loc, visual);
              },
              this.netdelay
          );
          */
      };
-     Kata.LoopbackSpace.prototype._locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
-         this.mLoc.update(id, pos, vel, acc, bounds, visual);
+     Kata.LoopbackSpace.prototype._locUpdateRequest = function(id, loc, visual) {
+         this.mLoc.update(id, loc, visual);
          var spaceself = this;
          this.mSubscription.notify(id,
                                    function(to) {
                                        var receiver_cb = spaceself.mObjects[to];
                                        receiver_cb.presenceLocUpdate(
                                            id, to,
-                                           pos, vel, acc, bounds, visual);
+                                           loc, visual);
                                    },
                                    true);
      };

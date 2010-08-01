@@ -96,8 +96,8 @@ Kata.defer(function() {
          this.mObjectHost.proxEvent(this.mSpaceURL, id, observed, entered, properties);
      };
 
-     Kata.LoopbackSpaceConnection.prototype.locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
-         this.mSpace.locUpdateRequest(id, pos, vel, acc, bounds, visual);
+     Kata.LoopbackSpaceConnection.prototype.locUpdateRequest = function(id, loc, visual) {
+         this.mSpace.locUpdateRequest(id, loc, visual);
      };
 
      Kata.LoopbackSpaceConnection.prototype.subscribe = function(id, observed) {
@@ -109,8 +109,8 @@ Kata.defer(function() {
      };
 
      // Invoked by LoopbackSpace when a loc update for a tracked object occurs.
-     Kata.LoopbackSpaceConnection.prototype.presenceLocUpdate = function(from, to, pos, vel, acc, bounds, visual) {
-         this.mObjectHost.presenceLocUpdate(this.mSpaceURL, from, to, pos, vel, acc, bounds, visual);
+     Kata.LoopbackSpaceConnection.prototype.presenceLocUpdate = function(from, to, loc, visual) {
+         this.mObjectHost.presenceLocUpdate(this.mSpaceURL, from, to, loc, visual);
      };
 
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);

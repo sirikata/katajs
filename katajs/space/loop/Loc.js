@@ -39,8 +39,7 @@
          this.mListeners = [];
      };
 
-     // Listeners should be callable as listener(uuid, pos, vel, acc,
-     // bounds), where some may be undefined
+     // Listeners should be callable as listener(uuid, loc), where some may be undefined
      Kata.Loopback.Loc.prototype.addListener = function(listener) {
          this.mListeners.append(listener);
      };
@@ -57,7 +56,6 @@
 
          this.mObjects[uuid] = {
              loc : loc,
-             bounds : bounds,
              visual : visual
          };
      };

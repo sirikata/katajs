@@ -85,14 +85,14 @@
 
              /** Location update.  Providing a subset of the information is permitted.
               */
-             Location : function(space, id, position, velocity, acceleration, bounds, vis) {
+             Location : function(space, id, loc, vis) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Location;
                  this.space = space;
                  this.id = id;
-                 if(position) this.position = position;
-                 if(velocity!=null) this.velocity = velocity;
-                 if(acceleration) this.acceleration = acceleration;
-                 if(bounds) this.bounds = bounds;
+                 if(position) {
+                     this.loc={};
+                     Kata.LocationUpdateUnifyTime(loc,this.loc);
+                 }
                  if(vis) this.vis = vis;
              },
 
@@ -124,12 +124,16 @@
                  this.space = space+observer;
                  this.id = remotePresence.id();
 				 this.spaceid = this.space;
-                 this.pos=remotePresence.rPosition;
-                 this.vel=remotePresence.vel;
-                 this.orient=[1,0,0,0];//fixme
-                 this.rotvel=0;
-                 this.rotaxis=[0,0,1];
-
+                 Kata.UpdateLocationUnifyTime(remotePresence.mLocation,this);
+             },
+             GFXMoveNode : function(space, observer, remotePresence, data) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="Move";
+                 this.space = space+observer;
+                 this.id = remotePresence.id();
+				 this.spaceid = this.space;
+                 if (data)
+                     Kata.UpdateLocationUnifyTime(data,this);
              },
              GFXDestroyNode : function(space, observer, remotePresence) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;

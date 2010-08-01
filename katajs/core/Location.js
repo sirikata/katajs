@@ -287,62 +287,62 @@ Kata.LocationCopy = function(destination, source) {
     }        
 };
 
-Kata.LocationCopyUnifyTime= function(destination, source) {
-    if (source.time!==undefined) {
-        destination.time=source.time;
-        if (source.scale!==undefined){
-            destination.scale=source.scale;
+Kata.LocationCopyUnifyTime= function(msg, destination) {
+    if (msg.time!==undefined) {
+        destination.time=msg.time;
+        if (msg.scale!==undefined){
+            destination.scale=msg.scale;
         }
-        if (source.pos!==undefined){
-                destination.pos=source.pos;
+        if (msg.pos!==undefined){
+                destination.pos=msg.pos;
         }
         if (destination.orient!==undefined) {            
-            destination.orient=source.orient;
+            destination.orient=msg.orient;
         }
-        if (source.angvel!==undefined && source.rotaxis!==undefined) {
-            destination.angvel=source.angvel;
-            destination.angvel=source.angvel;
+        if (msg.angvel!==undefined && msg.rotaxis!==undefined) {
+            destination.angvel=msg.angvel;
+            destination.angvel=msg.angvel;
         }
-        if (source.vel!==undefined){
-            destination.vel=source.vel;
+        if (msg.vel!==undefined){
+            destination.vel=msg.vel;
         }        
     }else{
-        var t=source.scaleTime;
-        if (t===undefined||source.posTime>t)
-            t=source.posTime;
-        if (t===undefined||source.orientTime>t)
-            t=source.orientTime;
-        if (source.scale!==undefined){
-            destination.scale=source.scale;
+        var t=msg.scaleTime;
+        if (t===undefined||msg.posTime>t)
+            t=msg.posTime;
+        if (t===undefined||msg.orientTime>t)
+            t=msg.orientTime;
+        if (msg.scale!==undefined){
+            destination.scale=msg.scale;
         }
-        if (source.pos!==undefined){
-            if (source.vel&&source.posTime) {
-                destination.pos=Kata._helperLocationExtrapolate3vec(source.pos,
-                                                                    source.vel,
+        if (msg.pos!==undefined){
+            if (msg.vel&&msg.posTime) {
+                destination.pos=Kata._helperLocationExtrapolate3vec(msg.pos,
+                                                                    msg.vel,
                                                                     deltaTime(t,
-                                                                              source.posTime));                
+                                                                              msg.posTime));                
             }else {
-                destination.pos=source.pos;
+                destination.pos=msg.pos;
             }
         }
-        if (source.orient!==undefined){
-            if (source.angvel&&source.rotaxis&&source.orientTime) {
+        if (msg.orient!==undefined){
+            if (msg.angvel&&msg.rotaxis&&msg.orientTime) {
                 destination.pos
-                    =Kata._helperLocationExtrapolateQuaternion(source.orient,
-                                                               source.angvel,
-                                                               source.rotaxis,
+                    =Kata._helperLocationExtrapolateQuaternion(msg.orient,
+                                                               msg.angvel,
+                                                               msg.rotaxis,
                                                                deltaTime(t,
-                                                                         source.orientTime));
+                                                                         msg.orientTime));
             }else {
-                destination.orient=source.orient;
+                destination.orient=msg.orient;
             }
         }
-        if (source.angvel!==undefined && source.rotaxis!==undefined) {
-            destination.angvel=source.angvel;
-            destination.angvel=source.angvel;
+        if (msg.angvel!==undefined && msg.rotaxis!==undefined) {
+            destination.angvel=msg.angvel;
+            destination.angvel=msg.angvel;
         }
-        if (source.vel!==undefined){
-            destination.vel=source.vel;
+        if (msg.vel!==undefined){
+            destination.vel=msg.vel;
         }
     }
 };

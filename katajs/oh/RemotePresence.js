@@ -104,22 +104,27 @@
      Kata.RemotePresence.prototype.velocity = function() {
          return this.mLocation.mVel.concat();//FIXME drh do interpolation?
      };
-     /** Get the current estimate of this object's acceleration. */
+     /** Get the current estimate of this object's orientation. */
      Kata.RemotePresence.prototype.orientation = function(time) {
          if (time===undefined) console.log("inaccurate read of orientation");
          return this.mLocation.mOrient.concat();//FIXME drh do interpolation?
      };
-     /** Get the current estimate of this object's acceleration. */
+     /** Get the current estimate of this object's angular speed. */
      Kata.RemotePresence.prototype.angularSpeed = function() {
-         return this.mLocation.mAngVel.concat();//FIXME drh do interpolation?
+         return this.mLocation.angvel.concat();//FIXME drh do interpolation?
      };
-     /** Get the current estimate of this object's acceleration. */
+     /** Get the current estimate of this object's rotational axis. */
      Kata.RemotePresence.prototype.rotationalAxis = function() {
-         return this.mLocation.mRotAxis.concat();//FIXME drh do interpolation?
+         return this.mLocation.rotaxis.concat();//FIXME drh do interpolation?
      };
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.location = function() {
-         return this.mLocation.concat();//FIXME drh do interpolation?
+         var retval={
+             };
+         for (var i in this.mLocation) {
+             retval[i]=this.mLocation[i];
+         }
+         return retval;
      };
      /** Get the current estimate of this object's bounds. */
      Kata.RemotePresence.prototype.bounds = function() {

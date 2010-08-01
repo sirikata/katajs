@@ -62,7 +62,7 @@ Kata.include("katajs/oh/ObjectHost.js");
          Kata.notImplemented("SpaceConnection.registerQuery");
      };
 
-     Kata.SpaceConnection.prototype.locUpdateRequest = function(id, pos, vel, acc, bounds, visual) {
+     Kata.SpaceConnection.prototype.locUpdateRequest = function(id, loc, visual) {
          Kata.notImplemented("SpaceConnection.locUpdateRequest");
      };
 
