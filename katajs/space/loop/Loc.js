@@ -79,7 +79,8 @@
              Kata.warn("Trying to update location for non-existant object: " + uuid);
              return;
          }
-         Kata.LocationReset(loc,this.mObjects[uuid].loc);
+         if(loc)
+             Kata.LocationReset(loc,this.mObjects[uuid].loc);
          if (visual) 
              this.mObjects[uuid].visual = visual;
          this._notify(uuid, loc, visual);

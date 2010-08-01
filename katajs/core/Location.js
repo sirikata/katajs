@@ -256,9 +256,9 @@ Kata.LocationExtrapolate=function(location,time) {
     return {
         scale:location.scale,
         scaleTime:time,
-        pos:Kata._helperLocationExtrapolate3vec(location.pos,location.vel,deltaTime(time,location.posTime)),
+        pos:Kata._helperLocationExtrapolate3vec(location.pos,location.vel,Kata.deltaTime(time,location.posTime)),
         posTime:time,
-        orient:Kata._helperLocationExtrapolateQuaternion(location.orient,location.rotvel,location.rotaxis,deltaTime(time,location.orientTime)),
+        orient:Kata._helperLocationExtrapolateQuaternion(location.orient,location.rotvel,location.rotaxis,Kata.deltaTime(time,location.orientTime)),
         orientTime:time,
         rotvel:location.rotvel,
         rotaxis:location.rotaxis,
@@ -319,7 +319,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
             if (msg.vel&&msg.posTime) {
                 destination.pos=Kata._helperLocationExtrapolate3vec(msg.pos,
                                                                     msg.vel,
-                                                                    deltaTime(t,
+                                                                    Kata.deltaTime(t,
                                                                               msg.posTime));                
             }else {
                 destination.pos=msg.pos;
@@ -331,7 +331,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
                     =Kata._helperLocationExtrapolateQuaternion(msg.orient,
                                                                msg.angvel,
                                                                msg.rotaxis,
-                                                               deltaTime(t,
+                                                               Kata.deltaTime(t,
                                                                          msg.orientTime));
             }else {
                 destination.orient=msg.orient;
@@ -410,10 +410,10 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
         curLocation.pos=prevLocation.pos;
         curLocation.posTime=prevLocation.posTime;
         if (msg.vel) {
-            curLocation.pos=Kata._helperLocationExtrapolate3vec(prevLocation.pos,prevLocation.vel,deltaTime(curDate,prevLocation.posTime));
+            curLocation.pos=Kata._helperLocationExtrapolate3vec(prevLocation.pos,prevLocation.vel,Kata.deltaTime(curDate,prevLocation.posTime));
             curLocation.posTime=curDate;
 
-            retval.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,deltaTime(msg.time,curLocation.posTime));
+            retval.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,Kata.deltaTime(msg.time,curLocation.posTime));
             retval.posTime=msg.time;
         }
     }

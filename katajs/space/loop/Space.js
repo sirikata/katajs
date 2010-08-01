@@ -31,6 +31,7 @@
  */
 
 Kata.include("katajs/oh/SpaceConnection.js");
+Kata.include("katajs/core/Time.js");
 Kata.include("katajs/core/Math.uuid.js");
 Kata.include("katajs/space/loop/Loc.js");
 Kata.include("katajs/space/loop/EveryoneProx.js");
@@ -84,7 +85,7 @@ Kata.include("katajs/space/loop/Subscription.js");
              {
                  uuid : uuid
              };
-         var obj_loc =IdentityPosition(Kata.now(this.mID));
+         var obj_loc =Kata.LocationIdentity(Kata.now(this.mID));
          //FIXME: update with initial position
          var visual = "../content/teapot";
 
@@ -93,7 +94,7 @@ Kata.include("katajs/space/loop/Subscription.js");
          this.mSubscription.addObject(uuid);
 
          this.mObjects[uuid] = cb;
-         cb.connected(id, uuid, obj_loc, obj_bounds, visual); // FIXME clone these so they aren't shared
+         cb.connected(id, uuid, obj_loc, visual); // FIXME clone these so they aren't shared
      };
 
      Kata.LoopbackSpace.prototype.registerProxQuery = function(id, sa) {

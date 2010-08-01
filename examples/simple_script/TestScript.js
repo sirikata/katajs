@@ -13,9 +13,9 @@ Kata.include("katajs/oh/Script.js");
         this.mNearby = {};
         this.connect(args.space, null, Kata.bind(this.connected, this));
         this.instance = Example.TestScript.instance;
-        this.movecount = 0
-        this.movemax = 1
-        Example.TestScript.instance += 1
+        this.movecount = 0;
+        this.movemax = 1;
+        Example.TestScript.instance += 1;
     };
     Kata.extend(Example.TestScript, SUPER);
     
@@ -29,11 +29,11 @@ Kata.include("katajs/oh/Script.js");
         if (!this.mPresence) 
             return;
         
-        var pos = this.mPresence.rPosition;
-        pos[0] = this.instance * 3;
-        pos[1] = this.movecount * 3
-        pos[2] = -10
-        console.log("move mPresence.setPosition:", pos[0], pos[1], pos[2])
+        var loc = this.mPresence.mLocation;
+        var pos = [this.instance * 3,
+                   this.movecount * 3,
+                   -10];
+        console.log("move mPresence.setPosition:", pos[0], pos[1], pos[2]);
         this.mPresence.setPosition(pos);
         
         // disabled until updates work

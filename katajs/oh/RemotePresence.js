@@ -141,7 +141,8 @@
       * updates.
       */
      Kata.RemotePresence.prototype._updateLoc = function (loc, visual) {
-         Kata.LocationUpdate(loc,this.mLocation,undefined,Kata.now(this.mSpace));
+         if (loc)
+             Kata.LocationUpdate(loc,this.mLocation,undefined,Kata.now(this.mSpace));
 
          if (visual) {
              this.mVisual = visual;

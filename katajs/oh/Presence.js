@@ -232,15 +232,15 @@ Kata.defer(function() {
       * possibly angular velocity, and bounding region.
       * @returns {Kata.RemotePresence} the remote presence that the loc event was meant for
       */
-     Kata.Presence.prototype._handleLocEvent = function(data) {
-         if (presence.id() === msg.observed) {
-             Kata.warn("Self loc update: " + presence.id());
-             presence._updateLoc(msg.loc, msg.visual);
+     Kata.Presence.prototype._handleLocEvent = function(msg, remotePresences) {
+         if (this.id() === msg.observed) {
+             Kata.warn("Self loc update: " + this.id());
+             this._updateLoc(msg.loc, msg.visual);
              return this;
          }
          else {
              var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
-             var remote = this.mRemotePresences[key];
+             var remote = remotePresences[key];
              Kata.warn("Remote presence loc update: " + key);
              if (remote)
                  remote._updateLoc(msg.loc, msg.visual);

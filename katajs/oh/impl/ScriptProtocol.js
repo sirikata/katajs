@@ -89,9 +89,9 @@
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Location;
                  this.space = space;
                  this.id = id;
-                 if(position) {
+                 if(loc) {
                      this.loc={};
-                     Kata.LocationUpdateUnifyTime(loc,this.loc);
+                     Kata.LocationCopyUnifyTime(loc,this.loc);
                  }
                  if(vis) this.vis = vis;
              },
@@ -124,7 +124,7 @@
                  this.space = space+observer;
                  this.id = remotePresence.id();
 				 this.spaceid = this.space;
-                 Kata.UpdateLocationUnifyTime(remotePresence.mLocation,this);
+                 Kata.LocationCopyUnifyTime(remotePresence.mLocation,this);
              },
              GFXMoveNode : function(space, observer, remotePresence, data) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
@@ -133,7 +133,7 @@
                  this.id = remotePresence.id();
 				 this.spaceid = this.space;
                  if (data)
-                     Kata.UpdateLocationUnifyTime(data,this);
+                     Kata.LocationCopyUnifyTime(data,this);
              },
              GFXDestroyNode : function(space, observer, remotePresence) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
