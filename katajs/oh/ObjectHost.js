@@ -229,7 +229,7 @@ Kata.include("katajs/core/URL.js");
       *  @param from
       *  @param to
       */
-     Kata.ObjectHost.prototype.presenceLocUpdate = function(space, from, to, pos, loc, visual) {
+     Kata.ObjectHost.prototype.presenceLocUpdate = function(space, from, to, loc, visual) {
          var obj = this.mObjects[to];
          obj.presenceLocUpdate(space, from, loc, visual);
      };

@@ -133,7 +133,7 @@
                  this.id = remotePresence.id();
 				 this.spaceid = this.space;
                  if (data)
-                     Kata.LocationCopyUnifyTime(data,this);
+                     Kata.LocationCopyUnifyTime(data.loc,this);
              },
              GFXDestroyNode : function(space, observer, remotePresence) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;

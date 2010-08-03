@@ -123,7 +123,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
          this.mObjectHost.locUpdateRequest(
              request.space,
              request.id,
-             request.loc,
+             request,
              request.visual
          );
      };

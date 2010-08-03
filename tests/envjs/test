@@ -39,7 +39,7 @@ for i in oo:
             r = responses.pop(0)
             if i != r:
                 fail=True
-                print "failure: expected", i, "|got|", r
+                print "failure: expected", r, "|got|", i
                 break
 if len(responses):
     print "failure: responses remaining"

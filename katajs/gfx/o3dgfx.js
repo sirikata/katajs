@@ -40,7 +40,6 @@ o3djs.require('o3djs.pack');
 o3djs.require('o3djs.arcball');
 o3djs.require('o3djs.dump');
 o3djs.require('o3djs.scene');
-Kata.include("katajs/core/Location.js");
 
 function SpaceDrawList(o3dgfx, element) {
     this.mElement = element;
