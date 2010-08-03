@@ -120,10 +120,12 @@ Kata.include("katajs/core/MessageDispatcher.js");
      };
 
      Kata.HostedObject.prototype._handleLocUpdateRequest = function (channel, request) {
+         var loc = {};
+         Kata.LocationCopyUnifyTime(request, loc)
          this.mObjectHost.locUpdateRequest(
              request.space,
              request.id,
-             request,
+             loc,
              request.visual
          );
      };
