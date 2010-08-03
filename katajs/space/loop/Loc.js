@@ -50,7 +50,7 @@
          }
      };
 
-     Kata.Loopback.Loc.prototype.add = function(uuid, pos, loc, visual) {
+     Kata.Loopback.Loc.prototype.add = function(uuid, loc, visual) {
          if (this.mObjects[uuid])
              Kata.warn("Loopback.Loc trying to add an existing object." + uuid);
 

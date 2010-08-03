@@ -117,13 +117,12 @@ Kata.include("katajs/space/loop/Subscription.js");
              return;
          }
 
-         var observed_loc = this.mLoc.lookup(observed);
+         var observed_loc = this.mLoc.lookup(observed).loc;
          var observed_properties = {
-             loc : {
-             },
+             loc : observed_loc,
              visual : observed_loc.visual
          };
-         Kata.LocationCopyUnifyTime(observed_properties.loc, observed.loc);
+         Kata.LocationCopyUnifyTime(observed_properties.loc, observed_loc);
          querier_cb.prox(querier, observed, entered, observed_properties);
      };
 

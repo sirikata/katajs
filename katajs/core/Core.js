@@ -288,6 +288,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
      *  @param {string} type If supplied, is used as a prefix to .
      */
     Kata.warn = function(note, type) {
+        return;
         if (typeof(type) == "undefined" || !type)
             type = "";
 

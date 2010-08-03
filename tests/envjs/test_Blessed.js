@@ -11,7 +11,7 @@ Kata.include("katajs/oh/Script.js");
         SUPER.constructor.call(this, channel, args);
         
         this.connect(args.space, null, Kata.bind(this.connected, this));
-        for (var idx = 0; idx < 1; idx++) {
+        for (var idx = 0; idx < 2; idx++) {
             this.createObject("tests/envjs/test_Script.js", "Example.TestScript", {
                 space: args.space
             });
