@@ -12,7 +12,7 @@ Kata.include("katajs/oh/Script.js");
         
         this.connect(args.space, null, Kata.bind(this.connected, this));
         
-        for (var idx = 0; idx < 2; idx++) {
+        for (var idx = 0; idx < 1; idx++) {
             this.createObject("tests/envjs/test_Script.js", "Example.TestScript", {
                 space: args.space
             });
