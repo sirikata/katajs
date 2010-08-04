@@ -35,6 +35,7 @@ Kata.include("katajs/oh/Script.js");
         console.log("move mPresence.setPosition:", pos[0], pos[1], pos[2])
         this.mPresence.setPosition(pos);
         this.mPresence.setOrientation([.5,.5,.5,.5]);
+        if(this.instance) this.mPresence.setVelocity([1,2,-3])
 
         if (this.movecount < this.movemax) {
             this.movecount++;
