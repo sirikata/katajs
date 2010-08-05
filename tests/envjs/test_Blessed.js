@@ -35,3 +35,5 @@ Kata.include("katajs/oh/Script.js");
         Kata.warn("Got connected callback.");
     };
 })();
+
+Kata.DEBUG_FAKE_UUID=true;

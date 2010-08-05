@@ -79,8 +79,15 @@ Kata.include("katajs/space/loop/Subscription.js");
              this.netdelay
          );
      };
+     Kata.LoopbackSpace._fakeUUIDs=100;
      Kata.LoopbackSpace.prototype._connectObject = function(id, cb) {
-         var uuid = Math.uuid();
+         var uuid;
+         if (Kata.DEBUG_FAKE_UUID) {
+             uuid = "fake-uuid-" + Kata.LoopbackSpace._fakeUUIDs++;
+         }
+         else {
+             uuid = Math.uuid();
+         }
          var obj =
              {
                  uuid : uuid

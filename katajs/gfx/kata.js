@@ -563,9 +563,7 @@ KJS.addProtoSafely(GLGE.Scene, "computeBoundingSpheres", function() {
 })
 
 //	return count of objects not fully loaded
-bugg=0
 KJS.addProtoSafely(GLGE.Scene, "incompleteObjects", function() {
-	if(bugg) return
 	if (this.getRoots().length < this.objectsToLoad) return this.objectsToLoad-this.getRoots().length
 	var count = 0
 	var roots = this.getRoots()
