@@ -410,7 +410,7 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     this.mRenderTargets={};//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
     this.mSpaceRoots={};//this will contain scene graph roots for each space
     this.mViewWidth=1.0/clientElements.length;
-
+    this._leftButtonState="up"
     this.send=function(obj) {
         return this.methodTable[obj.msg].call(this, obj);
     };
@@ -421,24 +421,35 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     delete this.initEvents;
     var el = this.mClientElement;
     el.addEventListener('mousedown',
-                        function (e){thus.startDragging(e);},
-                        true);
-    el.addEventListener('mousemove',
-                        function(e){thus.drag(e);},
+                        function (e){thus._mouseDown(e);},
                         true);
     el.addEventListener('mouseup',
-                        function(e){thus.stopDragging(e);},
+                        function(e){thus._mouseUp(e);},
+                        true);
+    el.addEventListener('mousemove',
+                        function(e){thus._mouseMove(e);},
                         true);
     el.addEventListener('wheel',
-                        function(e){thus.scrollMe(e);},
+                        function(e){thus._scrollWheel(e);},
                         true);
 
-    o3djs.event.addEventListener(this.mClientElement, 'keydown', function(e) {console.log("keydown:",e)});
+    o3djs.event.addEventListener(this.mClientElement, 'keydown', function(e){
+        var msg = {
+            msg: "keydown",
+            event: e
+        };
+        thus._inputCb(msg);
+    });
     this.mClientElement.client.setRenderCallback(function() {
         thus.renderCallback();
     });
 
 };
+
+O3DGraphics.prototype.setInputCallback = function(cb) {
+        this._inputCb = cb;
+    }
+
 
 O3DGraphics.prototype.renderCallback = function() {
     this.mCurTime=new Date();
@@ -658,31 +669,44 @@ O3DGraphics.prototype.methodTable["DestroyIFrame"]=function(msg) {
     //destroyX(msg,"IFrame");
 };
 
-
-O3DGraphics.prototype.startDragging = function(e) {
-  this.lastRot = this.thisRot;
-
-  this.aball.click([e.x, e.y]);
-
-  this.dragging = true;
+O3DGraphics.prototype._mouseDown = function(e){
+    if (e.button==0) this._leftButtonState="down";
+    var msg = {
+        msg: "mousedown",
+        event: e
+    };
+    this._inputCb(msg);
 };
 
-O3DGraphics.prototype.drag = function(e) {
-  if (this.dragging) {
-    var rotationQuat = this.aball.drag([e.x, e.y]);
-    var rot_mat = o3djs.quaternions.quaternionToRotation(rotationQuat);
-    this.thisRot = o3djs.math.matrix4.mul(this.lastRot, rot_mat);
-
-    var root = this.mRenderTargets[0].mSpaceRoot.mRootNode;
-    var m = root.localMatrix;
-    o3djs.math.matrix4.setUpper3x3(m, this.thisRot);
-    root.localMatrix = m;
-    this.mRenderTargets[0].mCamera.updateCamera(this);
-  }
+O3DGraphics.prototype._mouseUp = function(e){
+    if (e.button==0) this._leftButtonState="up";
+    var msg = {
+        msg: "mouseup",
+        event: e
+    };
+    this._inputCb(msg);
 };
 
-O3DGraphics.prototype.stopDragging = function(e) {
-  this.dragging = false;
+/*
+ * for now, we only send mouse moves if left button depressed
+ * otherwise we flood with messages.  Note right button is controlled by OS so we ignore
+ */
+O3DGraphics.prototype._mouseMove = function(e){
+    if (this._leftButtonState == "down") {
+        var msg = {
+            msg: "mousemove",
+            event: e
+        };
+        this._inputCb(msg);
+    }
+};
+
+O3DGraphics.prototype._scrollWheel = function(e){
+    var msg = {
+        msg: "wheel",
+        event: e
+    };
+    this._inputCb(msg);
 };
 
 VWObject.prototype.updateCamera = function(graphics) {
@@ -697,19 +721,6 @@ VWObject.prototype.updateCamera = function(graphics) {
                                             [0, 0, 0],  // target
                                             [0, 1, 0]); // up
 */
-};
-
-O3DGraphics.prototype.scrollMe = function(e) {
-  if (e.deltaY) {
-    var t = 1;
-    if (e.deltaY > 0)
-      t = 11 / 12;
-    else
-      t = 13 / 12;
-    this.camera.eye = o3djs.math.lerpVector(this.camera.target, this.camera.eye, t);
-
-    this.updateCamera();
-  }
 };
 
 // Register as a GraphicsSimulation if possible.

@@ -3,11 +3,11 @@ UNITTEST:   Camera
 UNITTEST:   AttachCamera
 UNITTEST:   Create
 UNITTEST:   Mesh   ../content/teapot
-UNITTEST: GraphicsSimulation._handleInputMessage:   65   false   undefined   undefined   undefined
+UNITTEST: GraphicsSimulation._handleInputMessage:   keydown   undefined   false   undefined   undefined   undefined
 UNITTEST:   Create
 UNITTEST:   Mesh   ../content/teapot
 UNITTEST:   Move   0,3,-10   undefined   undefined
-UNITTEST: GraphicsSimulation._handleInputMessage:   undefined   undefined   0   200   100
+UNITTEST: GraphicsSimulation._handleInputMessage:   mousedown   undefined   undefined   0   200   100
 UNITTEST:   Move   undefined   0.5,0.5,0.5,0.5   undefined
 UNITTEST:   Move   3,3,-10   undefined   undefined
 UNITTEST:   Move   undefined   0.5,0.5,0.5,0.5   undefined

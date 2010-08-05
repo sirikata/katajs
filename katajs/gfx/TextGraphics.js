@@ -165,6 +165,7 @@ TextGraphics=function(callbackFunction,parentElement) {
         if (obj.msg=="Mesh") console.log("UNITTEST:",obj.msg, obj.mesh);
         console.log("TextGraphics.send:", obj.msg, obj, "--------------------")
         console.show && console.show(obj, "TextGraphics.send:")
+        var msg;
         if (this._testInputCounter++ == 4) {
             msg = {
                 msg: "keydown",

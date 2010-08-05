@@ -1,4 +1,7 @@
 #!/usr/bin/python
+
+#to create results.txt:
+#rhino -debug < test.txt | grep -w UNITTEST > results.txt
 import os, subprocess, sys
 verbose=False
 if len(sys.argv) > 1 and sys.argv[1]=="-v":
@@ -6,31 +9,45 @@ if len(sys.argv) > 1 and sys.argv[1]=="-v":
 f = open("test.txt")
 p = subprocess.Popen(["rhino", "-debug"], stdin=f, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 p.wait()
-f.close
 oo = p.stdout.readlines()
+responses = [
+"TextGraphics.send:  pos: 0,0,0",
+"TextGraphics.send:  orient: 0,0,0,1",
+"TextGraphics.send:  vel: 0,0,0",
+"TextGraphics.send:  pos: 0,0,-10",
+"TextGraphics.send:  orient: 0.5,0.5,0.5,0.5",
+"TextGraphics.send:  vel: 0,0,0",
+"TextGraphics.send:  mesh: ../content/teapot",
+"TextGraphics.send:  pos: 3,0,-10",
+"TextGraphics.send:  orient: 0.5,0.5,0.5,0.5",
+"TextGraphics.send:  vel: 1,2,-3",
+"TextGraphics.send:  mesh: ../content/teapot",
+"TextGraphics.send:  pos: 0,3,-10",
+"TextGraphics.send:  orient: 0.5,0.5,0.5,0.5",
+"TextGraphics.send:  pos: 3,3,-10",
+"TextGraphics.send:  orient: 0.5,0.5,0.5,0.5",
+"TextGraphics.send:  vel: 1,2,-3"]
 
-f = open("results.txt")
-results = f.readlines()
 fail=False
 for i in oo:
     i = i.rstrip()
     if verbose:
-        print "stdout:", i
-    if "UNITTEST" in i:
-        if len(results)==0:
-            fail=True
-            print "failure: no more results to check against at", i
-            break
-        r = results.pop(0).rstrip()
-        if i != r:
-            fail=True
-            print "failure: expected", r, "|got|", i
-            break
-        else:
-            if verbose:
-                print "MATCH:", r
-
-if len(results):
-    print "failure:", len(results), "results remaining"
+        print i
+    if "TextGraphics.send" in i:
+        w = i.split()
+        if len(w)>2 and (w[1] in ["pos:", "orient:", "mesh:", "vel:"]):
+##            print '"' + i + '",'
+            if len(responses)==0:
+                fail=True
+                print "failure: no more responses to check against"
+                break
+            r = responses.pop(0)
+            if i != r:
+                fail=True
+                print "failure: expected", r, "|got|", i
+                break
+if len(responses):
+    print "failure: responses remaining"
     fail=True
 print "FAILURE" if fail else "SUCCESS"
+
