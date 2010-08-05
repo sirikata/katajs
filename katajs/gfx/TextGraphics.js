@@ -157,12 +157,48 @@ TextGraphics=function(callbackFunction,parentElement) {
     this.methodTable["DestroyIFrame"]=function(msg) {
         destroyX(msg,"IFrame");
     }
-    
+
+    this._testInputCounter=0;               /// kluge to force some fake input for testing
     this.send=function(obj) {
+        if (obj.msg=="Create" || obj.msg=="Camera" || obj.msg=="AttachCamera") console.log("UNITTEST:",obj.msg);            
+        if (obj.msg=="Move") console.log("UNITTEST:",obj.msg, obj.pos, obj.orient, obj.vel);            
+        if (obj.msg=="Mesh") console.log("UNITTEST:",obj.msg, obj.mesh);
         console.log("TextGraphics.send:", obj.msg, obj, "--------------------")
         console.show && console.show(obj, "TextGraphics.send:")
+        if (this._testInputCounter++ == 4) {
+            msg = {
+                msg: "keydown",
+                event: {
+                    KeyCode: 65,
+                    shiftKey: false
+                }
+            };
+            if (this._inputCb) 
+                this._inputCb(msg)
+        }
+        if (this._testInputCounter == 8) {
+            msg = {
+                msg: "mousedown",
+                event: {
+                    button: 0,
+                    clientX: 200,
+                    clientY: 100
+                }
+            };
+            if (this._inputCb) 
+                this._inputCb(msg)
+        }
         return this.methodTable[obj.msg](obj);
     }
+
+    /*
+     * set callback for receiving input (kbd & mouseclicks, etc)
+     * designed using message passing for eventual webworkerhood
+     */
+    this.setInputCallback=function(cb) {
+        this._inputCb = cb;
+    }
+
     this.destroy=function(){}
 }
 

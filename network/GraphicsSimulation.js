@@ -61,7 +61,9 @@ Kata.defer(function() {
         }
 
         this.mGFX = new drv(function(obj){},domElement);
+        this.mGFX.setInputCallback(this._handleInputMessage);
     };
+    
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 
     /** Handle receiving a cross-thread message
@@ -86,4 +88,12 @@ Kata.defer(function() {
          }
          this._drivers[type] = klass;
      };
+
+    /**
+     * handle input data from graphics driver
+     */
+     Kata.GraphicsSimulation.prototype._handleInputMessage = function(msg){
+         console.log("UNITTEST: GraphicsSimulation._handleInputMessage:", 
+         msg.event.KeyCode, msg.event.shiftKey, msg.event.button, msg.event.clientX, msg.event.clientY);
+     }
 });

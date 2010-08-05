@@ -105,7 +105,7 @@ Kata.include("katajs/oh/RemotePresence.js");
       * Marks the item as not being on the graphics thread
       */
      Kata.GraphicsScript.prototype.unrenderRemotePresence = function(presence,remotePresence) {
-         var msg = new Kata.Script.GFXDestroyNode(presence.space(),presence.id(),remotePresence);
+         var msg = new Kata.Script.GFXDestroyNode(presence.space(),presence.id(),remotePresence);//FIXME I think you want ScriptProtocol
          this._sendHostedObjectMessage(msg);
          delete remotePresence.inGFXSceneGraph;
      };

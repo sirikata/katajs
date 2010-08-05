@@ -433,6 +433,7 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
                         function(e){thus.scrollMe(e);},
                         true);
 
+    o3djs.event.addEventListener(this.mClientElement, 'keydown', function(e) {console.log("keydown:",e)});
     this.mClientElement.client.setRenderCallback(function() {
         thus.renderCallback();
     });
