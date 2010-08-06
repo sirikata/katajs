@@ -95,6 +95,13 @@
                  if(vis) this.vis = vis;
              },
 
+             Visual : function(space, id, vis) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Visual;
+                 this.space = space;
+                 this.id = id;
+                 this.vis = vis;
+             },
+
              Query : function(space, id, sa) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Query;
                  this.space = space;

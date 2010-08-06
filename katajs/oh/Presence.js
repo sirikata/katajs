@@ -146,8 +146,7 @@ Kata.defer(function() {
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Visual(this.mSpace, this.mID);
-         msg.vis = val;
+         var msg = new Kata.ScriptProtocol.FromScript.Visual(this.mSpace, this.mID, val);
          this._sendHostedObjectMessage(msg);
      };
 

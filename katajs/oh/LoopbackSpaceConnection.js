@@ -68,13 +68,14 @@ Kata.defer(function() {
      };
      Kata.extend(Kata.LoopbackSpaceConnection, Kata.SpaceConnection.prototype);
 
-     Kata.LoopbackSpaceConnection.prototype.connectObject = function(id, auth) {
+     Kata.LoopbackSpaceConnection.prototype.connectObject = function(id, auth, vis) {
          this.mSpace.connectObject(
              id,
              {
                  connected : Kata.bind(this.connectResponse, this),
                  prox : Kata.bind(this.proxEvent, this),
-                 presenceLocUpdate : Kata.bind(this.presenceLocUpdate, this)
+                 presenceLocUpdate : Kata.bind(this.presenceLocUpdate, this),
+                 visual: vis
              }
          );
      };

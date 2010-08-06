@@ -90,7 +90,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
      };
 
      Kata.HostedObject.prototype._handleConnect = function (channel, request) {
-         this.mObjectHost.connect(this, request.space, request.auth);
+         this.mObjectHost.connect(this, request, request.auth);
      };
 
      Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, loc, visual) {

@@ -168,8 +168,8 @@ Kata.include("katajs/core/URL.js");
       * @param {string} space URL of space to connect to
       * @param {} auth authentication information for the space
       */
-     Kata.ObjectHost.prototype.connect = function(ho, space, auth) {
-         var spaceURL = new Kata.URL(space);
+     Kata.ObjectHost.prototype.connect = function(ho, req, auth) {
+         var spaceURL = new Kata.URL(req.space);
 
          // Look up or create a connection
          var space_conn = this.mSpaceConnections[spaceURL.toString()];
@@ -182,7 +182,7 @@ Kata.include("katajs/core/URL.js");
          }
 
          // And try to connect
-         space_conn.connectObject(ho.getID(), auth);
+         space_conn.connectObject(ho.getID(), auth, req.visual);
      };
 
      /** Indicate a connection response to the ObjectHost.  Should

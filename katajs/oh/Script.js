@@ -80,9 +80,10 @@ Kata.include("katajs/oh/RemotePresence.js");
       *  @param {} auth authentication information to pass to the space
       *  @param {} cb callback to invoke upon completion
       */
-     Kata.Script.prototype.connect = function(space, auth, cb) {
-         var msg = new Kata.ScriptProtocol.FromScript.Connect(space, auth);
-         this.mConnectRequests[space] = cb;
+     Kata.Script.prototype.connect = function(args, auth, cb) {
+         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth);
+         msg.visual=args.visual
+         this.mConnectRequests[args.space] = cb;
          this._sendHostedObjectMessage(msg);
      };
 

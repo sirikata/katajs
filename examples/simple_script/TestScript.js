@@ -11,7 +11,7 @@ Kata.include("katajs/oh/Script.js");
         SUPER.constructor.call(this, channel, args);
         
         this.mNearby = {};
-        this.connect(args.space, null, Kata.bind(this.connected, this));
+        this.connect(args, null, Kata.bind(this.connected, this));
         this.instance = Example.TestScript.instance;
         this.movecount = 0;
         this.movemax = 1;

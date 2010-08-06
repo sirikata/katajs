@@ -94,14 +94,12 @@ Kata.include("katajs/space/loop/Subscription.js");
              };
          var obj_loc =Kata.LocationIdentity(Kata.now(this.mID));
          //FIXME: update with initial position
-         var visual = "../content/teapot";
-
-         this.mLoc.add(uuid, obj_loc, visual);
+         this.mLoc.add(uuid, obj_loc, cb.visual);
          this.mProx.addObject(uuid);
          this.mSubscription.addObject(uuid);
 
          this.mObjects[uuid] = cb;
-         cb.connected(id, uuid, obj_loc, visual); // FIXME clone these so they aren't shared
+         cb.connected(id, uuid, obj_loc, cb.visual); // FIXME clone these so they aren't shared
      };
 
      Kata.LoopbackSpace.prototype.registerProxQuery = function(id, sa) {
