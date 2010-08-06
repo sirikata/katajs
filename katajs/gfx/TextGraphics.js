@@ -161,7 +161,7 @@ TextGraphics=function(callbackFunction,parentElement) {
     this._testInputCounter=0;               /// kluge to force some fake input for testing
     this.send=function(obj) {
         if (obj.msg=="Create" || obj.msg=="Camera" || obj.msg=="AttachCamera") console.log("UNITTEST:",obj.msg, obj.id);            
-        if (obj.msg=="Move") console.log("UNITTEST:", obj.msg, obj.id, obj.pos, obj.orient, obj.vel);            
+        if (obj.msg=="Move") console.log("UNITTEST:", obj.msg, obj.id, obj.pos, obj.orient, obj.vel, obj.scale);            
         if (obj.msg=="Mesh") console.log("UNITTEST:", obj.msg, obj.id, obj.mesh);
         console.log("TextGraphics.send:", obj.msg, obj.id, obj, "--------------------")
         console.show && console.show(obj, "TextGraphics.send:")

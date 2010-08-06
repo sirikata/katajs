@@ -144,6 +144,11 @@ Kata.defer(function() {
      };
      Kata.Presence.prototype.setBounds = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
+         msg.bounds = val.concat();
+         this._sendHostedObjectMessage(msg);
+     };
+     Kata.Presence.prototype.setScale = function(val) {
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
          msg.scale = val.concat();
          this._sendHostedObjectMessage(msg);
      };

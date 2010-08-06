@@ -1,15 +1,15 @@
 UNITTEST:   Create   fake-uuid-100
 UNITTEST:   Camera   fake-uuid-100
 UNITTEST:   AttachCamera   fake-uuid-100
-UNITTEST:   Move   fake-uuid-100   1.5,2,5   undefined   undefined
+UNITTEST:   Move   fake-uuid-100   1.5,2,5   undefined   undefined   undefined
 UNITTEST:   Create   fake-uuid-101
 UNITTEST: GraphicsSimulation._handleInputMessage:   keydown   undefined   false   undefined   undefined   undefined
 UNITTEST:   Mesh   fake-uuid-101   ../content/teapot
 UNITTEST:   Create   fake-uuid-102
 UNITTEST:   Mesh   fake-uuid-102   ../content/teapot
 UNITTEST: GraphicsSimulation._handleInputMessage:   mousedown   undefined   undefined   0   200   100
-UNITTEST:   Move   fake-uuid-101   0,3,-10   undefined   undefined
-UNITTEST:   Move   fake-uuid-101   undefined   0.5,0.5,0.5,0.5   undefined
-UNITTEST:   Move   fake-uuid-102   3,3,-10   undefined   undefined
-UNITTEST:   Move   fake-uuid-102   undefined   0.5,0.5,0.5,0.5   undefined
-UNITTEST:   Move   fake-uuid-102   undefined   undefined   1,2,-3
+UNITTEST:   Move   fake-uuid-101   0,3,-10   undefined   undefined   undefined
+UNITTEST:   Move   fake-uuid-102   3,3,-10   undefined   undefined   undefined
+UNITTEST:   Move   fake-uuid-102   undefined   0.5,0.5,0.5,0.5   undefined   undefined
+UNITTEST:   Move   fake-uuid-102   undefined   undefined   1,2,-3   undefined
+UNITTEST:   Move   fake-uuid-102   undefined   undefined   undefined   0.5,0.5,0.5
