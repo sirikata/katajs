@@ -10,11 +10,12 @@ Kata.include("katajs/oh/Script.js");
     Example.BlessedScript = function(channel, args){
         SUPER.constructor.call(this, channel, args);
         
-        this.connect(args.space, null, Kata.bind(this.connected, this));
+        this.connect(args, null, Kata.bind(this.connected, this));
 
         for (var idx = 0; idx < 2; idx++) {
             this.createObject("tests/envjs/test_Script.js", "Example.TestScript", {
-                space: args.space
+                space: args.space,
+                visual: "../content/teapot"
             });
         }
         Example.blessedInstance=this;
@@ -37,7 +38,7 @@ Kata.include("katajs/oh/Script.js");
         presence.setPosition([1.5,2,5])
         Kata.warn("Got connected callback.");
     };
-    Example.hackInputMsg = function(msg) {
+    Example.BlessedScript.prototype._handleGUIMessage = function (channel, msg) {
         if (msg.msg == "mousemove") {
             var q = [0,1,0,0]
             console.log("UNITTEST: hackInputMsg:", msg.event.offsetX, msg.event.offsetY,q)   
