@@ -117,24 +117,24 @@ Kata.defer(function() {
      Kata.Presence.prototype.setPosition = function(val){
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
          msg.posTime=Kata.now(this.mSpace);
-         msg.pos = val;
+         msg.pos = val.concat();
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVelocity = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.vel = val.slice(0);
+         msg.vel = val.concat();
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setOrientation = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
          msg.orientTime=Kata.now(this.mSpace);
-         msg.orient = val.slice(0);
+         msg.orient = val.concat();
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setAngularRotation = function(axis,angle) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
          msg.mAngVel=angle;
-         msg.mRotAxis = axis.slice(0);
+         msg.mRotAxis = axis.concat();
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setLocation = function(location) {
@@ -144,7 +144,7 @@ Kata.defer(function() {
      };
      Kata.Presence.prototype.setBounds = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.scale = val.slice(0);
+         msg.scale = val.concat();
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {
