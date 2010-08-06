@@ -54,11 +54,19 @@ Kata.include("katajs/oh/Script.js");
                 rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos, 
                 rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin]
     };
+    Example.cameraPointX=0;
+    Example.cameraPointY=0;
 
     Example.hackInputMsg = function(msg) {
+        if (msg.msg == "mousedown") {
+            Example.dragStartX = parseInt(msg.event.offsetX)-Example.cameraPointX;
+            Example.dragStartY = parseInt(msg.event.offsetY)-Example.cameraPointY;
+        }
         if (msg.msg == "mousemove") {
-            var q = Example.euler2Quat(450-parseFloat(msg.event.offsetX),250-parseFloat(msg.event.offsetY),0)
-            console.log("hackInputMsg:", msg.event.offsetX, msg.event.offsetY,q)   
+            Example.cameraPointX = parseInt(msg.event.offsetX) - Example.dragStartX;
+            Example.cameraPointY = parseInt(msg.event.offsetY) - Example.dragStartY;
+            var q = Example.euler2Quat(Example.cameraPointX*-.25, Example.cameraPointY*-.25, 0)
+            console.log("hackInputMsg:", msg.event.offsetX, Example.cameraPointX,Example.dragStartX,q)   
             Example.blessedInstance.mPresence.setOrientation(q)
         }
         if (msg.msg == "keydown") {
