@@ -412,6 +412,7 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     this.mViewWidth=1.0/clientElements.length;
     this._leftButtonState="up"
     this.send=function(obj) {
+//        console.log("*** debug o3d send",obj)
         return this.methodTable[obj.msg].call(this, obj);
     };
     this.destroy=function(){}

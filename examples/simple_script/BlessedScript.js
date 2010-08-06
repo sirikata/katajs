@@ -33,6 +33,7 @@ Kata.include("katajs/oh/Script.js");
         presence.setQueryHandler(Kata.bind(this.proxEvent, this));
         presence.setQuery(0);
         this.mPresence=presence;
+        presence.setPosition([1.5,2,5])
         Kata.warn("Got connected callback.");
     };
 })();
