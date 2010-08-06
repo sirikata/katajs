@@ -30,12 +30,13 @@ Kata.include("katajs/oh/Script.js");
             Kata.warn("Camera Wiped object.");      // FIXME: unsubscribe!
         }
     };
+    Example.cameraPos=[1.5, 2, 5];
     Example.BlessedScript.prototype.connected = function(presence){
         this.enableGraphicsViewport(presence, 0);
         presence.setQueryHandler(Kata.bind(this.proxEvent, this));
         presence.setQuery(0);
         this.mPresence=presence;
-        presence.setPosition([1.5,2,5])
+        presence.setPosition(Example.cameraPos)
         Kata.warn("Got connected callback.");
     };
 
@@ -56,9 +57,37 @@ Kata.include("katajs/oh/Script.js");
 
     Example.hackInputMsg = function(msg) {
         if (msg.msg == "mousemove") {
-            var q = Example.euler2Quat(parseFloat(msg.event.offsetX),0,0)
+            var q = Example.euler2Quat(450-parseFloat(msg.event.offsetX),250-parseFloat(msg.event.offsetY),0)
             console.log("hackInputMsg:", msg.event.offsetX, msg.event.offsetY,q)   
             Example.blessedInstance.mPresence.setOrientation(q)
+        }
+        if (msg.msg == "keydown") {
+            switch(msg.event.keyCode) {
+                case 65:
+                    Example.cameraPos[0]-=1.0;
+                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    break;
+                case 68:
+                    Example.cameraPos[0]+=1.0;
+                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    break;
+                case 87:
+                    Example.cameraPos[2]-=1.0;
+                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    break;
+                case 83:
+                    Example.cameraPos[2]+=1.0;
+                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    break;
+                case 82:
+                    Example.cameraPos[1]+=1.0;
+                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    break;
+                case 76:
+                    Example.cameraPos[1]-=1.0;
+                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    break;
+            }            
         }
     };
 })();
