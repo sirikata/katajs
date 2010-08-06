@@ -17,6 +17,7 @@ Kata.include("katajs/oh/Script.js");
                 space: args.space
             });
         }
+        Example.blessedInstance=this;
     };
     Kata.extend(Example.BlessedScript, SUPER);
     Example.BlessedScript.prototype.proxEvent = function(remote, added){
@@ -35,5 +36,28 @@ Kata.include("katajs/oh/Script.js");
         this.mPresence=presence;
         presence.setPosition([1.5,2,5])
         Kata.warn("Got connected callback.");
+    };
+
+    Example.euler2Quat = function(yaw, pitch, roll){
+        // takes degrees; roll = rotation about z, pitch = x, yaw = y
+        var k = 0.00872664625 // deg2rad/2
+        var yawcos = Math.cos(roll * k)
+        var yawsin = Math.sin(roll * k)
+        var pitchcos = Math.cos(pitch * k)
+        var pitchsin = Math.sin(pitch * k)
+        var rollcos = Math.cos(yaw * k)
+        var rollsin = Math.sin(yaw * k)
+        return [rollcos * pitchsin * yawcos + rollsin * pitchcos * yawsin, 
+                rollsin * pitchcos * yawcos - rollcos * pitchsin * yawsin, 
+                rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos, 
+                rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin]
+    };
+
+    Example.hackInputMsg = function(msg) {
+        if (msg.msg == "mousemove") {
+            var q = Example.euler2Quat(parseFloat(msg.event.offsetX),0,0)
+            console.log("hackInputMsg:", msg.event.offsetX, msg.event.offsetY,q)   
+            Example.blessedInstance.mPresence.setOrientation(q)
+        }
     };
 })();

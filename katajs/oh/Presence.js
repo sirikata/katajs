@@ -132,6 +132,9 @@ Kata.defer(function() {
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setLocation = function(location) {
+         if (location.time===undefined) {
+             location.time=Kata.now(this.mSpace)
+         }
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, location);
          this._sendHostedObjectMessage(msg);
      };

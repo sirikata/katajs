@@ -93,8 +93,10 @@ Kata.defer(function() {
      * handle input data from graphics driver
      */
      Kata.GraphicsSimulation.prototype._handleInputMessage = function(msg){
-         console.log("GraphicsSimulation._handleInputMessage:",msg); 
+//         console.log("GraphicsSimulation._handleInputMessage:",msg); 
          console.log("UNITTEST: GraphicsSimulation._handleInputMessage:", 
              msg.msg, msg.event.keyCode, msg.event.shiftKey, msg.event.button, msg.event.clientX, msg.event.clientY);
+         // FIXME: ugly hack until we get messaging/webworkers going
+         Example.hackInputMsg(msg);
      }
 });
