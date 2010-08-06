@@ -17,6 +17,7 @@ Kata.include("katajs/oh/Script.js");
                 space: args.space
             });
         }
+        Example.blessedInstance=this;
     };
     Kata.extend(Example.BlessedScript, SUPER);
     Example.BlessedScript.prototype.proxEvent = function(remote, added){
@@ -35,6 +36,13 @@ Kata.include("katajs/oh/Script.js");
         this.mPresence=presence;
         presence.setPosition([1.5,2,5])
         Kata.warn("Got connected callback.");
+    };
+    Example.hackInputMsg = function(msg) {
+        if (msg.msg == "mousemove") {
+            var q = [0,1,0,0]
+            console.log("UNITTEST: hackInputMsg:", msg.event.offsetX, msg.event.offsetY,q)   
+            Example.blessedInstance.mPresence.setOrientation(q)
+        }
     };
 })();
 

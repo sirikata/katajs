@@ -7,7 +7,9 @@ UNITTEST: GraphicsSimulation._handleInputMessage:   keydown   undefined   false 
 UNITTEST:   Mesh   fake-uuid-101   ../content/teapot
 UNITTEST:   Create   fake-uuid-102
 UNITTEST:   Mesh   fake-uuid-102   ../content/teapot
-UNITTEST: GraphicsSimulation._handleInputMessage:   mousedown   undefined   undefined   0   200   100
+UNITTEST: GraphicsSimulation._handleInputMessage:   mousemove   undefined   undefined   0   undefined   undefined
+UNITTEST: hackInputMsg:   180   100   0,1,0,0
+UNITTEST:   Move   fake-uuid-100   undefined   0,1,0,0   undefined   undefined
 UNITTEST:   Move   fake-uuid-101   0,3,-10   undefined   undefined   undefined
 UNITTEST:   Move   fake-uuid-102   3,3,-10   undefined   undefined   undefined
 UNITTEST:   Move   fake-uuid-102   undefined   0.5,0.5,0.5,0.5   undefined   undefined

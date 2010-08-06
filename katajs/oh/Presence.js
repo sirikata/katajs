@@ -124,7 +124,6 @@ Kata.defer(function() {
      };
      Kata.Presence.prototype.setOrientation = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {orient:val.concat(), time:Kata.now(this.mSpace)});
-         console.log("msg:",msg)
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setAngularRotation = function(axis, angvel) {

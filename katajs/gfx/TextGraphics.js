@@ -179,11 +179,11 @@ TextGraphics=function(callbackFunction,parentElement) {
         }
         if (this._testInputCounter == 8) {
             msg = {
-                msg: "mousedown",
+                msg: "mousemove",
                 event: {
                     button: 0,
-                    clientX: 200,
-                    clientY: 100
+                    offsetX: 180,
+                    offsetY: 100
                 }
             };
             if (this._inputCb) 
