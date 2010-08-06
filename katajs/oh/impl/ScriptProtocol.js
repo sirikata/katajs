@@ -90,8 +90,7 @@
                  this.space = space;
                  this.id = id;
                  if(loc) {
-                     this.loc={};
-                     Kata.LocationCopyUnifyTime(loc,this.loc);
+                     Kata.LocationCopyUnifyTime(loc,this);
                  }
                  if(vis) this.vis = vis;
              },

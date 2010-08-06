@@ -37,7 +37,9 @@ Kata.include("katajs/oh/Script.js");
         if(this.instance) this.mPresence.setOrientation([.5,.5,.5,.5]);
         if(this.instance) this.mPresence.setVelocity([1,2,-3])
         if(this.instance) this.mPresence.setScale([.5,.5,.5])
-
+        if (this.instance && this.movecount) {
+            this.mPresence.setLocation({orient:[1,0,0,0],pos:[4,4,-12],scale:[4,2,1]})
+        }
         if (this.movecount < this.movemax) {
             this.movecount++;
             setTimeout(Kata.bind(this.move, this), 2000);

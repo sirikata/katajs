@@ -296,12 +296,12 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         if (msg.pos!==undefined){
                 destination.pos=msg.pos;
         }
-        if (destination.orient!==undefined) {            
+        if (msg.orient!==undefined) {            
             destination.orient=msg.orient;
         }
         if (msg.angvel!==undefined && msg.rotaxis!==undefined) {
             destination.angvel=msg.angvel;
-            destination.angvel=msg.angvel;
+            destination.rotaxis=msg.rotaxis;
         }
         if (msg.vel!==undefined){
             destination.vel=msg.vel;

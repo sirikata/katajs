@@ -115,41 +115,32 @@ Kata.defer(function() {
      };
 
      Kata.Presence.prototype.setPosition = function(val){
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.posTime=Kata.now(this.mSpace);
-         msg.pos = val.concat();
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {pos:val.concat(), time:Kata.now(this.mSpace)});
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVelocity = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.vel = val.concat();
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {vel:val.concat(), time:Kata.now(this.mSpace)});
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setOrientation = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.orientTime=Kata.now(this.mSpace);
-         msg.orient = val.concat();
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {orient:val.concat(), time:Kata.now(this.mSpace)});
+         console.log("msg:",msg)
          this._sendHostedObjectMessage(msg);
      };
-     Kata.Presence.prototype.setAngularRotation = function(axis,angle) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.mAngVel=angle;
-         msg.mRotAxis = axis.concat();
+     Kata.Presence.prototype.setAngularRotation = function(axis, angvel) {
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {rotaxis:axis.concat(), angvel:angvel, time:Kata.now(this.mSpace)});
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setLocation = function(location) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         Kata.LocationCopy(msg,location);
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, location);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setBounds = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.bounds = val.concat();
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {bounds:val.concat(), time:Kata.now(this.mSpace)});
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setScale = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID);
-         msg.scale = val.concat();
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {scale:val.concat(), time:Kata.now(this.mSpace)});
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {

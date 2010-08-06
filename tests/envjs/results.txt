@@ -13,3 +13,4 @@ UNITTEST:   Move   fake-uuid-102   3,3,-10   undefined   undefined   undefined
 UNITTEST:   Move   fake-uuid-102   undefined   0.5,0.5,0.5,0.5   undefined   undefined
 UNITTEST:   Move   fake-uuid-102   undefined   undefined   1,2,-3   undefined
 UNITTEST:   Move   fake-uuid-102   undefined   undefined   undefined   0.5,0.5,0.5
+UNITTEST:   Move   fake-uuid-102   4,4,-12   1,0,0,0   undefined   4,2,1
