@@ -73,21 +73,28 @@ var Example;
             Example.blessedInstance.mPresence.setOrientation(q);
         }
         if (msg.msg == "keydown") {
+            var ang = Example.cameraPointX*-.25 *  0.0174532925;
+            var x = Math.sin(ang);
+            var y = Math.cos(ang);
             switch(msg.event.keyCode) {
                 case 65:
-                    Example.cameraPos[0]-=1.0;
+                    Example.cameraPos[0]-=y;
+                    Example.cameraPos[2]+=x;
                     Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
                     break;
                 case 68:
-                    Example.cameraPos[0]+=1.0;
+                    Example.cameraPos[0]+=y;
+                    Example.cameraPos[2]-=x;
                     Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
                     break;
                 case 87:
-                    Example.cameraPos[2]-=1.0;
+                    Example.cameraPos[0]-=x;
+                    Example.cameraPos[2]-=y;
                     Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
                     break;
                 case 83:
-                    Example.cameraPos[2]+=1.0;
+                    Example.cameraPos[0]+=x;
+                    Example.cameraPos[2]+=y;
                     Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
                     break;
                 case 82:
