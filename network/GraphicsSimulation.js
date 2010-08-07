@@ -98,8 +98,5 @@ Kata.defer(function() {
              msg.msg, msg.event.keyCode, msg.event.shiftKey, msg.event.button, msg.event.clientX, msg.event.clientY);
          
          this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg.msg, msg.event));
-         // FIXME: ugly hack until we get messaging/webworkers going
-         //Example.hackInputMsg(msg);
-           
      };
 });

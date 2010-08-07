@@ -56,11 +56,7 @@ var Example;
     };
     Example.cameraPointX=0;
     Example.cameraPointY=0;
-    Example.BlessedScript.prototype._handleGUIMessage = function (channel, data) {
-        Example.hackInputMsg(data);
-    };
-
-    Example.hackInputMsg = function(msg) {
+    Example.BlessedScript.prototype._handleGUIMessage = function (channel, msg) {
         if (msg.msg == "mousedown") {
             Example.dragStartX = parseInt(msg.event.offsetX)-Example.cameraPointX;
             Example.dragStartY = parseInt(msg.event.offsetY)-Example.cameraPointY;
