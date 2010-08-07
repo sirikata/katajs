@@ -1,0 +1,191 @@
+{
+  "version": 6,
+  "o3d_rootObject_root": 1,
+  "objects": {
+    "o3d.IndexBuffer": [
+      {
+        "id": 61,
+        "properties": {
+          "name": "Cube-Geometry|i_Cube_tga"
+        },
+        "custom": {
+          "fieldData": [
+            {"id":62,"type":"o3d.UInt32Field","numComponents":1,"data":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35]}
+          ]
+        }
+      }
+    ],
+    "o3d.Material": [
+      {
+        "id": 16,
+        "properties": {
+          "name": "i_Cube_tga"
+        },
+        "params": {
+          "ambient": {"class":"o3d.ParamFloat4","value":[0.4,0.4,0.4,1]},
+          "collada.lightingType": {"class":"o3d.ParamString","value":"phong"},
+          "diffuseSampler": {"class":"o3d.ParamSampler","value":{"ref":23}},
+          "emissive": {"class":"o3d.ParamFloat4","value":[0,0,0,1]},
+          "o3d.drawList": {"value":null},
+          "o3d.effect": {"value":null},
+          "o3d.state": {"value":null},
+          "shininess": {"class":"o3d.ParamFloat","value":12.5},
+          "specular": {"class":"o3d.ParamFloat4","value":[0.5,0.5,0.5,1]},
+          "specularFactor": {"class":"o3d.ParamFloat","value":1}
+        }
+      }
+    ],
+    "o3d.Primitive": [
+      {
+        "id": 63,
+        "properties": {
+          "name": "Cube-Geometry|i_Cube_tga",
+          "owner": {"ref":49},
+          "numberVertices": 36,
+          "numberPrimitives": 12,
+          "primitiveType": 4,
+          "indexBuffer": {"ref":61},
+          "startIndex": 0
+        },
+        "custom": {
+          "indexBuffer": 61
+        },
+        "params": {
+          "o3d.boundingBox": {"value":[]},
+          "o3d.cull": {"value":false},
+          "o3d.material": {"value":{"ref":16}},
+          "o3d.priority": {"value":0},
+          "o3d.streamBank": {"value":{"ref":50}},
+          "o3d.zSortPoint": {"value":[0,0,0]}
+        }
+      }
+    ],
+    "o3d.Sampler": [
+      {
+        "id": 23,
+        "properties": {
+          "name": "diffuseSampler"
+        },
+        "params": {
+          "o3d.addressModeU": {"value":0},
+          "o3d.addressModeV": {"value":0},
+          "o3d.addressModeW": {"value":0},
+          "o3d.borderColor": {"value":[0,0,0,0]},
+          "o3d.magFilter": {"value":2},
+          "o3d.maxAnisotropy": {"value":1},
+          "o3d.minFilter": {"value":2},
+          "o3d.mipFilter": {"value":2},
+          "o3d.texture": {"value":{"ref":11}}
+        }
+      }
+    ],
+    "o3d.Shape": [
+      {
+        "id": 49,
+        "properties": {
+          "name": "Cube-Geometry",
+          "elements": [{"ref":63}]
+        }
+      }
+    ],
+    "o3d.StreamBank": [
+      {
+        "id": 50,
+        "properties": {
+          "name": "Cube-Geometry"
+        },
+        "custom": {
+          "vertexStreams": [
+            {
+              "stream": {
+                "field": 52,
+                "startIndex": 0,
+                "semantic": 1,
+                "semanticIndex": 0
+              }
+            },
+            {
+              "stream": {
+                "field": 53,
+                "startIndex": 0,
+                "semantic": 2,
+                "semanticIndex": 0
+              }
+            },
+            {
+              "stream": {
+                "field": 54,
+                "startIndex": 0,
+                "semantic": 6,
+                "semanticIndex": 0
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "o3d.Texture2D": [
+      {
+        "id": 11,
+        "properties": {
+          "name": "_Cube_tga-img"
+        },
+        "custom": {
+          "width": 512,
+          "height": 512,
+          "format": 1,
+          "levels": 10,
+          "renderSurfacesEnabled": false
+        },
+        "params": {
+          "o3d.uri": {"class":"o3d.ParamString","value":"_cube.jpg"}
+        }
+      }
+    ],
+    "o3d.Transform": [
+      {
+        "id": 37,
+        "properties": {
+          "name": "Scene",
+          "shapes": [],
+          "parent": {"ref":1}
+        },
+        "params": {
+          "o3d.boundingBox": {"value":[]},
+          "o3d.cull": {"value":false},
+          "o3d.localMatrix": {"value":[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]},
+          "o3d.visible": {"value":true}
+        }
+      },
+      {
+        "id": 43,
+        "properties": {
+          "name": "Cube",
+          "shapes": [{"ref":49}],
+          "parent": {"ref":37}
+        },
+        "params": {
+          "o3d.boundingBox": {"value":[]},
+          "o3d.cull": {"value":false},
+          "o3d.localMatrix": {"value":[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]},
+          "o3d.visible": {"value":true}
+        }
+      }
+    ],
+    "o3d.VertexBuffer": [
+      {
+        "id": 51,
+        "properties": {
+          "name": "Cube-Geometry"
+        },
+        "custom": {
+          "fieldData": [
+            {"id":52,"type":"o3d.FloatField","numComponents":3,"data":[1,1,-1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,1,-1,1,1,1,-1,1,1,-1,-1,1,-1,-1,1,1,-1,1,1,1,1,1,1,-1,1,1,1,1,-1,1,1,-1,1,1,-1,-1,1,1,-1,1,-1,-1,1,-1,1,-1,-1,1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,1,-1,1,1,-1,1,-1,-1,-1,-1,1,1,1,1,1,-1,-1,1,-1,-1,1,-1,-1,1,1,1,1,1]},
+            {"id":53,"type":"o3d.FloatField","numComponents":3,"data":[0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-0,1,0,-0,1,0,-0,1,0,-0,1,0,-0,1,0,-0,1,1,-0,0,1,-0,0,1,-0,0,1,-0,0,1,-0,0,1,-0,0,-0,-1,-0,-0,-1,-0,-0,-1,-0,-0,-1,-0,-0,-1,-0,-0,-1,-0,-1,0,-0,-1,0,-0,-1,0,-0,-1,0,-0,-1,0,-0,-1,0,-0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0]},
+            {"id":54,"type":"o3d.FloatField","numComponents":2,"data":[0,0,1,0,1,1,1,1,0,1,0,0,0,0,1,0,1,1,1,1,0,1,0,0,0,0,1,0,1,1,1,1,0,1,0,0,0,0,1,0,1,1,1,1,0,1,0,0,0,0,1,0,1,1,1,1,0,1,0,0,0,0,1,0,1,1,1,1,0,1,0,0]}
+          ]
+        }
+      }
+    ]
+  }
+}
