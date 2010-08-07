@@ -178,9 +178,26 @@ if (typeof(JSON) == "undefined") {JSON = {};}
      *  @return {function(...[*])}  A new function that wraps func.apply()
      */
     Kata.bind = function(func, object) {
-        return function() {
-            return func.apply(object, arguments);
-        };
+        if (arguments.length==2) {
+            delete arguments;
+            return function() {
+                return func.apply(object, arguments);
+            };            
+        }else {
+            var args=new Array(arguments.length-2);
+            for (var i=2;i<arguments.length;++i) {
+                args[i-2]=arguments[i];
+            }
+            delete arguments;
+            return function () {
+                var argLen=arguments.length;
+                var newarglist=new Array(argLen);
+                for (var i=0;i<argLen;++i){
+                    newarglist[i]=arguments[i];
+                }
+                return func.apply(object,args.concat(newarglist));
+            };
+        }
     };
     if (console.log && debug_console) {
         /** Logs msg to the console, in addition to some json object.

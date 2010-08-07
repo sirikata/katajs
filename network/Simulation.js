@@ -42,13 +42,13 @@ if (typeof(Kata) == "undefined") {Kata = {};}
     Kata.Simulation = function (channel) {
         this.mChannel = channel;
         channel.registerListener(Kata.bind(this.receivedMessage, this));
-    }
+    };
     /**
      * Received a message from the object host. Override this method.
      * @param {Kata.Channel} channel  The sender. Usually equals this.mChannel.
      * @param {object} data  A message usually in JavascriptGraphicsApi format.
      */
     Kata.Simulation.prototype.receivedMessage = function (channel, data) {
-    }
+    };
 
 })();

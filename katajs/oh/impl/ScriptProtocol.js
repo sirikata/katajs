@@ -69,7 +69,9 @@
                  Subscription : "fsub",
 
                  CreateObject : "fcre",
-                 GraphicsMessage : "fgfm"
+                 GraphicsMessage : "fgfm",
+                 EnableGUIMessage : "feui",
+                 DisableGUIMessage : "fdui"
              },
 
              Connect : function(space, auth) {
@@ -77,7 +79,14 @@
                  this.space = space;
                  this.auth = auth;
              },
-
+             RegisterGUIMessage : function (event) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.EnableGUIMessage;
+                 this.event = event;  
+             },            
+             UnregisterGUIMessage : function (event) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.DisableGUIMessage;
+                 this.event = event;  
+             },            
              Disconnect : function(space) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Disconnect;
                  this.space = space;
@@ -116,8 +125,6 @@
                  this.observed = observed;
                  this.enable = enable;
              },
-
-
              CreateObject : function(script, cons, args) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.CreateObject;
                  this.script = script;
@@ -204,7 +211,9 @@
                  ConnectionFailed : "tfyl",
                  Disconnected : "tdis",
                  QueryEvent : "tque",
-                 PresenceLocUpdate : "tloc"
+                 PresenceLocUpdate : "tloc",
+                 GUIMessage : "tgui"
+
              },
 
              Connected : function(space, id, loc, bounds, visual) {
@@ -227,7 +236,12 @@
                  this.__type = Kata.ScriptProtocol.ToScript.Types.Disconnected;
                  this.space = space;
              },
-
+             
+             GUIMessage : function (msg, event) {
+                 this.__type = Kata.ScriptProtocol.ToScript.Types.GUIMessage;
+                 this.msg = msg;
+                 this.event = event;  
+             },            
              QueryEvent : function(space, observed, entered, loc, visual) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.QueryEvent;
                  this.space = space;

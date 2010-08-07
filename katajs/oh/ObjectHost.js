@@ -45,6 +45,7 @@ Kata.include("katajs/core/URL.js");
     Kata.ObjectHost = function () {
         this.mSimulations = [];
         this.mSimulationsByName = {};
+        this.mSimulationCallbacksByName={};
         this.mSpaceMap = {};
         this.mSpaceConnections = {};
         this.mObjects = {};
@@ -85,19 +86,7 @@ Kata.include("katajs/core/URL.js");
     Kata.ObjectHost.prototype.registerSimulation = function (channel, name) {
         this.mSimulations.push(channel);
         this.mSimulationsByName[name] = channel;
-        channel.registerListener(Kata.bind(this.receivedMessage, this));
-    };
-    /**
-     * @return The human-readable name passed to registerSimulation.
-     * @param {Kata.Channel} channel  The corresponding simulation's channel.
-     */
-    Kata.ObjectHost.prototype.getSimulationName = function (channel) {
-        for (var name in this.mSimulationsByName) {
-            if (this.mSimulationsByName[name] == channel) {
-                return name;
-            }
-        }
-        return null;
+        channel.registerListener(Kata.bind(this.receivedSimulationMessage, this, name));
     };
 
     /** Sends a message to some simulation.
@@ -128,7 +117,38 @@ Kata.include("katajs/core/URL.js");
          var createdObject = this.generateObject(privid);
          if (script && cons && args)
              createdObject.createScript(script, cons, args);
-     };
+    };
+    Kata.ObjectHost.prototype.registerSimulationCallback = function(simName, object){
+        if (simName in this.mSimulationCallbacksByName) {
+            this.mSimulationCallbacksByName[simName].push(object);
+        }else {
+            this.mSimulationCallbacksByName[simName]=[object];
+        }
+    };
+    Kata.ObjectHost.prototype.unregisterSimulationCallback = function(simName, object){
+        var callbacks = this.mSimulationCallbacksByName[simName];
+        if (callbacks.length==1) {
+            delete this.mSimulationCallbacksByName[simName];
+        }else {
+            for (var i=0;i<callbacks.length;++i) {
+                if (callbacks[i]==object) {
+                    callbacks[i]=callbacks[callbacks.length-1];
+                    callbacks.pop();
+                    break;
+                }
+            }
+        }
+    };
+    Kata.ObjectHost.prototype.receivedSimulationMessage = function(simName, channel, data) {
+        var cbArray=this.mSimulationCallbacksByName[simName];
+        if (cbArray) {
+            for (var i=0;i<cbArray.length;++i) {
+                cbArray[i].handleMessageFromSimulation(simName,channel,data);
+            }
+        }else {//for bootstrapping the initial create command
+            this.receivedMessage(channel,data);
+        }
+    };
 
     /** Sends a message to some simulation.
      * @param {Kata.Channel} channel  The sending simulation.
@@ -136,7 +156,7 @@ Kata.include("katajs/core/URL.js");
      *     JavascriptGraphicsApi)
      */
     Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
-        if (channel == this.mSimulationsByName["graphics"]||data.msg=="Create") {
+        if (data.msg=="Create") {
             switch (data.msg) {
             case "Create":{
                 this.createObject(data.script, data.method, data.args);

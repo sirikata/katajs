@@ -61,7 +61,7 @@ Kata.defer(function() {
         }
 
         this.mGFX = new drv(function(obj){},domElement);
-        this.mGFX.setInputCallback(this._handleInputMessage);
+        this.mGFX.setInputCallback(Kata.bind(this._handleInputMessage,this));
     };
     
     Kata.extend(Kata.GraphicsSimulation, SUPER);
@@ -96,7 +96,10 @@ Kata.defer(function() {
 //         console.log("GraphicsSimulation._handleInputMessage:",msg); 
          console.log("UNITTEST: GraphicsSimulation._handleInputMessage:", 
              msg.msg, msg.event.keyCode, msg.event.shiftKey, msg.event.button, msg.event.clientX, msg.event.clientY);
+         
+         this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg.msg, msg.event));
          // FIXME: ugly hack until we get messaging/webworkers going
-         Example.hackInputMsg(msg);
-     }
+         //Example.hackInputMsg(msg);
+           
+     };
 });

@@ -58,8 +58,20 @@ Kata.include("katajs/oh/RemotePresence.js");
          this.mRenderableRemotePresenceIndex=0;
          this.mGraphicsTimer=null;
          this.mNumGraphicsSystems=0;
+         var handlers = {};
+         var msgTypes = Kata.ScriptProtocol.ToScript.Types;
+         handlers[msgTypes.QueryEvent] = Kata.bind(this._handleQueryEvent, this);
+         handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);
+         handlers[msgTypes.GUIMessage] = Kata.bind(this._handleGUIMessage, this);
+         //duplicated code i Script.js:66
+         this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
      };
      Kata.extend(Kata.GraphicsScript, SUPER);
+
+      Kata.GraphicsScript.prototype._handleGUIMessage = function (channel, data) {
+          
+      };
+
      /**
       * Enables graphics on the main canvas viewport. 
       * @param {Kata.Presence} presence The presence that graphics should be enabled for
@@ -126,7 +138,9 @@ Kata.include("katajs/oh/RemotePresence.js");
                  }
              }
          }
-         var msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
+         var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(),presence.id(),presence.id());
+         this._sendHostedObjectMessage(msg);
+         msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
 		 msg.msg = "Camera";
          this._sendHostedObjectMessage(msg);
          msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
@@ -198,6 +212,9 @@ Kata.include("katajs/oh/RemotePresence.js");
              this.mGraphicsTimer.disable();
              this.mGraphicsTimer=null;
          }
+         msg = new Kata.ScriptProtocol.FromScript.UnregisterGUIMessage(presence.space(),presence.id(),presence.id());
+         this._sendHostedObjectMessage(msg);
+
      };
      /**
       *

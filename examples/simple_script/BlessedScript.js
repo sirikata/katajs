@@ -1,6 +1,6 @@
 
 Kata.include("katajs/oh/Script.js");
-
+var Example;
 (function(){
     if (typeof(Example) === "undefined") {
         Example = {};
@@ -24,7 +24,7 @@ Kata.include("katajs/oh/Script.js");
     Example.BlessedScript.prototype.proxEvent = function(remote, added){
         if (added) {
             Kata.warn("Camera Discover object.");
-            this.mPresence.subscribe(remote.id())
+            this.mPresence.subscribe(remote.id());
         }
         else {
             Kata.warn("Camera Wiped object.");      // FIXME: unsubscribe!
@@ -36,26 +36,29 @@ Kata.include("katajs/oh/Script.js");
         presence.setQueryHandler(Kata.bind(this.proxEvent, this));
         presence.setQuery(0);
         this.mPresence=presence;
-        presence.setPosition(Example.cameraPos)
+        presence.setPosition(Example.cameraPos);
         Kata.warn("Got connected callback.");
     };
 
     Example.euler2Quat = function(yaw, pitch, roll){
         // takes degrees; roll = rotation about z, pitch = x, yaw = y
-        var k = 0.00872664625 // deg2rad/2
-        var yawcos = Math.cos(roll * k)
-        var yawsin = Math.sin(roll * k)
-        var pitchcos = Math.cos(pitch * k)
-        var pitchsin = Math.sin(pitch * k)
-        var rollcos = Math.cos(yaw * k)
-        var rollsin = Math.sin(yaw * k)
+        var k = 0.00872664625; // deg2rad/2
+        var yawcos = Math.cos(roll * k);
+        var yawsin = Math.sin(roll * k);
+        var pitchcos = Math.cos(pitch * k);
+        var pitchsin = Math.sin(pitch * k);
+        var rollcos = Math.cos(yaw * k);
+        var rollsin = Math.sin(yaw * k);
         return [rollcos * pitchsin * yawcos + rollsin * pitchcos * yawsin, 
                 rollsin * pitchcos * yawcos - rollcos * pitchsin * yawsin, 
                 rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos, 
-                rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin]
+                rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin];
     };
     Example.cameraPointX=0;
     Example.cameraPointY=0;
+    Example.BlessedScript.prototype._handleGUIMessage = function (channel, data) {
+        Example.hackInputMsg(data);
+    };
 
     Example.hackInputMsg = function(msg) {
         if (msg.msg == "mousedown") {
@@ -65,9 +68,9 @@ Kata.include("katajs/oh/Script.js");
         if (msg.msg == "mousemove") {
             Example.cameraPointX = parseInt(msg.event.offsetX) - Example.dragStartX;
             Example.cameraPointY = parseInt(msg.event.offsetY) - Example.dragStartY;
-            var q = Example.euler2Quat(Example.cameraPointX*-.25, Example.cameraPointY*-.25, 0)
-            console.log("hackInputMsg:", msg.event.offsetX, Example.cameraPointX,Example.dragStartX,q)   
-            Example.blessedInstance.mPresence.setOrientation(q)
+            var q = Example.euler2Quat(Example.cameraPointX*-.25, Example.cameraPointY*-.25, 0);
+            console.log("hackInputMsg:", msg.event.offsetX, Example.cameraPointX,Example.dragStartX,q);
+            Example.blessedInstance.mPresence.setOrientation(q);
         }
         if (msg.msg == "keydown") {
             switch(msg.event.keyCode) {

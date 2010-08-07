@@ -58,6 +58,8 @@ Kata.include("katajs/core/MessageDispatcher.js");
 
         scriptHandlers[scriptTypes.CreateObject] = Kata.bind(this._handleCreateObject, this);
         scriptHandlers[scriptTypes.GraphicsMessage] = Kata.bind(this._handleGraphicsMessage, this);
+        scriptHandlers[scriptTypes.DisableGUIMessage] = Kata.bind(objectHost.unregisterSimulationCallback, objectHost, "graphics",this);//FIXME somehow call this when the object is destroyed
+        scriptHandlers[scriptTypes.EnableGUIMessage] = Kata.bind(objectHost.registerSimulationCallback, objectHost, "graphics",this);
 
         this.mScriptMessageDispatcher = new Kata.MessageDispatcher(scriptHandlers);
     };
@@ -121,7 +123,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
 
      Kata.HostedObject.prototype._handleLocUpdateRequest = function (channel, request) {
          var loc = {};
-         Kata.LocationCopyUnifyTime(request, loc)
+         Kata.LocationCopyUnifyTime(request, loc);
          this.mObjectHost.locUpdateRequest(
              request.space,
              request.id,
@@ -137,6 +139,9 @@ Kata.include("katajs/core/MessageDispatcher.js");
          this.sendScriptMessage(msg);
      };
 
+     Kata.HostedObject.prototype.handleMessageFromSimulation=function(simName, channel, data) {
+         this.sendScriptMessage(data);
+     };
 
      Kata.HostedObject.prototype._handleGraphicsMessage = function (channel, request) {
          this.mObjectHost.sendToSimulation(request);//FIXME: broadcasts to all simulations, not just gfx
