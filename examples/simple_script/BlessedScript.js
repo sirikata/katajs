@@ -18,7 +18,9 @@ var Example;
                 visual: idx?"../content/happybox":"../content/teapot"
             });
         }
-        Example.blessedInstance=this;
+        this.cameraPointX=0;
+        this.cameraPointY=0;
+        this.cameraPos=[0,0,0]
     };
     Kata.extend(Example.BlessedScript, SUPER);
     Example.BlessedScript.prototype.proxEvent = function(remote, added){
@@ -30,17 +32,16 @@ var Example;
             Kata.warn("Camera Wiped object.");      // FIXME: unsubscribe!
         }
     };
-    Example.cameraPos=[1.5, 2, 5];
     Example.BlessedScript.prototype.connected = function(presence){
         this.enableGraphicsViewport(presence, 0);
         presence.setQueryHandler(Kata.bind(this.proxEvent, this));
         presence.setQuery(0);
         this.mPresence=presence;
-        presence.setPosition(Example.cameraPos);
+        presence.setPosition(this.cameraPos);
         Kata.warn("Got connected callback.");
     };
 
-    Example.euler2Quat = function(yaw, pitch, roll){
+    Example.BlessedScript.prototype._euler2Quat = function(yaw, pitch, roll){
         // takes degrees; roll = rotation about z, pitch = x, yaw = y
         var k = 0.00872664625; // deg2rad/2
         var yawcos = Math.cos(roll * k);
@@ -54,52 +55,50 @@ var Example;
                 rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos, 
                 rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin];
     };
-    Example.cameraPointX=0;
-    Example.cameraPointY=0;
     Example.BlessedScript.prototype._handleGUIMessage = function (channel, msg) {
         if (msg.msg == "mousedown") {
-            Example.dragStartX = parseInt(msg.event.offsetX)-Example.cameraPointX;
-            Example.dragStartY = parseInt(msg.event.offsetY)-Example.cameraPointY;
+            this.dragStartX = parseInt(msg.event.offsetX)-this.cameraPointX;
+            this.dragStartY = parseInt(msg.event.offsetY)-this.cameraPointY;
         }
         if (msg.msg == "mousemove") {
-            Example.cameraPointX = parseInt(msg.event.offsetX) - Example.dragStartX;
-            Example.cameraPointY = parseInt(msg.event.offsetY) - Example.dragStartY;
-            var q = Example.euler2Quat(Example.cameraPointX*-.25, Example.cameraPointY*-.25, 0);
-            console.log("hackInputMsg:", msg.event.offsetX, Example.cameraPointX,Example.dragStartX,q);
-            Example.blessedInstance.mPresence.setOrientation(q);
+            this.cameraPointX = parseInt(msg.event.offsetX) - this.dragStartX;
+            this.cameraPointY = parseInt(msg.event.offsetY) - this.dragStartY;
+            var q = this._euler2Quat(this.cameraPointX*-.25, this.cameraPointY*-.25, 0);
+            console.log("hackInputMsg:", msg.event.offsetX, this.cameraPointX,this.dragStartX,q);
+            this.mPresence.setOrientation(q);
         }
         if (msg.msg == "keydown") {
-            var ang = Example.cameraPointX*-.25 *  0.0174532925;
+            var ang = this.cameraPointX*-.25 *  0.0174532925;
             var x = Math.sin(ang);
             var y = Math.cos(ang);
             switch(msg.event.keyCode) {
                 case 65:
-                    Example.cameraPos[0]-=y;
-                    Example.cameraPos[2]+=x;
-                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    this.cameraPos[0]-=y;
+                    this.cameraPos[2]+=x;
+                    this.mPresence.setPosition(this.cameraPos);
                     break;
                 case 68:
-                    Example.cameraPos[0]+=y;
-                    Example.cameraPos[2]-=x;
-                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    this.cameraPos[0]+=y;
+                    this.cameraPos[2]-=x;
+                    this.mPresence.setPosition(this.cameraPos);
                     break;
                 case 87:
-                    Example.cameraPos[0]-=x;
-                    Example.cameraPos[2]-=y;
-                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    this.cameraPos[0]-=x;
+                    this.cameraPos[2]-=y;
+                    this.mPresence.setPosition(this.cameraPos);
                     break;
                 case 83:
-                    Example.cameraPos[0]+=x;
-                    Example.cameraPos[2]+=y;
-                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    this.cameraPos[0]+=x;
+                    this.cameraPos[2]+=y;
+                    this.mPresence.setPosition(this.cameraPos);
                     break;
                 case 82:
-                    Example.cameraPos[1]+=1.0;
-                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    this.cameraPos[1]+=1.0;
+                    this.mPresence.setPosition(this.cameraPos);
                     break;
                 case 76:
-                    Example.cameraPos[1]-=1.0;
-                    Example.blessedInstance.mPresence.setPosition(Example.cameraPos);
+                    this.cameraPos[1]-=1.0;
+                    this.mPresence.setPosition(this.cameraPos);
                     break;
             }            
         }
