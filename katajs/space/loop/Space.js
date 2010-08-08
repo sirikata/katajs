@@ -36,6 +36,7 @@ Kata.include("katajs/core/Math.uuid.js");
 Kata.include("katajs/space/loop/Loc.js");
 Kata.include("katajs/space/loop/EveryoneProx.js");
 Kata.include("katajs/space/loop/Subscription.js");
+Kata.include("katajs/core/Location.js");
 
 (function() {
 

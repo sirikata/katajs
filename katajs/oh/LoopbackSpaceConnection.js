@@ -115,4 +115,7 @@ Kata.defer(function() {
      };
 
      Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
+     // Simulated local space
+     loopspace = new Kata.LoopbackSpace( new Kata.URL("loop://localhost") );
+
 });
