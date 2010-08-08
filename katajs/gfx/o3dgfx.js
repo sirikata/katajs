@@ -60,7 +60,7 @@ SpaceDrawList.prototype.initializeDrawList = function(viewInfo) {
     this.mZOrderedDrawList = viewInfo.zOrderedDrawList;
     var paramObject = this.mPack.createObject('ParamObject');
     this.mLightPosParam = paramObject.createParam('lightWorldPos', 'ParamFloat3');
-}
+};
 
 
 /**
@@ -317,8 +317,6 @@ var O3DGraphics=function(callbackFunction,parentElement) {
 
     this.mObjectUpdates = {}; // map id -> function
 
-    this.lightPosParam = null;
-
     // For dragging camera
     this.dragging = false;
     this.thisRot = o3djs.math.matrix4.identity();
@@ -343,7 +341,7 @@ O3DGraphics.prototype.removeObjectUpdate = function(vwObj) {
     delete this.mObjectUpdates[vwObj.mID];
 };
 
-VWObject.prototype.sceneLoadedCallback = function(renderTarg, lightPosParam, pack, parent, exception) {
+VWObject.prototype.sceneLoadedCallback = function(renderTarg, pack, parent, exception) {
     if (exception) {
         console.log("loading failed: "+this.mMeshURI,exception);
         alert("Could not load: " + this.mMeshURI + "\n" + exception);
@@ -363,13 +361,13 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, lightPosParam, pac
             var material = materials[m];
             var param = material.getParam('lightWorldPos');
             if (param) {
-                param.bind(lightPosParam);
+                param.bind(renderTarg.mSpaceRoot.mLightPosParam);
             }
         }
     }
 };
 
-VWObject.prototype.createMesh = function(lightPosParam, path) {
+VWObject.prototype.createMesh = function(path) {
     if (path == null) {
         throw "loadScene with null path";
     }
@@ -386,7 +384,7 @@ VWObject.prototype.createMesh = function(lightPosParam, path) {
                 if (thus.mMeshURI == path) {
                     thus.mMeshPack = p;
                     thus.sceneLoadedCallback(
-                        renderTarg, lightPosParam,
+                        renderTarg, 
                         p, par, exc);
                 }
             });
@@ -594,7 +592,7 @@ O3DGraphics.prototype.methodTable["Mesh"]=function(msg) {
     //q.innerHTML="Mesh "+msg.mesh;
     if (msg.mesh && msg.id in this.mObjects) {
         var vwObject=this.mObjects[msg.id];
-        vwObject.createMesh(this.lightPosParam, msg.mesh);
+        vwObject.createMesh(msg.mesh);
     }
 };
 O3DGraphics.prototype.methodTable["DestroyMesh"]=function(msg) {
