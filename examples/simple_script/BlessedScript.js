@@ -1,5 +1,6 @@
 
 Kata.include("katajs/oh/Script.js");
+Kata.include("katajs/oh/GraphicsScript.js");
 var Example;
 (function(){
     if (typeof(Example) === "undefined") {

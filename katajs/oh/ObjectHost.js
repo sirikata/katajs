@@ -266,3 +266,6 @@ Kata.include("katajs/core/URL.js");
 
 
 })();
+
+// Needs to register using registerProtocolHandler.
+Kata.include("katajs/space/loop/Space.js");

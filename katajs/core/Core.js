@@ -71,7 +71,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             includedscripts[scriptfile] = true;
             importScripts(Kata.scriptRoot+scriptfile);
         };
-        Kata.eval=Kata.include;
+        Kata.evalInclude = Kata.include;
         Kata.defer = function (f){if (f) f();};
     } else if (typeof(document) != "undefined" && document.write) {
         var scripttags = document.getElementsByTagName("script");
