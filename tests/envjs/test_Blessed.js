@@ -41,7 +41,7 @@ Kata.include("katajs/oh/Script.js");
     Example.BlessedScript.prototype._handleGUIMessage = function (channel, msg) {
         if (msg.msg == "mousemove") {
             var q = [0,1,0,0]
-            console.log("UNITTEST: hackInputMsg:", msg.event.offsetX, msg.event.offsetY,q)   
+            console.log("ENVJSTEST: _handleGUIMessage:", msg.event.offsetX, msg.event.offsetY,q)   
             Example.blessedInstance.mPresence.setOrientation(q)
         }
     };

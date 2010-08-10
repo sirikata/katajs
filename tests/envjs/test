@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 #to create results.txt:
-#rhino -debug < test.txt | grep -w UNITTEST > results.txt
+#rhino -debug < test.txt | grep -w ENVJSTEST > results.txt
 import os, subprocess, sys
 verbose=False
 if len(sys.argv) > 1 and sys.argv[1]=="-v":
@@ -21,7 +21,7 @@ for i in oo:
     i = i.rstrip()
     if verbose:
         print i
-    if "UNITTEST" in i:
+    if "ENVJSTEST" in i:
         if len(results)==0:
             fail=True
             print "failure: no more results to check against at", i

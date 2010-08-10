@@ -94,7 +94,7 @@ Kata.defer(function() {
      */
      Kata.GraphicsSimulation.prototype._handleInputMessage = function(msg){
 //         console.log("GraphicsSimulation._handleInputMessage:",msg); 
-         console.log("UNITTEST: GraphicsSimulation._handleInputMessage:", 
+         console.log("ENVJSTEST: GraphicsSimulation._handleInputMessage:", 
              msg.msg, msg.event.keyCode, msg.event.shiftKey, msg.event.button, msg.event.clientX, msg.event.clientY);
          
          this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg.msg, msg.event));

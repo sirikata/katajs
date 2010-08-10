@@ -1,18 +1,18 @@
-UNITTEST:   Create   fake-uuid-100
-UNITTEST:   Camera   fake-uuid-100
-UNITTEST:   AttachCamera   fake-uuid-100
-UNITTEST:   Move   fake-uuid-100   1.5,2,5   undefined   undefined   undefined
-UNITTEST:   Create   fake-uuid-101
-UNITTEST: GraphicsSimulation._handleInputMessage:   keydown   undefined   false   undefined   undefined   undefined
-UNITTEST:   Mesh   fake-uuid-101   ../content/teapot
-UNITTEST:   Create   fake-uuid-102
-UNITTEST:   Mesh   fake-uuid-102   ../content/teapot
-UNITTEST: GraphicsSimulation._handleInputMessage:   mousemove   undefined   undefined   0   undefined   undefined
-UNITTEST: hackInputMsg:   180   100   0,1,0,0
-UNITTEST:   Move   fake-uuid-100   undefined   0,1,0,0   undefined   undefined
-UNITTEST:   Move   fake-uuid-101   0,3,-10   undefined   undefined   undefined
-UNITTEST:   Move   fake-uuid-102   3,3,-10   undefined   undefined   undefined
-UNITTEST:   Move   fake-uuid-102   undefined   0.5,0.5,0.5,0.5   undefined   undefined
-UNITTEST:   Move   fake-uuid-102   undefined   undefined   1,2,-3   undefined
-UNITTEST:   Move   fake-uuid-102   undefined   undefined   undefined   0.5,0.5,0.5
-UNITTEST:   Move   fake-uuid-102   4,4,-12   1,0,0,0   undefined   4,2,1
+ENVJSTEST:   Create   fake-uuid-100
+ENVJSTEST:   Camera   fake-uuid-100
+ENVJSTEST:   AttachCamera   fake-uuid-100
+ENVJSTEST:   Move   fake-uuid-100   1.5,2,5   undefined   undefined   undefined
+ENVJSTEST:   Create   fake-uuid-101
+ENVJSTEST: GraphicsSimulation._handleInputMessage:   keydown   undefined   false   undefined   undefined   undefined
+ENVJSTEST:   Mesh   fake-uuid-101   ../content/teapot
+ENVJSTEST:   Create   fake-uuid-102
+ENVJSTEST:   Mesh   fake-uuid-102   ../content/teapot
+ENVJSTEST: GraphicsSimulation._handleInputMessage:   mousemove   undefined   undefined   0   undefined   undefined
+ENVJSTEST: _handleGUIMessage:   180   100   0,1,0,0
+ENVJSTEST:   Move   fake-uuid-100   undefined   0,1,0,0   undefined   undefined
+ENVJSTEST:   Move   fake-uuid-101   0,3,-10   undefined   undefined   undefined
+ENVJSTEST:   Move   fake-uuid-102   3,3,-10   undefined   undefined   undefined
+ENVJSTEST:   Move   fake-uuid-102   undefined   0.5,0.5,0.5,0.5   undefined   undefined
+ENVJSTEST:   Move   fake-uuid-102   undefined   undefined   1,2,-3   undefined
+ENVJSTEST:   Move   fake-uuid-102   undefined   undefined   undefined   0.5,0.5,0.5
+ENVJSTEST:   Move   fake-uuid-102   4,4,-12   1,0,0,0   undefined   4,2,1
