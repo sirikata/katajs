@@ -231,14 +231,14 @@ Kata.defer(function() {
       */
      Kata.Presence.prototype._handleLocEvent = function(msg, remotePresences) {
          if (this.id() === msg.observed) {
-             Kata.warn("Self loc update: " + this.id());
+//             Kata.warn("Self loc update: " + this.id());
              this._updateLoc(msg.loc, msg.visual);
              return this;
          }
          else {
              var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
              var remote = remotePresences[key];
-             Kata.warn("Remote presence loc update: " + key);
+//             Kata.warn("Remote presence loc update: " + key);
              if (remote)
                  remote._updateLoc(msg.loc, msg.visual);
              return remote;
