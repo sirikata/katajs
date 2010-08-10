@@ -506,9 +506,7 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
     newObject.updateTransformation(this);
 };
 O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
-//	if (!msg.scale) msg.scale = [1,2,3];
 	if (!msg.time) msg.time = new Date().getMilliseconds();
-	console.log("moveTo pos:", msg.pos, msg);
     var prevParent=vwObject.mNode.parent;
     if (msg.parent!==undefined) {
         if (vwObject.mUnsetParent) {

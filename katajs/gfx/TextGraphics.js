@@ -170,7 +170,7 @@ TextGraphics=function(callbackFunction,parentElement) {
             msg = {
                 msg: "keydown",
                 event: {
-                    KeyCode: 65,
+                    keyCode: 65,
                     shiftKey: false
                 }
             };

@@ -93,10 +93,7 @@ Kata.defer(function() {
      * handle input data from graphics driver
      */
      Kata.GraphicsSimulation.prototype._handleInputMessage = function(msg){
-//         console.log("GraphicsSimulation._handleInputMessage:",msg); 
-         console.log("ENVJSTEST: GraphicsSimulation._handleInputMessage:", 
-             msg.msg, msg.event.keyCode, msg.event.shiftKey, msg.event.button, msg.event.clientX, msg.event.clientY);
-         
+//         console.log("GraphicsSimulation._handleInputMessage:",msg);
          this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg.msg, msg.event));
      };
 });

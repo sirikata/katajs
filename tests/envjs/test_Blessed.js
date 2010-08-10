@@ -39,6 +39,9 @@ Kata.include("katajs/oh/Script.js");
         Kata.warn("Got connected callback.");
     };
     Example.BlessedScript.prototype._handleGUIMessage = function (channel, msg) {
+        if (msg.msg == "keydown") {
+            console.log("ENVJSTEST: _handleGUIMessage:", msg.event.keyCode)   
+        }
         if (msg.msg == "mousemove") {
             var q = [0,1,0,0]
             console.log("ENVJSTEST: _handleGUIMessage:", msg.event.offsetX, msg.event.offsetY,q)   
