@@ -433,9 +433,28 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
                         true);
 
     o3djs.event.addEventListener(this.mClientElement, 'keydown', function(e){
+        var ev = {};
+        ev.type = e.type;
+        ev.keyCode = e.keyCode;
+        ev.shiftKey = e.shiftKey;
+        ev.altKey = e.altKey;
+        ev.ctrlKey = e.ctrlKey;
         var msg = {
             msg: "keydown",
-            event: e
+            event: ev
+        };
+        thus._inputCb(msg);
+    });
+    o3djs.event.addEventListener(this.mClientElement, 'keyup', function(e){
+        var ev = {};
+        ev.type = e.type;
+        ev.keyCode = e.keyCode;
+        ev.shiftKey = e.shiftKey;
+        ev.altKey = e.altKey;
+        ev.ctrlKey = e.ctrlKey;
+        var msg = {
+            msg: "keyup",
+            event: ev
         };
         thus._inputCb(msg);
     });
@@ -670,18 +689,42 @@ O3DGraphics.prototype.methodTable["DestroyIFrame"]=function(msg) {
 
 O3DGraphics.prototype._mouseDown = function(e){
     if (e.button==0) this._leftButtonState="down";
+    var ev = {};
+    ev.type = e.type;
+    ev.shiftKey = e.shiftKey;
+    ev.altKey = e.altKey;
+    ev.ctrlKey = e.ctrlKey;
+    ev.button = e.button;
+    ev.offsetX = e.offsetX;
+    ev.offsetY = e.offsetY;
+    ev.screenX = e.screenX;
+    ev.screenY = e.screenY;
+    ev.clientX = e.clientX;
+    ev.clientY = e.clientY;
     var msg = {
         msg: "mousedown",
-        event: e
+        event: ev
     };
     this._inputCb(msg);
 };
 
 O3DGraphics.prototype._mouseUp = function(e){
     if (e.button==0) this._leftButtonState="up";
+    var ev = {};
+    ev.type = e.type;
+    ev.shiftKey = e.shiftKey;
+    ev.altKey = e.altKey;
+    ev.ctrlKey = e.ctrlKey;
+    ev.button = e.button;
+    ev.offsetX = e.offsetX;
+    ev.offsetY = e.offsetY;
+    ev.screenX = e.screenX;
+    ev.screenY = e.screenY;
+    ev.clientX = e.clientX;
+    ev.clientY = e.clientY;
     var msg = {
         msg: "mouseup",
-        event: e
+        event: ev
     };
     this._inputCb(msg);
 };
@@ -692,15 +735,28 @@ O3DGraphics.prototype._mouseUp = function(e){
  */
 O3DGraphics.prototype._mouseMove = function(e){
     if (this._leftButtonState == "down") {
+        var ev = {};
+        ev.type = e.type;
+        ev.shiftKey = e.shiftKey;
+        ev.altKey = e.altKey;
+        ev.ctrlKey = e.ctrlKey;
+        ev.button = e.button;
+        ev.offsetX = e.offsetX;
+        ev.offsetY = e.offsetY;
+        ev.screenX = e.screenX;
+        ev.screenY = e.screenY;
+        ev.clientX = e.clientX;
+        ev.clientY = e.clientY;
         var msg = {
             msg: "mousemove",
-            event: e
+            event: ev
         };
         this._inputCb(msg);
     }
 };
 
 O3DGraphics.prototype._scrollWheel = function(e){
+    /// FIXME: figure out what event attributes to copy
     var msg = {
         msg: "wheel",
         event: e
