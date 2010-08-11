@@ -37,8 +37,9 @@ Kata.include("katajs/core/SimpleChannel.js");
      * engines. If false, never uses workers, and runs code synchronously.
      */
     // In WebKit, debugging webworkers breaks nested workers.
-    Kata.WEB_WORKERS_ENABLED = true; //typeof(importScripts)==='undefined';
-
+    if (Kata.WEB_WORKERS_ENABLED === undefined) {
+        Kata.WEB_WORKERS_ENABLED = true; //typeof(importScripts)==='undefined';
+    }
     function getErrorCallback(thus) {
         return function(ev) {
             thus.gotError(ev.message, ev.filename, ev.lineno);
