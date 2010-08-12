@@ -44,7 +44,7 @@ Kata.include("katajs/oh/Script.js");
         }
         if (msg.msg == "mousemove") {
             var q = [0,1,0,0]
-            console.log("ENVJSTEST: _handleGUIMessage:", msg.event.offsetX, msg.event.offsetY,q)   
+            console.log("ENVJSTEST: _handleGUIMessage:", msg.event.x, msg.event.y,q)   
             Example.blessedInstance.mPresence.setOrientation(q)
         }
     };

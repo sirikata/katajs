@@ -182,8 +182,8 @@ TextGraphics=function(callbackFunction,parentElement) {
                 msg: "mousemove",
                 event: {
                     button: 0,
-                    offsetX: 180,
-                    offsetY: 100
+                    x: 180,
+                    y: 100
                 }
             };
             if (this._inputCb) 
