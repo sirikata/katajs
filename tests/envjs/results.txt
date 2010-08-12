@@ -3,13 +3,14 @@ ENVJSTEST:   Camera   fake-uuid-100
 ENVJSTEST:   AttachCamera   fake-uuid-100
 ENVJSTEST:   Move   fake-uuid-100   1.5,2,5   undefined   undefined   undefined
 ENVJSTEST:   Create   fake-uuid-101
-ENVJSTEST: _handleGUIMessage:   65
+ENVJSTEST: _handleGUIMessage:   keydown   65
 ENVJSTEST:   Mesh   fake-uuid-101   ../content/teapot
 ENVJSTEST:   Create   fake-uuid-102
 ENVJSTEST:   Mesh   fake-uuid-102   ../content/teapot
-ENVJSTEST: _handleGUIMessage:   180   100   0,1,0,0
+ENVJSTEST: _handleGUIMessage:   mousemove   180   100   0,1,0,0
 ENVJSTEST:   Move   fake-uuid-100   undefined   0,1,0,0   undefined   undefined
 ENVJSTEST:   Move   fake-uuid-101   0,3,-10   undefined   undefined   undefined
+ENVJSTEST: _handleGUIMessage:   mousedown   0
 ENVJSTEST:   Move   fake-uuid-102   3,3,-10   undefined   undefined   undefined
 ENVJSTEST:   Move   fake-uuid-102   undefined   0.5,0.5,0.5,0.5   undefined   undefined
 ENVJSTEST:   Move   fake-uuid-102   undefined   undefined   1,2,-3   undefined

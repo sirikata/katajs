@@ -40,12 +40,18 @@ Kata.include("katajs/oh/Script.js");
     };
     Example.BlessedScript.prototype._handleGUIMessage = function (channel, msg) {
         if (msg.msg == "keydown") {
-            console.log("ENVJSTEST: _handleGUIMessage:", msg.event.keyCode)   
+            console.log("ENVJSTEST: _handleGUIMessage:", msg.msg, msg.event.keyCode)   
         }
-        if (msg.msg == "mousemove") {
+        else if (msg.msg == "mousedown") {
+            console.log("ENVJSTEST: _handleGUIMessage:",  msg.msg, msg.event.which)   
+        }
+        else if (msg.msg == "mousemove") {
             var q = [0,1,0,0]
-            console.log("ENVJSTEST: _handleGUIMessage:", msg.event.x, msg.event.y,q)   
+            console.log("ENVJSTEST: _handleGUIMessage:",  msg.msg, msg.event.x, msg.event.y,q)   
             Example.blessedInstance.mPresence.setOrientation(q)
+        }
+        else {
+            console.log("ENVJSTEST: _handleGUIMessage unexpected event", msg.msg, msg.event)   
         }
     };
 })();

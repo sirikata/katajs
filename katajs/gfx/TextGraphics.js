@@ -181,9 +181,18 @@ TextGraphics=function(callbackFunction,parentElement) {
             msg = {
                 msg: "mousemove",
                 event: {
-                    button: 0,
                     x: 180,
                     y: 100
+                }
+            };
+            if (this._inputCb) 
+                this._inputCb(msg)
+        }
+        if (this._testInputCounter == 10) {
+            msg = {
+                msg: "mousedown",
+                event: {
+                    which:0
                 }
             };
             if (this._inputCb) 
