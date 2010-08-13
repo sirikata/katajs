@@ -428,10 +428,26 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     el.addEventListener('mousemove',
                         function(e){thus._mouseMove(e);},
                         true);
+
+    /*
     el.addEventListener('wheel',
                         function(e){thus._scrollWheel(e);},
                         true);
+    */
 
+    // many events not supported in eventListener, need to get them direct from o3d:
+
+    o3djs.event.addEventListener(this.mClientElement, 'wheel', function(e){
+//        console.log("*** listen wheel:",e);
+        var ev = {};
+        ev.type = e.type;
+        ev.dy = e.deltaY;
+        var msg = {
+            msg: "wheel",
+            event: ev
+        };
+        thus._inputCb(msg);
+    });
     o3djs.event.addEventListener(this.mClientElement, 'keydown', function(e){
         var ev = {};
         ev.type = e.type;
@@ -754,6 +770,7 @@ O3DGraphics.prototype._mouseMove = function(e){
 };
 
 O3DGraphics.prototype._scrollWheel = function(e){
+    console.log("*** SCROLL",e)
     /// FIXME: figure out what event attributes to copy
     var msg = {
         msg: "wheel",
