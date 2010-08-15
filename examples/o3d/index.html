@@ -50,34 +50,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	    }
 	</script>
 -->
-	<script type="text/javascript" src="../../network/GraphicsSimulation.js"></script>
-	<script type="text/javascript" src="../../network/MainThread.js"></script>
+
+    <script type="text/javascript">
+        Kata.include("network/MainThread.js");
+        Kata.include("network/GraphicsSimulation.js");
+        Kata.include("katajs/core/URL.js");
+	Kata.include("katajs/space/loop/Space.js");
+	Kata.include("katajs/oh/LoopbackSpaceConnection.js");
+    </script>
+
     <script type="text/javascript" src="../../externals/o3djs/base.js"></script>
     <script type="text/javascript" src="../../externals/o3d-webgl/base.js"></script>
 	<script type="text/javascript" src="../../katajs/gfx/o3dgfx.js"></script>
 
     <script type="text/javascript">
         var kata, graphics;
-        var defaultSpace = "12345678-1111-1111-1111-defa01759ace";
-        window.onload = function(){
+        var defaultSpace = "loop://localhost";
+        var driver = "o3d"; // "o3d" or "glge"
+
+        Kata.resolveDeferredHeaders();
+
+        function loadGFX() {
             window.kata = new Kata.MainThread();
-            graphics = new Kata.GraphicsSimulation("o3d", window.kata.getChannel(), document.getElementById("container"));
-            // Use a real space server.
-            /*
-             window.kata.getChannel().sendMessage({
-             msg: "RegisterSpace",
-             spaceid: defaultSpace,
-             server: "sirikata://localhost" // Remote space
-             });
-             */
-            window.kata.getChannel().sendMessage({
-                msg: "RegisterSpace",
-                spaceid: defaultSpace,
-                server: "skloop://" // Loopback space
-            });
-            var testObj0 = "camera" //Math.uuid();
-            var testObj1 = "tst1" //Math.uuid();
-            var testObj2 = "tst2" //Math.uuid();
+            graphics = new Kata.GraphicsSimulation(driver, window.kata.getChannel(), document.getElementById("container"));
+
+            // Simulated local space
+            loopspace = new Kata.LoopbackSpace( new Kata.URL(defaultSpace) );
+
             window.kata.getChannel().sendMessage({
                 msg: "Create",
                 spaceid: defaultSpace,
@@ -85,6 +84,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 method:"Sirikata.BlessedScript",
                 args:{spaceid:defaultSpace,pos:[0,0,100]}
             });
+        }
+        if (driver == "glge") {
+            doc = new GLGE.Document;
+            doc.onLoad = loadGFX;
+            doc.load("scene.xml");
+        } else {
+           window.onload=loadGFX;
         }
     </script>
 

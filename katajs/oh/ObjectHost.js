@@ -166,8 +166,9 @@ Kata.include("katajs/core/URL.js");
                 break;
             }
         }
-        console.log("ObjectHost message for unknown object: "+privid);
-        console.log("List of known objects:",this.mObjects);
+        else {
+            Kata.warn("ObjectHost received unknown message: " + data.msg);
+        }
     };
 
     /** Creates a new instance of a Kata.HostedObject for a specific protocol.
