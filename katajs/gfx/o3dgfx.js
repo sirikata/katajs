@@ -376,6 +376,10 @@ VWObject.prototype.createMesh = function(path) {
     this.mMeshURI = path;
     var thus = this;
     var renderTarg = this.mSpaceRoot.mDefaultRenderView;
+    var secondCounter = this.mPack.createObject('SecondCounter');
+    secondCounter.countMode = o3d.Counter.CYCLE;
+    secondCounter.start = 0;
+    secondCounter.end = 1.33; // HACK: Need better way to get end of animation from mesh.
     try {
         o3djs.scene.loadScene(
             this.mSpaceRoot.mElement.client,
@@ -387,7 +391,8 @@ VWObject.prototype.createMesh = function(path) {
                         renderTarg, 
                         p, par, exc);
                 }
-            });
+            },
+            {opt_animSource: secondCounter.getParam('count')});
     } catch (e) {
         console.log("loading failed : ",e);
     }
