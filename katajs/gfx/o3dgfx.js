@@ -379,7 +379,7 @@ VWObject.prototype.createMesh = function(path) {
     var secondCounter = this.mPack.createObject('SecondCounter');
     secondCounter.countMode = o3d.Counter.CYCLE;
     secondCounter.start = 0;
-    secondCounter.end = 1.33; // HACK: Need better way to get end of animation from mesh.
+    secondCounter.end = 0.8; // HACK: Need better way to get end of animation from mesh.
     try {
         o3djs.scene.loadScene(
             this.mSpaceRoot.mElement.client,
