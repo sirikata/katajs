@@ -36,7 +36,7 @@
  */
 
 // Typed arrays
-
+try {    
 // -- Bytes
 if (!WebGLUnsignedByteArray && Uint8Array) {
     var WebGLUnsignedByteArray = Uint8Array;
@@ -65,4 +65,7 @@ if (!WebGLFloatArray && Float32Array) {
 }
 if (!WebGLDoubleArray && Float64Array) {
     var WebGLDoubleArray = Float64Array;
+}
+} catch (x) {
+// Ignore, in this case just don't even have the necessary types
 }
