@@ -53,7 +53,10 @@
 
          this.mLocation = location;
 
-         this.mVisual = vis;
+         if (vis) {
+             this.rMesh = vis.mesh;
+             this.rAnim = vis.anim;
+         }
 
          // Indicates whether we're tracking this object, i.e. if a subscription was submitted.
          this.mTracking = false;

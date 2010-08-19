@@ -367,7 +367,7 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, pack, parent, exce
     }
 };
 
-VWObject.prototype.createMesh = function(path) {
+VWObject.prototype.createMesh = function(path, animation) {
     if (path == null) {
         throw "loadScene with null path";
     }
@@ -376,10 +376,16 @@ VWObject.prototype.createMesh = function(path) {
     this.mMeshURI = path;
     var thus = this;
     var renderTarg = this.mSpaceRoot.mDefaultRenderView;
-    var secondCounter = this.mPack.createObject('SecondCounter');
-    secondCounter.countMode = o3d.Counter.CYCLE;
-    secondCounter.start = 0;
-    secondCounter.end = 0.8; // HACK: Need better way to get end of animation from mesh.
+    if (animation) {
+        var secondCounter = this.mPack.createObject('SecondCounter');
+        secondCounter.countMode = o3d.Counter.CYCLE;
+        secondCounter.start = animation.beg;
+        secondCounter.end = animation.end;
+        animParams = {opt_animSource: secondCounter.getParam('count')};
+    }
+    else {
+        animParams = null;
+    }
     try {
         o3djs.scene.loadScene(
             this.mSpaceRoot.mElement.client,
@@ -392,7 +398,8 @@ VWObject.prototype.createMesh = function(path) {
                         p, par, exc);
                 }
             },
-            {opt_animSource: secondCounter.getParam('count')});
+            animParams
+            );
     } catch (e) {
         console.log("loading failed : ",e);
     }
@@ -415,7 +422,6 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     this.mViewWidth=1.0/clientElements.length;
     this._leftButtonState="up"
     this.send=function(obj) {
-//        console.log("*** debug o3d send",obj)
         return this.methodTable[obj.msg].call(this, obj);
     };
     this.destroy=function(){}
@@ -630,7 +636,7 @@ O3DGraphics.prototype.methodTable["Mesh"]=function(msg) {
     //q.innerHTML="Mesh "+msg.mesh;
     if (msg.mesh && msg.id in this.mObjects) {
         var vwObject=this.mObjects[msg.id];
-        vwObject.createMesh(msg.mesh);
+        vwObject.createMesh(msg.mesh, msg.anim);
     }
 };
 O3DGraphics.prototype.methodTable["DestroyMesh"]=function(msg) {
@@ -775,7 +781,6 @@ O3DGraphics.prototype._mouseMove = function(e){
 };
 
 O3DGraphics.prototype._scrollWheel = function(e){
-    console.log("*** SCROLL",e)
     /// FIXME: figure out what event attributes to copy
     var msg = {
         msg: "wheel",

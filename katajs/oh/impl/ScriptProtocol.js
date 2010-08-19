@@ -157,8 +157,9 @@
              },
              generateGFXUpdateVisualMessages : function(space, observer, remotePresence) {
                  var messageList=[];
-                 if (remotePresence.mVisual) {
-                     messageList.push(new Kata.ScriptProtocol.FromScript.GFXUpdateVisualMesh(space, observer, remotePresence.id(), remotePresence.mVisual));
+                 if (remotePresence.rMesh) {
+                     messageList.push(new Kata.ScriptProtocol.FromScript.GFXUpdateVisualMesh(space, 
+                        observer, remotePresence.id(), remotePresence.rMesh, remotePresence.rAnim));
                  }else {
                     //MIGHT be a light or somesuch
                  }
@@ -171,13 +172,14 @@
                  this.id = id;
              },
              // Generates either a Mesh, Light, WebView, or Camera message, or the Destroy variants.
-             GFXUpdateVisualMesh : function(space, observer, id, mesh) {
+             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
                  if (mesh == null) {
                      this.msg = "DestroyMesh";
                  } else {
                      this.msg = "Mesh";
                      this.mesh = mesh;
+                     this.anim = anim;
                  }
              },
              GFXAttachCamera : function(space, observer, id, canvasId) {
