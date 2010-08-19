@@ -56,6 +56,7 @@
          if (vis) {
              this.rMesh = vis.mesh;
              this.rAnim = vis.anim;
+             this.rUpAxis = vis.up_axis;
          }
 
          // Indicates whether we're tracking this object, i.e. if a subscription was submitted.
