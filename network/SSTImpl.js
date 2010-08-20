@@ -55,7 +55,7 @@ ObjectMessageDispatcherSST.prototype.registerObjectMessageRecipient = function(p
 ObjectMessageDispatcherSST.prototype.unregisterObjectMessageRecipient = function(port, recipient) {
     var currentRecipient = this.mObjectMessageRecipients[port];
     if (currentRecipient != recipient) {
-        console.log("Unregistering wrong recipient for port "+port);
+        Kata.log("Unregistering wrong recipient for port "+port);
     } else {
         delete this.mObjectMessageRecipients[port];
     }
@@ -736,7 +736,6 @@ ConnectionSST.prototype.receiveMessage=function(object_message) {
 
     if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
         this.mState = CONNECTION_CONNECTED_SST;
-        
         var originalListeningEndPoint=new EndPointSST(this.mRemoteEndPoint.endPoint, this.mRemoteEndPoint.port);
         
         this.setRemoteChannelID(received_msg.payload[0]+received_msg.payload[1]*256);
@@ -909,10 +908,10 @@ ConnectionSST.prototype.handleDatagram=function(received_stream_msg) {
     }
 
     var sstMsg=new Protocol.SST.SSTChannelHeader();
-    sstMsg.channel_id= mRemoteChannelID ;
-    sstMsg.transmit_sequence_number=mTransmitSequenceNumber;
+    sstMsg.channel_id=this.mRemoteChannelID;
+    sstMsg.transmit_sequence_number=this.mTransmitSequenceNumber;
     sstMsg.ack_count=1;
-    sstMsg.ack_sequence_number=mLastReceivedSequenceNumber;
+    sstMsg.ack_sequence_number=this.mLastReceivedSequenceNumber;
 
     this.sendSSTChannelPacket(sstMsg);
 
@@ -925,7 +924,7 @@ ConnectionSST.prototype.handleDatagram=function(received_stream_msg) {
 ConnectionSST.prototype.finalize=function() {
     //printf("Connection on %s getting destroyed\n", mLocalEndPoint.endPoint.readableHexData().c_str());
 
-    mDatagramLayer.dispatcher().unregisterObjectMessageRecipient(this.mLocalEndPoint.port, this);
+    this.mDatagramLayer.dispatcher().unregisterObjectMessageRecipient(this.mLocalEndPoint.port, this);
 
 
     if (this.mState != CONNECTION_DISCONNECTED_SST) {
@@ -1312,11 +1311,7 @@ function StreamSST (parentLSID, conn,
 /**
  * @type {Array} of uint8
  */
-    this.mReceiveBuffer=new Array(this.mReceiveWindowSize);
-/**
- * @type {Array} of boolean whether the data is there
- */
-    this.mReceiveBitmap=new Array(this.mReceiveWindowSize);
+    this.mReceiveBuffer=[];
 /**
  * @type {!KataDeque} deque of StreamBuffer data that is queued
  */
@@ -1343,7 +1338,7 @@ function StreamSST (parentLSID, conn,
 /**
  * @type {number} number of bytes put to the wire
  */
-    this.mNumBytesSent=this.mInitialDataLength;
+    this.mNumBytesSent=this.mInitialDataLength || 0;
     if (initial_data.length>this.mInitialData.length){
         this.write(initial_data.slice(this.mInitialData.length,initial_data.length));
     }
@@ -1389,7 +1384,7 @@ StreamSST.prototype.write=function(data) {
       if (this.mCurrentQueueLength+len > MAX_QUEUE_LENGTH_STREAM_SST) {
         return 0;
       }
-      KataDequePushBack(this.mQueuedBuffers,new StreamBuffer(data, data.length, this.mNumBytesSent));
+      KataDequePushBack(this.mQueuedBuffers,new StreamBuffer(data, this.mNumBytesSent));
       this.mCurrentQueueLength += len;
       this.mNumBytesSent += len;
 
@@ -1509,7 +1504,7 @@ StreamSST.prototype.connection=function() {
   */
 StreamSST.prototype.createChildStream=function (cb, data,local_port,remote_port)
   {
-    this.mConnection.stream(cb, data, length, local_port, remote_port, mParentLSID);
+    this.mConnection.stream(cb, data, length, local_port, remote_port, this.mParentLSID);
   };
 
   /**
@@ -1701,10 +1696,10 @@ StreamSST.prototype.sendToApp=function(skipLength) {
     var readyBufferSize = skipLength;
 
     for (var i=skipLength; i < MAX_RECEIVE_WINDOW_STREAM_SST; i++) {
-      if (this.mReceiveBitmap[i] == 1) {
+      if (this.mReceiveBuffer[i] !== undefined) {
         readyBufferSize++;
       }
-      else if (this.mReceiveBitmap[i] == 0) {
+      else {
         break;
       }
     }
@@ -1712,15 +1707,17 @@ StreamSST.prototype.sendToApp=function(skipLength) {
     //pass data up to the app from 0 to readyBufferSize;
     //
     if (this.mReadCallback && readyBufferSize > 0) {
-      this.mReadCallback(this.mReceiveBuffer, readyBufferSize);
+      this.mReadCallback(this.mReceiveBuffer);
 
       //now move the window forward...
-      this.mLastContiguousByteReceived = mLastContiguousByteReceived.add(PROTO.I64.fromNumber(readyBufferSize));
-      this.mNextByteExpected = mLastContiguousByteReceived.add(PROTO.I64.ONE);
+      this.mLastContiguousByteReceived = this.mLastContiguousByteReceived.add(PROTO.I64.fromNumber(readyBufferSize));
+      this.mNextByteExpected = this.mLastContiguousByteReceived.add(PROTO.I64.ONE);
 
-      memset(mReceiveBitmap, 0, readyBufferSize);
-      memmove(mReceiveBitmap, mReceiveBitmap + readyBufferSize, MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize);
-      memmove(mReceiveBuffer, mReceiveBuffer + readyBufferSize, MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize);
+      var len = MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize;
+      for (var i = 0; i < len; i++) {
+        this.mReceiveBuffer[i] = this.mReceiveBuffer[i + readyBufferSize];
+      }
+      this.mRecieveBuffer.length = len;
 
       this.mReceiveWindowSize += readyBufferSize;
     }
@@ -1739,7 +1736,7 @@ StreamSST.prototype.receiveData=function(streamMsg,
     }
     else if (streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
       var offsetHash=offset.hash();
-      var channelBuffer=this.mChannelToBufferMap[offset];
+      var channelBuffer=this.mChannelToBufferMap[offsetHash];
       if (channelBuffer) {
         var dataOffset = channelBuffer.mOffset;
         this.mNumOutstandingBytes -= channelBuffer.mBuffer.length;
@@ -1748,8 +1745,8 @@ StreamSST.prototype.receiveData=function(streamMsg,
 
         this.updateRTO(channelBuffer.mTransmitTime, channelBuffer.mAckTime);
 
-        if ( Math.pow(2.0, streamMsg.window) - mNumOutstandingBytes >= 0.5 ) {
-          this.mTransmitWindowSize = Math.round(pow(2.0, streamMsg.window) - mNumOutstandingBytes);
+        if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes >= 0.5 ) {
+          this.mTransmitWindowSize = Math.round(pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
         }
         else {
           this.mTransmitWindowSize = 0;
@@ -1795,7 +1792,6 @@ StreamSST.prototype.receiveData=function(streamMsg,
             for (var i=0;i<len;++i) {
                 var loc=offsetInBuffer+i;
                 this.mReceiveBuffer[loc]=buffer[i];
-                this.mReceiveBitmap[loc]=1;
             }
 
             this.sendToApp(len);
@@ -1815,11 +1811,11 @@ StreamSST.prototype.receiveData=function(streamMsg,
         var lastByteInBuffer=offset+len-1;
         var beforeWindow=lastByteInBuffer - this.mLastContiguousByteReceived.lsw;
         // is 2 billion the right number?
-        if (Math.abs(beforeWindow) > (1<<31)) {
+        if (Math.abs(beforeWindow) > 2147483647) {
             beforeWindow = -beforeWindow;
         }
         if (beforeWindow <= 0) {
-          Kata.log("Acking packet which we had already received previously\n");
+          Kata.log("Acking packet which we had already received previously\n", lastByteInBuffer, this.mLastContiguousByteReceived.lsw, offset, len);
           this.sendAckPacket();
         }
         else if (offsetInBuffer + len <= MAX_RECEIVE_WINDOW_STREAM_SST) {
@@ -1832,7 +1828,6 @@ StreamSST.prototype.receiveData=function(streamMsg,
           for (var i=0;i<len;++i) {
               var loc=offsetInBuffer+i;
               this.mReceiveBuffer[loc]=buffer[i];
-              this.mReceiveBitmap[loc]=1;
           }
 
           this.sendAckPacket();

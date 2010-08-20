@@ -7,6 +7,14 @@ Kata.include("network/sirikata/protocol/ObjectMessage.pbj.js");
 Protocol = Sirikata.Protocol;
 Kata.include("network/SSTImpl.js");
 
+function print(str) {
+    console.log.call(console, arguments);
+    var text = document.createTextNode(str);
+    var br = document.createElement("br");
+    document.body.appendChild(text);
+    document.body.appendChild(br);
+}
+
 function TestObjectMessageRouter(targetEndpoint, targetDispatcher) {
     this.mDispatcher = targetDispatcher;
     this.mTargetEndpoint = targetEndpoint;
@@ -22,15 +30,19 @@ function SSTTest() {
     this.dispatcher = new ObjectMessageDispatcherSST;
 };
 SSTTest.prototype.establishedConnection = function(error, stream) {
-    console.log("established, error = "+error+"\n", stream);
+    print("established, error = "+error+"\n", stream);
     stream.write([2,7,1,8,2,8,1,8]);
+    var t = this;
+    stream.registerReadCallback(function(){SSTTest.prototype.receiveMessage.apply(t, arguments);});
 };
 SSTTest.prototype.acceptConnection = function(error, stream) {
-    console.log("accepted, error = "+error+"\n", stream);
+    print("accepted, error = "+error+"\n", stream);
     stream.write([3,1,4,1,5,9,2,7]);
+    var t = this;
+    stream.registerReadCallback(function(){SSTTest.prototype.receiveMessage.apply(t, arguments);});
 }
 SSTTest.prototype.receiveMessage = function(msg) {
-    console.log("receive message!\n", msg);
+    print("received message! "+msg, msg);
 };
 SSTTest.prototype.createTestObjects = function(uuidA, uuidB) {
     var dispatcherA = new ObjectMessageDispatcherSST;
