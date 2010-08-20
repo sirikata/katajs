@@ -637,6 +637,13 @@ O3DGraphics.prototype.methodTable["Mesh"]=function(msg) {
     if (msg.mesh && msg.id in this.mObjects) {
         var vwObject=this.mObjects[msg.id];
         vwObject.createMesh(msg.mesh, msg.anim);
+        if (msg.up_axis == "Z_UP") {
+            this.moveTo(vwObject, {
+                // FIXME: needs to be permanent, so future setOrientations will be relative to this
+                orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
+            });
+        }
+        vwObject.updateTransformation(this);
     }
 };
 O3DGraphics.prototype.methodTable["DestroyMesh"]=function(msg) {
