@@ -15,7 +15,7 @@ Kata.include("katajs/oh/Script.js");
         for (var idx = 0; idx < 2; idx++) {
             this.createObject("tests/envjs/test_Script.js", "Example.TestScript", {
                 space: args.space,
-                visual: "../content/teapot"
+                visual: {mesh:"../content/teapot"}
             });
         }
         Example.blessedInstance=this;
