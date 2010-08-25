@@ -420,7 +420,7 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     this.mRenderTargets={};//this contains info about each render target, be it a texture or a clientElement (client elements are mapped by #, textures by uuid)
     this.mSpaceRoots={};//this will contain scene graph roots for each space
     this.mViewWidth=1.0/clientElements.length;
-    this._leftButtonState="up"
+    this._buttonState="up"
     this.send=function(obj) {
         return this.methodTable[obj.msg].call(this, obj);
     };
@@ -449,7 +449,6 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     // many events not supported in eventListener, need to get them direct from o3d:
 
     o3djs.event.addEventListener(this.mClientElement, 'wheel', function(e){
-//        console.log("*** listen wheel:",e);
         var ev = {};
         ev.type = e.type;
         ev.dy = e.deltaY;
@@ -720,7 +719,7 @@ O3DGraphics.prototype.methodTable["DestroyIFrame"]=function(msg) {
 };
 
 O3DGraphics.prototype._mouseDown = function(e){
-    if (e.button==0) this._leftButtonState="down";
+    if (e.button<2) this._buttonState="down";
     var ev = {};
     ev.type = e.type;
     ev.shiftKey = e.shiftKey;
@@ -741,7 +740,7 @@ O3DGraphics.prototype._mouseDown = function(e){
 };
 
 O3DGraphics.prototype._mouseUp = function(e){
-    if (e.button==0) this._leftButtonState="up";
+    if (e.button<2) this._buttonState="up";
     var ev = {};
     ev.type = e.type;
     ev.shiftKey = e.shiftKey;
@@ -766,7 +765,7 @@ O3DGraphics.prototype._mouseUp = function(e){
  * otherwise we flood with messages.  Note right button is controlled by OS so we ignore
  */
 O3DGraphics.prototype._mouseMove = function(e){
-    if (this._leftButtonState == "down") {
+    if (this._buttonState == "down") {
         var ev = {};
         ev.type = e.type;
         ev.shiftKey = e.shiftKey;
