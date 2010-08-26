@@ -732,6 +732,8 @@ O3DGraphics.prototype._mouseDown = function(e){
     ev.screenY = e.screenY;
     ev.clientX = e.clientX;
     ev.clientY = e.clientY;
+    ev.width = e.srcElement.clientWidth;
+    ev.height = e.srcElement.clientHeight;
     var msg = {
         msg: "mousedown",
         event: ev
@@ -753,6 +755,8 @@ O3DGraphics.prototype._mouseUp = function(e){
     ev.screenY = e.screenY;
     ev.clientX = e.clientX;
     ev.clientY = e.clientY;
+    ev.width = e.srcElement.clientWidth;
+    ev.height = e.srcElement.clientHeight;
     var msg = {
         msg: "mouseup",
         event: ev
@@ -778,6 +782,8 @@ O3DGraphics.prototype._mouseMove = function(e){
         ev.screenY = e.screenY;
         ev.clientX = e.clientX;
         ev.clientY = e.clientY;
+        ev.width = e.srcElement.clientWidth;
+        ev.height = e.srcElement.clientHeight;
         var msg = {
             msg: "mousemove",
             event: ev
