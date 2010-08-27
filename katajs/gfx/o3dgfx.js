@@ -347,6 +347,7 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, pack, parent, exce
         alert("Could not load: " + this.mMeshURI + "\n" + exception);
     } else {
         console.log("loading finished.");
+        if(typeof(GlobalLoadDone)=="function") GlobalLoadDone();        // sue me; I've got lawyers
         // Generate draw elements and setup material draw lists.
         o3djs.pack.preparePack(pack, renderTarg.mViewInfo);
 

@@ -59,7 +59,6 @@ Kata.defer(function() {
         if (drv == undefined) {
             Kata.error('No graphics driver called "' + driver + '" available.');
         }
-
         this.mGFX = new drv(function(obj){},domElement);
         this.mGFX.setInputCallback(Kata.bind(this._handleInputMessage,this));
     };
