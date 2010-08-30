@@ -12,7 +12,7 @@ var Example;
         SUPER.constructor.call(this, channel, args);
         
         this.connect(args, null, Kata.bind(this.connected, this));
-        
+
         for (var idx = 0; idx < 2; idx++) {
             this.createObject("examples/simple_script/TestScript.js", "Example.TestScript", {
                 space: args.space,
@@ -21,7 +21,7 @@ var Example;
         }
         this.cameraPointX=0;
         this.cameraPointY=0;
-        this.cameraPos=[0,0,0]
+        this.cameraPos=[0,0,0];
     };
     Kata.extend(Example.BlessedScript, SUPER);
     Example.BlessedScript.prototype.proxEvent = function(remote, added){

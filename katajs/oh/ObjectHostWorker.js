@@ -40,8 +40,8 @@ Kata.include("katajs/oh/ObjectHost.js");
      * @constructor
      * @param {Kata.Channel=} graphicsChannel A channel to Kata.MainThread.
      */
-    Kata.ObjectHostWorker = function (graphicsChannel) {
-        this.mObjectHost = new Kata.ObjectHost();
+    Kata.ObjectHostWorker = function (graphicsChannel, blessed_args) {
+        this.mObjectHost = new Kata.ObjectHost(blessed_args.script, blessed_args.method, blessed_args.args);
 
         this.mObjectHost.registerSimulation(graphicsChannel, "graphics");
 

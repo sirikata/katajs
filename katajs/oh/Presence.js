@@ -179,7 +179,7 @@ Kata.defer(function() {
       * disconnected from the space.
       */
      Kata.Presence.prototype.onDisconnected = function(cb) {
-         Kata.notImplemented();
+         Kata.notImplemented("Presence.onDisconnected");
      };
 
      Kata.Presence.prototype.ODP = {};
@@ -201,7 +201,7 @@ Kata.defer(function() {
       * handler can be found.
       */
      Kata.Presence.prototype.ODP.setDefaultHandler = function(cb) {
-         Kata.notImplemented();
+         Kata.notImplemented("Presence.setDefaultHandler");
      };
 
 
@@ -214,13 +214,13 @@ Kata.defer(function() {
       * @param data the .
       */
      Kata.Presence.prototype.handleSpaceEvent = function(data) {
-         Kata.notImplemented();
+         Kata.notImplemented("Presence.handleSpaceEvent");
      };
 
      /** Handle a disconnection event.
       */
      Kata.Presence.prototype._handleDisconnect = function(data) {
-         Kata.notImplemented();
+         Kata.notImplemented("Presence._handleDisconnect");
      };
 
      /** Handle a location update event received from the space.  This
@@ -249,16 +249,16 @@ Kata.defer(function() {
       * (both this object and others).
       */
      Kata.Presence.prototype._handleVisualEvent = function(data) {
-         Kata.notImplemented();
+         Kata.notImplemented("Presence._handleVisualEvent");
      };
 
      /** Handle an update to result set of the current interest query. */
      Kata.Presence.prototype._handleQueryEvent = function(data) {
-         Kata.notImplemented();
+         Kata.notImplemented("Presence._handleQueryEvent");
      };
 
      /** Handle an received ODP message. */
      Kata.Presence.prototype._handleODPEvent = function(data) {
-         Kata.notImplemented();
+         Kata.notImplemented("Presence._handleODPEvent");
      };     
 });

@@ -40,8 +40,10 @@ Kata.defer(function() {
      * spawn Kata.GraphicsSimulation objects, or to communicate to the OH.
      * @constructor
      */
-    Kata.MainThread = function () {
-        this.mObjectHostWorker = new Kata.WebWorker("katajs/oh/ObjectHostWorker.js", "Kata.ObjectHostWorker", []);
+    Kata.MainThread = function (blessed_script, blessed_class, blessed_args) {
+        this.mObjectHostWorker = new Kata.WebWorker("katajs/oh/ObjectHostWorker.js", "Kata.ObjectHostWorker",
+                                                    {script : blessed_script, method : blessed_class, args : blessed_args}
+                                                   );
         this.mObjectHostChannel = this.mObjectHostWorker.getChannel();
         this.mObjectHostChannel.registerListener(Kata.bind(this.receivedMessage, this));
         this.mObjectHostWorker.go();

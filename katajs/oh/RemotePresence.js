@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("katajs/core/Time.js");
+
 (function() {
 
      /** A RemotePresence represents another object in the world you

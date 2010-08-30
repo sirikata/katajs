@@ -30,6 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("katajs/core/URL.js");
+Kata.include("katajs/core/Location.js");
+Kata.include("katajs/core/Time.js");
+
 (function() {
 
      /** Script protocol contains classes for inter-thread
@@ -72,6 +76,22 @@
                  GraphicsMessage : "fgfm",
                  EnableGUIMessage : "feui",
                  DisableGUIMessage : "fdui"
+             },
+
+             reconstitute : function(data) {
+                 // "Reconstituting" is really just reallocating member variables
+                 // so they have the correct type, allowing them to access methods
+                 // of their original types.  This is necessary because the
+                 // migration across strands loses the prototype and functions.
+
+                 // FIXME currently there are just some generic rules, but we
+                 // probably need some message specific approach based on looking
+                 // up a function based on __type.
+
+                 if (typeof(data.space) != "undefined")
+                     data.space = new Kata.URL(data.space);
+
+                 return data;
              },
 
              Connect : function(space, auth) {
@@ -217,6 +237,22 @@
                  PresenceLocUpdate : "tloc",
                  GUIMessage : "tgui"
 
+             },
+
+             reconstitute : function(data) {
+                 // "Reconstituting" is really just reallocating member variables
+                 // so they have the correct type, allowing them to access methods
+                 // of their original types.  This is necessary because the
+                 // migration across strands loses the prototype and functions.
+
+                 // FIXME currently there are just some generic rules, but we
+                 // probably need some message specific approach based on looking
+                 // up a function based on __type.
+
+                 if (typeof(data.space) != "undefined")
+                     data.space = new Kata.URL(data.space);
+
+                 return data;
              },
 
              Connected : function(space, id, loc, bounds, visual) {

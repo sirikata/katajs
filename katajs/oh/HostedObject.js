@@ -88,6 +88,11 @@ Kata.include("katajs/core/MessageDispatcher.js");
      };
 
      Kata.HostedObject.prototype.messageFromScript = function (channel, data) {
+         // If the message can "reconstitute" itself, let it do so.
+         // This restores known types to versions with their prototype
+         // set properly so they regain their methods.
+         data = Kata.ScriptProtocol.FromScript.reconstitute(data);
+
          this.mScriptMessageDispatcher.dispatch(channel, data);
      };
 

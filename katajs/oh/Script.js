@@ -122,7 +122,7 @@ Kata.include("katajs/oh/RemotePresence.js");
       *
       */
      Kata.Script.prototype.timer = function(freq, cb, repeat) {
-         Kata.notImplemented();
+         Kata.notImplemented("Script.timer");
          return null;
      };
 
@@ -142,20 +142,21 @@ Kata.include("katajs/oh/RemotePresence.js");
       * @param readset set of keys to be read
       */
      Kata.Script.prototype.Persistence.read = function(readset) {
-         Kata.notImplemented();
+         Kata.notImplemented("Script.read");
      };
 
      /** Request the given data be read.
       * @param writeset map of keys to data to be written
       */
      Kata.Script.prototype.Persistence.write = function(writeset) {
-         Kata.notImplemented();
+         Kata.notImplemented("Script.write");
      };
 
      /** Handle messages received from the HostedObject.  This just
       * parses and dispatches to individual handler functions.
       */
      Kata.Script.prototype._handleHostedObjectMessage = function(channel, data) {
+         data = Kata.ScriptProtocol.ToScript.reconstitute(data);
          this.mMessageDispatcher.dispatch(channel, data);
      };
      /**

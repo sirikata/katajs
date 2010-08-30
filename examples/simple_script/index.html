@@ -102,18 +102,12 @@ is left up to the user since some may be expensive to load.
         var defaultSpace = "loop://localhost";
         var driver = "o3d"; // "o3d" or "glge"
         function loadGFX() {
-            window.kata = new Kata.MainThread();
+            window.kata = new Kata.MainThread(
+                                "examples/simple_script/BlessedScript.js",
+                                "Example.BlessedScript",
+                                { space : defaultSpace }
+                          );
             graphics = new Kata.GraphicsSimulation(driver, window.kata.getChannel(), document.getElementById("container"));
-
-            // Simulated local space
-            loopspace = new Kata.LoopbackSpace( new Kata.URL(defaultSpace) );
-
-            window.kata.getChannel().sendMessage({
-                msg: "Create",
-                script:"examples/simple_script/BlessedScript.js",
-                method:"Example.BlessedScript",
-                args:{ space : defaultSpace }
-            });
         }
         if (driver == "glge") {
             doc = new GLGE.Document;

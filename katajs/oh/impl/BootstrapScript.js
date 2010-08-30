@@ -33,6 +33,7 @@
 Kata.include("katajs/core/FilterChannel.js");
 Kata.include("katajs/core/MessageDispatcher.js");
 Kata.include("katajs/oh/Presence.js");
+Kata.include("katajs/core/URL.js");
 
 (function() {
      /** Bootstraps an object's script, enabling it to communicate
@@ -62,10 +63,6 @@ Kata.include("katajs/oh/Presence.js");
              cls = cls[clsTree[i]];
          }
 
-         // Create a filtered channel, so we get first crack at any messages
-         var filtered_channel = new Kata.FilterChannel(channel, Kata.bind(this.receiveMessage, this));
-         this.mScript = new cls(filtered_channel, args.realArgs);
-
          // Setup dispatcher and register handlers
          var handlers = {};
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
@@ -75,6 +72,12 @@ Kata.include("katajs/oh/Presence.js");
          this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
 
          this.mPresences = {};
+
+
+         // Create a filtered channel, so we get first crack at any messages
+         var filtered_channel = new Kata.FilterChannel(channel, Kata.bind(this.receiveMessage, this));
+         // And finally, in case the script constructor does anything synchronously, make the script creation the final step
+         this.mScript = new cls(filtered_channel, args.realArgs);
      };
 
      Kata.BootstrapScript.prototype.receiveMessage = function(channel, msg) {
@@ -82,7 +85,7 @@ Kata.include("katajs/oh/Presence.js");
      };
 
      Kata.BootstrapScript.prototype._handleConnected = function(channel, msg) {
-         var presence = new Kata.Presence(this.mScript, msg.space, msg.id, msg.loc, msg.visual);
+         var presence = new Kata.Presence(this.mScript, new Kata.URL(msg.space), msg.id, msg.loc, msg.visual);
 
          this.mPresences[msg.space] = presence;
          this.mScript.newPresence(presence);

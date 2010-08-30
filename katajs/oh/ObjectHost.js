@@ -42,13 +42,16 @@ Kata.include("katajs/core/URL.js");
      * other simulations (graphics and physics).
      * @constructor
      */
-    Kata.ObjectHost = function () {
+    Kata.ObjectHost = function (blessed_script, blessed_class, blessed_args) {
         this.mSimulations = [];
         this.mSimulationsByName = {};
         this.mSimulationCallbacksByName={};
         this.mSpaceMap = {};
         this.mSpaceConnections = {};
         this.mObjects = {};
+
+        this.createObject(blessed_script, blessed_class, blessed_args);
+
         if (network_debug) console.log("ObjectHosted!");
     };
 
@@ -145,29 +148,6 @@ Kata.include("katajs/core/URL.js");
             for (var i=0;i<cbArray.length;++i) {
                 cbArray[i].handleMessageFromSimulation(simName,channel,data);
             }
-        }else {//for bootstrapping the initial create command
-            this.receivedMessage(channel,data);
-        }
-    };
-
-    /** Sends a message to some simulation.
-     * @param {Kata.Channel} channel  The sending simulation.
-     * @param {string|object} data  A message (often an object formatted as
-     *     JavascriptGraphicsApi)
-     */
-    Kata.ObjectHost.prototype.receivedMessage = function (channel, data) {
-        if (data.msg=="Create") {
-            switch (data.msg) {
-            case "Create":{
-                this.createObject(data.script, data.method, data.args);
-                return;
-            }
-            default:
-                break;
-            }
-        }
-        else {
-            Kata.warn("ObjectHost received unknown message: " + data.msg);
         }
     };
 
