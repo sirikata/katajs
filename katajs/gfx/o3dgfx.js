@@ -719,8 +719,7 @@ O3DGraphics.prototype.methodTable["DestroyIFrame"]=function(msg) {
     //destroyX(msg,"IFrame");
 };
 
-O3DGraphics.prototype._mouseDown = function(e){
-    if (e.button<2) this._buttonState="down";
+O3DGraphics.prototype._extractMouseEventInfo = function(e){
     var ev = {};
     ev.type = e.type;
     ev.shiftKey = e.shiftKey;
@@ -733,8 +732,24 @@ O3DGraphics.prototype._mouseDown = function(e){
     ev.screenY = e.screenY;
     ev.clientX = e.clientX;
     ev.clientY = e.clientY;
-    ev.width = e.srcElement.clientWidth;
-    ev.height = e.srcElement.clientHeight;
+    if (typeof(e.srcElement) != "undefined") {
+        ev.width = e.srcElement.clientWidth;
+        ev.height = e.srcElement.clientHeight;
+    }
+    else if (typeof(e.target != "undefined")) {
+        ev.width = e.target.width;
+        ev.height = e.target.height;
+    }
+    else {
+        ev.width = 0;
+        ev.height = 0;
+    }
+    return ev;
+};
+
+O3DGraphics.prototype._mouseDown = function(e){
+    if (e.button<2) this._buttonState="down";
+    var ev = this._extractMouseEventInfo(e);
     var msg = {
         msg: "mousedown",
         event: ev
@@ -744,20 +759,7 @@ O3DGraphics.prototype._mouseDown = function(e){
 
 O3DGraphics.prototype._mouseUp = function(e){
     if (e.button<2) this._buttonState="up";
-    var ev = {};
-    ev.type = e.type;
-    ev.shiftKey = e.shiftKey;
-    ev.altKey = e.altKey;
-    ev.ctrlKey = e.ctrlKey;
-    ev.which = e.button;
-    ev.x = e.offsetX;
-    ev.y = e.offsetY;
-    ev.screenX = e.screenX;
-    ev.screenY = e.screenY;
-    ev.clientX = e.clientX;
-    ev.clientY = e.clientY;
-    ev.width = e.srcElement.clientWidth;
-    ev.height = e.srcElement.clientHeight;
+    var ev = this._extractMouseEventInfo(e);
     var msg = {
         msg: "mouseup",
         event: ev
@@ -771,20 +773,7 @@ O3DGraphics.prototype._mouseUp = function(e){
  */
 O3DGraphics.prototype._mouseMove = function(e){
     if (this._buttonState == "down") {
-        var ev = {};
-        ev.type = e.type;
-        ev.shiftKey = e.shiftKey;
-        ev.altKey = e.altKey;
-        ev.ctrlKey = e.ctrlKey;
-        ev.which = e.button;
-        ev.x = e.offsetX;
-        ev.y = e.offsetY;
-        ev.screenX = e.screenX;
-        ev.screenY = e.screenY;
-        ev.clientX = e.clientX;
-        ev.clientY = e.clientY;
-        ev.width = e.srcElement.clientWidth;
-        ev.height = e.srcElement.clientHeight;
+        var ev = this._extractMouseEventInfo(e);
         var msg = {
             msg: "mousemove",
             event: ev
