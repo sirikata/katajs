@@ -16,7 +16,11 @@ var Example;
         for (var idx = 0; idx < 2; idx++) {
             this.createObject("examples/simple_script/TestScript.js", "Example.TestScript", {
                 space: args.space,
-                visual: idx?"../content/happybox":"../content/teapot"
+                visual : {
+                    mesh : idx?"../content/happybox":"../content/teapot",
+                    anim : "",
+                    up_axis : [1, 0, 0]
+                }
             });
         }
         this.cameraPointX=0;
