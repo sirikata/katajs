@@ -63,20 +63,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     var defaultSpace = "loop://localhost";
     var driver = "text"; // "o3d" or "glge"
     function loadGFX(){
-        window.kata = new Kata.MainThread();
+        window.kata = new Kata.MainThread(
+                                "tests/envjs/test_Blessed.js",
+                                "Example.BlessedScript",
+                                { space : defaultSpace }
+                      );
         graphics = new Kata.GraphicsSimulation(driver, window.kata.getChannel(), document.getElementById("container"));
         
         // Simulated local space
         loopspace = new Kata.LoopbackSpace(new Kata.URL(defaultSpace));
-        
-        window.kata.getChannel().sendMessage({
-            msg: "Create",
-            script: "tests/envjs/test_Blessed.js",
-            method: "Example.BlessedScript",
-            args: {
-                space: defaultSpace
-            }
-        });
     }
     
     if (driver == "glge") {
