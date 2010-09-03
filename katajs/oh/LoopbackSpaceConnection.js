@@ -31,7 +31,7 @@
  */
 
 Kata.include("katajs/oh/SpaceConnection.js");
-Kata.include("katajs/oh/ObjectHost.js");
+Kata.include("katajs/oh/SessionManager.js");
 
 // See note about how connections work. Generally connection classes
 // shouldn't include anything from a space implementation (and
@@ -46,11 +46,12 @@ Kata.defer(function() {
       * i.e. one running in a WebWorker in the same browser.
       *
       * @constructor
-      * @param {Kata.ObjectHost} oh the owner ObjectHost.
+      * @param {Kata.SessionManager} parent the parent
+      * SessionManager that owns this connection
       * @param {Kata.URL} spaceurl URL of the space to connect to
       */
-     Kata.LoopbackSpaceConnection = function (oh, spaceurl) {
-         SUPER.constructor.call(this, oh);
+     Kata.LoopbackSpaceConnection = function (parent, spaceurl) {
+         SUPER.constructor.call(this, parent);
 
          // LoopbackSpaceConnection uses an unusual mechanism for
          // connections. Since they are local, there's no network
@@ -84,9 +85,9 @@ Kata.defer(function() {
          this.mObjectID[id] = object;
          this.mLocalID[object] = id;
          if (object) // FIXME real presence_id below
-             this.mObjectHost.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, loc, bounds, visual);
+             this.mParent.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, loc, bounds, visual);
          else
-             this.mObjectHost.connectionResponse(id, false);
+             this.mParent.connectionResponse(id, false);
      };
 
      Kata.LoopbackSpaceConnection.prototype.registerProxQuery = function(id, sa) {
@@ -94,7 +95,7 @@ Kata.defer(function() {
      };
 
      Kata.LoopbackSpaceConnection.prototype.proxEvent = function(id, observed, entered, properties) {
-         this.mObjectHost.proxEvent(this.mSpaceURL, id, observed, entered, properties);
+         this.mParent.proxEvent(this.mSpaceURL, id, observed, entered, properties);
      };
 
      Kata.LoopbackSpaceConnection.prototype.locUpdateRequest = function(id, loc, visual) {
@@ -111,10 +112,10 @@ Kata.defer(function() {
 
      // Invoked by LoopbackSpace when a loc update for a tracked object occurs.
      Kata.LoopbackSpaceConnection.prototype.presenceLocUpdate = function(from, to, loc, visual) {
-         this.mObjectHost.presenceLocUpdate(this.mSpaceURL, from, to, loc, visual);
+         this.mParent.presenceLocUpdate(this.mSpaceURL, from, to, loc, visual);
      };
 
-     Kata.ObjectHost.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
+     Kata.SessionManager.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
      // Simulated local space
      loopspace = new Kata.LoopbackSpace( new Kata.URL("loop://localhost") );
 

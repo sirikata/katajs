@@ -42,11 +42,11 @@ Kata.include("katajs/oh/ObjectHost.js");
       * handlers using Kata.ObjectHost.registerProtocolHandler.
       *
       * @constructor
-      * @param {Kata.ObjectHost} oh the object host that owns this
-      * connection. Used to provide callbacks.
+      * @param {Kata.SessionManager} parent the parent SessionManager
+      * that owns this connection.
       */
-     Kata.SpaceConnection = function (oh) {
-         this.mObjectHost = oh;
+     Kata.SpaceConnection = function (parent) {
+         this.mParent = parent;
      };
 
      /** Attempt to connect the object to the space using the

@@ -30,12 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("katajs/oh/SessionManager.js");
 Kata.include("katajs/oh/HostedObject.js");
 Kata.include("katajs/core/URL.js");
 
 (function() {
-
-    var NUM_STREAMS = 1; //FIXME: Test with more than one.
 
     /** Kata.ObjectHost is the main interface to access HostedObject's. It also
      * manages the list of open space connections, and communication between
@@ -46,40 +45,13 @@ Kata.include("katajs/core/URL.js");
         this.mSimulations = [];
         this.mSimulationsByName = {};
         this.mSimulationCallbacksByName={};
-        this.mSpaceMap = {};
-        this.mSpaceConnections = {};
         this.mObjects = {};
 
-        this.createObject(blessed_script, blessed_class, blessed_args);
+        this.mSessionManager = new Kata.SessionManager();
 
+        this.createObject(blessed_script, blessed_class, blessed_args);
         if (network_debug) console.log("ObjectHosted!");
     };
-
-     /** Register a protocol handler which is used to create
-      *  connections to spaces for a protocol.
-      *
-      * @param {string} protocol the protocol this constructor
-      * handles, e.g. the protocol part of a URL such as http in http://host/
-      * @param {} conn_const a constructor for a SpaceConnection
-      */
-     Kata.ObjectHost.registerProtocolHandler = function(protocol, conn_const) {
-         if (! this._protocols)
-             this._protocols = {};
-
-         if (this._protocols[protocol])
-             Kata.warn("Overwriting protocol handler for " + protocol);
-
-         this._protocols[protocol] = conn_const;
-     };
-
-     /** Lookup the handler for the specified protocol.
-      *  @param {string} protocol the protocol to handle.
-      */
-     Kata.ObjectHost._getProtocolHandler = function(protocol) {
-         if (! this._protocols)
-             return undefined;
-         return this._protocols[protocol];
-     };
 
     /** Notifies the ObjectHost about a new simulation.
      * @param {Kata.Channel} channel  The corresponding simulation's channel.
@@ -107,20 +79,6 @@ Kata.include("katajs/core/URL.js");
         }
     };
 
-    Kata.ObjectHost.prototype.privateIdGenerator=function(){
-        var retval=0;
-        return function() {
-            retval+=1;
-            return ""+retval;
-        };
-    }();
-
-     Kata.ObjectHost.prototype.createObject = function(script, cons, args) {
-         var privid = this.privateIdGenerator();
-         var createdObject = this.generateObject(privid);
-         if (script && cons && args)
-             createdObject.createScript(script, cons, args);
-    };
     Kata.ObjectHost.prototype.registerSimulationCallback = function(simName, object){
         if (simName in this.mSimulationCallbacksByName) {
             this.mSimulationCallbacksByName[simName].push(object);
@@ -151,6 +109,21 @@ Kata.include("katajs/core/URL.js");
         }
     };
 
+    Kata.ObjectHost.prototype.privateIdGenerator=function(){
+        var retval=0;
+        return function() {
+            retval+=1;
+            return ""+retval;
+        };
+    }();
+
+     Kata.ObjectHost.prototype.createObject = function(script, cons, args) {
+         var privid = this.privateIdGenerator();
+         var createdObject = this.generateObject(privid);
+         if (script && cons && args)
+             createdObject.createScript(script, cons, args);
+    };
+
     /** Creates a new instance of a Kata.HostedObject for a specific protocol.
      * @param {string} id  A unique name for this object. You can use this to
      *     lookup the object within the object host, and it gets passed to the
@@ -170,83 +143,23 @@ Kata.include("katajs/core/URL.js");
       * @param {} auth authentication information for the space
       */
      Kata.ObjectHost.prototype.connect = function(ho, req, auth) {
-         var spaceURL = new Kata.URL(req.space);
-
-         // Look up or create a connection
-         var space_conn = this.mSpaceConnections[spaceURL.toString()];
-         if (!space_conn) {
-             var protoClass = Kata.ObjectHost._getProtocolHandler(spaceURL.protocol);
-             if (!protoClass)
-                 Kata.error("Unknown space protocol: " + spaceURL.protocol);
-             space_conn = new protoClass(this, spaceURL);
-             this.mSpaceConnections[spaceURL.toString()] = space_conn;
-         }
-
-         // And try to connect
-         space_conn.connectObject(ho.getID(), auth, req.visual);
-     };
-
-     /** Indicate a connection response to the ObjectHost.  Should
-      *  only be called by SpaceConnections.
-      *  @param {} id
-      *  @param {boolean} success
-      *  @param {} presence_id the identifier for the presence, or
-      *  null if the connection wasn't successful.
-      *  @param {Kata.Location} loc initial location information for the object
-      *  @param {} visual a reference to the visual description of the object
-      */
-     Kata.ObjectHost.prototype.connectionResponse = function(id, success, presence_id, loc, visual) {
-         var obj = this.mObjects[id];
-         if (!obj) {
-             Kata.warn("Got connection response for unknown object: " + id);
-             return;
-         }
-
-         // Swap which ID we're tracking the object with
-         delete this.mObjects[id];
-         this.mObjects[presence_id.object] = obj;
-
-         obj.connectionResponse(success, presence_id, loc, visual);
+         this.mSessionManager.connect(ho, req, auth);
      };
 
      Kata.ObjectHost.prototype.registerProxQuery = function(space, id, sa) {
-         var space_conn = this.mSpaceConnections[space];
-         space_conn.registerProxQuery(id, sa);
+         this.mSessionManager.registerProxQuery(space, id, sa);
      };
 
-     Kata.ObjectHost.prototype.proxEvent = function(space, querier, observed, entered, properties) {
-         var obj = this.mObjects[querier];
-         obj.proxEvent(space, observed, entered, properties);
-     };
-
-     /** Send an update request to the space. */
      Kata.ObjectHost.prototype.locUpdateRequest = function(space, id, loc, visual) {
-         var space_conn = this.mSpaceConnections[space];
-         space_conn.locUpdateRequest(id, loc, visual);
+         this.mSessionManager.locUpdateRequest(space, id, loc, visual);
      };
 
-     /** Should be invoked by SpaceConnection classes when a location
-      *  update for a presence is available.
-      *  @param from
-      *  @param to
-      */
-     Kata.ObjectHost.prototype.presenceLocUpdate = function(space, from, to, loc, visual) {
-         var obj = this.mObjects[to];
-         obj.presenceLocUpdate(space, from, loc, visual);
+     Kata.ObjectHost.prototype.subscribe = function(space, id, observe) {
+         this.mSessionManager.subscribe(space, id, observe);
      };
 
-     Kata.ObjectHost.prototype.subscribe = function(space, id, observed) {
-         var space_conn = this.mSpaceConnections[space];
-         space_conn.subscribe(id, observed);
+     Kata.ObjectHost.prototype.unsubscribe = function(space, id, observe) {
+         this.mSessionManager.unsubscribe(space, id, observe);
      };
-
-     Kata.ObjectHost.prototype.unsubscribe = function(space, id, observed) {
-         var space_conn = this.mSpaceConnections[space];
-         space_conn.unsubscribe(id, observed);
-     };
-
 
 })();
-
-// Needs to register using registerProtocolHandler.
-Kata.include("katajs/oh/LoopbackSpaceConnection.js");
