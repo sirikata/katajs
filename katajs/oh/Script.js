@@ -63,13 +63,12 @@ Kata.include("katajs/oh/RemotePresence.js");
 
          var handlers = {};
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
+         handlers[msgTypes.ReceiveODPMessage] = Kata.bind(this._handleReceiveODPMessage, this);
          handlers[msgTypes.QueryEvent] = Kata.bind(this._handleQueryEvent, this);
-         handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);//duplicated code i GraphicsScript.js:66
+         handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);
          this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
      };
-     Kata.Script.prototype._handleGUIMessage = function (data) {
-        
-     };
+
      /** Send a message to the HostedObject.
       */
      Kata.Script.prototype._sendHostedObjectMessage = function (data) {
@@ -187,6 +186,10 @@ Kata.include("katajs/oh/RemotePresence.js");
              presence.remotePresence(remote, false);
          }
          return remote;
+     };
+
+     Kata.Script.prototype._handleReceiveODPMessage = function(channel, msg) {
+         Kata.notImplemented("Script._handleReceiveODPMessage");
      };
 
      Kata.Script.prototype._handlePresenceLocUpdate = function(channel, msg) {

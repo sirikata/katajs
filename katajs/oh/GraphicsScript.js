@@ -58,18 +58,12 @@ Kata.include("katajs/oh/RemotePresence.js");
          this.mRenderableRemotePresenceIndex=0;
          this.mGraphicsTimer=null;
          this.mNumGraphicsSystems=0;
-         var handlers = {};
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
-         handlers[msgTypes.QueryEvent] = Kata.bind(this._handleQueryEvent, this);
-         handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);
-         handlers[msgTypes.GUIMessage] = Kata.bind(this._handleGUIMessage, this);
-         //duplicated code i Script.js:66
-         this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
+         this.mMessageDispatcher.add(msgTypes.GUIMessage, Kata.bind(this._handleGUIMessage, this));
      };
      Kata.extend(Kata.GraphicsScript, SUPER);
 
       Kata.GraphicsScript.prototype._handleGUIMessage = function (channel, data) {
-          
       };
 
      /**

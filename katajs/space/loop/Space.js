@@ -103,6 +103,31 @@ Kata.include("katajs/core/Location.js");
          cb.connected(id, uuid, obj_loc, cb.visual); // FIXME clone these so they aren't shared
      };
 
+     Kata.LoopbackSpace.prototype.sendODPMessage = function(src_obj, src_port, dst_obj, dst_port, payload) {
+         var spaceself = this;
+         setTimeout(
+             function() {
+                 spaceself._sendODPMessage(src_obj, src_port, dst_obj, dst_port, payload);
+             },
+             this.netdelay
+         );
+     };
+     Kata.LoopbackSpace.prototype._sendODPMessage = function(src_obj, src_port, dst_obj, dst_port, payload) {
+         var src_cb = this.mObjects[src_obj];
+         if (!src_cb) {
+             Kata.warn("LoopbackSpace got message from non-existant object: " + src_obj);
+             return;
+         }
+
+         var dst_cb = this.mObjects[dst_obj];
+         if (!dst_cb) {
+             Kata.warn("LoopbackSpace got message to non-existant object: " + dst_obj);
+             return;
+         }
+
+         dst_cb.message(src_obj, src_port, dst_obj, dst_port, payload);
+     };
+
      Kata.LoopbackSpace.prototype.registerProxQuery = function(id, sa) {
          var spaceself = this;
          setTimeout(

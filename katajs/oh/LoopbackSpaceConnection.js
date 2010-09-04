@@ -74,6 +74,7 @@ Kata.defer(function() {
              id,
              {
                  connected : Kata.bind(this.connectResponse, this),
+                 message : Kata.bind(this.receiveODPMessage, this),
                  prox : Kata.bind(this.proxEvent, this),
                  presenceLocUpdate : Kata.bind(this.presenceLocUpdate, this),
                  visual: vis
@@ -88,6 +89,14 @@ Kata.defer(function() {
              this.mParent.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, loc, bounds, visual);
          else
              this.mParent.connectionResponse(id, false);
+     };
+
+     Kata.LoopbackSpaceConnection.prototype.sendODPMessage = function(src_obj, src_port, dst_obj, dst_port, payload) {
+         this.mSpace.sendODPMessage(src_obj, src_port, dst_obj, dst_port, payload);
+     };
+
+     Kata.LoopbackSpaceConnection.prototype.receiveODPMessage = function(src_obj, src_port, dst_obj, dst_port, payload) {
+         this.mParent.receiveODPMessage(this.mSpaceURL, src_obj, src_port, dst_obj, dst_port, payload);
      };
 
      Kata.LoopbackSpaceConnection.prototype.registerProxQuery = function(id, sa) {

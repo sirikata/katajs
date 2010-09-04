@@ -121,6 +121,16 @@ Kata.include("katajs/core/URL.js");
          obj.connectionResponse(success, presence_id, loc, visual);
      };
 
+     Kata.SessionManager.prototype.sendODPMessage = function(space, src_obj, src_port, dst_obj, dst_port, payload) {
+         var space_conn = this.mSpaceConnections[space];
+         space_conn.sendODPMessage(src_obj, src_port, dst_obj, dst_port, payload);
+     };
+
+     Kata.SessionManager.prototype.receiveODPMessage = function(space, src_obj, src_port, dst_obj, dst_port, payload) {
+         var obj = this.mObjects[dst_obj];
+         obj.receiveODPMessage(space, src_obj, src_port, dst_obj, dst_port, payload);
+     };
+
      Kata.SessionManager.prototype.registerProxQuery = function(space, id, sa) {
          var space_conn = this.mSpaceConnections[space];
          space_conn.registerProxQuery(id, sa);

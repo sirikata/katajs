@@ -32,6 +32,7 @@ var Example;
         if (added) {
             Kata.warn("Camera Discover object.");
             this.mPresence.subscribe(remote.id());
+            this.mPresence._sendODPMessage(10, remote.id(), 10, 'xyz');
         }
         else {
             Kata.warn("Camera Wiped object.");      // FIXME: unsubscribe!

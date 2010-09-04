@@ -86,6 +86,7 @@ Kata.include("katajs/core/Time.js");
              Types : {
                  Connect : "fcon",
                  Disconnect : "fdis",
+                 SendODPMessage : "fodp",
                  Location : "floc",
                  Visual : "fvis",
                  Query : "fque",
@@ -118,6 +119,16 @@ Kata.include("katajs/core/Time.js");
              Disconnect : function(space) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Disconnect;
                  this.space = space;
+             },
+
+             SendODPMessage : function(space, source_object, source_port, dest_object, dest_port, payload) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.SendODPMessage;
+                 this.space = space;
+                 this.source_object = source_object;
+                 this.source_port = source_port;
+                 this.dest_object = dest_object;
+                 this.dest_port = dest_port;
+                 this.payload = payload;
              },
 
              /** Location update.  Providing a subset of the information is permitted.
@@ -241,6 +252,7 @@ Kata.include("katajs/core/Time.js");
                  Connected : "tcon",
                  ConnectionFailed : "tfyl",
                  Disconnected : "tdis",
+                 ReceiveODPMessage : "todp",
                  QueryEvent : "tque",
                  PresenceLocUpdate : "tloc",
                  GUIMessage : "tgui"
@@ -277,7 +289,18 @@ Kata.include("katajs/core/Time.js");
                  this.__type = Kata.ScriptProtocol.ToScript.Types.GUIMessage;
                  this.msg = msg;
                  this.event = event;  
-             },            
+             },
+
+             ReceiveODPMessage : function(space, source_object, source_port, dest_object, dest_port, payload) {
+                 this.__type = Kata.ScriptProtocol.ToScript.Types.ReceiveODPMessage;
+                 this.space = space;
+                 this.source_object = source_object;
+                 this.source_port = source_port;
+                 this.dest_object = dest_object;
+                 this.dest_port = dest_port;
+                 this.payload = payload;
+             },
+    
              QueryEvent : function(space, observed, entered, loc, visual) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.QueryEvent;
                  this.space = space;

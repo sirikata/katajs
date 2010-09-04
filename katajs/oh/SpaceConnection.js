@@ -58,6 +58,11 @@ Kata.include("katajs/oh/ObjectHost.js");
          Kata.notImplemented("SpaceConnection.connectObject");
      };
 
+     /** Send an ODP message. */
+     Kata.SpaceConnection.prototype.sendODPMessage = function(src_obj, src_port, dst_obj, dst_port, payload) {
+         Kata.notImplemented("SpaceConnection.sendODPMessage");
+     };
+
      Kata.SpaceConnection.prototype.registerProxQuery = function(id, sa) {
          Kata.notImplemented("SpaceConnection.registerQuery");
      };
