@@ -24,8 +24,15 @@ Kata.include("katajs/oh/GraphicsScript.js");
         this.mPresence = presence;
         // Start periodic movements
         this.move();
+        // Listen for messages
+        this.mTestODPPort = this.mPresence.bindODPPort(10);
+        this.mTestODPPort.receive(Kata.bind(this._handleTestODPMessage, this));
     };
-    
+
+    Example.TestScript.prototype._handleTestODPMessage = function(src, dest, payload) {
+        Kata.warn("Received test message from " + dest + ": " + payload);
+    };
+     
     Example.TestScript.prototype.move = function(){
         if (!this.mPresence) 
             return;

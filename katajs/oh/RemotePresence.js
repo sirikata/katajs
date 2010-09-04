@@ -31,6 +31,7 @@
  */
 
 Kata.include("katajs/core/Time.js");
+Kata.include("katajs/oh/odp/Endpoint.js");
 
 (function() {
 
@@ -80,6 +81,11 @@ Kata.include("katajs/core/Time.js");
          return this.mSpace;
      };
 
+    /** Get an ODP endpoint for this object on the specified port. */
+    Kata.RemotePresence.prototype.endpoint = function(port) {
+        return new Kata.ODP.Endpoint(this.mSpace, this.mID, port);
+    };
+     
      /** Enable tracking for this RemotePresence, i.e. subscribe it
       * for updates.
       */

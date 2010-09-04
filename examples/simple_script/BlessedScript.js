@@ -6,11 +6,11 @@ var Example;
     if (typeof(Example) === "undefined") {
         Example = {};
     }
-    
+
     var SUPER = Kata.GraphicsScript.prototype;
     Example.BlessedScript = function(channel, args){
         SUPER.constructor.call(this, channel, args);
-        
+
         this.connect(args, null, Kata.bind(this.connected, this));
 
         for (var idx = 0; idx < 2; idx++) {
@@ -26,23 +26,29 @@ var Example;
         this.cameraPointX=0;
         this.cameraPointY=0;
         this.cameraPos=[0,0,0];
+
+        this.mTestODPPort = null;
     };
     Kata.extend(Example.BlessedScript, SUPER);
     Example.BlessedScript.prototype.proxEvent = function(remote, added){
         if (added) {
             Kata.warn("Camera Discover object.");
             this.mPresence.subscribe(remote.id());
-            this.mPresence._sendODPMessage(10, remote.id(), 10, 'xyz');
+            if (typeof(this.mTestODPPort) != "undefined")
+                this.mTestODPPort.send(remote.endpoint(10), 'xyz');
         }
         else {
             Kata.warn("Camera Wiped object.");      // FIXME: unsubscribe!
         }
     };
     Example.BlessedScript.prototype.connected = function(presence){
+        this.mPresence = presence;
+
+        this.mTestODPPort = this.mPresence.bindODPPort(10);
+
         this.enableGraphicsViewport(presence, 0);
         presence.setQueryHandler(Kata.bind(this.proxEvent, this));
         presence.setQuery(0);
-        this.mPresence=presence;
         presence.setPosition(this.cameraPos);
         Kata.warn("Got connected callback.");
     };

@@ -33,8 +33,10 @@
 Kata.include("katajs/oh/impl/ScriptProtocol.js");
 Kata.include("katajs/oh/Presence.js");
 Kata.include("katajs/oh/RemotePresence.js");
+Kata.include("katajs/oh/odp/Port.js");
+Kata.include("katajs/oh/odp/Service.js");
 
-(function() {
+Kata.defer(function() {
 
      /** Script is the base class for all scripts.  It should cover
       * all the necessary basic inter-thread communication.  It
@@ -53,6 +55,11 @@ Kata.include("katajs/oh/RemotePresence.js");
       * object
       */
      Kata.Script = function (channel, args) {
+         Kata.ODP.Service.prototype.constructor.call(
+             this,
+             Kata.bind(this._sendODPMessage, this)
+         );
+
          this.mChannel = channel;
          this.mChannel.registerListener( Kata.bind(this._handleHostedObjectMessage, this));
 
@@ -68,6 +75,7 @@ Kata.include("katajs/oh/RemotePresence.js");
          handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);
          this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
      };
+     Kata.extend(Kata.Script, Kata.ODP.Service.prototype);
 
      /** Send a message to the HostedObject.
       */
@@ -188,9 +196,28 @@ Kata.include("katajs/oh/RemotePresence.js");
          return remote;
      };
 
-     Kata.Script.prototype._handleReceiveODPMessage = function(channel, msg) {
-         Kata.notImplemented("Script._handleReceiveODPMessage");
-     };
+    /** Internal helper method to construct and send an ODP message. */
+    Kata.Script.prototype._sendODPMessage = function(src, dst, payload) {
+        if (!src.space().equals(dst.space()))
+            throw "Mismatching spaces in ODP message.";
+        var msg = new Kata.ScriptProtocol.FromScript.SendODPMessage(
+            src.space(),
+            src.object(), src.port(),
+            dst.object(), dst.port(),
+            payload
+        );
+        this._sendHostedObjectMessage(msg);
+    };
+
+    /** Handle an received ODP message. */
+    Kata.Script.prototype._handleReceiveODPMessage = function(channel, msg) {
+        // Reconstruct and then delegate to ODP.Service.
+        this._deliverODPMessage(
+            new Kata.ODP.Endpoint(msg.space, msg.source_object, msg.source_port),
+            new Kata.ODP.Endpoint(msg.space, msg.dest_object, msg.dest_port),
+            msg.payload
+        );
+    };
 
      Kata.Script.prototype._handlePresenceLocUpdate = function(channel, msg) {
          var presence = this.mPresences[msg.space];
@@ -202,4 +229,4 @@ Kata.include("katajs/oh/RemotePresence.js");
      Kata.Script.prototype._handleStorageEvent = function(data) {
      };
 
-})();
+});

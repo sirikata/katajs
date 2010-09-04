@@ -34,7 +34,7 @@ Kata.include("katajs/oh/impl/ScriptProtocol.js");
 Kata.include("katajs/oh/Presence.js");
 Kata.include("katajs/oh/RemotePresence.js");
 
-(function() {
+Kata.defer(function() {
      var SUPER = Kata.Script.prototype;
      /** GraphicsScript is an extension of the core Script interface
       * which provides convenience methods for interacting with an
@@ -255,4 +255,4 @@ Kata.include("katajs/oh/RemotePresence.js");
          return true;
      };
      
- })();
+ });

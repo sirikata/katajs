@@ -76,4 +76,11 @@
              as_string = as_string + ":" +  this.port;
          return as_string;
      };
+
+     Kata.URL.prototype.equals = function(rhs) {
+         if (rhs.protocol && rhs.host)
+             return (this.protocol === rhs.protocol && this.host === rhs.host);
+         return this.toString() === rhs.toString();
+     };
+     
 })();

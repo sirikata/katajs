@@ -88,6 +88,10 @@ Kata.defer(function() {
      };
      Kata.extend(Kata.Presence, SUPER);
 
+    Kata.Presence.prototype.bindODPPort = function(port) {
+        return this.mScript.bindODPPort(this.mSpace, this.mID, port);
+    };
+
      /** Short hand for sending a message to the owning HostedObject.
       *  Note that the channel this is sent via is shared by all
       *  Presences and the Script itself.
@@ -182,34 +186,6 @@ Kata.defer(function() {
          Kata.notImplemented("Presence.onDisconnected");
      };
 
-     /** Internal helper method to construct and send an ODP message. */
-     Kata.Presence.prototype._sendODPMessage = function(src_port, dst_obj, dst_port, payload) {
-         var msg = new Kata.ScriptProtocol.FromScript.SendODPMessage(this.mSpace, this.mID, src_port, dst_obj, dst_port, payload);
-         this._sendHostedObjectMessage(msg);
-     };
-
-     /** Bind an ODP port for this presence.  The full identifier for
-      * the port will be (PID,port), where PID is the PresenceID of
-      * this Presence (which uniquely identifies the space and
-      * object).
-      * @param port the port to attempt to bind.
-      * @returns {Kata.ODP.Port} an ODP port that can be used to send
-      * ODP messages, or null on failure to bind
-      */
-     Kata.Presence.prototype.bindODPPort = function(port) {
-         Kata.notImplemeneted("Presence.bindODPPort");
-         return null;
-     };
-     /** Bind a default ODP listener.  This can be used to catch any
-      * ODP messages which are not explicitly being listened for.
-      * @param cb callback to invoke when no other handler for an ODP
-      * handler can be found.
-      */
-     Kata.Presence.prototype.setDefaultODPHandler = function(cb) {
-         Kata.notImplemented("Presence.setDefaultODPHandler");
-     };
-
-
      // Space -> Presence
 
      /** Parses and handles events originating from the Space (via the
@@ -262,8 +238,4 @@ Kata.defer(function() {
          Kata.notImplemented("Presence._handleQueryEvent");
      };
 
-     /** Handle an received ODP message. */
-     Kata.Presence.prototype._handleODPEvent = function(data) {
-         Kata.notImplemented("Presence._handleODPEvent");
-     };
 });
