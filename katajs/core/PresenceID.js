@@ -1,5 +1,5 @@
 /*  Kata Javascript Utilities
- *  Endpoint.js
+ *  PresenceID.js
  *
  *  Copyright (c) 2010, Ewen Cheslack-Postava
  *  All rights reserved.
@@ -32,59 +32,50 @@
 
 Kata.include('katajs/core/SpaceID.js');
 Kata.include('katajs/core/ObjectID.js');
-Kata.include('katajs/core/PresenceID.js');
-Kata.include('katajs/oh/odp/PortID.js');
 
 (function() {
 
-    if (typeof(Kata.ODP) == "undefined")
-        Kata.ODP = {};
-
-    /** An ODP.Endpoint is a fully qualified address for ODP, including the
-     *  space, object, and port.
+    /** PresenceID is just a combination of SpaceID and ObjectID, giving a fully
+     * qualified name for an object in a space.
+     * @constructor
      */
-    Kata.ODP.Endpoint = function() {
-        if (arguments.length == 2) {
-            this.mSpace = arguments[0].space();
-            this.mObject = arguments[0].object();
-            this.mPort = arguments[1];
+    Kata.PresenceID = function() {
+        if (arguments.length == 1) {
+            if (arguments[0].mSpace && arguments[0].mObject) {
+                this.mSpace = arguments[0].mSpace;
+                this.mObject = arguments[0].mObject;
+            }
+            else {
+                throw "Invalid PresenceID constructor arguments.";
+            }
         }
-        else if (arguments.length == 3) {
+        else if (arguments.length == 2 && arguments[0] && arguments[1]) {
             this.mSpace = arguments[0];
             this.mObject = arguments[1];
-            this.mPort = arguments[2];
         }
         else {
-            throw "Invalid endpoint constructor argument list";
+            throw "Invalid PresenceID constructor arguments.";
         }
     };
 
-    Kata.ODP.Endpoint.prototype.space = function() {
+    Kata.PresenceID.prototype.space = function() {
         return this.mSpace;
     };
 
-    Kata.ODP.Endpoint.prototype.object = function() {
+    Kata.PresenceID.prototype.object = function() {
         return this.mObject;
     };
 
-    Kata.ODP.Endpoint.prototype.port = function() {
-        return this.mPort;
+    Kata.PresenceID.prototype.toString = function() {
+        return 'PresenceID(' + this.mSpace.toString() + ':' + this.mObject.toString() + ')';
     };
 
-    Kata.ODP.Endpoint.prototype.presenceID = function() {
-        return new Kata.PresenceID(this.mSpace, this.mObject);
+    Kata.PresenceID.null = function() {
+        return new Kata.PresenceID(Kata.SpaceID.null(), Kata.ObjectID.null());
     };
 
-    Kata.ODP.Endpoint.any = function() {
-        return new Kata.ODP.Endpoint(Kata.SpaceID.any(), Kata.ObjectID.any(), Kata.ODP.PortID.any());
-    };
-
-    Kata.ODP.Endpoint.prototype.toConciseString = function() {
-        return this.mSpace.toString() + ':' + this.mObject.toString() + ':' +
-            this.mPort.toString();
-    };
-    Kata.ODP.Endpoint.prototype.toString = function() {
-        return 'ODP.Endpoint(' + this.toConciseString() + ')';
+    Kata.PresenceID.any = function() {
+        return new Kata.PresenceID(Kata.SpaceID.any(), Kata.ObjectID.any());
     };
 
 })();

@@ -48,7 +48,7 @@ var Example;
 
     Example.BlessedScript.prototype.nameEvent = function(remote, added) {
         if (added)
-            Kata.warn("Name event: " + remote.spaceObject() + " = " + remote.name);
+            Kata.warn("Name event: " + remote.presenceID() + " = " + remote.name);
     };
 
     Example.BlessedScript.prototype.connected = function(presence){

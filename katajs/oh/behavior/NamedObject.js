@@ -56,8 +56,8 @@
 
     Kata.Behavior.NamedObject.prototype._getPort = function(pres) {
         var id = pres;
-        if (pres.spaceObject)
-            id = pres.spaceObject();
+        if (pres.presenceID)
+            id = pres.presenceID();
         var odp_port = this.mPorts[id];
         if (!odp_port && pres.bindODPPort) {
             odp_port = pres.bindODPPort(this.ProtocolPort);
@@ -76,12 +76,12 @@
         var odp_port = this._getPort(pres);
         if (odp_port) {
             odp_port.close();
-            delete this.mPorts[pres.spaceObject()];
+            delete this.mPorts[pres.presenceID()];
         }
     };
 
     Kata.Behavior.NamedObject.prototype._handleMessage = function(src, dest, payload) {
-        var odp_port = this._getPort(dest.spaceObject());
+        var odp_port = this._getPort(dest.presenceID());
         odp_port.send(src, this.mName);
     };
 
@@ -111,7 +111,7 @@
                 this.mCB(remote, added);
             return;
         }
-        
+
         var odp_port = this._getPort(presence);
         // Empty payload indicates request
         odp_port.send(remote.endpoint(this.ProtocolPort), '');
@@ -123,7 +123,7 @@
             1000
         );
         reqinfo.timer = timer;
-        this.mQueriedObjects[remote.spaceObject()] = reqinfo;
+        this.mQueriedObjects[remote.presenceID()] = reqinfo;
     };
 
     Kata.Behavior.NamedObjectObserver.prototype._handleReply = function(reqinfo, name) {
@@ -131,11 +131,11 @@
         if (this.mCB)
             this.mCB(reqinfo.remote, name);
         clearTimeout(reqinfo.timer);
-        delete this.mQueriedObjects[reqinfo.remote.spaceObject()];
+        delete this.mQueriedObjects[reqinfo.remote.presenceID()];
     };
 
     Kata.Behavior.NamedObjectObserver.prototype._handleMessage = function(src, dest, payload) {
-        var queried_reqinfo = this.mQueriedObjects[src.spaceObject()];
+        var queried_reqinfo = this.mQueriedObjects[src.presenceID()];
         // If we sent a query and we have non-zero response length, this is a reply
         if (queried_reqinfo && payload.length > 0)
             this._handleReply(queried_reqinfo, payload);

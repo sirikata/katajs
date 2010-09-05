@@ -81,8 +81,8 @@ Kata.include("katajs/oh/odp/Endpoint.js");
          return this.mSpace;
      };
 
-    Kata.RemotePresence.prototype.spaceObject = function() {
-        return this.mSpace.toString() + this.mID.toString();
+    Kata.RemotePresence.prototype.presenceID = function() {
+        return new Kata.PresenceID(this.mSpace, this.mID);
     };
      
     /** Get an ODP endpoint for this object on the specified port. */
