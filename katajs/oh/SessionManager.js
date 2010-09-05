@@ -170,5 +170,5 @@ Kata.include("katajs/core/URL.js");
 })();
 
 // Needs to register using registerProtocolHandler.
-Kata.include("katajs/oh/LoopbackSpaceConnection.js");
+Kata.include("katajs/oh/plugins/loop/LoopbackSpaceConnection.js");
 Kata.include("katajs/oh/plugins/sirikata/SirikataSpaceConnection.js");
