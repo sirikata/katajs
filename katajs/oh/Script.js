@@ -74,8 +74,14 @@ Kata.defer(function() {
          handlers[msgTypes.QueryEvent] = Kata.bind(this._handleQueryEvent, this);
          handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);
          this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
+
+         this.mBehaviors = [];
      };
      Kata.extend(Kata.Script, Kata.ODP.Service.prototype);
+
+     Kata.Script.prototype.addBehavior = function(behavior) {
+         this.mBehaviors.push(behavior);
+     };
 
      /** Send a message to the HostedObject.
       */
@@ -91,7 +97,7 @@ Kata.defer(function() {
       */
      Kata.Script.prototype.connect = function(args, auth, cb) {
          var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth);
-         msg.visual=args.visual
+         msg.visual=args.visual;
          this.mConnectRequests[args.space] = cb;
          this._sendHostedObjectMessage(msg);
      };
@@ -104,6 +110,10 @@ Kata.defer(function() {
              delete this.mConnectRequests[presence.space()];
              cb(presence);
          }
+
+         this.mBehaviors.every(function(beh) {
+             if (beh.newPresence) beh.newPresence(presence);
+         });
      };
      Kata.Script.prototype.connectFailure = function(space, reason) {
          var cb = this.mConnectRequests[space];
@@ -116,6 +126,10 @@ Kata.defer(function() {
          if (this.mPresences[presence.space()]) {
              delete this.mPresences[presence.space()];
          }
+
+         this.mBehaviors.every(function(beh) {
+             if (beh.presenceInvalidated) beh.presenceInvalidated(presence);
+         });
      };
      /** Request a callback after the specified amount of time.  If
       * repeat is true, will repeat every freq period.
@@ -182,6 +196,10 @@ Kata.defer(function() {
              remote = new Kata.RemotePresence(presence, msg.space, msg.observed, msg.loc, msg.visual);
              this.mRemotePresences[key] = remote;
              presence.remotePresence(remote, true);
+
+             this.mBehaviors.every(function(beh) {
+                 if (beh.remotePresence) beh.remotePresence(presence, remote, true);
+             });
          }
          else {
              // Object exited, invalidate presence and notify
@@ -192,6 +210,10 @@ Kata.defer(function() {
              }
              delete this.mRemotePresences[key];
              presence.remotePresence(remote, false);
+
+             this.mBehaviors.every(function(beh) {
+                 if (beh.remotePresence) beh.remotePresence(presence, remote, false);
+             });
          }
          return remote;
      };

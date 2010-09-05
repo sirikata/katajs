@@ -168,6 +168,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
             childcons.prototype[prop] = parent[prop];
         }
         childcons.prototype.constructor = childcons;
+        childcons.prototype.SUPER = parent;
     };
     /** Returns a function that binds the passed function to an object.
      *  Useful for all cases where you need to pass a function argument, but

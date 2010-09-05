@@ -1,6 +1,7 @@
 
-Kata.include("katajs/oh/Script.js");
 Kata.include("katajs/oh/GraphicsScript.js");
+Kata.include("katajs/oh/behavior/NamedObject.js");
+
 var Example;
 (function(){
     if (typeof(Example) === "undefined") {
@@ -27,24 +28,31 @@ var Example;
         this.cameraPointY=0;
         this.cameraPos=[0,0,0];
 
-        this.mTestODPPort = null;
+        // We keep nameEvent separate, but we could completely replace proxEvent
+        this.mNamedObjectObserver =
+            new Kata.Behavior.NamedObjectObserver(
+                "Blessed", this,
+                Kata.bind(this.nameEvent, this));
     };
     Kata.extend(Example.BlessedScript, SUPER);
+
     Example.BlessedScript.prototype.proxEvent = function(remote, added){
         if (added) {
             Kata.warn("Camera Discover object.");
             this.mPresence.subscribe(remote.id());
-            if (typeof(this.mTestODPPort) != "undefined")
-                this.mTestODPPort.send(remote.endpoint(10), 'xyz');
         }
         else {
             Kata.warn("Camera Wiped object.");      // FIXME: unsubscribe!
         }
     };
+
+    Example.BlessedScript.prototype.nameEvent = function(remote, added) {
+        if (added)
+            Kata.warn("Name event: " + remote.spaceObject() + " = " + remote.name);
+    };
+
     Example.BlessedScript.prototype.connected = function(presence){
         this.mPresence = presence;
-
-        this.mTestODPPort = this.mPresence.bindODPPort(10);
 
         this.enableGraphicsViewport(presence, 0);
         presence.setQueryHandler(Kata.bind(this.proxEvent, this));
@@ -62,9 +70,9 @@ var Example;
         var pitchsin = Math.sin(pitch * k);
         var rollcos = Math.cos(yaw * k);
         var rollsin = Math.sin(yaw * k);
-        return [rollcos * pitchsin * yawcos + rollsin * pitchcos * yawsin, 
-                rollsin * pitchcos * yawcos - rollcos * pitchsin * yawsin, 
-                rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos, 
+        return [rollcos * pitchsin * yawcos + rollsin * pitchcos * yawsin,
+                rollsin * pitchcos * yawcos - rollcos * pitchsin * yawsin,
+                rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos,
                 rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin];
     };
     Example.BlessedScript.prototype._handleGUIMessage = function (channel, msg) {
@@ -112,7 +120,7 @@ var Example;
                     this.cameraPos[1]-=1.0;
                     this.mPresence.setPosition(this.cameraPos);
                     break;
-            }            
+            }
         }
     };
 })();

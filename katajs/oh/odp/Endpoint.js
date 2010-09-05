@@ -70,6 +70,10 @@ Kata.include('katajs/oh/odp/PortID.js');
         return this.mPort;
     };
 
+    Kata.ODP.Endpoint.prototype.spaceObject = function() {
+        return this.mSpace.toString() + this.mObject.toString();
+    };
+
     Kata.ODP.Endpoint.any = function() {
         return new Kata.ODP.Endpoint(Kata.SpaceID.any(), Kata.ObjectID.any(), Kata.ODP.PortID.any());
     };
