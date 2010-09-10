@@ -1,0 +1,98 @@
+<!-- katajs
+ index.html
+
+ Copyright (c) 2010, Ewen Cheslack-Postava
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+ * Neither the name of katajs nor the names of its contributors may
+   be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kata Simple Scripting</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<!-- Core must be loaded before web-socket-js because it cludges window.console -->
+	<script type="text/javascript" src="../../katajs/core/Core.js"></script>
+<!--
+	<script type="text/javascript" src="../../externals/web-socket-js/FABridge.js"></script>
+	<script type="text/javascript" src="../../externals/web-socket-js/swfobject.js"></script>
+	<script type="text/javascript" src="../../externals/web-socket-js/web_socket.js"></script>
+	<script type="text/javascript">
+	    try {
+	        WebSocket.__swfLocation = "../externals/web-socket-js/WebSocketMain.swf";
+	    } catch (e) {
+	        alert(""+e);
+	    }
+	</script>
+-->
+
+    <script type="text/javascript">
+      // This is a simple ping-pong test to verify that a simple
+      // TCPSST connection between JS on a WebSocket and a C++
+      // stream_echo server works.
+
+      Kata.include("katajs/network/TCPSST.js");
+
+      var start_test = function() {
+        Kata.resolveDeferredHeaders();
+
+        var tcpsst_sock = new Kata.TCPSST("localhost", "9999");
+        tcpsst_substream = tcpsst_sock.clone();
+        tcpsst_substream.registerListener(
+          function(substream, data) {
+            Kata.warn("Received: " + data);
+            if (data != "U2lyaWthdGE=")
+              Kata.warn("Got mismatched response.");
+          }
+        );
+        setInterval(
+          function() {
+            // Message must be base 64 encode - "Sirikata"
+            tcpsst_substream.sendMessage("U2lyaWthdGE=");
+          },
+          1000
+        );
+      }
+      window.onload = start_test;
+    </script>
+  </head>
+
+  <body>
+	<div id="debug"></div>
+	<div id="dbg0"></div>
+	<div id="dbg1"></div>
+	<div id="dbg2"></div>
+	<div id="dbg3"></div>
+	<div id="dbg4"></div>
+	<div id="dbg5"></div>
+	<div id="dbg6"></div>
+	<div id="dbg7"></div>
+	<div id="dbg8"></div>
+	<div id="dbg9"></div>
+	<div id="dbg"></div>
+  </body>
+</html>

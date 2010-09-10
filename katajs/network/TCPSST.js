@@ -33,7 +33,7 @@
 Kata.include("katajs/core/Channel.js");
 Kata.include("katajs/core/Math.uuid.js");
 
-(function() {
+Kata.defer(function() {
 
     function getMessageCallback(thus, which) {
         return function(ev) {
@@ -222,6 +222,8 @@ Kata.include("katajs/core/Math.uuid.js");
             // FIXME: How do we send a "close" message?
         };
 
+    } else {
+        Kata.warn("WebSockets not available.");
     }
 
-})();
+});
