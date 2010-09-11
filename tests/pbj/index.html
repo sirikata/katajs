@@ -1,0 +1,134 @@
+<!-- katajs
+ index.html
+
+ Copyright (c) 2010, Ewen Cheslack-Postava
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+ * Neither the name of katajs nor the names of its contributors may
+   be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kata Simple Scripting</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<!-- Core must be loaded before web-socket-js because it cludges window.console -->
+	<script type="text/javascript" src="../../katajs/core/Core.js"></script>
+<!--
+	<script type="text/javascript" src="../../externals/web-socket-js/FABridge.js"></script>
+	<script type="text/javascript" src="../../externals/web-socket-js/swfobject.js"></script>
+	<script type="text/javascript" src="../../externals/web-socket-js/web_socket.js"></script>
+	<script type="text/javascript">
+	    try {
+	        WebSocket.__swfLocation = "../externals/web-socket-js/WebSocketMain.swf";
+	    } catch (e) {
+	        alert(""+e);
+	    }
+	</script>
+-->
+
+    <script type="text/javascript">
+      // This is a simple test of PBJ messages between C++ and
+      // JS.  Since it uses TCPSST to connect to the stream_echo
+      // server, make sure tests/tcpsst works before running this.
+
+      // The basic approach is to build messages and ship them over.
+      // If we're getting responses, then the remote side parsed them
+      // successfully. We'll get the same message back and try to
+      // parse it.
+      //
+      // To be sure things are working requires checking the output of
+      // the stream_echo server to ensure it is outputting the
+      // expected set of fields.
+
+      Kata.include("katajs/network/TCPSST.js");
+      Kata.include("externals/protojs/protobuf.js");
+      Kata.include("externals/protojs/pbj.js");
+      Kata.include("tests/pbj/Test.pbj.js");
+
+      var start_test = function() {
+        Kata.resolveDeferredHeaders();
+
+        var tcpsst_sock = new Kata.TCPSST("localhost", "9998");
+        tcpsst_substream = tcpsst_sock.clone();
+        var startPing = function() {
+          setTimeout(
+            function() {
+
+              var mymsg = new Kata.Test.TestMessage();
+              mymsg.field_integral = 7;
+              mymsg.field_float = 42.6;
+              mymsg.field_string = "Hello World";
+
+              var serialized = new PROTO.Base64Stream;
+              mymsg.SerializeToStream(serialized);
+
+              tcpsst_substream.last_data_shipped = serialized.getString();
+              tcpsst_substream.sendMessage( tcpsst_substream.last_data_shipped );
+            },
+            1000
+          );
+        };
+        tcpsst_substream.registerListener(
+          function(substream, data) {
+            Kata.warn("Received: " + data);
+            if (data != substream.last_data_shipped) {
+              Kata.warn("Got mismatched response.");
+              substream.close();
+              return;
+            }
+
+            var mymsg = new Kata.Test.TestMessage();
+            mymsg.ParseFromStream( new PROTO.Base64Stream(data) )
+            Kata.warn("Parsed: " +
+                      "integral: " + mymsg.field_integral +
+                      ", float: " + mymsg.field_float +
+                      ", string: " + mymsg.field_string);
+
+            startPing();
+          }
+        );
+        startPing();
+      }
+      window.onload = start_test;
+    </script>
+  </head>
+
+  <body>
+	<div id="debug"></div>
+	<div id="dbg0"></div>
+	<div id="dbg1"></div>
+	<div id="dbg2"></div>
+	<div id="dbg3"></div>
+	<div id="dbg4"></div>
+	<div id="dbg5"></div>
+	<div id="dbg6"></div>
+	<div id="dbg7"></div>
+	<div id="dbg8"></div>
+	<div id="dbg9"></div>
+	<div id="dbg"></div>
+  </body>
+</html>

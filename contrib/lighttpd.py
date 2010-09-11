@@ -85,7 +85,7 @@ mimetype.assign             = (
 """ % { 'pwd' : os.getcwd() }
     print conf
 
-    tmp_conf_file = tempfile.NamedTemporaryFile(delete = False)
+    tmp_conf_file = file('lighttpd.cfg', 'w') #tempfile.NamedTemporaryFile(delete = False)
     tmp_conf_file.write(conf)
     tmp_conf_file.close()
 
