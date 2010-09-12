@@ -13,3 +13,6 @@
 [submodule "externals/o3djs"]
 	path = externals/o3djs
 	url = git://github.com/sirikata/o3djs.git
+[submodule "externals/sirikata-protocol"]
+	path = externals/sirikata-protocol
+	url = git://github.com/sirikata/sirikata-protocol.git
