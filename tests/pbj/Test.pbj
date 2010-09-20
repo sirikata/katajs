@@ -34,8 +34,23 @@
 
 package Kata.Test;
 
+message TestSubMessage {
+  optional string field_string = 1;
+}
+
 message TestMessage {
   optional uint32 field_integral = 1;
   optional float field_float = 2;
   optional string field_string = 3;
+  optional uint64 field_uint64 = 4;
+  optional uint16 field_uint16 = 5;
+  optional uuid field_uuid = 6;
+
+  optional TestSubMessage field_message = 7;
+
+  enum TestEnum {
+    Value1 = 1;
+    Value2 = 2;
+  }
+  optional TestEnum field_enum = 8;
 }

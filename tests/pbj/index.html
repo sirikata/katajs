@@ -82,6 +82,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               mymsg.field_integral = 7;
               mymsg.field_float = 42.6;
               mymsg.field_string = "Hello World";
+              mymsg.field_uint64 = PROTO.I64.fromNumber(0);
+              mymsg.field_uint16 = 0;
+              mymsg.field_uuid = "6fa459ea-ee8a-3ca4-894e-db77e160355e";
+              mymsg.field_message = new Kata.Test.TestSubMessage();
+              mymsg.field_message.field_string = "Hello SubMessage";
+              mymsg.field_enum = Kata.Test.TestMessage.TestEnum.Value2;
 
               var serialized = new PROTO.Base64Stream;
               mymsg.SerializeToStream(serialized);
