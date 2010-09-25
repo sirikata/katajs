@@ -41,7 +41,7 @@ Kata.include('katajs/core/Math.uuid.js');
     };
 
     Kata.ObjectID.random = function() {
-        return new Math.uuid();
+        return Math.uuid();
     };
 
     Kata.ObjectID.any = function() {
