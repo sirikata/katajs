@@ -41,7 +41,9 @@ Kata.defer(function() {
      * @constructor
      */
     Kata.MainThread = function (blessed_script, blessed_class, blessed_args) {
-        this.mObjectHostWorker = new Kata.WebWorker("katajs/oh/ObjectHostWorker.js", "Kata.ObjectHostWorker",
+        // FIXME this should select FakeWebWorker or WebWorker based on whether
+        // the necessary objects (e.g. WebSocket) are available in WebWorkers.
+        this.mObjectHostWorker = new Kata.FakeWebWorker("katajs/oh/ObjectHostWorker.js", "Kata.ObjectHostWorker",
                                                     {script : blessed_script, method : blessed_class, args : blessed_args}
                                                    );
         this.mObjectHostChannel = this.mObjectHostWorker.getChannel();
