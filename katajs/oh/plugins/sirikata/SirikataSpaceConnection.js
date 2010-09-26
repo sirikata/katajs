@@ -63,6 +63,10 @@ Kata.defer(function() {
         this.mObjectUUIDs = {};
         this.mLocalIDs = {};
 
+        // Track outstanding connect request info so we can provide it
+        // back if we get the OK from the space server
+        this.mOutstandingConnectRequests = {};
+
         //var port = 9998;
         var port = 7777;
         if (spaceurl.port)
@@ -102,6 +106,12 @@ Kata.defer(function() {
         var objid = this._getObjectID(id);
 
         //Kata.warn("Connecting " + id + " == " + objid);
+
+        this.mOutstandingConnectRequests[objid] =
+            {
+                loc_bounds : Kata.LocationIdentity(0),
+                visual : vis
+            };
 
         var connect_msg = new Sirikata.Protocol.Session.Connect();
 
@@ -174,6 +184,9 @@ Kata.defer(function() {
                 var id = this._getLocalID(objid);
                 Kata.warn("Successfully connected " + id);
 
+                var connect_info = this.mOutstandingConnectRequests[objid];
+                delete this.mOutstandingConnectRequests[objid];
+
                 // Send ack
                 var connect_ack_msg = new Sirikata.Protocol.Session.ConnectAck();
                 var ack_msg = new Sirikata.Protocol.Session.Container();
@@ -186,13 +199,11 @@ Kata.defer(function() {
                 );
 
                 // Indicate response. FIXME SST connect stream should happen before this
-                /*
                 this.mParent.connectionResponse(
                     id, true,
-                    {space : this.mSpaceURL, object : object},
-                    loc, bounds, visual
+                    {space : this.mSpaceURL, object : objid},
+                    connect_info.loc_bounds, connect_info.visual
                 );
-                 */
             }
             else if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Redirect) {
                 Kata.notImplemented("Server redirects for Sirikata are not implemented.");
