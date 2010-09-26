@@ -36,34 +36,34 @@
  */
 
 // Typed arrays
-try {    
+try {
 // -- Bytes
-if (!WebGLUnsignedByteArray && Uint8Array) {
+if (typeof(WebGLUnsignedByteArray) === "undefined" && typeof(Uint8Array) !== "undefined") {
     var WebGLUnsignedByteArray = Uint8Array;
 }
-if (!WebGLByteArray && Int8Array) {
+if (typeof(WebGLByteArray) === "undefined" && typeof(Int8Array) !== "undefined") {
     var WebGLByteArray = Int8Array;
 }
 // -- Shorts
-if (!WebGLUnsignedShortArray && Uint16Array) {
+if (typeof(WebGLUnsignedShortArray) === "undefined" && typeof(Uint16Array) !== "undefined") {
     var WebGLUnsignedShortArray = Uint16Array;
 }
-if (!WebGLShortArray && Int16Array) {
+if (typeof(WebGLShortArray) === "undefined" && typeof(Int16Array) !== "undefined") {
     var WebGLShortArray = Int16Array;
 }
 // -- Ints
-if (!WebGLUnsignedIntArray && Uint32Array) {
+if (typeof(WebGLUnsignedIntArray) === "undefined" && typeof(Uint32Array) !== "undefined") {
     var WebGLUnsignedIntArray = Uint32Array;
 }
-if (!WebGLIntArray && Int32Array) {
+if (typeof(WebGLIntArray) === "undefined" && typeof(Int32Array) !== "undefined") {
     var WebGLIntArray = Int32Array;
 }
 
 // -- Floats
-if (!WebGLFloatArray && Float32Array) {
+if (typeof(WebGLFloatArray) === "undefined" && typeof(Float32Array) !== "undefined") {
     var WebGLFloatArray = Float32Array;
 }
-if (!WebGLDoubleArray && Float64Array) {
+if (typeof(WebGLDoubleArray) === "undefined" && typeof(Float64Array) !== "undefined") {
     var WebGLDoubleArray = Float64Array;
 }
 } catch (x) {
