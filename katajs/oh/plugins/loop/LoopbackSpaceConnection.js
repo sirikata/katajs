@@ -92,7 +92,7 @@ Kata.defer(function() {
      };
 
     Kata.LoopbackSpaceConnection.prototype.disconnectObject = function(id) {
-        Kata.notImplemented("LoopbackSpaceConnection.disconnectObject");
+        this.mSpace.disconnectObject(id);
     };
 
      Kata.LoopbackSpaceConnection.prototype.sendODPMessage = function(src_obj, src_port, dst_obj, dst_port, payload) {

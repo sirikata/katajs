@@ -103,6 +103,24 @@ Kata.include("katajs/core/Location.js");
          cb.connected(id, uuid, obj_loc, cb.visual); // FIXME clone these so they aren't shared
      };
 
+    Kata.LoopbackSpace.prototype.disconnectObject = function(id) {
+        var spaceself = this;
+        setTimeout(
+            function() {
+                spaceself._disconnectObject(id);
+            },
+            this.netdelay
+        );
+    };
+    Kata.LoopbackSpace.prototype._disconnectObject = function(id, cb) {
+        this.mSubscription.removeObject(id);
+        this.mProx.removeQuery(id);
+        this.mProx.removeObject(id);
+        this.mLoc.remove(id);
+
+        delete this.mObjects[id];
+    };
+
      Kata.LoopbackSpace.prototype.sendODPMessage = function(src_obj, src_port, dst_obj, dst_port, payload) {
          var spaceself = this;
          setTimeout(

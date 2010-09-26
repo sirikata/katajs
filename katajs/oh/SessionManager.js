@@ -126,7 +126,7 @@ Kata.include("katajs/core/URL.js");
         var spaceURL = new Kata.URL(req.space);
         var space_conn = this.mSpaceConnections[spaceURL.toString()];
         if (!space_conn) return;
-        space_conn.disconnectObject(ho.getID());
+        space_conn.disconnectObject(req.id);
     };
 
      Kata.SessionManager.prototype.sendODPMessage = function(space, src_obj, src_port, dst_obj, dst_port, payload) {

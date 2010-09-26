@@ -53,12 +53,25 @@
          this.mSubscribers[id] = {};
      };
 
+    /** Remove an object from subscription tracking. This removes it
+     * both as a subscriber and from all subscribers list of
+     * subscribees.
+     * @param id the object that should no longer be tracked.
+     */
+    Kata.Loopback.Subscription.prototype.removeObject = function(id) {
+        delete this.mSubscribers[id];
+
+        for(var sub in this.mSubscribers)
+            delete this.mSubscribers[sub][id];
+    };
+
      /** Subscribe the object with the given id for updates from observed.
       * @param id the ID of the subscriber
       * @param observed the ID of the object to receive updates from
       */
      Kata.Loopback.Subscription.prototype.subscribe = function(id, observed) {
-         this.mSubscribers[observed][id] = id;
+         if (this.mSubscribers[observed])
+             this.mSubscribers[observed][id] = id;
      };
 
      /** Unsubscribe the object with the given id for updates from observed.
@@ -66,7 +79,8 @@
       * @param observed the ID of the object to stop receiving updates from
       */
      Kata.Loopback.Subscription.prototype.unsubscribe = function(id, observed) {
-         delete this.mSubscribers[observed][id];
+         if (this.mSubscribers[observed])
+             delete this.mSubscribers[observed][id];
      };
 
      /** Sends an update (payload) to all subscribers of the specified object.
