@@ -112,10 +112,12 @@ Kata.defer(function() {
         loc.t = 0;
         loc.position = [0, 0, 0];
         loc.velocity = [0, 0, 0];
+        connect_msg.loc = loc;
         var orient = new Sirikata.Protocol.TimedMotionQuaternion();
         orient.t = 0;
         orient.position = [0, 0, 0, 0];
         orient.velocity = [0, 0, 0, 0];
+        connect_msg.orientation = orient;
         connect_msg.bounds = [0, 0, 0, 1];
         // FIXME don't always register queries, allow specifying angle
         connect_msg.query_angle = 0.0000001;
