@@ -82,11 +82,11 @@ Kata.defer(function() {
          );
      };
 
-     Kata.LoopbackSpaceConnection.prototype.connectResponse = function(id, object, loc, bounds, visual) {
+     Kata.LoopbackSpaceConnection.prototype.connectResponse = function(id, object, loc, visual) {
          this.mObjectID[id] = object;
          this.mLocalID[object] = id;
          if (object) // FIXME real presence_id below
-             this.mParent.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, loc, bounds, visual);
+             this.mParent.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, loc, visual);
          else
              this.mParent.connectionResponse(id, false);
      };
