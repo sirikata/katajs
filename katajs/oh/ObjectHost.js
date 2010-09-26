@@ -146,6 +146,10 @@ Kata.include("katajs/core/URL.js");
          this.mSessionManager.connect(ho, req, auth);
      };
 
+     Kata.ObjectHost.prototype.disconnect = function(ho, req) {
+         this.mSessionManager.disconnect(ho, req);
+     };
+
      Kata.ObjectHost.prototype.sendODPMessage = function(space, src_obj, src_port, dst_obj, dst_port, payload) {
          this.mSessionManager.sendODPMessage(space, src_obj, src_port, dst_obj, dst_port, payload);
      };

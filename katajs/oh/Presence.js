@@ -100,6 +100,15 @@ Kata.defer(function() {
          return this.mScript._sendHostedObjectMessage(data);
      };
 
+    /** Request that this presence be disconnected from the
+     *  space. This effectively disables this presence, removing it
+     *  from other objects views and disabling its ability to send
+     *  messages through the space.
+     */
+    Kata.Presence.prototype.disconnect = function() {
+        this.mScript._disconnect(this);
+    };
+
      /** Get the current interest query's value. */
      Kata.Presence.prototype.query = function() {
          return this.mQuery;

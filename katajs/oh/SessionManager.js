@@ -121,6 +121,14 @@ Kata.include("katajs/core/URL.js");
          obj.connectionResponse(success, presence_id, loc, visual);
      };
 
+    /** Diconnect the given object from the space. */
+    Kata.SessionManager.prototype.disconnect = function(ho, req) {
+        var spaceURL = new Kata.URL(req.space);
+        var space_conn = this.mSpaceConnections[spaceURL.toString()];
+        if (!space_conn) return;
+        space_conn.disconnectObject(ho.getID());
+    };
+
      Kata.SessionManager.prototype.sendODPMessage = function(space, src_obj, src_port, dst_obj, dst_port, payload) {
          var space_conn = this.mSpaceConnections[space];
          space_conn.sendODPMessage(src_obj, src_port, dst_obj, dst_port, payload);

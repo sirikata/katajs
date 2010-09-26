@@ -116,9 +116,10 @@ Kata.include("katajs/core/Time.js");
                  this.__type = Kata.ScriptProtocol.FromScript.Types.DisableGUIMessage;
                  this.event = event;  
              },            
-             Disconnect : function(space) {
+             Disconnect : function(space, id) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Disconnect;
                  this.space = space;
+                 this.id = id;
              },
 
              SendODPMessage : function(space, source_object, source_port, dest_object, dest_port, payload) {

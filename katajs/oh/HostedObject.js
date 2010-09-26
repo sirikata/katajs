@@ -111,7 +111,7 @@ Kata.include("katajs/core/MessageDispatcher.js");
      };
 
      Kata.HostedObject.prototype._handleDisconnect = function (channel, request) {
-         Kata.warn("Disconnect request.");
+         this.mObjectHost.disconnect(this, request);
      };
 
      Kata.HostedObject.prototype._handleSendODPMessage = function (channel, request) {

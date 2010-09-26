@@ -59,6 +59,11 @@ Kata.include("katajs/oh/ObjectHost.js");
          Kata.notImplemented("SpaceConnection.connectObject");
      };
 
+    /** Disconnect the object from the space. */
+    Kata.SpaceConnection.prototype.disconnectObject = function(id) {
+        Kata.notImplemented("SpaceConnection.disconnectObject");
+    };
+
      /** Send an ODP message. */
      Kata.SpaceConnection.prototype.sendODPMessage = function(src_obj, src_port, dst_obj, dst_port, payload) {
          Kata.notImplemented("SpaceConnection.sendODPMessage");

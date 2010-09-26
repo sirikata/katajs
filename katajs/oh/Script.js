@@ -102,6 +102,16 @@ Kata.defer(function() {
          this._sendHostedObjectMessage(msg);
      };
 
+     /** Request that the given presence be disconnected from the space.
+      *  @param {Kata.Presence} pres the Presence to disconnect
+      *  @param {} auth authentication information to pass to the space
+      *  @param {} cb callback to invoke upon completion
+      */
+     Kata.Script.prototype._disconnect = function(pres) {
+         var msg = new Kata.ScriptProtocol.FromScript.Disconnect(pres.space(), pres.id());
+         this._sendHostedObjectMessage(msg);
+     };
+
      Kata.Script.prototype.newPresence = function(presence) {
          this.mPresences[presence.space()] = presence;
 

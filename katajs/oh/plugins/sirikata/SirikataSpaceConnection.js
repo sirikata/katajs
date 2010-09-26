@@ -144,6 +144,10 @@ Kata.defer(function() {
         );
     };
 
+    Kata.SirikataSpaceConnection.prototype.disconnectObject = function(id) {
+        Kata.notImplemented("SirikataSpaceConnection.disconnectObject");
+    };
+
     Kata.SirikataSpaceConnection.prototype._sendODPMessage = function(src, src_port, dest, dest_port, payload) {
         var odp_msg = new Sirikata.Protocol.Object.ObjectMessage();
         odp_msg.source_object = src;
