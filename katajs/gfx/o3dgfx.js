@@ -617,10 +617,12 @@ O3DGraphics.prototype.methodTable["Destroy"]=function(msg) {
             if (!(msg.id in this.mUnsetParents)) {
                 this.mUnsetParents[msg.id]={};
             }
-            this.mUnsetParents[msg.id][children[i].mKataObject.mId]=children[i].mKataObject;
-            children[i].mKataObject.mUnsetParent=msg.id;
+            if (children[i].mKataObject) {
+                this.mUnsetParents[msg.id][children[i].mKataObject.mId]=children[i].mKataObject;
+                children[i].mKataObject.mUnsetParent=msg.id;
+                children[i].parent=this.mSpaceRoots[children[i].mKataObject.mSpaceId].mRootNode;
+            }
             children[i].localTransformMatrix=mat;
-            children[i].parent=this.mSpaceRoots[children[i].mKataObject.mSpaceId].mRootNode;
             children[i].getUpdatedWorldMatrix();
             //FIXME: update interpolation parameters with world coordinates
         }
