@@ -351,7 +351,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
      *  to the main thread.
      */
     Kata.debugMessage = function(data) {
-        if (data.msg != __magic_debug_msg_string)
+        if (data === undefined || data === null || data.msg != __magic_debug_msg_string)
             return false;
 
         // We'll always return true after this since we know somebody
