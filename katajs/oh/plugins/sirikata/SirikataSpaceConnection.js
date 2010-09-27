@@ -145,7 +145,20 @@ Kata.defer(function() {
     };
 
     Kata.SirikataSpaceConnection.prototype.disconnectObject = function(id) {
-        Kata.notImplemented("SirikataSpaceConnection.disconnectObject");
+        var objid = this._getObjectID(id);
+
+        var disconnect_msg = new Sirikata.Protocol.Session.Disconnect();
+        disconnect_msg.object = objid;
+        disconnect_msg.reason = "Quit";
+
+        var session_msg = new Sirikata.Protocol.Session.Container();
+        session_msg.disconnect = disconnect_msg;
+
+        this._sendODPMessage(
+            objid, this.Ports.Session,
+            Kata.ObjectID.null(), this.Ports.Session,
+            this._serializeMessage(session_msg)
+        );
     };
 
     Kata.SirikataSpaceConnection.prototype._sendODPMessage = function(src, src_port, dest, dest_port, payload) {
