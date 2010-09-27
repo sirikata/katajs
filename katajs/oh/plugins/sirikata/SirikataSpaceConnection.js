@@ -164,6 +164,8 @@ Kata.defer(function() {
     };
 
     Kata.SirikataSpaceConnection.prototype._receivedData = function(substream, data) {
+        if (data === undefined || data === null) return;
+
         var odp_msg = new Sirikata.Protocol.Object.ObjectMessage();
         odp_msg.ParseFromStream(new PROTO.Base64Stream(data));
 
