@@ -38,7 +38,10 @@ Kata.include("katajs/core/SimpleChannel.js");
      */
     // In WebKit, debugging webworkers breaks nested workers.
     if (Kata.WEB_WORKERS_ENABLED === undefined) {
-        Kata.WEB_WORKERS_ENABLED = true; //typeof(importScripts)==='undefined';
+        Kata.WEB_WORKERS_ENABLED = true; //typeof(importScripts)==='undefined';        
+    }
+    if (Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT === undefined) {
+        Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT = false; //typeof(importScripts)==='undefined';        
     }
 
     // Always provide Kata.FakeWebWorker so we'll have a uniform interface in
@@ -169,10 +172,14 @@ Kata.include("katajs/core/SimpleChannel.js");
          * @param {*} args  Primitive data to instantiate the class with.
          */
         Kata.WebWorker = function (jsFile, clsName, args) {
-            this.mWorker = new Worker(Kata.scriptRoot+"katajs/core/GenericWorker.js");
+            if (Kata.bootstrapWorker===undefined)
+                this.mWorker = new Worker(Kata.scriptRoot+"katajs/core/GenericWorker.js");
+            else
+                this.mWorker = new Worker(Kata.bootstrapWorker);
             this.mWorker.onerror = getErrorCallback(this);
             this.mInitialMessage = [
                 Kata.scriptRoot,
+                Kata.bootstrapWorker===undefined?undefined:Kata.bootstrapWorker,
                 jsFile,
                 clsName,
                 args];
@@ -185,6 +192,8 @@ Kata.include("katajs/core/SimpleChannel.js");
         Kata.WebWorker.prototype.go = function() {
             var initMsg = this.mInitialMessage;
             delete this.mInitialMessage;
+            if (!(Kata.bootstrapWorker===undefined))
+                this.mWorker.postMessage(Kata.scriptRoot+"katajs/core/GenericWorker.js");            
             this.mWorker.postMessage(initMsg);
         };
 
