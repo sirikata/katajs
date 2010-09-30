@@ -3,7 +3,7 @@
 	url = git://github.com/sirikata/protojs.git
 [submodule "externals/GLGE"]
 	path = externals/GLGE
-	url = git://github.com/danielrh/GLGE.git
+	url = git://github.com/supereggbert/GLGE.git
 [submodule "externals/web-socket-js"]
 	path = externals/web-socket-js
 	url = git://github.com/gimite/web-socket-js.git

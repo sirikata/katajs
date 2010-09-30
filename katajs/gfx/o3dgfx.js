@@ -347,7 +347,7 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, pack, parent, exce
         alert("Could not load: " + this.mMeshURI + "\n" + exception);
     } else {
         console.log("loading finished.");
-        if(typeof(GlobalLoadDone)=="function") GlobalLoadDone();        // sue me; I've got lawyers
+        if(typeof(GlobalLoadDone)=="function") GlobalLoadDone();        // this should be done with message passing
         // Generate draw elements and setup material draw lists.
         o3djs.pack.preparePack(pack, renderTarg.mViewInfo);
 
@@ -549,10 +549,10 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
                 }
                 this.mUnsetParents[msg.parent][msg.id]=newObject;
                 vwObject.mUnsetParent=msg.parent;
-                vwObject.mNode.parent=spaceRoot;
+                vwObject.mNode.parent=spaceRootNode;
             }
         }else {
-            vwObject.mNode.parent=spaceRoot;
+            vwObject.mNode.parent=spaceRootNode;
         }
         function o3dTransformationToLocationList(gfx,node){
             var retval=[];
