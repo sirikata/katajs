@@ -505,6 +505,9 @@ O3DGraphics.prototype.renderCallback = function() {
         this.mObjectUpdates[id].update(this);
         
     }
+	if (Kata.userRenderCallback) {
+		Kata.userRenderCallback(this.mCurTime);
+	}
 };
 
 O3DGraphics.prototype.methodTable={};
