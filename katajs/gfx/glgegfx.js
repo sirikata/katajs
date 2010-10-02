@@ -31,6 +31,7 @@
  */
 
 var GLGEGraphics=function(callbackFunction,parentElement) {
+    this.mCurTime=new Date();
     this.callback=callbackFunction;
     {        
         var canvas;
@@ -63,9 +64,13 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     var frameratebuffer = 60;
     this.mCurTime=new Date();
     this.mObjectUpdates = {}; // map id -> function
-    
+    this.mSpaceRoots={};
+    this.mRenderTargets={};
+    this.mUnsetParents={};
+    this.mObjects={};
 
     function render(){
+        this.mCurTime=new Date();
         if(typeof(GlobalLoadDone)=="function") {
                 GlobalLoadDone();//this should be done with message passing
             GlobalLoadDone=null;
@@ -104,7 +109,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     RenderTarget.prototype.attachScene=function(spaceRoot,camera) {
         this.mSpaceRoot=spaceRoot;
         if (this.mTextureCamera==null) {
-            this.mGraphicsSystem.setScene(spaceRoot.mScene);            
+            this.mGraphicsSystem.renderer.setScene(spaceRoot.mScene);            
             spaceRoot.mScene.setCamera(camera);
         }else {
             console.log("Do not know how to deal with texture camera");
@@ -134,14 +139,36 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mNode.mKataObject=this;
         this.update = this.updateTransformation;
         this.mParent = null;
-        spaceroot.addChild(this.mNode);
+        spaceroot.mScene.addChild(this.mNode);
+    };
+    VWObject.prototype.createMesh = function(path, animation) {
+        if (path == null) {
+            throw "loadScene with null path";
+        }
+        if (path.lastIndexOf(".dae")==-1) {
+            path += ".dae";            
+        }
+        console.log("Loading: " + path);
+        this.mMeshURI = path;
+        var thus = this;
+        var clda = new GLGE.Collada();
+        clda.setDocument(this.mMeshURI);
+        clda.setScaleX(1.0);
+        clda.setScaleY(1.0);
+        clda.setScaleZ(1.0);
+        clda.setQuatX(0.0);
+        clda.setQuatY(0.0);
+        clda.setQuatZ(0.0);
+        clda.setQuatW(1.0);
+        this.mNode.addCollada(clda);
+        return clda;
     };
 
     VWObject.prototype.createCamera = function(fov,hither,yon) {
         this.mHither = hither;
         this.mYon = yon;
         this.mFOV = fov;
-        this.mCamera=new GLGE.camera(this.mID+"C");
+        this.mCamera=new GLGE.Camera(this.mID+"C");
         this.mNode.addChild(this.mCamera);
         this.update = this.updateCamera;
     };
@@ -162,7 +189,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mRenderTarg = renderTarg;
         renderTarg.mCamera = this;
         renderTarg.attachScene(spaceRoot, this.mCamera);
-        this.update(renderTarg.mGraphics);
+        this.update(renderTarg.mGraphicsSystem);
     };
 
     VWObject.prototype.detachRenderTarget = function(curTime) {
@@ -328,8 +355,6 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         var spaceRoot=this.mSpaceRoots[s];
         var newObject;
         this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,spaceRoot);
-        newObject.mParent=null;
-        spaceRoot.mRootNode.addChild(newObject.mNode);
         this.moveTo(newObject,msg);
         newObject.updateTransformation(this);
         
@@ -367,7 +392,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         var curParent=null;
         var curParentNode=null;
         if (prevParent==null){
-            prevParentNode=this.mSpaceRoot[vwObject.mSpaceID].mScene;
+            prevParentNode=this.mSpaceRoots[vwObject.mSpaceID].mScene;
         }else {
             prevParentNode=prevParent.mNode;
         }
@@ -487,7 +512,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     GLGEGraphics.prototype.methodTable["Camera"]=function(msg) {
         if (msg.id in this.mObjects) {
             var vwObject=this.mObjects[msg.id];
-            vwObject.createCamera(o3djs.math.degToRad(45),
+            var pi=3.1415926536;
+            vwObject.createCamera(45*pi/180.,
                                   0.1,
                                   50000);
         }
@@ -504,17 +530,16 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 spaceView = new SpaceRoot(this, this.mClientElement);
                 this.mSpaceRoots[cam.mSpaceID] = spaceView;
             }
-            if (cam.mCamera) {
-                
-            }
             renderTarg = this.mRenderTargets[msg.target];
             if (!renderTarg) {
                 renderTarg = new RenderTarget(
                     this,
-                    spaceView);
+                    this.mClientElement,
+                    null);
                 this.mRenderTargets[msg.target] = renderTarg;
             }
-            if (renderTarg) {
+            
+            if (cam.mCamera) {
                 cam.attachRenderTarget(renderTarg,spaceView);
             }
         }
