@@ -328,39 +328,48 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         var spaceRoot=this.mSpaceRoots[s];
         var newObject;
         this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,spaceRoot);
-        newObject.mNode.parent=spaceRoot.mRootNode;
+        newObject.mParent=null;
+        spaceRoot.mRootNode.addChild(newObject.mNode);
+        this.moveTo(newObject,msg);
+        newObject.updateTransformation(this);
+        
         if (msg.id in this.mUnsetParents) {
             var unset=this.mUnsetParents[msg.id];
             var unsetl=unset.length;
             for (var i=0;i<unsetl;++i) {
-                unset[i].mNode.parent=newObject.mNode;
+                newObject.mNode.addChild(unset[i].mNode);//.parent=newObject.mNode;
                 delete unset[i].mUnsetParent;
             }
         }
-        this.moveTo(newObject,msg);
-        newObject.updateTransformation(this);
     };
-    function glgeTransformationToLocationList(gfx,node){
+    function LocationFromGLGETransformation(transformation,time) {
+        return Kata.LocationSet({time:time,
+                                 pos:[transformation.locX,transformation.locY,transformation.locZ],
+                                 orient:[transformation.quatX,
+                                         transformation.quatY,
+                                         transformation.quatZ,
+                                         transformation.quatW]});
+};
+
+    function glgeTransformationToLocationList(gfx,vwObject){
         var retval=[];
-        while(node!=null) {
-            var loc;
-            if (node.mKataObject) {
-                loc=[node.mKataObject.mPrevLocation,node.mKataObject.mPrevLocation];
-            }else {
-                var cloc=Kata.LocationFromGLGETransformation(node,new Date());
-                loc=[cloc,cloc];
-            }
-            retval[retval.length]=loc;
-            node=node.parent;
+        while(vwObject!=null) {
+            var loc=[vwObject.mPrevLocation,vwObject.mPrevLocation];
+            retval.push(loc);
+            vwObject=vwObject.mParent;
         }
         return retval;
     }
     GLGEGraphics.prototype.moveTo=function(vwObject,msg) {
 	    if (!msg.time) msg.time = new Date().getMilliseconds();
         var prevParent=vwObject.mParent;
+        var prevParentNode=null;
         var curParent=null;
+        var curParentNode=null;
         if (prevParent==null){
-            prevParent=this.mSpaceRoot[vwObject.mSpaceID].mScene;
+            prevParentNode=this.mSpaceRoot[vwObject.mSpaceID].mScene;
+        }else {
+            prevParentNode=prevParent.mNode;
         }
         if (msg.parent!==undefined) {
             if (vwObject.mUnsetParent) {
@@ -369,12 +378,14 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
             }
             if (msg.parent) {
                 if (msg.parent in this.mObjects) {
-                    var parentNode=this.mObjects[msg.parent].mNode;
-                    if (parentNode!=vwObject.mParent) {
-                        prevParent.removeChild(vwObject.mNode);
-                        vwObject.mParent=parentNode;                    
+                    var parent=this.mObjects[msg.parent];
+                    var parentNode=parent.mNode;
+                    if (parent!=vwObject.mParent) {
+                        prevParentNode.removeChild(vwObject.mNode);
+                        vwObject.mParent=parent;
                         parentNode.addChild(vwObject.mNode);                
-                        curParent=parentNode;
+                        curParent=parent;
+                        curParentNode=parentNode;
                     }
                 }else {
                     if (!(msg.parent in this.mUnsetParents)) {
@@ -384,23 +395,24 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                     vwObject.mUnsetParent=msg.parent;
                     var spaceRoot = this.mSpaceRoot[vwObject.mSpaceID];
                     if (vvwObject.mParent) {
-                        vwObject.mParent.removeChild(vwObject.mNode);
+                        vwObject.mParent.mNode.removeChild(vwObject.mNode);
                         spaceRoot.mScene.addChild(vwObject.mNode);
                         vwObject.mParent=null;
                     }
-                    curParent=sceneRoot.mScene;
+                    curParent=null;
+                    curParentNode=sceneRoot.mScene;
                 }
             }else {
                 if (vwObject.mParent) {                    
-                    prevParent.removeChild(vwObject.mNode);
-                    curParent=this.mSpaceRoot[vwObject.mSpaceID].mScene;
-                    curParent.addChild(vwObject.mNode);
+                    prevParentNode.removeChild(vwObject.mNode);
+                    curParent=null;
+                    curParentNode=this.mSpaceRoot[vwObject.mSpaceID].mScene;
+                    curParentNode.addChild(vwObject.mNode);
                     vwObject.mParent=null;
                 }
-
             }
-            var prevParentNode=glgeTransformationToLocationList(this,prevParent);
-            var curParentNode=glgeTransformationToLocationList(this,curParent);
+            var prevParentTransformation=glgeTransformationToLocationList(this,prevParent);
+            var curParentTransformation=glgeTransformationToLocationList(this,curParent);
             vwObject.mPrevLocation=Kata.LocationReparent(vwObject.mPrevLocation,prevParentNode,curParentNode);
             vwObject.mCurLocation=Kata.LocationReparent(vwObject.mCurLocation,prevParentNode,curParentNode);
         }
@@ -431,8 +443,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                     kataObject.mUnsetParent=msg.id;
                     kataObject.mParent=null;
                     var spaceRoot=this.mSpaceRoots[children[i].mKataObject.mSpaceId];
-                    var prevParentNode=glgeTransformationToLocationList(this,vwObject.mNode);
-                    var curParentNode=glgeTransformationToLocationList(this,spaceRoot.mScene);
+                    var prevParentNode=glgeTransformationToLocationList(this,vwObject);
+                    var curParentNode=glgeTransformationToLocationList(this,null);
                     
                     kataObject.mPrevLocation=Kata.LocationReparent(kataObject.mPrevLocation,prevParentNode,curParentNode);
                     kataObject.mCurLocation=Kata.LocationReparent(kataObject.mCurLocation,prevParentNode,curParentNode);
