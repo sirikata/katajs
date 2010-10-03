@@ -731,23 +731,31 @@ O3DGraphics.prototype._extractMouseEventInfo = function(e){
     ev.altKey = e.altKey;
     ev.ctrlKey = e.ctrlKey;
     ev.which = e.button;
-    ev.x = e.offsetX;
-    ev.y = e.offsetY;
+    ev.x = e.clientX;
+    ev.y = e.clientY;
     ev.screenX = e.screenX;
     ev.screenY = e.screenY;
     ev.clientX = e.clientX;
     ev.clientY = e.clientY;
+    var el = null;
     if (typeof(e.srcElement) != "undefined") {
+        el = e.srcElement;
         ev.width = e.srcElement.clientWidth;
         ev.height = e.srcElement.clientHeight;
     }
     else if (typeof(e.target != "undefined")) {
+        el = e.target;
         ev.width = e.target.width;
         ev.height = e.target.height;
     }
     else {
         ev.width = 0;
         ev.height = 0;
+    }
+    while (el != null) {
+        ev.x -= el.offsetLeft || 0;
+        ev.y -= el.offsetTop || 0;
+        el = el.offsetParent;
     }
     return ev;
 };
