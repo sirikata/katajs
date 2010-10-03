@@ -386,7 +386,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         return retval;
     }
     GLGEGraphics.prototype.moveTo=function(vwObject,msg) {
-	    if (!msg.time) msg.time = new Date().getMilliseconds();
+	    if (!msg.time) msg.time = new Date().getTime();
         var prevParent=vwObject.mParent;
         var prevParentNode=null;
         var curParent=null;

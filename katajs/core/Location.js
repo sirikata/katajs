@@ -344,6 +344,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         if (msg.vel!==undefined){
             destination.vel=msg.vel;
         }
+        destination.time=t;
     }
 };
 

@@ -292,10 +292,9 @@ VWObject.prototype.updateTransformation = function(graphics) {
 	// FIXME: dbm: interpolate doesn't seem to work for pos, orient; tho scale does
 //    this.mNode.translate(l.pos[0],l.pos[1],l.pos[2]);
 	var pos = this.mCurLocation.pos;
-    this.mNode.translate(pos[0],pos[1],pos[2]);
+    this.mNode.translate(l.pos[0],l.pos[1],l.pos[2]);
     this.mNode.scale(l.scale[0],l.scale[1],l.scale[2]);
-//    this.mNode.quaternionRotate(l.orient);
-    this.mNode.quaternionRotate(this.mCurLocation.orient);
+    this.mNode.quaternionRotate(l.orient);
     if (this.stationary(graphics.mCurTime)) {
         graphics.removeObjectUpdate(this);        
     }
@@ -536,7 +535,7 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
     newObject.updateTransformation(this);
 };
 O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
-	if (!msg.time) msg.time = new Date().getMilliseconds();
+	if (!msg.time) msg.time = new Date().getTime();
     var prevParent=vwObject.mNode.parent;
     if (msg.parent!==undefined) {
         if (vwObject.mUnsetParent) {
