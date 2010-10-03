@@ -52,7 +52,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 thus.displayInfo = {width: canvas.width, height: canvas.height};
             };
             this.renderer=new GLGE.Renderer(canvas);
-            this.keys=new GLGE.KeyInput();
+            //this.keys=new GLGE.KeyInput();
             
             window.addEventListener('resize', resizeHandler, false);
             setTimeout(resizeHandler, 0);                
@@ -99,10 +99,19 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                             function (e){thus._mouseDown(e);},
                             true);
     canvas.addEventListener('mouseup',
-                                function(e){thus._mouseUp(e);},
+                            function(e){thus._mouseUp(e);},
                             true);
     canvas.addEventListener('mousemove',
                             function(e){thus._mouseMove(e);},
+                            true);
+    document.addEventListener('keydown',
+                            function (e){thus._keyDown(e);},
+                            true);
+    document.addEventListener('keyup',
+                            function(e){thus._keyUp(e);},
+                            true);
+    canvas.addEventListener('wheel',
+                            function(e){thus._wheel(e);},
                             true);
     
 };
@@ -334,7 +343,35 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
             this._inputCb(msg);
         }
     };
-    
+
+    GLGEGraphics.prototype._keyDown = function(e){
+        var ev = {};
+        ev.type = e.type;
+        ev.keyCode = e.keyCode;
+        ev.shiftKey = e.shiftKey;
+        ev.altKey = e.altKey;
+        ev.ctrlKey = e.ctrlKey;
+        var msg = {
+            msg: "keydown",
+            event: ev
+        };
+        this._inputCb(msg);
+    };
+
+    GLGEGraphics.prototype._keyUp = function(e) {
+        var ev = {};
+        ev.type = e.type;
+        ev.keyCode = e.keyCode;
+        ev.shiftKey = e.shiftKey;
+        ev.altKey = e.altKey;
+        ev.ctrlKey = e.ctrlKey;
+        var msg = {
+            msg: "keyup",
+            event: ev
+        };
+        this._inputCb(msg);
+    };
+
     GLGEGraphics.prototype._scrollWheel = function(e){
         /// FIXME: figure out what event attributes to copy
         var msg = {
