@@ -271,7 +271,7 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
 
 VWObject.prototype.stationary = function (curTime) {
     var v=this.mCurLocation.vel;
-    var a=this.mCurLocation.mAngVel;
+    var a=this.mCurLocation.rotvel;
     var t=curTime;//.getTime();
     return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.scaleTime/*.getTime()*/>=0&&t-this.mCurLocation.posTime/*.getTime()*/>=0&&t-this.mCurLocation.orientTime/*.getTime()*/>=0;
 };

@@ -33,9 +33,9 @@
 var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mCurTime=new Date();
     this.callback=callbackFunction;
+    var thus=this;
     {        
         var canvas;
-        var thus=this;
         canvas = document.createElement('canvas');
         canvas.style.width = "100%";
         canvas.style.height = "100%";
@@ -70,9 +70,9 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mObjects={};
 
     function render(){
-        this.mCurTime=new Date();
+        thus.mCurTime=new Date();
         if(typeof(GlobalLoadDone)=="function") {
-                GlobalLoadDone();//this should be done with message passing
+            GlobalLoadDone();//this should be done with message passing
             GlobalLoadDone=null;
         }
         var now = parseInt(new Date().getTime());
@@ -84,7 +84,16 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         var debug=document.getElementById("debug");
         if (debug)
             debug.innerHTML = "Frame Rate:" + frameratebuffer;
+        for (var id in thus.mObjectUpdates) {        
+            thus.mObjectUpdates[id].update(thus);
+            
         }
+	    if (Kata.userRenderCallback) {
+		    Kata.userRenderCallback(thus.mCurTime);
+	}
+        
+    }
+    
     setInterval(render, 16);
     canvas.addEventListener('mousedown',
                             function (e){thus._mouseDown(e);},
@@ -205,7 +214,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     };
     VWObject.prototype.stationary = function (curTime) {
         var v=this.mCurLocation.vel;
-        var a=this.mCurLocation.mAngVel;
+        var a=this.mCurLocation.rotvel;
         var t=curTime;//.getTime();
         return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.scaleTime/*.getTime()*/>=0&&t-this.mCurLocation.posTime/*.getTime()*/>=0&&t-this.mCurLocation.orientTime/*.getTime()*/>=0;
     };
