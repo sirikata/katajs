@@ -296,6 +296,7 @@ VWObject.prototype.updateTransformation = function(graphics) {
     this.mNode.scale(l.scale[0],l.scale[1],l.scale[2]);
     this.mNode.quaternionRotate(l.orient);
     if (this.stationary(graphics.mCurTime)) {
+        //console.log("Stationary ",this.mID,l,l.pos[0],l.pos[1],l.pos[2]);
         graphics.removeObjectUpdate(this);        
     }
 
@@ -608,7 +609,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
 O3DGraphics.prototype.methodTable["Move"]=function(msg) {
     var vwObject=this.mObjects[msg.id];
     this.moveTo(vwObject,msg);
-    vwObject.updateTransformation(this);
+    vwObject.update(this);
 };
 O3DGraphics.prototype.methodTable["Destroy"]=function(msg) {
     if (msg.id in this.mObjects) {
@@ -647,7 +648,7 @@ O3DGraphics.prototype.methodTable["Mesh"]=function(msg) {
                 orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
             });
         }
-        vwObject.updateTransformation(this);
+        vwObject.update(this);
     }
 };
 O3DGraphics.prototype.methodTable["DestroyMesh"]=function(msg) {
