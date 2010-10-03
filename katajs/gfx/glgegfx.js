@@ -235,6 +235,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mNode.setQuat(l.orient[0],l.orient[1],l.orient[2],l.orient[3]);
         if (this.stationary(graphics.mCurTime)) {
             graphics.removeObjectUpdate(this);        
+            //console.log("Stationary ",this.mID,l,l.pos[0],l.pos[1],l.pos[2]);
         }
         return l;
     };
@@ -497,7 +498,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     GLGEGraphics.prototype.methodTable["Move"]=function(msg) {
         var vwObject=this.mObjects[msg.id];
         this.moveTo(vwObject,msg);
-        vwObject.updateTransformation(this);
+        vwObject.update(this);
     };
     GLGEGraphics.prototype.methodTable["Destroy"]=function(msg) {
         if (msg.id in this.mObjects) {
@@ -539,7 +540,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
             //msg.up_axis == "Z_UP"
                                 // FIXME: needs to be permanent, so future setOrientations will be relative to this
                                 //orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
-            vwObject.updateTransformation(this);
+            vwObject.update(this);
         }
     };
     GLGEGraphics.prototype.methodTable["DestroyMesh"]=function(msg) {
