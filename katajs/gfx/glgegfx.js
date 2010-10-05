@@ -82,9 +82,6 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         //checkkeys();
         thus.renderer.render();
         lasttime = now;
-        var debug=document.getElementById("debug");
-        if (debug)
-            debug.innerHTML = "Frame Rate:" + frameratebuffer;
         for (var id in thus.mObjectUpdates) {        
             thus.mObjectUpdates[id].update(thus);
             
