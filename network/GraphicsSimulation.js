@@ -74,7 +74,7 @@ Kata.defer(function() {
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
         data = Kata.ScriptProtocol.FromScript.reconstitute(data);
         SUPER.receivedMessage.apply(this, arguments);
-        console.log("Graphics received message from ObjectHost:", data, data.msg);
+//        console.log("Graphics received message from ObjectHost:", data, data.msg);
         this.mGFX.send(data);
     };
 
