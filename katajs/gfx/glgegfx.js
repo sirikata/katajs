@@ -48,6 +48,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 var height = Math.max(1, canvas.clientHeight);
                 canvas.width = width;
                 canvas.height = height;
+                GLGEGraphics.canvasAspect = width/height;
                 canvas.sizeInitialized_ = true;
                 thus.displayInfo = {width: canvas.width, height: canvas.height};
             };
@@ -187,6 +188,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mYon = yon;
         this.mFOV = fov;
         this.mCamera=new GLGE.Camera(this.mID+"C");
+        this.mCamera.setAspect(GLGEGraphics.canvasAspect);
         this.mNode.addChild(this.mCamera);
         this.update = this.updateCamera;
     };
