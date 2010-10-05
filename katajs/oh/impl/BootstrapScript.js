@@ -48,7 +48,7 @@ Kata.include("katajs/core/URL.js");
       * @constructor
       * @param {Kata.Channel} channel the channel used to communicate
       * with the HostedObject this script belongs to
-      * @param {} args additional arguments passed by the creating
+      * @param {Array} args additional arguments passed by the creating
       * object
       */
      Kata.BootstrapScript = function(channel,args) {

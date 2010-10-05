@@ -61,7 +61,7 @@ Kata.defer(function() {
          * @implements {Kata.ObjectHost.TopLevelStream}
          * @param {string} host  The hostname to connect to.
          * @param {string} port  The port number to connect to.
-         * @param {number=1} numStreams  Number of connections to make (def. 1)
+         * @param {number=} numStreams  Number of connections to make (def. 1)
          */
         Kata.TCPSST = function (host, port, numStreams) {
             if (!numStreams) {

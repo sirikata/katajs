@@ -70,8 +70,8 @@ Kata.include('katajs/core/ObjectID.js');
         return 'PresenceID(' + this.mSpace.toString() + ':' + this.mObject.toString() + ')';
     };
 
-    Kata.PresenceID.null = function() {
-        return new Kata.PresenceID(Kata.SpaceID.null(), Kata.ObjectID.null());
+    Kata.PresenceID.nil = function() {
+        return new Kata.PresenceID(Kata.SpaceID.nil(), Kata.ObjectID.nil());
     };
 
     Kata.PresenceID.any = function() {

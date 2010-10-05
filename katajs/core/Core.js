@@ -47,12 +47,12 @@ if (typeof(console) == "undefined") {
 }
 if (typeof(JSON) == "undefined") {JSON = {};}
 
+/** @define {string} Root directory of scripts. Inferred by any "script"
+  tags pointing to Core.js. */
+Kata.scriptRoot="";
 (function() {
     var includedscripts = {"Core.js":true};
 
-    /** @define {string} Root directory of scripts. Inferred by any "script"
-     tags pointing to Core.js. */
-    Kata.scriptRoot="";
     if (Kata.precompiled) {
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
          * @param {string} scriptfile  A script to include only once.

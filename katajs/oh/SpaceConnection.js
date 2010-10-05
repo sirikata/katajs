@@ -51,9 +51,9 @@ Kata.include("katajs/oh/ObjectHost.js");
 
      /** Attempt to connect the object to the space using the
       * authentication information.
-      * @param {} id identifier for this object, only used internally
-      * @param {} auth authentication information for the object
-      * @param {} vis the visual representation for the object
+      * @param {string} id identifier for this object, only used internally
+      * @param {string} auth authentication information for the object
+      * @param {string} vis the visual representation for the object
       */
      Kata.SpaceConnection.prototype.connectObject = function(id, auth, vis) {
          Kata.notImplemented("SpaceConnection.connectObject");

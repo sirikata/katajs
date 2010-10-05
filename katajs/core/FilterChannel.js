@@ -39,7 +39,7 @@ Kata.include("katajs/core/Channel.js");
       *
       * @constructor
       * @param {Kata.Channel} channel the channel which feeds this one
-      * @param {function} filter the filter to apply. Takes the same
+      * @param {function(Kata.Channel, (string|object))} filter the filter to apply. Takes the same
       * form as a listener but returns a boolean indicating whether to
       * deliver to listeners
       */

@@ -52,7 +52,7 @@ Kata.include("katajs/core/URL.js");
       *
       * @param {string} protocol the protocol this constructor
       * handles, e.g. the protocol part of a URL such as http in http://host/
-      * @param {} conn_const a constructor for a SpaceConnection
+      * @param {function()} conn_const a constructor for a SpaceConnection
       */
      Kata.SessionManager.registerProtocolHandler = function(protocol, conn_const) {
          if (! this._protocols)
@@ -77,7 +77,7 @@ Kata.include("katajs/core/URL.js");
       *
       * @param {Kata.HostedObject} ho the HostedObject to connect
       * @param {string} space URL of space to connect to
-      * @param {} auth authentication information for the space
+      * @param {string} auth authentication information for the space
       */
      Kata.SessionManager.prototype.connect = function(ho, req, auth) {
          var spaceURL = new Kata.URL(req.space);
@@ -100,12 +100,13 @@ Kata.include("katajs/core/URL.js");
 
      /** Indicate a connection response to the SessionManager.  Should
       *  only be called by SpaceConnections.
-      *  @param {} id
+      *  @param {string} id
       *  @param {boolean} success
-      *  @param {} presence_id the identifier for the presence, or
+      *  @param {string} presence_id the identifier for the presence, or
       *  null if the connection wasn't successful.
       *  @param {Kata.Location} loc initial location information for the object
-      *  @param {} visual a reference to the visual description of the object
+      *  @param {string} visual a reference to the visual description of the
+      *  object
       */
      Kata.SessionManager.prototype.connectionResponse = function(id, success, presence_id, loc, visual) {
          var obj = this.mObjects[id];

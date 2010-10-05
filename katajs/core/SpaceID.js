@@ -34,7 +34,7 @@
 
     Kata.SpaceID = {};
 
-    Kata.SpaceID.null = function() {
+    Kata.SpaceID.nil = function() {
         return '';
     };
 

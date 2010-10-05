@@ -36,7 +36,7 @@ Kata.include('katajs/core/Math.uuid.js');
 
     Kata.ObjectID = {};
 
-    Kata.ObjectID.null = function() {
+    Kata.ObjectID.nil = function() {
         return '00000000-0000-0000-0000-000000000000';
     };
 
