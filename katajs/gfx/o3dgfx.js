@@ -271,7 +271,7 @@ VWObject.prototype.attachRenderTarget = function(renderTarg) {
 
 VWObject.prototype.stationary = function (curTime) {
     var v=this.mCurLocation.vel;
-    var a=this.mCurLocation.mAngVel;
+    var a=this.mCurLocation.rotvel;
     var t=curTime;//.getTime();
     return v[0]==0&&v[1]==0&&v[2]==0&&a==0&&t-this.mCurLocation.scaleTime/*.getTime()*/>=0&&t-this.mCurLocation.posTime/*.getTime()*/>=0&&t-this.mCurLocation.orientTime/*.getTime()*/>=0;
 };
@@ -292,11 +292,11 @@ VWObject.prototype.updateTransformation = function(graphics) {
 	// FIXME: dbm: interpolate doesn't seem to work for pos, orient; tho scale does
 //    this.mNode.translate(l.pos[0],l.pos[1],l.pos[2]);
 	var pos = this.mCurLocation.pos;
-    this.mNode.translate(pos[0],pos[1],pos[2]);
+    this.mNode.translate(l.pos[0],l.pos[1],l.pos[2]);
     this.mNode.scale(l.scale[0],l.scale[1],l.scale[2]);
-//    this.mNode.quaternionRotate(l.orient);
-    this.mNode.quaternionRotate(this.mCurLocation.orient);
+    this.mNode.quaternionRotate(l.orient);
     if (this.stationary(graphics.mCurTime)) {
+        //console.log("Stationary ",this.mID,l,l.pos[0],l.pos[1],l.pos[2]);
         graphics.removeObjectUpdate(this);        
     }
 
@@ -347,7 +347,7 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, pack, parent, exce
         alert("Could not load: " + this.mMeshURI + "\n" + exception);
     } else {
         console.log("loading finished.");
-        if(typeof(GlobalLoadDone)=="function") GlobalLoadDone();        // sue me; I've got lawyers
+        if(typeof(GlobalLoadDone)=="function") GlobalLoadDone();        // this should be done with message passing
         // Generate draw elements and setup material draw lists.
         o3djs.pack.preparePack(pack, renderTarg.mViewInfo);
 
@@ -505,6 +505,9 @@ O3DGraphics.prototype.renderCallback = function() {
         this.mObjectUpdates[id].update(this);
         
     }
+	if (Kata.userRenderCallback) {
+		Kata.userRenderCallback(this.mCurTime);
+	}
 };
 
 O3DGraphics.prototype.methodTable={};
@@ -533,7 +536,7 @@ O3DGraphics.prototype.methodTable["Create"]=function(msg) {//this function creat
     newObject.updateTransformation(this);
 };
 O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
-	if (!msg.time) msg.time = new Date().getMilliseconds();
+	if (!msg.time) msg.time = new Date().getTime();
     var prevParent=vwObject.mNode.parent;
     if (msg.parent!==undefined) {
         if (vwObject.mUnsetParent) {
@@ -549,10 +552,10 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
                 }
                 this.mUnsetParents[msg.parent][msg.id]=newObject;
                 vwObject.mUnsetParent=msg.parent;
-                vwObject.mNode.parent=spaceRoot;
+                vwObject.mNode.parent=spaceRootNode;
             }
         }else {
-            vwObject.mNode.parent=spaceRoot;
+            vwObject.mNode.parent=spaceRootNode;
         }
         function o3dTransformationToLocationList(gfx,node){
             var retval=[];
@@ -606,7 +609,7 @@ O3DGraphics.prototype.moveTo=function(vwObject,msg,spaceRootNode) {
 O3DGraphics.prototype.methodTable["Move"]=function(msg) {
     var vwObject=this.mObjects[msg.id];
     this.moveTo(vwObject,msg);
-    vwObject.updateTransformation(this);
+    vwObject.update(this);
 };
 O3DGraphics.prototype.methodTable["Destroy"]=function(msg) {
     if (msg.id in this.mObjects) {
@@ -645,7 +648,7 @@ O3DGraphics.prototype.methodTable["Mesh"]=function(msg) {
                 orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
             });
         }
-        vwObject.updateTransformation(this);
+        vwObject.update(this);
     }
 };
 O3DGraphics.prototype.methodTable["DestroyMesh"]=function(msg) {
@@ -728,23 +731,31 @@ O3DGraphics.prototype._extractMouseEventInfo = function(e){
     ev.altKey = e.altKey;
     ev.ctrlKey = e.ctrlKey;
     ev.which = e.button;
-    ev.x = e.offsetX;
-    ev.y = e.offsetY;
+    ev.x = e.clientX;
+    ev.y = e.clientY;
     ev.screenX = e.screenX;
     ev.screenY = e.screenY;
     ev.clientX = e.clientX;
     ev.clientY = e.clientY;
+    var el = null;
     if (typeof(e.srcElement) != "undefined") {
+        el = e.srcElement;
         ev.width = e.srcElement.clientWidth;
         ev.height = e.srcElement.clientHeight;
     }
     else if (typeof(e.target != "undefined")) {
+        el = e.target;
         ev.width = e.target.width;
         ev.height = e.target.height;
     }
     else {
         ev.width = 0;
         ev.height = 0;
+    }
+    while (el != null) {
+        ev.x -= el.offsetLeft || 0;
+        ev.y -= el.offsetTop || 0;
+        el = el.offsetParent;
     }
     return ev;
 };
