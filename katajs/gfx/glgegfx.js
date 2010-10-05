@@ -34,7 +34,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mCurTime=new Date();
     this.callback=callbackFunction;
     var thus=this;
-    {        
+    {
         var canvas;
         canvas = document.createElement('canvas');
         canvas.style.width = "100%";
@@ -52,7 +52,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 thus.displayInfo = {width: canvas.width, height: canvas.height};
             };
             this.renderer=new GLGE.Renderer(canvas);
-            //this.keys=new GLGE.KeyInput();
+                //this.keys=new GLGE.KeyInput();
             
             window.addEventListener('resize', resizeHandler, false);
             setTimeout(resizeHandler, 0);                
@@ -257,7 +257,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     function SpaceRoot(glgegfx, element, spaceID) {
         this.mElement = element;
         //this.mPack = this.mElement.client.createPack();
-        this.mScene = new GLGE.Scene(spaceID);
+//        this.mScene = new GLGE.Scene(spaceID);
+        this.mScene = g_GLGE_doc.getElement("mainscene");
         this.mDefaultRenderView = new RenderTarget(glgegfx, element, null);
         //this.mDefaultRenderView.createBasicView([0,0,0,0], [0,0,0,0]);
         //FIXME not sure what to do with this this.initializeDrawList(this.mDefaultRenderView.mViewInfo);
