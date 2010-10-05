@@ -49,6 +49,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 canvas.width = width;
                 canvas.height = height;
                 GLGEGraphics.canvasAspect = width/height;
+                if (thus.mCamera) thus.mCamera.setAspect(GLGEGraphics.canvasAspect);
                 canvas.sizeInitialized_ = true;
                 thus.displayInfo = {width: canvas.width, height: canvas.height};
             };
@@ -185,7 +186,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mYon = yon;
         this.mFOV = fov;
         this.mCamera=new GLGE.Camera(this.mID+"C");
-        this.mCamera.setAspect(GLGEGraphics.canvasAspect);
+        if (GLGEGraphics.canvasAspect) this.mCamera.setAspect(GLGEGraphics.canvasAspect);
         this.mNode.addChild(this.mCamera);
         this.update = this.updateCamera;
     };
@@ -574,6 +575,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
             vwObject.createCamera(45*pi/180.,
                                   0.1,
                                   50000);
+            this.mCamera = vwObject.mCamera;    /// need to keep track of camera in case of canvas resize
         }
     };
     GLGEGraphics.prototype.methodTable["AttachCamera"]=function(msg) {
