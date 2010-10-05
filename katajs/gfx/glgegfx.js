@@ -543,11 +543,14 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
         //q.innerHTML="Mesh "+msg.mesh;
         if (msg.mesh && msg.id in this.mObjects) {
-            var vwObject=this.mObjects[msg.id];
+            var vwObject = this.mObjects[msg.id];
             vwObject.createMesh(msg.mesh, msg.anim);//FIXME we need to add this function
-            //msg.up_axis == "Z_UP"
-                                // FIXME: needs to be permanent, so future setOrientations will be relative to this
-                                //orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
+            if (msg.up_axis == "Z_UP") {
+                this.moveTo(vwObject, {
+                    // FIXME: needs to be permanent, so future setOrientations will be relative to this
+                    orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
+                });
+            }
             vwObject.update(this);
         }
     };
