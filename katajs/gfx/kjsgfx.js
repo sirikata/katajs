@@ -1,5 +1,5 @@
 Kata.include("katajs/gfx/kata.js");
-Kata.include("network/GraphicsSimulation.js");
+Kata.include("katajs/oh/GraphicsSimulation.js");
 
 kjsgfx_camera_id = null
 kjsgfx_id_map = {}

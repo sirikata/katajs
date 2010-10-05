@@ -1,4 +1,4 @@
-Kata.include("network/GraphicsSimulation.js");
+Kata.include("katajs/oh/GraphicsSimulation.js");
 
 /**
  *@constructor
