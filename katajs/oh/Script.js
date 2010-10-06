@@ -51,7 +51,7 @@ Kata.defer(function() {
       * @constructor
       * @param {Kata.Channel} channel the channel used to communicate
       * with the HostedObject this script belongs to
-      * @param {} args additional arguments passed by the creating
+      * @param {Array} args additional arguments passed by the creating
       * object
       */
      Kata.Script = function (channel, args) {
@@ -92,8 +92,8 @@ Kata.defer(function() {
 
      /** Request a presence in the given space.
       *  @param {Kata.SpaceID} space ID of the space to connect to
-      *  @param {} auth authentication information to pass to the space
-      *  @param {} cb callback to invoke upon completion
+      *  @param {string} auth authentication information to pass to the space
+      *  @param {function(Kata.Presence)} cb callback to invoke upon completion
       */
      Kata.Script.prototype.connect = function(args, auth, cb) {
          var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth);
@@ -104,8 +104,6 @@ Kata.defer(function() {
 
      /** Request that the given presence be disconnected from the space.
       *  @param {Kata.Presence} pres the Presence to disconnect
-      *  @param {} auth authentication information to pass to the space
-      *  @param {} cb callback to invoke upon completion
       */
      Kata.Script.prototype._disconnect = function(pres) {
          var msg = new Kata.ScriptProtocol.FromScript.Disconnect(pres.space(), pres.id());
@@ -146,7 +144,7 @@ Kata.defer(function() {
       *
       * @param {Kata.Duration} freq amount of time to wait before
       * invoking the timer
-      * @param {} cb a callback to invoke when the timer expires
+      * @param {function()} cb a callback to invoke when the timer expires
       * @param {bool} repeat
       * @returns {Kata.Timer} timer object which can be used to cancel
       * or update the timer.
@@ -158,9 +156,9 @@ Kata.defer(function() {
      };
 
      /** Have the object host instantiate a new object.
-      * @param {} script the script to execute for the object
-      * @param {} cons the constructor for the object
-      * @param {} args the arguments for the constructor
+      * @param {string} script the script to execute for the object
+      * @param {function()} cons the constructor for the object
+      * @param {Array} args the arguments for the constructor
       */
      Kata.Script.prototype.createObject = function(script, cons, args) {
          var msg = new Kata.ScriptProtocol.FromScript.CreateObject(script, cons, args);

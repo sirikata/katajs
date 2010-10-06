@@ -38,13 +38,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <script type="text/javascript" src="../../katajs/core/Core.js"></script>
 <script type="text/javascript">
     Kata.WEB_WORKERS_ENABLED=false;
-    Kata.include("network/MainThread.js");
+    Kata.include("katajs/oh/MainThread.js");
     
     // "Plugins" - load files which add specific implementations. This is left up to the user since some may be expensive to load.
     Kata.include("katajs/oh/SpaceConnection.js");
     Kata.include("katajs/space/loop/Space.js");
-    Kata.include("network/Simulation.js");
-    Kata.include("network/GraphicsSimulation.js");
+    Kata.include("katajs/oh/GraphicsSimulation.js");
     //	Kata.include("katajs/gfx/kjsgfx.js");
     Kata.include("katajs/core/Location.js");
     Kata.include("katajs/gfx/TextGraphics.js");
@@ -53,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     Kata.include("katajs/oh/ObjectHost.js");
     Kata.include("katajs/oh/impl/BootstrapScript.js");
     Kata.include("katajs/oh/GraphicsScript.js");
-    Kata.include("network/MainThread.js");
     Kata.include("examples/simple_script/BlessedScript.js");
     Kata.include("examples/simple_script/TestScript.js");
 	</script>

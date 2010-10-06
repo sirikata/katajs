@@ -139,7 +139,7 @@ Kata.defer(function() {
 
         this._sendODPMessage(
             objid, this.Ports.Session,
-            Kata.ObjectID.null(), this.Ports.Session,
+            Kata.ObjectID.nil(), this.Ports.Session,
             this._serializeMessage(session_msg)
         );
     };
@@ -156,7 +156,7 @@ Kata.defer(function() {
 
         this._sendODPMessage(
             objid, this.Ports.Session,
-            Kata.ObjectID.null(), this.Ports.Session,
+            Kata.ObjectID.nil(), this.Ports.Session,
             this._serializeMessage(session_msg)
         );
     };
@@ -183,7 +183,7 @@ Kata.defer(function() {
         odp_msg.ParseFromStream(new PROTO.Base64Stream(data));
 
         // Special case: Session messages
-        if (odp_msg.source_object == Kata.ObjectID.null() && odp_msg.dest_port == this.Ports.Session)
+        if (odp_msg.source_object == Kata.ObjectID.nil() && odp_msg.dest_port == this.Ports.Session)
             this._handleSessionMessage(odp_msg);
         else
             Kata.warn("Not implemented - Sirikata ODP dispatch: " + odp_msg.toString());
@@ -213,7 +213,7 @@ Kata.defer(function() {
 
                 this._sendODPMessage(
                     objid, this.Ports.Session,
-                    Kata.ObjectID.null(), this.Ports.Session,
+                    Kata.ObjectID.nil(), this.Ports.Session,
                     this._serializeMessage(ack_msg)
                 );
 

@@ -37,7 +37,7 @@
 
     Kata.ODP.PortID = {};
 
-    Kata.ODP.PortID.null = function() {
+    Kata.ODP.PortID.nil = function() {
         return 0;
     };
 

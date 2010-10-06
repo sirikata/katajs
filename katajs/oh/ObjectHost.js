@@ -31,7 +31,6 @@
  */
 
 Kata.include("katajs/oh/SessionManager.js");
-Kata.include("katajs/oh/HostedObject.js");
 Kata.include("katajs/core/URL.js");
 
 (function() {
@@ -140,7 +139,7 @@ Kata.include("katajs/core/URL.js");
       *
       * @param {Kata.HostedObject} ho the HostedObject to connect
       * @param {string} space URL of space to connect to
-      * @param {} auth authentication information for the space
+      * @param {string} auth authentication information for the space
       */
      Kata.ObjectHost.prototype.connect = function(ho, req, auth) {
          this.mSessionManager.connect(ho, req, auth);
@@ -171,3 +170,5 @@ Kata.include("katajs/core/URL.js");
      };
 
 })();
+
+Kata.include("katajs/oh/HostedObject.js");

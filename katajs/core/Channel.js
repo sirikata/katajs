@@ -41,7 +41,7 @@
 
     /**
      * Registers a function to be called when a message is sent.
-     * @param {function(Kata.Channel, string|object)} listener  A callback func
+     * @param {function(Kata.Channel, (string|object))} listener  A callback func
      */
     Kata.Channel.prototype.registerListener = function (listener) {
         if (!listener.call) {
