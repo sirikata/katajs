@@ -576,6 +576,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                                   0.1,
                                   50000);
             this.mCamera = vwObject.mCamera;    /// need to keep track of camera in case of canvas resize
+            this.mCamera.setFar(2000);          /// not sure why we need this but otherwise it defaults to 1000
         }
     };
     GLGEGraphics.prototype.methodTable["AttachCamera"]=function(msg) {
