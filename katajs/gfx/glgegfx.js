@@ -48,6 +48,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 var height = Math.max(1, canvas.clientHeight);
                 canvas.width = width;
                 canvas.height = height;
+                GLGEGraphics.canvasAspect = width/height;
+                if (thus.mCamera) thus.mCamera.setAspect(GLGEGraphics.canvasAspect);
                 canvas.sizeInitialized_ = true;
                 thus.displayInfo = {width: canvas.width, height: canvas.height};
             };
@@ -81,9 +83,6 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         //checkkeys();
         thus.renderer.render();
         lasttime = now;
-        var debug=document.getElementById("debug");
-        if (debug)
-            debug.innerHTML = "Frame Rate:" + frameratebuffer;
         for (var id in thus.mObjectUpdates) {        
             thus.mObjectUpdates[id].update(thus);
             
@@ -187,6 +186,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mYon = yon;
         this.mFOV = fov;
         this.mCamera=new GLGE.Camera(this.mID+"C");
+        if (GLGEGraphics.canvasAspect) this.mCamera.setAspect(GLGEGraphics.canvasAspect);
         this.mNode.addChild(this.mCamera);
         this.update = this.updateCamera;
     };
@@ -544,11 +544,14 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
         //q.innerHTML="Mesh "+msg.mesh;
         if (msg.mesh && msg.id in this.mObjects) {
-            var vwObject=this.mObjects[msg.id];
+            var vwObject = this.mObjects[msg.id];
             vwObject.createMesh(msg.mesh, msg.anim);//FIXME we need to add this function
-            //msg.up_axis == "Z_UP"
-                                // FIXME: needs to be permanent, so future setOrientations will be relative to this
-                                //orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
+            if (msg.up_axis == "Z_UP") {
+                this.moveTo(vwObject, {
+                    // FIXME: needs to be permanent, so future setOrientations will be relative to this
+                    orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
+                });
+            }
             vwObject.update(this);
         }
     };
@@ -572,6 +575,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
             vwObject.createCamera(45*pi/180.,
                                   0.1,
                                   50000);
+            this.mCamera = vwObject.mCamera;    /// need to keep track of camera in case of canvas resize
         }
     };
     GLGEGraphics.prototype.methodTable["AttachCamera"]=function(msg) {
