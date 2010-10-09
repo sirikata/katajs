@@ -85,7 +85,7 @@ Kata.include("katajs/core/URL.js");
      };
 
      Kata.BootstrapScript.prototype._handleConnected = function(channel, msg) {
-         var presence = new Kata.Presence(this.mScript, new Kata.URL(msg.space), msg.id, msg.loc, msg.visual);
+         var presence = new Kata.Presence(this.mScript, Kata.URL(msg.space), msg.id, msg.loc, msg.visual);
 
          this.mPresences[msg.space] = presence;
          this.mScript.newPresence(presence);
