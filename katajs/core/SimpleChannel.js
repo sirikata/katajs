@@ -69,6 +69,9 @@ Kata.include("katajs/core/Channel.js");
      */
     /// dbm: this is what's being used presently for local message passing (as of 7/27/10)
     Kata.SimpleChannel.prototype.sendMessage = function (data) {
+        if (Kata.FAKE_WEB_WORKERS_DEBUG) {
+            data = JSON.parse(JSON.stringify(data));
+        }
         this.mPartner.callListeners(data);
     };
 
