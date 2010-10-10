@@ -408,11 +408,11 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
         retval.pos=msg.pos;
         retval.posTime=msg.time;
     }else {
-        curLocation.pos=prevLocation.pos;
-        curLocation.posTime=prevLocation.posTime;
+        //curLocation.pos=prevLocation.pos;
+        //curLocation.posTime=prevLocation.posTime;
         if (msg.vel) {
-            curLocation.pos=Kata._helperLocationExtrapolate3vec(prevLocation.pos,prevLocation.vel,Kata.deltaTime(curDate,prevLocation.posTime));
-            curLocation.posTime=curDate;
+            //curLocation.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,Kata.deltaTime(curDate,curLocation.posTime));
+            //curLocation.posTime=curDate;
 
             retval.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,Kata.deltaTime(msg.time,curLocation.posTime));
             retval.posTime=msg.time;
@@ -420,18 +420,20 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     }
     if (msg.vel) {
         retval.vel=msg.vel;
+        //console.log("Setting velocity to "+retval.vel+" was "+curLocation.vel+" and before "+prevLocation.vel+" Pos "+retval.pos+" was "+curLocation.pos+" and before "+prevLocation.pos);
     }else {
+        //console.log("Setting position to "+retval.vel+" was "+curLocation.vel+" and before "+prevLocation.vel+" Pos "+retval.pos+" was "+curLocation.pos+" and before "+prevLocation.pos);
         curLocation.vel=prevLocation.vel;
     }
     if (msg.orient) {
         retval.orient=msg.orient;
         retval.orientTime=msg.time;
     }else {
-        curLocation.orient=prevLocation.orient;
-        curLocation.orientTime=prevLocation.orientTime;
+        //curLocation.orient=prevLocation.orient;
+        //curLocation.orientTime=prevLocation.orientTime;
         if (msg.rotvel&&msg.rotaxis) {
-            curLocation.orient=Kata._helperLocationExtrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
-            curLocation.orientTime=curDate;
+            //curLocation.orient=Kata._helperLocationExtrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
+            //curLocation.orientTime=curDate;
 
             retval.orient=Kata._helperLocationExtrapolateQuaternion(curLocation.orient,curLocation.rotvel,curLocation.rotaxis,Kata.deltaTime(msg.time,curLocation.orientTime));
             retval.orientTime=msg.time;
@@ -453,6 +455,7 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     }
     return retval;
 };
+
 
 /**
  * Takes a current location and updates it with all fields and timestamps that have changed

@@ -114,16 +114,16 @@ Kata.include("katajs/oh/odp/Endpoint.js");
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.position = function(time) {
          if (time===undefined) console.log("inaccurate read of orientation");
-         return this.mLocation.mPos.concat();//FIXME drh do interpolation?
+         return this.mLocation.pos.concat();//FIXME drh do interpolation?
      };
      /** Get the current estimate of this object's velocity. */
      Kata.RemotePresence.prototype.velocity = function() {
-         return this.mLocation.mVel.concat();//FIXME drh do interpolation?
+         return this.mLocation.vel.concat();//FIXME drh do interpolation?
      };
      /** Get the current estimate of this object's orientation. */
      Kata.RemotePresence.prototype.orientation = function(time) {
          if (time===undefined) console.log("inaccurate read of orientation");
-         return this.mLocation.mOrient.concat();//FIXME drh do interpolation?
+         return this.mLocation.orient.concat();//FIXME drh do interpolation?
      };
      /** Get the current estimate of this object's angular speed. */
      Kata.RemotePresence.prototype.angularSpeed = function() {
