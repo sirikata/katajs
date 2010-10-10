@@ -113,7 +113,8 @@ Kata.include('katajs/oh/odp/Endpoint.js');
      */
     Kata.ODP.Port.prototype._tryDeliver = function(match, src, payload) {
         if(match in this.mReceiveHandlers) {
-            this.mReceiveHandlers[match](src, this.mEndpoint, payload);
+            var handler=this.mReceiveHandlers[match];
+            handler(src, this.mEndpoint, payload);
             return true;
         }
         return false;

@@ -68,7 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         graphics = new Kata.GraphicsSimulation(driver, window.kata.getChannel(), document.getElementById("container"));
         
         // Simulated local space
-        loopspace = new Kata.LoopbackSpace(new Kata.URL(defaultSpace));
+        loopspace = new Kata.LoopbackSpace(Kata.URL(defaultSpace));
     }
     
     if (driver == "glge") {

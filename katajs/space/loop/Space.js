@@ -48,9 +48,10 @@ Kata.include("katajs/core/Location.js");
       */
      Kata.LoopbackSpace = function(spaceurl) {
          // First try to add to central registery
-         if (Kata.LoopbackSpace.spaces[spaceurl.host])
+         var spaceurlhost=Kata.URL.host(spaceurl);
+         if (Kata.LoopbackSpace.spaces[spaceurlhost])
              Kata.warn("Overwriting static LoopbackSpace map entry for " + spaceurl);
-         Kata.LoopbackSpace.spaces[spaceurl.host] = this;
+         Kata.LoopbackSpace.spaces[spaceurlhost] = this;
          this.mID=spaceurl;
          this.netdelay = 10; // Constant delay, in milliseconds
 

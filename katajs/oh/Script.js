@@ -228,7 +228,7 @@ Kata.defer(function() {
 
     /** Internal helper method to construct and send an ODP message. */
     Kata.Script.prototype._sendODPMessage = function(src, dst, payload) {
-        if (!src.space().equals(dst.space()))
+        if (!Kata.URL.equals(src.space(),dst.space()))
             throw "Mismatching spaces in ODP message.";
         var msg = new Kata.ScriptProtocol.FromScript.SendODPMessage(
             src.space(),

@@ -70,10 +70,10 @@ Kata.include("katajs/core/Time.js");
              // up a function based on __type.
 
              if (typeof(data.space) != "undefined")
-                 data.space = new Kata.URL(data.space);
+                 data.space = Kata.URL(data.space);
 
              if (typeof(data.spaceid) != "undefined")
-                 data.spaceid = new Kata.URL(data.spaceid);
+                 data.spaceid = Kata.URL(data.spaceid);
 
              return data;
          },
