@@ -200,6 +200,24 @@ Kata.scriptRoot="";
             };
         }
     };
+
+    Kata.stringify = function(msg, level) {
+        if (!level) {
+            level = "";
+        }
+        level += "    ";
+        var datastr;
+        if (typeof(msg)!="object") {
+            return "" + msg;
+        }
+        datastr = "{\n";
+        for (var k in msg) {
+            datastr += level+k+": "+Kata.stringify(msg[k])+",\n";
+        }
+        datastr += "}";
+        return datastr;
+    };
+
     if (console.log && debug_console) {
         /** Logs msg to the console, in addition to some json object.
          * @param {...(object|string)} var_args  Some optional JSON data to log.
@@ -213,6 +231,20 @@ Kata.scriptRoot="";
          */
         Kata.log = console.log = function(var_args) {
             if (typeof(document)=="undefined" || typeof(window)=="undefined") {
+                var args = [];
+                for (var i = 0; i < arguments.length; i++) {
+                    args[i] = arguments[i];
+                    if (typeof(args[i])=="object") {
+                        args[i] = Kata.stringify(args[i]);
+                    } else if (typeof(args[i])!="string") {
+                        args[i] = "" + args[i];
+                    }
+                }
+                self.postMessage({
+                    msg : __magic_debug_msg_string,
+                    debug : "log",
+                    contents : args
+                });
                 return;
             }
             window.status = ""+arguments[0];
@@ -228,15 +260,7 @@ Kata.scriptRoot="";
                     div.appendChild(document.createTextNode(msg));
                 } else {
                     var datastr;
-                    try {
-                        datastr = JSON.stringify(msg, null, 4);
-                    } catch (e) {
-                        datastr = "{\n";
-                        for (var k in msg) {
-                            datastr += "    "+k+": "+msg[k]+",\n";
-                        }
-                        datastr += "}";
-                    }
+                    datastr = Kata.stringify(msg);
                     div = document.createElement("pre");
                     div.appendChild(document.createTextNode(datastr));
                 }
@@ -346,13 +370,23 @@ Kata.scriptRoot="";
         Kata.warn(note, "notImplemented");
     };
 
+    var nextDebugId = 1001;
+
     /** Tries to handle debug messages from other threads.  This allows
      *  Web Worker threads to access the logging functionality available
      *  to the main thread.
      */
-    Kata.debugMessage = function(data) {
+    Kata.debugMessage = function(channel, data) {
         if (data === undefined || data === null || data.msg != __magic_debug_msg_string)
             return false;
+        var debugId = 0;
+        if (channel) {
+            if (!channel.__debug_id) {
+                channel.__debug_id = nextDebugId++;
+            }
+            debugId = channel.__debug_id;
+        }
+        debugId = "<" + debugId + ">";
 
         // We'll always return true after this since we know somebody
         // was using the magic debug string.  Naming collisions are unlikely
@@ -363,14 +397,18 @@ Kata.scriptRoot="";
         // e.g. by checking for window.
         switch (data.debug) {
         case "error":
-            Kata.error(data.contents);
+            Kata.error(debugId+" "+data.contents);
             break;
         case "warn":
-            Kata.warn(data.contents, data.type);
+            Kata.warn(debugId+" "+data.contents, data.type);
+            break;
+        case "log":
+            data.contents.splice(0, 0, debugId);
+            Kata.log.apply(self, data.contents);
             break;
         default:
             // Somebody probably meant to get a real error...
-            Kata.error("Unknown debug message type: " + data.debug);
+            Kata.error(debugId+" "+"Unknown debug message type: " + data.debug);
             break;
         }
         return true;

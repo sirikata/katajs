@@ -80,16 +80,16 @@ Kata.include("katajs/core/URL.js");
       * @param {string} auth authentication information for the space
       */
      Kata.SessionManager.prototype.connect = function(ho, req, auth) {
-         var spaceURL = new Kata.URL(req.space);
-
+         var spaceURL = req.space;
+         var spaceURLProtocol = Kata.URL.protocol(spaceURL);
          // Look up or create a connection
-         var space_conn = this.mSpaceConnections[spaceURL.toString()];
+         var space_conn = this.mSpaceConnections[spaceURL];
          if (!space_conn) {
-             var protoClass = Kata.SessionManager._getProtocolHandler(spaceURL.protocol);
+             var protoClass = Kata.SessionManager._getProtocolHandler(spaceURLProtocol);
              if (!protoClass)
                  Kata.error("Unknown space protocol: " + spaceURL.protocol);
              space_conn = new protoClass(this, spaceURL);
-             this.mSpaceConnections[spaceURL.toString()] = space_conn;
+             this.mSpaceConnections[spaceURL] = space_conn;
          }
 
          this.mObjects[ho.getID()] = ho;
@@ -124,8 +124,8 @@ Kata.include("katajs/core/URL.js");
 
     /** Diconnect the given object from the space. */
     Kata.SessionManager.prototype.disconnect = function(ho, req) {
-        var spaceURL = new Kata.URL(req.space);
-        var space_conn = this.mSpaceConnections[spaceURL.toString()];
+        var spaceURL = Kata.URL(req.space);
+        var space_conn = this.mSpaceConnections[spaceURL];
         if (!space_conn) return;
         space_conn.disconnectObject(req.id);
     };

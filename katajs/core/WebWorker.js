@@ -40,6 +40,10 @@ Kata.include("katajs/core/SimpleChannel.js");
     if (Kata.WEB_WORKERS_ENABLED === undefined) {
         Kata.WEB_WORKERS_ENABLED = true; //typeof(importScripts)==='undefined';        
     }
+    
+    if (Kata.FAKE_WEB_WORKERS_DEBUG === undefined) {//turns on if serialization happens for the fake workers. Set to true for now, so we test things adequately, but we want to turn it off for deployment if fake workers are used
+        Kata.FAKE_WEB_WORKERS_DEBUG = true; //typeof(importScripts)==='undefined';        
+    }
     if (Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT === undefined) {
         Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT = false; //typeof(importScripts)==='undefined';        
     }

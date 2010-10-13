@@ -31,56 +31,67 @@
  */
 
 (function() {
-
+    
      /** The URL class provides utilities for operating on a URL.  The
       * constructor accepts a string URL or a Kata.URL.
       *
-      * The components of the URL are available in the fields
-      * protocol, host, and (possibly) port.
+      * The components of the URL are available via global accessor functions to access 
+      * the protocol, host, and (possibly) port.
       *
       * @constructor
       */
-     Kata.URL = function(url) {
-         // If its a URL object, just copy its fields
-         if (url.protocol && url.host) {
-             this.protocol = url.protocol;
-             this.host = url.host;
-             if (url.port)
-                 this.port = url.port;
+     Kata.URL = function(s){
+         return s;
+    };
+    /**
+     * @param {Kata.URL} url
+     * Global function to seek the protocol from a given url
+     */
+     Kata.URL.protocol=function(url) {
+         var colon = url.indexOf("://");
+         if (colon == -1) {
+             Kata.error("Invalid URL: " + url);
          }
-         else { // Parse string URL
-             var colon = url.indexOf("://");
-             if (colon == -1) {
-                 Kata.error("Invalid URL: " + url);
-             }
-             this.protocol = url.substr(0, colon);
-
-             var no_proto = url.substr(colon+3);
-             var slash = no_proto.indexOf("/");
-             if (slash != -1)
-                 no_proto = no_proto.substr(0, slash);
-             colon = no_proto.indexOf(":");
-
-             if (colon == -1) {
-                 this.host = no_proto;
-             } else {
-                 this.host = no_proto.substr(0, colon);
-                 this.port = no_proto.substr(colon+1);
-             }
-         }
-     };
-
-     Kata.URL.prototype.toString = function() {
-         var as_string = this.protocol + "://" + this.host;
-         if (this.port)
-             as_string = as_string + ":" +  this.port;
-         return as_string;
-     };
-
-     Kata.URL.prototype.equals = function(rhs) {
-         if (rhs.protocol && rhs.host)
-             return (this.protocol === rhs.protocol && this.host === rhs.host);
-         return this.toString() === rhs.toString();
-     };
+         return url.substr(0, colon);         
+    };
+    Kata.URL._hostAndPort=function(url) {
+        var colon = url.indexOf("://");
+        if (colon == -1) {
+            Kata.error("Invalid URL: " + url);
+            colon=0;
+        }else colon+=3;
+        var slash = url.indexOf("/",colon);
+        if (slash != -1)
+            return url.substr(colon, slash-colon);
+        else
+            return url.substr(colon);
+    };
+    Kata.URL.host=function(url) {
+        url=Kata.URL._hostAndPort(url);
+        var colon=url.indexOf(":");
+        if (colon==-1)
+            return url;
+        return url.substr(0,colon);
+    };
+    Kata.URL.port=function(url) {
+        url=Kata.URL._hostAndPort(url);
+        var colon=url.indexOf(":");
+        if (colon==-1)
+            return undefined;
+        return parseInt(url.substr(colon));
+    };
+    Kata.URL.resource=function(url) {
+        var colon = url.indexOf("://");
+        if (colon == -1) {
+            Kata.error("Invalid URL: " + url);
+        }
+        var slash = url.indexOf("/",colon+3);
+        if (slash==-1)
+            return "";
+        return url.substr(slash);
+    };
+    Kata.URL.equals=function(a,b) {
+        return a==b;
+    };
      
 })();

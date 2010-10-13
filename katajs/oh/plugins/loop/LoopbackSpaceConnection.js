@@ -59,7 +59,7 @@ Kata.defer(function() {
          // the space registers itself in a global variable (within
          // Kata.LoopbackSpace). We just lookup that object and make async
          // calls to it.
-         this.mSpace = Kata.LoopbackSpace.spaces[spaceurl.host];
+         this.mSpace = Kata.LoopbackSpace.spaces[Kata.URL.host(spaceurl)];
          this.mSpaceURL = spaceurl;
          if (!this.mSpace)
              Kata.error("Couldn't find loopback space: " + spaceurl.toString());
@@ -130,6 +130,6 @@ Kata.defer(function() {
 
      Kata.SessionManager.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
      // Simulated local space
-     loopspace = new Kata.LoopbackSpace( new Kata.URL("loop://localhost") );
+     loopspace = new Kata.LoopbackSpace( Kata.URL("loop://localhost") );
 
 });

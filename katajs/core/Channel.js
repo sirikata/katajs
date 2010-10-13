@@ -65,7 +65,7 @@
      */
     Kata.Channel.prototype.callListeners = function (data) {
         // Filter for debug messages first
-        if (Kata.debugMessage(data))
+        if (Kata.debugMessage(this, data))
             return;
 
         if (!this.mListener) {
