@@ -229,13 +229,34 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     };
     
     VWObject.prototype.updateTransformation = function(graphics) {
+        var curx=this.mCurLocation.pos[0];
+        var cury=this.mCurLocation.pos[1];
+        var curz=this.mCurLocation.pos[2];
+        var curt=this.mCurLocation.posTime;
+            var prevx=curx;
+            var prevy=cury;
+            var prevz=curz;
+            var prevt=curt;
+            if( this.mPrevLocation) {
+                prevx=this.mPrevLocation.pos[0];
+                prevy=this.mPrevLocation.pos[1];
+                prevz=this.mPrevLocation.pos[2];
+                prevt=this.mPrevLocation.posTime;
+            }
         var l=Kata.LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
         this.mNode.setLoc(l.pos[0],l.pos[1],l.pos[2]);
         this.mNode.setScale(l.scale[0],l.scale[1],l.scale[2]);
         this.mNode.setQuat(l.orient[0],l.orient[1],l.orient[2],l.orient[3]);
         if (this.stationary(graphics.mCurTime)) {
             graphics.removeObjectUpdate(this);        
+            var isCamera=this.mCamera?"CAMERA":"OBJECT";
+            console.log("UpSetting location ",this.mID,l.pos[0],l.pos[1],l.pos[2],isCamera,curx,cury,curz,curt,prevx,prevy,prevz,prevt);
+
             //console.log("Stationary ",this.mID,l,l.pos[0],l.pos[1],l.pos[2]);
+        }else {
+            //var isCamera=this.mCamera?"CAMERA":"OBJECT";
+            //console.log("tmpStting location ",this.mID,l.pos[0],l.pos[1],l.pos[2],isCamera,curx,cury,curz,curt,prevx,prevy,prevz,prevt);
+            
         }
         return l;
     };
@@ -500,8 +521,33 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         var newLoc=Kata.LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation,this.mCurTime);
         vwObject.mPrevLocation=vwObject.mCurLocation;
         vwObject.mCurLocation=newLoc;
+/*
+        vwObject.mNode.setLoc(newLoc.pos[0],newLoc.pos[1],newLoc.pos[2]);
+        vwObject.mNode.setScale(newLoc.scale[0],newLoc.scale[1],newLoc.scale[2]);
+        vwObject.mNode.setQuat(newLoc.orient[0],newLoc.orient[1],newLoc.orient[2],newLoc.orient[3]);
+*/
+        var isCamera=vwObject.mCamera?"CAMERA":"OBJECT";
+        var isStationary="NOT STATIONARY";
         if (!vwObject.stationary(this.mCurTime)) {
             this.addObjectUpdate(vwObject);
+            isStationary="BRICK STATIONARY";
+        }else {
+            var curx=vwObject.mCurLocation.pos[0];
+            var cury=vwObject.mCurLocation.pos[1];
+            var curz=vwObject.mCurLocation.pos[2];
+            var curt=vwObject.mCurLocation.posTime;
+            var prevx=curx;
+            var prevy=cury;
+            var prevz=curz;
+            var prevt=curt;
+            if( vwObject.mPrevLocation) {
+                prevx=vwObject.mPrevLocation.pos[0];
+                prevy=vwObject.mPrevLocation.pos[1];
+                prevz=vwObject.mPrevLocation.pos[2];
+                prevt=vwObject.mPrevLocation.posTime;
+            }
+
+            console.log("Setting ",vwObject.mID,"location to",newLoc.pos[0],newLoc.pos[1],newLoc.pos[2],isCamera,curx,cury,curz,curt,prevx,prevy,prevz,prevt,isStationary);
         }
     };
     GLGEGraphics.prototype.methodTable["Move"]=function(msg) {
