@@ -276,7 +276,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     
     
     GLGEGraphics.prototype.send=function(obj) {
-        return this.methodTable[obj.msg].call(this, obj);
+        if (obj.msg!="Custom")
+            this.methodTable[obj.msg].call(this, obj);
     };
     GLGEGraphics.prototype.setInputCallback=function(cb) {
         this._inputCb = cb;

@@ -179,6 +179,13 @@ Kata.include("katajs/core/Time.js");
 				 this.spaceid = this.space;
                  Kata.LocationCopyUnifyTime(remotePresence.mLocation,this);
              },
+             GFXCustom : function(space, observer, data) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="Custom";
+                 this.data=data;
+                 this.space = space+observer;
+				 this.spaceid = this.space;
+             },
              GFXMoveNode : function(space, observer, remotePresence, data) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
                  this.msg="Move";
