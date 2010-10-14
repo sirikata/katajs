@@ -60,6 +60,7 @@ Kata.include("katajs/oh/odp/Endpoint.js");
              this.rMesh = vis.mesh;
              this.rAnim = vis.anim;
              this.rUpAxis = vis.up_axis;
+             this.rCenter = vis.center;
          }
 
          // Indicates whether we're tracking this object, i.e. if a subscription was submitted.

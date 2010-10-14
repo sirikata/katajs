@@ -158,7 +158,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mParent = null;
         spaceroot.mScene.addChild(this.mNode);
     };
-    VWObject.prototype.createMesh = function(path, animation) {
+    VWObject.prototype.createMesh = function(path, animation, offset) {
         if (path == null) {
             throw "loadScene with null path";
         }
@@ -177,6 +177,11 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         clda.setQuatY(0.0);
         clda.setQuatZ(0.0);
         clda.setQuatW(1.0);
+        if (offset) {
+            clda.setLocX(offset[0]);
+            clda.setLocY(offset[1]);
+            clda.setLocZ(offset[2]);            
+        }
         this.mNode.addCollada(clda);
         return clda;
     };
@@ -276,7 +281,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     
     
     GLGEGraphics.prototype.send=function(obj) {
-        return this.methodTable[obj.msg].call(this, obj);
+        if (obj.msg!="Custom")
+            this.methodTable[obj.msg].call(this, obj);
     };
     GLGEGraphics.prototype.setInputCallback=function(cb) {
         this._inputCb = cb;
@@ -542,14 +548,13 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         //"Uniform "+msg.name+"="+msg.value;
     };
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
-        //q.innerHTML="Mesh "+msg.mesh;
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
-            vwObject.createMesh(msg.mesh, msg.anim);//FIXME we need to add this function
+            vwObject.createMesh(msg.mesh, msg.anim, [-msg.center[0],-msg.center[1],-msg.center[2]]);
             if (msg.up_axis == "Z_UP") {
                 this.moveTo(vwObject, {
                     // FIXME: needs to be permanent, so future setOrientations will be relative to this
-                    orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
+                    orient: [-0.7071067805519557, 0, 0, 0.7071067818211394],
                 });
             }
             vwObject.update(this);
@@ -584,7 +589,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         if (msg.id in this.mObjects && msg.target !== undefined) {
             var cam = this.mObjects[msg.id];
             var spaceView;
-            console.log("cam.mSpaceID:", cam.mSpaceID);
+//            console.log("cam.mSpaceID:", cam.mSpaceID);
             if (cam.mSpaceID in this.mSpaceRoots) {
                 spaceView = this.mSpaceRoots[cam.mSpaceID];
             } else {

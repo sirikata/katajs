@@ -179,6 +179,13 @@ Kata.include("katajs/core/Time.js");
 				 this.spaceid = this.space;
                  Kata.LocationCopyUnifyTime(remotePresence.mLocation,this);
              },
+             GFXCustom : function(space, observer, data) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="Custom";
+                 this.data=data;
+                 this.space = space+observer;
+				 this.spaceid = this.space;
+             },
              GFXMoveNode : function(space, observer, remotePresence, data) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
                  this.msg="Move";
@@ -199,7 +206,8 @@ Kata.include("katajs/core/Time.js");
                  var messageList=[];
                  if (remotePresence.rMesh) {
                      messageList.push(new Kata.ScriptProtocol.FromScript.GFXUpdateVisualMesh(space, 
-                        observer, remotePresence.id(), remotePresence.rMesh, remotePresence.rAnim, remotePresence.rUpAxis));
+                        observer, remotePresence.id(), remotePresence.rMesh, remotePresence.rAnim, remotePresence.rUpAxis,
+                        remotePresence.rCenter));
                  }else {
                     //MIGHT be a light or somesuch
                  }
@@ -212,7 +220,7 @@ Kata.include("katajs/core/Time.js");
                  this.id = id;
              },
              // Generates either a Mesh, Light, WebView, or Camera message, or the Destroy variants.
-             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim, up) {
+             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim, up, center) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
                  if (mesh == null) {
                      this.msg = "DestroyMesh";
@@ -221,6 +229,7 @@ Kata.include("katajs/core/Time.js");
                      this.mesh = mesh;
                      this.anim = anim;
                      this.up_axis = up;
+                     this.center = center;
                  }
              },
              GFXAttachCamera : function(space, observer, id, canvasId) {
