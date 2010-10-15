@@ -109,8 +109,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     document.addEventListener('keyup',
                             function(e){thus._keyUp(e);},
                             true);
-    canvas.addEventListener('wheel',
-                            function(e){thus._wheel(e);},
+    canvas.addEventListener('mousewheel',
+                            function(e){thus._scrollWheel(e);},
                             true);
     canvas.addEventListener('contextmenu', 
     function(e){
@@ -398,14 +398,18 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
 
     GLGEGraphics.prototype._scrollWheel = function(e){
         /// FIXME: figure out what event attributes to copy
+        var ev = {};
+        ev.type = e.type;
+        ev.shiftKey = e.shiftKey;
+        ev.altKey = e.altKey;
+        ev.ctrlKey = e.ctrlKey;
+        ev.delta = e.wheelDelta;
         var msg = {
             msg: "wheel",
-            event: e
+            event: ev
         };
         this._inputCb(msg);
     };
-    
-
 
     GLGEGraphics.prototype.methodTable["Create"]=function(msg) {//this function creates a scene graph node
         var s = msg.spaceid;
