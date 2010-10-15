@@ -1,5 +1,4 @@
-#!/opt/local/bin/python2.6
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # A simple wrapper for running lighttpd on your katajs.git
 # directory. Generates an appropriate configuration and runs lighttpd
