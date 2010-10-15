@@ -403,7 +403,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         ev.shiftKey = e.shiftKey;
         ev.altKey = e.altKey;
         ev.ctrlKey = e.ctrlKey;
-        ev.delta = e.wheelDelta;
+        ev.dy = e.wheelDelta;
         var msg = {
             msg: "wheel",
             event: ev
