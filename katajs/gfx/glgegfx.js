@@ -112,6 +112,14 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     canvas.addEventListener('wheel',
                             function(e){thus._wheel(e);},
                             true);
+    canvas.addEventListener('contextmenu', 
+    function(e){
+        if (e.preventDefault) 
+            e.preventDefault();
+        else 
+            e.returnValue = false;
+        return false;
+    }, true);
     
 };
 (function(){
@@ -326,7 +334,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     
 
     GLGEGraphics.prototype._mouseDown = function(e){
-        if (e.button<2) this._buttonState="down";
+        this._buttonState |= Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
         var msg = {
             msg: "mousedown",
@@ -336,7 +344,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     };
     
     GLGEGraphics.prototype._mouseUp = function(e){
-        if (e.button<2) this._buttonState="up";
+        this._buttonState &= 7-Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
         var msg = {
             msg: "mouseup",
@@ -350,7 +358,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
      * otherwise we flood with messages.  Note right button is controlled by OS so we ignore
      */
     GLGEGraphics.prototype._mouseMove = function(e){
-        if (this._buttonState == "down") {
+        if (this._buttonState) {
             var ev = this._extractMouseEventInfo(e);
             var msg = {
                 msg: "mousemove",
