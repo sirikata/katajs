@@ -343,16 +343,22 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
             msg: "mousedown",
             event: ev
         };
+        if (ev.which==2) {
+            document.body.style.cursor="crosshair";
+        }
         this._inputCb(msg);
     };
     
     GLGEGraphics.prototype._mouseUp = function(e){
-        this._buttonState &= 7-Math.pow(2, e.button);
+        this._buttonState &= 7 - Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
         var msg = {
             msg: "mouseup",
             event: ev
-    };
+        };
+        if (ev.which == 2) {
+            document.body.style.cursor = "default";
+        }
         this._inputCb(msg);
     };
     
