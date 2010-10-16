@@ -30,7 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js");
+Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
+
 Protocol = Sirikata.Protocol;
+
 KataDequePushBack = function(x,y){x.push_back(y);};
 KataDequePushFront = function(x,y){return x.push_front(y);};
 KataDequePopBack = function(x){return x.pop_back();};
@@ -71,7 +75,7 @@ ObjectMessageDispatcherSST.prototype.dispatchMessage = function(msg) {
 /**
  * @constructor
  * @param {!EndPointType} endPoint The end point object (must have .id field)
- * @param {number} port 
+ * @param {number} port
 */
 
 var EndPointSST = function(endPoint, port) {

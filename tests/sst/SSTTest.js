@@ -2,10 +2,7 @@
 Kata.include("externals/protojs/pbj.js");
 Kata.include("katajs/core/Math.uuid.js");
 Kata.include("katajs/core/KataDeque.js");
-Kata.include("network/sirikata/protocol/SSTHeader.pbj.js");
-Kata.include("network/sirikata/protocol/ObjectMessage.pbj.js");
-Protocol = Sirikata.Protocol;
-Kata.include("network/SSTImpl.js");
+Kata.include("katajs/oh/sst/SSTImpl.js");
 
 function print(str) {
     console.log.call(console, arguments);
