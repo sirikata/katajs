@@ -33,8 +33,6 @@
 Kata.include("katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js");
 Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
 
-Protocol = Sirikata.Protocol;
-
 KataDequePushBack = function(x,y){x.push_back(y);};
 KataDequePushFront = function(x,y){return x.push_front(y);};
 KataDequePopBack = function(x){return x.pop_back();};
@@ -181,7 +179,7 @@ function listenBaseDatagramLayerSST(listeningEndPoint){
  * @returns {boolean} route success
  */
 BaseDatagramLayer.prototype.send=function(src,dest,data) {
-    var objectMessage=new Protocol.Object.ObjectMessage();
+    var objectMessage=new Sirikata.Protocol.Object.ObjectMessage();
     objectMessage.source_object=src.objectId();
     objectMessage.source_port=src.port;
     objectMessage.dest_object=dest.objectId();
@@ -191,7 +189,7 @@ BaseDatagramLayer.prototype.send=function(src,dest,data) {
 };
 
 /**
- * @param {!Protocol.Object.ObjectMessage} msg 
+ * @param {!Sirikata.Protocol.Object.ObjectMessage} msg 
 */
 BaseDatagramLayer.prototype.receiveMessage=function(msg)  {
     connectionHandleReceiveSST(this,
@@ -369,7 +367,7 @@ function ConnectionSST(localEndPoint,remoteEndPoint){
 }
 
 /**
- * @param {Protocol.SST.SSTChannelHeader} sstMsg 
+ * @param {Sirikata.Protocol.SST.SSTChannelHeader} sstMsg 
  * @returns {boolean} whether send actually fires off a packet.
  */
 ConnectionSST.prototype.sendSSTChannelPacket=function(sstMsg){
@@ -401,7 +399,7 @@ ConnectionSST.prototype.serviceConnection=function (curTime) {
       for (var i = 0; (!KataDequeEmpty(this.mQueuedSegments)) && i < this.mCwnd; i++) {
 	      var segment = KataDequeFront(this.mQueuedSegments);
 
-	      var sstMsg=new Protocol.SST.SSTChannelHeader();
+	      var sstMsg=new Sirikata.Protocol.SST.SSTChannelHeader();
 	      sstMsg.channel_id = this.mRemoteChannelID;
 	      sstMsg.transmit_sequence_number = segment.mChannelSequenceNumber;
 	      sstMsg.ack_count = 1;
@@ -644,9 +642,9 @@ ConnectionSST.prototype.stream=function (cb, initial_data,
 };
 
 function streamHeaderTypeIsAckSST(data){
-    var stream_msg = new Protocol.SST.SSTStreamHeader();
+    var stream_msg = new Sirikata.Protocol.SST.SSTStreamHeader();
     var parsed = stream_msg.ParseFromArray(data);
-    return stream_msg.type==Protocol.SST.SSTStreamHeader.StreamPacketType.ACK;
+    return stream_msg.type==Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.ACK;
 }
 /**
  * @param {Array} data Array of uint8 data
@@ -674,7 +672,7 @@ ConnectionSST.prototype.sendData=function(data, sstStreamHeaderTypeIsAck){
       }
     }
     else {
-      var sstMsg=new Protocol.SST.SSTChannelHeader();
+      var sstMsg=new Sirikata.Protocol.SST.SSTChannelHeader();
       sstMsg.channel_id= this.mRemoteChannelID;
       sstMsg.transmit_sequence_number=this.mTransmitSequenceNumber;
       sstMsg.ack_count=1;
@@ -725,11 +723,11 @@ ConnectionSST.prototype.markAcknowledgedPacket=function(receivedAckNum){
 };
 
 /**
- * @param {Protocol.Object.ObjectMessage} object_message the data to be received
+ * @param {Sirikata.Protocol.Object.ObjectMessage} object_message the data to be received
  */
 ConnectionSST.prototype.receiveMessage=function(object_message) {
     var recv_buff = object_message.payload;
-    var received_msg = new Protocol.SST.SSTChannelHeader;
+    var received_msg = new Sirikata.Protocol.SST.SSTChannelHeader;
     received_msg.ParseFromArray(recv_buff);
 
     this.mLastReceivedSequenceNumber = received_msg.transmit_sequence_number;
@@ -769,29 +767,29 @@ ConnectionSST.prototype.receiveMessage=function(object_message) {
  */
 ConnectionSST.prototype.parsePacket=function(received_channel_msg, source_port, dest_port) {
 
-    var received_stream_msg = new Protocol.SST.SSTStreamHeader();
+    var received_stream_msg = new Sirikata.Protocol.SST.SSTStreamHeader();
     
     var parsed = received_stream_msg.ParseFromArray(received_channel_msg.payload);
 
 
-    if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
+    if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
       this.handleInitPacket(received_stream_msg, source_port, dest_port);
     }
-    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
+    else if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
       this.handleReplyPacket(received_stream_msg);
     }
-    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.DATA) {
+    else if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.DATA) {
       this.handleDataPacket(received_stream_msg);
     }
-    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
+    else if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
       this.handleAckPacket(received_channel_msg, received_stream_msg);
     }
-    else if (received_stream_msg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.DATAGRAM) {
+    else if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.DATAGRAM) {
       this.handleDatagram(received_stream_msg);
     }
 };
 /**
- * @param {!Protocol.SST.SSTStreamHeader} received_stream_msg
+ * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  * @returns {string} a textual description of the header
  */
 ConnectionSST.prototype.headerToStringDebug=function(received_stream_msg) {
@@ -799,7 +797,7 @@ ConnectionSST.prototype.headerToStringDebug=function(received_stream_msg) {
 };
 
 /**
- * @param {!Protocol.SST.SSTStreamHeader} received_stream_msg
+ * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
 ConnectionSST.prototype.handleInitPacket=function (received_stream_msg, source_port, dest_port) {
     var incomingLsid = received_stream_msg.lsid;
@@ -834,7 +832,7 @@ ConnectionSST.prototype.handleInitPacket=function (received_stream_msg, source_p
 };
 
 /**
- * @param {!Protocol.SST.SSTStreamHeader} received_stream_msg
+ * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
 ConnectionSST.prototype.handleReplyPacket=function(received_stream_msg) {
     var incomingLsid = received_stream_msg.lsid;
@@ -860,7 +858,7 @@ ConnectionSST.prototype.handleReplyPacket=function(received_stream_msg) {
     }
 };
 /**
- * @param {!Protocol.SST.SSTStreamHeader} received_stream_msg
+ * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
 
 ConnectionSST.prototype.handleDataPacket=function(received_stream_msg) {
@@ -876,8 +874,8 @@ ConnectionSST.prototype.handleDataPacket=function(received_stream_msg) {
 };
 
 /**
- * @param {!Protocol.SST.SSTChannelHeader} received_channel_msg
- * @param {!Protocol.SST.SSTStreamHeader} received_stream_msg
+ * @param {!Sirikata.Protocol.SST.SSTChannelHeader} received_channel_msg
+ * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
 ConnectionSST.prototype.handleAckPacket=function(received_channel_msg,
 		                                      received_stream_msg) 
@@ -894,7 +892,7 @@ ConnectionSST.prototype.handleAckPacket=function(received_channel_msg,
 };
 
 /**
- * @param {!Protocol.SST.SSTStreamHeader} received_stream_msg
+ * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
 ConnectionSST.prototype.handleDatagram=function(received_stream_msg) {
     var payload = received_stream_msg.payload;
@@ -911,7 +909,7 @@ ConnectionSST.prototype.handleDatagram=function(received_stream_msg) {
       datagramCallbacks[i](payload);
     }
 
-    var sstMsg=new Protocol.SST.SSTChannelHeader();
+    var sstMsg=new Sirikata.Protocol.SST.SSTChannelHeader();
     sstMsg.channel_id=this.mRemoteChannelID;
     sstMsg.transmit_sequence_number=this.mTransmitSequenceNumber;
     sstMsg.ack_count=1;
@@ -1010,13 +1008,13 @@ ConnectionSST.prototype.datagram=function(data, local_port, remote_port,cb) {
 	            MAX_PAYLOAD_SIZE_SST :
            	    (length-currOffset);
 
-      var sstMsg=new Protocol.SST.SSTStreamHeader();
+      var sstMsg=new Sirikata.Protocol.SST.SSTStreamHeader();
       sstMsg.lsid= lsid ;
-      sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.DATAGRAM;
+      sstMsg.type=Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.DATAGRAM;
       sstMsg.flags=0;        
       sstMsg.window=10;
       // FIXME: Why does it need src/dest_port two layers down from ObjectMessage?!?!
-      // Applies to all places that uses Protocol.SST.SSTStreamHeader
+      // Applies to all places that uses Sirikata.Protocol.SST.SSTStreamHeader
       // Need to fix C++
       sstMsg.src_port=local_port;
       sstMsg.dest_port=remote_port;
@@ -1105,7 +1103,7 @@ ConnectionSST.prototype.close=function( force) {
  */
 function connectionHandleReceiveSST(datagramLayer, remoteEndPoint,localEndPoint,recvBuffer){
 
-    var received_msg = new Protocol.SST.SSTChannelHeader();
+    var received_msg = new Sirikata.Protocol.SST.SSTChannelHeader();
     var parsed = received_msg.ParseFromArray(recvBuffer);
 
     var channelID = received_msg.channel_id;
@@ -1728,17 +1726,17 @@ StreamSST.prototype.sendToApp=function(skipLength) {
   };
 
 /**
- * @param {!Protocol.SST.SSTStreamHeader} streamMsg
+ * @param {!Sirikata.Protocol.SST.SSTStreamHeader} streamMsg
  * @param {Array} buffer
  * @param {!PROTO.I64} offset
  */
 StreamSST.prototype.receiveData=function(streamMsg,
                     buffer, offset )
   {
-    if (streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
+    if (streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
       this.mConnected = true;
     }
-    else if (streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
+    else if (streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
       var offsetHash=offset.hash();
       var channelBuffer=this.mChannelToBufferMap[offsetHash];
       if (channelBuffer) {
@@ -1777,7 +1775,7 @@ StreamSST.prototype.receiveData=function(streamMsg,
           Kata.log("unknown packet corresponding to offset "+offsetHash+" not found in map");
       }
     }
-    else if (streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.DATA || streamMsg.type == Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
+    else if (streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.DATA || streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
 
       if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes < .5){
           Kata.log("Assertion failed: 2^"+streamMsg.window+" <= "+this.mNumOutstandingBytes);
@@ -1874,9 +1872,9 @@ StreamSST.prototype.updateRTO=function(){
 StreamSST.prototype.sendInitPacket = function(data) {
     //std::cout <<  mConnection.lock()->localEndPoint().endPoint.toString()  << " sending Init packet\n";
 
-    var sstMsg=new Protocol.SST.SSTStreamHeader();
+    var sstMsg=new Sirikata.Protocol.SST.SSTStreamHeader();
     sstMsg.lsid= this.mLSID;
-    sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.INIT;
+    sstMsg.type=Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.INIT;
     sstMsg.flags=0;
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;
@@ -1893,9 +1891,9 @@ StreamSST.prototype.sendInitPacket = function(data) {
   }
 
 StreamSST.prototype.sendAckPacket=function() {
-    var sstMsg= new Protocol.SST.SSTStreamHeader();
+    var sstMsg= new Sirikata.Protocol.SST.SSTStreamHeader();
     sstMsg.lsid= this.mLSID ;
-    sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.ACK;
+    sstMsg.type=Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.ACK;
     sstMsg.flags=0;
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;
@@ -1912,9 +1910,9 @@ StreamSST.prototype.sendAckPacket=function() {
  * @param {number} offset
  */
 StreamSST.prototype.sendDataPacket=function( data, offset) {
-    var sstMsg= new Protocol.SST.SSTStreamHeader();
+    var sstMsg= new Sirikata.Protocol.SST.SSTStreamHeader();
     sstMsg.lsid= this.mLSID ;
-    sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.DATA;
+    sstMsg.type=Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.DATA;
     sstMsg.flags=0;
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;
@@ -1935,9 +1933,9 @@ StreamSST.prototype.sendDataPacket=function( data, offset) {
 StreamSST.prototype.sendReplyPacket=function(data, remoteLSID) {
     //printf("Sending Reply packet\n");
 
-    var sstMsg= new Protocol.SST.SSTStreamHeader();
+    var sstMsg= new Sirikata.Protocol.SST.SSTStreamHeader();
     sstMsg.lsid= this.mLSID ;
-    sstMsg.type=Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY;
+    sstMsg.type=Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY;
     sstMsg.flags=0;
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;

@@ -37,7 +37,7 @@ SSTTest.prototype.acceptConnection = function(error, stream) {
     stream.write([3,1,4,1,5,9,2,7]);
     var t = this;
     stream.registerReadCallback(function(){SSTTest.prototype.receiveMessage.apply(t, arguments);});
-}
+};
 SSTTest.prototype.receiveMessage = function(msg) {
     print("received message! "+msg, msg);
 };
