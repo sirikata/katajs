@@ -109,7 +109,10 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     document.addEventListener('keyup',
                             function(e){thus._keyUp(e);},
                             true);
-    canvas.addEventListener('mousewheel',
+    canvas.addEventListener('mousewheel',                           /// Chrome
+                            function(e){thus._scrollWheel(e);},
+                            true);
+    canvas.addEventListener('DOMMouseScroll',                       /// FF
                             function(e){thus._scrollWheel(e);},
                             true);
     canvas.addEventListener('contextmenu', 
@@ -398,12 +401,18 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
 
     GLGEGraphics.prototype._scrollWheel = function(e){
         /// FIXME: figure out what event attributes to copy
+        document.getElementById("debug").innerHTML = e.detail;
         var ev = {};
         ev.type = e.type;
         ev.shiftKey = e.shiftKey;
         ev.altKey = e.altKey;
         ev.ctrlKey = e.ctrlKey;
-        ev.dy = e.wheelDelta;
+        if (e.wheelDelta != null) {         /// Chrome
+            ev.dy = e.wheelDelta;
+        }
+        else {                              /// Firefox
+            ev.dy = e.detail * -40;         /// -3 for Firefox == 120 for Chrome
+        }
         var msg = {
             msg: "wheel",
             event: ev
