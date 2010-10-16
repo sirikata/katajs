@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+Kata.include("katajs/core/Deque.js");
+
 Kata.include("katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js");
 Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
 
@@ -358,11 +360,11 @@ function ConnectionSST(localEndPoint,remoteEndPoint){
     /**
      * @type {!KataDeque} Deque of ChannelSegmentSST
      */
-    this.mQueuedSegments=new KataDeque();
+    this.mQueuedSegments=new Kata.Deque();
     /**
      * @type {!KataDeque} Deque of ChannelSegmentSST
      */
-    this.mOutstandingSegments=new KataDeque();
+    this.mOutstandingSegments=new Kata.Deque();
     
 }
 
@@ -1317,7 +1319,7 @@ function StreamSST (parentLSID, conn,
 /**
  * @type {!KataDeque} deque of StreamBuffer data that is queued
  */
-    this.mQueuedBuffers=new KataDeque();
+    this.mQueuedBuffers=new Kata.Deque();
 
     /**
      * @type {Hash} FIXME maps int64 to buffer.... need to carefully consider int64
