@@ -35,23 +35,26 @@ Kata.include("katajs/core/Deque.js");
 Kata.include("katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js");
 Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
 
-KataDequePushBack = function(x,y){x.push_back(y);};
-KataDequePushFront = function(x,y){return x.push_front(y);};
-KataDequePopBack = function(x){return x.pop_back();};
-KataDequePopFront = function(x){return x.pop_front();};
-KataDequeBack = function(x){return x.back();};
-KataDequeFront = function(x){return x.front();};
-KataDequeLength = function(x){return x.size();};
-KataDequeEmpty = function(x){return x.empty();};
-KataDequeIndex = function(x,y){return x.index(y);};
-KataDequeClear = function(x){return x.clear();};
+(function() {
+
+var KataDequePushBack = function(x,y){x.push_back(y);};
+var KataDequePushFront = function(x,y){return x.push_front(y);};
+var KataDequePopBack = function(x){return x.pop_back();};
+var KataDequePopFront = function(x){return x.pop_front();};
+var KataDequeBack = function(x){return x.back();};
+var KataDequeFront = function(x){return x.front();};
+var KataDequeLength = function(x){return x.size();};
+var KataDequeEmpty = function(x){return x.empty();};
+var KataDequeIndex = function(x,y){return x.index(y);};
+var KataDequeClear = function(x){return x.clear();};
 
 /**
  * @constructor
 */
-function ObjectMessageDispatcherSST () {
+ObjectMessageDispatcherSST = function() {
     this.mObjectMessageRecipients = {};
-}
+};
+
 // Registration and unregistration for object messages destined for the space
 ObjectMessageDispatcherSST.prototype.registerObjectMessageRecipient = function(port, recipient) {
     this.mObjectMessageRecipients[port] = recipient;
@@ -78,7 +81,7 @@ ObjectMessageDispatcherSST.prototype.dispatchMessage = function(msg) {
  * @param {number} port
 */
 
-var EndPointSST = function(endPoint, port) {
+EndPointSST = function(endPoint, port) {
     /**
      * The object to communicate to. Must sport a .id field so EndPoints may be sorted 
      * @type {!EndPointType}
@@ -141,20 +144,20 @@ var sListeningConnectionsCallbackMapSST={};
 /**
  * @param {!EndPointSST} endPoint The end point object (must have .uid() and .objectId() functions)
  */
-function getDatagramLayerSST(endPoint) {
+var getDatagramLayerSST = function(endPoint) {
     var id=endPoint.objectId();
     if (id in sDatagramLayerMap) {
         return sDatagramLayerMap[id];
     }
     return null;
-}
+};
 
 /**
  * @param {!EndPointSST} endPoint The end point object (must have .uid() and .objectId() functions)
  * @param {!ObjectMessageRouter} router The place where messages may be sent to the wire
  * @param {!ObjectMessageDispatcher} dispatcher The place where messages may be returned from the wire
  */
-function createBaseDatagramLayerSST(endPoint,router,dispatcher) {
+createBaseDatagramLayerSST = function(endPoint,router,dispatcher) {
     var id=endPoint.objectId();
     if (id  in sDatagramLayerMap){
         return sDatagramLayerMap[id];
@@ -166,14 +169,15 @@ function createBaseDatagramLayerSST(endPoint,router,dispatcher) {
  * @param {!EndPointSST} listeningEndPoint The end point that wishes to receive messages from the ObjectMessageDispatcher (must have .uid() and .objectId() functions)
  * @returns whether a baseDatagramLayer to register for was available
  */
-function listenBaseDatagramLayerSST(listeningEndPoint){
+var listenBaseDatagramLayerSST = function(listeningEndPoint){
     var id= listeningEndPoint.objectId();
     var baseDatagramLayer=sDatagramLayerMap[id];
     if (baseDatagramLayer) {
         baseDatagramLayer.mDispatcher.registerObjectMessageRecipient(listeningEndPoint.port,baseDatagramLayer);
         return true;
     }else return false;
-}
+};
+
 /**
  * @param {!EndPointSST} src
  * @param {!EndPointSST} dst
@@ -243,7 +247,7 @@ var FAILURE_SST=-1;
  * @param {PROTO.I64} channelSeqNum,
  * @param {PROTO.I64} ackSequenceNum
  */
-function ChannelSegmentSST (data,channelSeqNum,ackSequenceNum){
+ChannelSegmentSST = function(data,channelSeqNum,ackSequenceNum){
     /**
      * @type {Array}
      */
@@ -278,7 +282,7 @@ ChannelSegmentSST.prototype.setAckTime=function(ackTime) {
  * @param {!EndPointSST} localEndPoint 
  * @param {!EndPointSST} remoteEndPoint 
  */
-function ConnectionSST(localEndPoint,remoteEndPoint){
+ConnectionSST = function(localEndPoint,remoteEndPoint){
     /**
      * @type {!EndPointSST}
      */
@@ -514,7 +518,7 @@ var CONNECTION_CONNECTED_SST=4;           // The connection is connected to a re
 var CONNECTION_PENDING_DISCONNECT_SST=5;  // The connection is in the process of
                               // disconnecting from the remote end point.
 
-function getConnectionSST(endPoint) {
+var getConnectionSST = function(endPoint) {
     var endPointUid=endPoint.uid();
     return sConnectionMapSST[endPointUid];
 }
@@ -544,7 +548,7 @@ function getConnectionSST(endPoint) {
  * @returns false if it's not possible to create this connection, e.g. if another connection
  *     is already using the same local endpoint; true otherwise.
  */
-function createConnectionSST(localEndPoint,remoteEndPoint,cb){
+var createConnectionSST = function(localEndPoint,remoteEndPoint,cb){
     var endPointUid=localEndPoint.uid();
     if (endPointUid in sConnectionMapSST) {
         Kata.log("mConnectionMap.find failed for " +localEndPoint.uid());
@@ -567,12 +571,13 @@ function createConnectionSST(localEndPoint,remoteEndPoint,cb){
     sConnectionReturnCallbackMapSST[localEndPoint.uid()] = cb;
 
     return true;
-}
+};
+
 /**
  * @param cb StreamReturnCallbackFunction void(int, boost::shared_ptr< Stream<UUID> )
  * @returns whether the listening port could be bound
  */
-function connectionListenSST(cb,listeningEndPoint) {
+var connectionListenSST = function(cb,listeningEndPoint) {
     var retval=listenBaseDatagramLayerSST(listeningEndPoint);
     if (!retval)return false;
     var listeningEndPointId=listeningEndPoint.uid();
@@ -581,7 +586,7 @@ function connectionListenSST(cb,listeningEndPoint) {
     }
     sListeningConnectionsCallbackMapSST[listeningEndPointId]=cb;
     return true;
-}
+};
 /**
  * FIXME actually allow reuse
  */
@@ -643,11 +648,12 @@ ConnectionSST.prototype.stream=function (cb, initial_data,
     return stream;
 };
 
-function streamHeaderTypeIsAckSST(data){
+var streamHeaderTypeIsAckSST = function(data){
     var stream_msg = new Sirikata.Protocol.SST.SSTStreamHeader();
     var parsed = stream_msg.ParseFromArray(data);
     return stream_msg.type==Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.ACK;
-}
+};
+
 /**
  * @param {Array} data Array of uint8 data
  * @returns {PROTO.I64} sequence number of sent data
@@ -943,11 +949,11 @@ ConnectionSST.prototype.finalize=function() {
 /**
  * FIXME: is this correct shutdown procedure?
  */
-function closeConnectionsSST() {
+var closeConnectionsSST = function() {
   sConnectionMapSST={};  
 };
 
-function serviceConnectionsSST() {
+serviceConnectionsSST = function() {
     var curTime = new Date();
 
     for (it in sConnectionMapSST)
@@ -972,7 +978,8 @@ function serviceConnectionsSST() {
         break;//FIXME: must we break?
       }
     }
-}
+};
+
   /** Sends the specified data buffer using best-effort datagrams on the
      underlying connection. This may be done using an ephemeral stream
      on top of the underlying connection or some other mechanism (e.g.
@@ -1103,7 +1110,7 @@ ConnectionSST.prototype.close=function( force) {
  *  @param {!EndPointSST} localEndPoint 
  *  @param {!Array} recvBuffer
  */
-function connectionHandleReceiveSST(datagramLayer, remoteEndPoint,localEndPoint,recvBuffer){
+var connectionHandleReceiveSST = function(datagramLayer, remoteEndPoint,localEndPoint,recvBuffer){
 
     var received_msg = new Sirikata.Protocol.SST.SSTChannelHeader();
     var parsed = received_msg.ParseFromArray(recvBuffer);
@@ -1154,9 +1161,9 @@ function connectionHandleReceiveSST(datagramLayer, remoteEndPoint,localEndPoint,
         Kata.log("No one listening on this connection\n"+localEndPointId);
       }
     }
-}
+};
 
-function StreamBuffer (data, offset) {
+StreamBuffer = function(data, offset) {
     /**
      * @type {Date} 
      */
@@ -1174,7 +1181,7 @@ function StreamBuffer (data, offset) {
      * @type {number} Length
      */
     this.mOffset=offset;
-}
+};
 
 var MAX_PAYLOAD_SIZE_STREAM_SST=1000;
 var MAX_QUEUE_LENGTH_STREAM_SST=4000000;
@@ -1195,7 +1202,7 @@ var sStreamReturnCallbackMapSST={};
  * @param {function} cb StreamReturnCallbackFunction ==  void(int, boost::shared_ptr< Stream<UUID> >)
  * @returns bool whether the stream can connect
  */
-function connectStreamSST(localEndPoint,remoteEndPoint,cb) {
+connectStreamSST = function(localEndPoint,remoteEndPoint,cb) {
     var localEndPointId=localEndPoint.uid();
     if (sStreamReturnCallbackMapSST[localEndPointId]) {
         return false;
@@ -1203,7 +1210,7 @@ function connectStreamSST(localEndPoint,remoteEndPoint,cb) {
     sStreamReturnCallbackMapSST[localEndPointId]=cb;
     
     return createConnectionSST(localEndPoint,remoteEndPoint,connectionCreatedStreamSST);
-}
+};
 
 
   /**
@@ -1216,9 +1223,9 @@ function connectStreamSST(localEndPoint,remoteEndPoint,cb) {
     @return false, if its not possible to listen to this endpoint (e.g. if listen
             has already been called on this endpoint); true otherwise.
   */
-  function listenStreamSST(cb, listeningEndPoint) {
+listenStreamSST = function(cb, listeningEndPoint) {
     return connectionListenSST(cb, listeningEndPoint);
-  }
+};
 
 
 /**
@@ -1233,7 +1240,7 @@ function connectStreamSST(localEndPoint,remoteEndPoint,cb) {
  * @param {number} remoteLSID
  * @param {function} cb StreamReturnCallbackFunction ==  void(int, boost::shared_ptr< Stream<UUID> >)
  */
-function StreamSST (parentLSID, conn,
+StreamSST = function(parentLSID, conn,
 		 local_port, remote_port,
 		 usid, lsid, initial_data,
 		 remotelyInitiated, remoteLSID, cb){
@@ -1346,7 +1353,7 @@ function StreamSST (parentLSID, conn,
     if (initial_data.length>this.mInitialData.length){
         this.write(initial_data.slice(this.mInitialData.length,initial_data.length));
     }
-}
+};
 
 
 StreamSST.prototype.finalize=function() {
@@ -1534,7 +1541,7 @@ StreamSST.prototype.remoteEndPoint=function()  {
  * @param {number} errCode
  * @param {!ConnectionSST} c
  */
-function connectionCreatedStreamSST( errCode, c) {
+var connectionCreatedStreamSST = function( errCode, c) {
     //boost::mutex::scoped_lock lock(mStreamCreationMutex.getMutex());
     var localEndPoint=c.mLocalEndPoint;
     var localEndPointId=localEndPoint.uid();
@@ -1550,7 +1557,7 @@ function connectionCreatedStreamSST( errCode, c) {
     }
     //Empty array? the original code has some sort of pointless loop on 1505 that makes an array of size 0
     c.stream(cb, new Array(), localEndPoint.port, c.mRemoteEndPoint.port);
-  }
+};
 
 /**
  * @param {Date} curTime 
@@ -1890,7 +1897,7 @@ StreamSST.prototype.sendInitPacket = function(data) {
 
     var buffer = sstMsg.SerializeToArray();
     this.mConnection.sendData( buffer , false /*Not an ack*/ );
-  }
+};
 
 StreamSST.prototype.sendAckPacket=function() {
     var sstMsg= new Sirikata.Protocol.SST.SSTStreamHeader();
@@ -1951,3 +1958,5 @@ StreamSST.prototype.sendReplyPacket=function(data, remoteLSID) {
     var buffer = sstMsg.SerializeToArray();
     this.mConnection.sendData(  buffer, false/*not an ack packet!*/);
   };
+
+})();
