@@ -1731,7 +1731,7 @@ Kata.SST.Stream.prototype.sendToApp=function(skipLength) {
       for (var i = 0; i < len; i++) {
         this.mReceiveBuffer[i] = this.mReceiveBuffer[i + readyBufferSize];
       }
-      this.mRecieveBuffer.length = len;
+      this.mReceiveBuffer.length = len;
 
       this.mReceiveWindowSize += readyBufferSize;
     }
