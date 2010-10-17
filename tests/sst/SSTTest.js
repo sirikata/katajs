@@ -23,7 +23,7 @@ TestObjectMessageRouter.prototype.route = function(msg) {
 };
 
 function SSTTest() {
-    this.dispatcher = new ObjectMessageDispatcherSST;
+    this.dispatcher = new Kata.SST.ObjectMessageDispatcher;
 };
 SSTTest.prototype.establishedConnection = function(error, stream) {
     print("established, error = "+error+"\n", stream);
@@ -41,12 +41,12 @@ SSTTest.prototype.receiveMessage = function(msg) {
     print("received message! "+msg, msg);
 };
 SSTTest.prototype.createTestObjects = function(uuidA, uuidB) {
-    var dispatcherA = new ObjectMessageDispatcherSST;
-    var dispatcherB = new ObjectMessageDispatcherSST;
+    var dispatcherA = new Kata.SST.ObjectMessageDispatcher;
+    var dispatcherB = new Kata.SST.ObjectMessageDispatcher;
     var objRouterA = new TestObjectMessageRouter(uuidA, dispatcherB);
     var objRouterB = new TestObjectMessageRouter(uuidB, dispatcherA);
-    var baseDatagramA = createBaseDatagramLayerSST(uuidA, objRouterA, dispatcherA);
-    var baseDatagramB = createBaseDatagramLayerSST(uuidB, objRouterB, dispatcherB);
-    listenStreamSST(this.acceptConnection, uuidB);
-    connectStreamSST(uuidA, uuidB, this.establishedConnection);
+    var baseDatagramA = Kata.SST.createBaseDatagramLayer(uuidA, objRouterA, dispatcherA);
+    var baseDatagramB = Kata.SST.createBaseDatagramLayer(uuidB, objRouterB, dispatcherB);
+    Kata.SST.listenStream(this.acceptConnection, uuidB);
+    Kata.SST.connectStream(uuidA, uuidB, this.establishedConnection);
 };
