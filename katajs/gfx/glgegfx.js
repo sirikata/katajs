@@ -407,7 +407,6 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
 
     GLGEGraphics.prototype._scrollWheel = function(e){
         /// FIXME: figure out what event attributes to copy
-        document.getElementById("debug").innerHTML = e.detail;
         var ev = {};
         ev.type = e.type;
         ev.shiftKey = e.shiftKey;
