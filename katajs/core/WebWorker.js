@@ -113,9 +113,6 @@ Kata.include("katajs/core/SimpleChannel.js");
         Kata.error("ERROR at "+file+":"+line+": "+data);
     };
 
-})();
-
-(function() {
     // Define a Channel for FakeWebWorker.
 
     function getCallback(thus) {
@@ -147,9 +144,8 @@ Kata.include("katajs/core/SimpleChannel.js");
     Kata.FakeWebWorker.Channel.prototype.sendMessage = function (data) {
         this.mMessagePort.postMessage(data);
     };
-})();
 
-(function() {
+
     // And finally, figure out what to do about WebWorker.  If possible, use
     // native WebWorkers.  If not, just alias FakeWebWorker.  In both cases,
     // the FakeWebWorker channel class is reusable.
@@ -159,7 +155,6 @@ Kata.include("katajs/core/SimpleChannel.js");
             thus.gotError(ev.message, ev.filename, ev.lineno);
         };
     }
-
 
     if (Kata.WEB_WORKERS_ENABLED && typeof(Worker)!="undefined") {
         /**
@@ -208,6 +203,4 @@ Kata.include("katajs/core/SimpleChannel.js");
     } else {
         Kata.WebWorker = Kata.FakeWebWorker;
     }
-})();
-(function() {
 })();

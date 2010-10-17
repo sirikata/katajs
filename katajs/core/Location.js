@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+(function() {
+
 /**
  * Returns the identity location updated at the current time
  * @return {!Location} an identity object with time set to newDate
@@ -670,3 +672,5 @@ Kata.LocationReparent=function(loc,oldNode,newNode){
     }
     return loc;
 };
+
+})();
