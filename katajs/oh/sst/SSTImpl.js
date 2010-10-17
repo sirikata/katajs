@@ -1263,6 +1263,10 @@ Kata.SST.Stream = function(parentLSID, conn,
  */
     this.mLocalPort=local_port;
     /**
+     * @type {number} uint16 port
+     */
+    this.mRemotePort = remote_port;
+    /**
      * @type {number} lower stream uint16 id for parent stream
      */
     this.mParentLSID=parentLSID;
