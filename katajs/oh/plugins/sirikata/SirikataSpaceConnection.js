@@ -42,7 +42,12 @@ Kata.include("katajs/oh/plugins/sirikata/impl/Session.pbj.js");
 
 Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
 
+Kata.include("katajs/oh/sst/SSTImpl.js");
+
 Kata.defer(function() {
+
+    // FIXME having this sucks, we need to get rid of polling like the Sirikata code did
+    setInterval(Kata.SST.serviceConnections, 100);
 
     var SUPER = Kata.SpaceConnection.prototype;
     /** Kata.SirikataSpaceConnection is an implementation of
@@ -67,6 +72,9 @@ Kata.defer(function() {
         // back if we get the OK from the space server
         this.mOutstandingConnectRequests = {};
 
+        // Track information about active connections
+        this.mConnectedObjects = {};
+
         //var port = 9998;
         var port = 7777;
         if (spaceurl.port)
@@ -82,7 +90,16 @@ Kata.defer(function() {
     Kata.SirikataSpaceConnection.prototype.Ports = {
         Session : 1,
         Proximity : 2,
-        Location : 3
+        Location : 3,
+        Space : 253
+    };
+
+    Kata.SirikataSpaceConnection.prototype.ObjectMessageRouter = function(parent_spaceconn) {
+        this.mParentSpaceConn = parent_spaceconn;
+    };
+
+    Kata.SirikataSpaceConnection.prototype.ObjectMessageRouter.prototype.route = function(msg) {
+        this.mParentSpaceConn._sendPreparedODPMessage(msg);
     };
 
     Kata.SirikataSpaceConnection.prototype._getObjectID = function(id) {
@@ -170,6 +187,10 @@ Kata.defer(function() {
         odp_msg.unique = PROTO.I64.fromNumber(0);
         odp_msg.payload = payload;
 
+        this._sendPreparedODPMessage(odp_msg);
+    };
+
+    Kata.SirikataSpaceConnection.prototype._sendPreparedODPMessage = function(odp_msg) {
         var serialized = new PROTO.Base64Stream();
         odp_msg.SerializeToStream(serialized);
 
@@ -183,10 +204,14 @@ Kata.defer(function() {
         odp_msg.ParseFromStream(new PROTO.Base64Stream(data));
 
         // Special case: Session messages
-        if (odp_msg.source_object == Kata.ObjectID.nil() && odp_msg.dest_port == this.Ports.Session)
+        if (odp_msg.source_object == Kata.ObjectID.nil() && odp_msg.dest_port == this.Ports.Session) {
             this._handleSessionMessage(odp_msg);
-        else
-            Kata.warn("Not implemented - Sirikata ODP dispatch: " + odp_msg.toString());
+        }
+        else {
+            var dest_obj_data = this.mConnectedObjects[odp_msg.dest_object];
+            if (dest_obj_data)
+                dest_obj_data.odpDispatcher.dispatchMessage(odp_msg);
+        }
     };
 
     /* Handle session messages from the space server. */
@@ -217,7 +242,25 @@ Kata.defer(function() {
                     this._serializeMessage(ack_msg)
                 );
 
-                // Indicate response. FIXME SST connect stream should happen before this
+                // Set up SST
+                this.mConnectedObjects[objid] = {};
+                var odpRouter = new this.ObjectMessageRouter(this);
+                var odpDispatcher = new Kata.SST.ObjectMessageDispatcher();
+                // Store the dispatcher so we can deliver ODP messages
+                this.mConnectedObjects[objid].odpDispatcher = odpDispatcher;
+                // And the BaseDatagramLayer...
+                this.mConnectedObjects[objid].odpBaseDatagramLayer = Kata.SST.createBaseDatagramLayer(
+                    // FIXME SST requiring a full endpoint here is unnecessary, it only uses the objid for indexing
+                    new Kata.SST.EndPoint(objid, 0), odpRouter, odpDispatcher
+                );
+                // Try to connect the initial stream
+                var tried_sst = Kata.SST.connectStream(
+                    new Kata.SST.EndPoint(objid, this.Ports.Space),
+                    new Kata.SST.EndPoint(Kata.SpaceID.nil(), this.Ports.Space),
+                    Kata.bind(this._spaceSSTConnectCallback, this)
+                );
+
+                // Indicate response to parent SessionManager
                 this.mParent.connectionResponse(
                     id, true,
                     {space : this.mSpaceURL, object : objid},
@@ -239,6 +282,13 @@ Kata.defer(function() {
         if (session_msg.HasField("init_migration")) {
             Kata.notImplemented("Migrations not implemented.");
         }
+    };
+
+    Kata.SirikataSpaceConnection.prototype._spaceSSTConnectCallback = function(error, stream) {
+        if (error == Kata.SST.FAILURE)
+            Kata.warn("Failed to get SST connection to space.");
+        else
+            Kata.warn("Successfully opened initial SST stream to space.");
     };
 
     Kata.SessionManager.registerProtocolHandler("sirikata", Kata.SirikataSpaceConnection);
