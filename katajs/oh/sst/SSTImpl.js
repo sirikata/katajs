@@ -788,7 +788,7 @@ Kata.SST.Connection.prototype.parsePacket=function(received_channel_msg, source_
 
 
     if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
-      this.handleInitPacket(received_stream_msg, source_port, dest_port);
+      this.handleInitPacket(received_stream_msg);
     }
     else if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
       this.handleReplyPacket(received_stream_msg);
@@ -814,11 +814,11 @@ Kata.SST.Connection.prototype.headerToStringDebug=function(received_stream_msg) 
 /**
  * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
-Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg, source_port, dest_port) {
+Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg) {
     var incomingLsid = received_stream_msg.lsid;
     
     if (!(incomingLsid in this.mIncomingSubstreamMap)){
-        var listeningStreamsCallback=this.mListeningStreamsCallbackMap[dest_port];
+        var listeningStreamsCallback=this.mListeningStreamsCallbackMap[received_stream_msg.dest_port];
       if (listeningStreamsCallback)
       {
         //create a new stream
@@ -826,8 +826,8 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg, so
         var newLSID = this.getNewLSID();
 
         var stream = new Kata.SST.Stream (received_stream_msg.psid, this,
-                                     dest_port,
-                                     source_port,
+                                     received_stream_msg.dest_port,
+                                     received_stream_msg.src_port,
                                      usid, newLSID,
                                      [], true, incomingLsid, null);
         this.mOutgoingSubstreamMap[newLSID] = stream;
