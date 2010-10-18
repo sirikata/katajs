@@ -42,7 +42,11 @@ Kata.include("katajs/oh/plugins/sirikata/impl/Session.pbj.js");
 
 Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
 
+Kata.include("katajs/oh/plugins/sirikata/impl/Prox.pbj.js");
+
 Kata.include("katajs/oh/sst/SSTImpl.js");
+
+Kata.include("katajs/oh/plugins/sirikata/Frame.js");
 
 Kata.defer(function() {
 
@@ -253,6 +257,10 @@ Kata.defer(function() {
                     // FIXME SST requiring a full endpoint here is unnecessary, it only uses the objid for indexing
                     new Kata.SST.EndPoint(objid, 0), odpRouter, odpDispatcher
                 );
+
+                this.mConnectedObjects[objid].locdata = [];
+                this.mConnectedObjects[objid].proxdata = [];
+
                 // Try to connect the initial stream
                 var tried_sst = Kata.SST.connectStream(
                     new Kata.SST.EndPoint(objid, this.Ports.Space),
@@ -311,10 +319,24 @@ Kata.defer(function() {
 
     Kata.SirikataSpaceConnection.prototype._handleLocationSubstreamRead = function(objid, stream, data) {
         Kata.warn("Location data for " + objid + " of size " + data.length);
+        var objinfo = this.mConnectedObjects[objid];
+        objinfo.locdata = objinfo.locdata.concat(data);
     };
 
     Kata.SirikataSpaceConnection.prototype._handleProximitySubstreamRead = function(objid, stream, data) {
         Kata.warn("Proximity data for " + objid + " of size " + data.length);
+        var objinfo = this.mConnectedObjects[objid];
+        objinfo.proxdata = objinfo.proxdata.concat(data);
+
+        while(true) {
+            var next_prox_msg = Kata.Frame.parse(objinfo.proxdata);
+            if (next_prox_msg === null) break;
+
+            // Handle the message
+            var prox_msg = new Sirikata.Protocol.Prox.ProximityUpdate();
+            prox_msg.ParseFromStream(new PROTO.ByteArrayStream(next_prox_msg));
+            // FIXME add actual use of proximity events
+        }
     };
 
     Kata.SessionManager.registerProtocolHandler("sirikata", Kata.SirikataSpaceConnection);
