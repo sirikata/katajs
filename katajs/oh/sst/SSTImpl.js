@@ -1732,7 +1732,7 @@ Kata.SST.Stream.prototype.sendToApp=function(skipLength) {
     //pass data up to the app from 0 to readyBufferSize;
     //
     if (this.mReadCallback && readyBufferSize > 0) {
-      this.mReadCallback(this.mReceiveBuffer);
+      this.mReadCallback(this.mReceiveBuffer.slice(0, readyBufferSize));
 
       //now move the window forward...
       this.mLastContiguousByteReceived = this.mLastContiguousByteReceived.add(PROTO.I64.fromNumber(readyBufferSize));
