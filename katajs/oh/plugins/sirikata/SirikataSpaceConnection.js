@@ -257,7 +257,7 @@ Kata.defer(function() {
                 var tried_sst = Kata.SST.connectStream(
                     new Kata.SST.EndPoint(objid, this.Ports.Space),
                     new Kata.SST.EndPoint(Kata.SpaceID.nil(), this.Ports.Space),
-                    Kata.bind(this._spaceSSTConnectCallback, this)
+                    Kata.bind(this._spaceSSTConnectCallback, this, objid)
                 );
 
                 // Indicate response to parent SessionManager
@@ -284,11 +284,37 @@ Kata.defer(function() {
         }
     };
 
-    Kata.SirikataSpaceConnection.prototype._spaceSSTConnectCallback = function(error, stream) {
-        if (error == Kata.SST.FAILURE)
-            Kata.warn("Failed to get SST connection to space.");
-        else
-            Kata.warn("Successfully opened initial SST stream to space.");
+    Kata.SirikataSpaceConnection.prototype._spaceSSTConnectCallback = function(objid, error, stream) {
+        if (error == Kata.SST.FAILURE) {
+            Kata.warn("Failed to get SST connection to space for " + objid + ".");
+            return;
+        }
+
+        Kata.warn("Successful SST space connection for " + objid + ". Setting up loc and prox listeners.");
+        // Store the stream for later use
+        this.mConnectedObjects[objid].spaceStream = stream;
+
+        // And setup listeners for loc and prox
+        stream.listenSubstream(this.Ports.Location, Kata.bind(this._handleLocationSubstream, this, objid));
+        stream.listenSubstream(this.Ports.Proximity, Kata.bind(this._handleProximitySubstream, this, objid));
+    };
+
+    Kata.SirikataSpaceConnection.prototype._handleLocationSubstream = function(objid, error, stream) {
+        Kata.warn("Location substream (error " + error + ")");
+        stream.registerReadCallback(Kata.bind(this._handleLocationSubstreamRead, this, objid, stream));
+    };
+
+    Kata.SirikataSpaceConnection.prototype._handleProximitySubstream = function(objid, error, stream) {
+        Kata.warn("Proximity substream (error " + error + ")");
+        stream.registerReadCallback(Kata.bind(this._handleProximitySubstreamRead, this, objid, stream));
+    };
+
+    Kata.SirikataSpaceConnection.prototype._handleLocationSubstreamRead = function(objid, stream, data) {
+        Kata.warn("Location data for " + objid + " of size " + data.length);
+    };
+
+    Kata.SirikataSpaceConnection.prototype._handleProximitySubstreamRead = function(objid, stream, data) {
+        Kata.warn("Proximity data for " + objid + " of size " + data.length);
     };
 
     Kata.SessionManager.registerProtocolHandler("sirikata", Kata.SirikataSpaceConnection);
