@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/ObjectHost.js");
 
-(function() {
+Kata.require([
+    'katajs/oh/ObjectHost.js'
+], function() {
 
      /** Kata.SpaceConnection is a connection to a space. It provides
       * functionality for connecting to a space (as an object host)
@@ -94,4 +95,4 @@ Kata.include("katajs/oh/ObjectHost.js");
          Kata.notImplemented("SpaceConnection.unsubscribe");
      };
 
-})();
+}, 'katajs/oh/SpaceConnection.js');

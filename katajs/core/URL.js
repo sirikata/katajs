@@ -30,7 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function() {
+Kata.require([
+], function() {
     
      /** The URL class provides utilities for operating on a URL.  The
       * constructor accepts a string URL or a Kata.URL.
@@ -94,4 +95,4 @@
         return a==b;
     };
      
-})();
+}, 'katajs/core/URL.js');

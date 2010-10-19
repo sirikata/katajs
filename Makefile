@@ -11,18 +11,22 @@ THESE_PBJJS=$(patsubst $(INPUTDIR)/%,$(OUTPUTDIR)/%.js,$(THESE_PBJ))
 ALL_PBJJS += $(THESE_PBJJS)
 
 ### Closure Vars
-CLOSURESRCS=externals/protojs/protobuf.js externals/protojs/pbj.js katajs/core/Core.js
+###########CLOSURESRCS=externals/protojs/protobuf.js externals/protojs/pbj.js
+CLOSURESRCS=katajs/core/Core.js
 CLOSURESRCS+=$(shell find katajs/core katajs/oh katajs/network katajs/space -name '*.js' -and -not -name 'Core.js' -and -not -name 'GenericWorker.js' )
 
+CLOSUREOUT=katajs.compiled.js
+
+CLOSURE=java -jar externals/GLGE/closure/compiler.jar
 CLOSUREARGS=$(patsubst %,--js %,$(CLOSURESRCS))
 CLOSUREARGS+=--externs contrib/closure_preinclude.js
 CLOSUREARGS+=--formatting pretty_print
-
-#CLOSUREARGS+=--compilation_level ADVANCED_OPTIMIZATIONS
-#CLOSUREARGS+=--compilation_level WHITESPACE_ONLY
 CLOSUREARGS+=--compilation_level SIMPLE_OPTIMIZATIONS
+CLOSUREARGS+= --js_output_file $(CLOSUREOUT)
 
-CLOSUREOUT=katajs.compiled.js
+#CLOSURE=python makeclosure.py
+#CLOSUREARGS=$(CLOSURESRCS)
+#CLOSUREARGS+= > $(CLOSUREOUT)
 
 ### Rules
 
@@ -50,8 +54,7 @@ $(OUTPUTDIR)/%.pbj.js: $(INPUTDIR)/%.pbj
 closure : $(CLOSUREOUT)
 
 $(CLOSUREOUT) : $(CLOSURESRCS)
-	bash -c 'java -jar externals/GLGE/closure/compiler.jar $(CLOSUREARGS) \
-		--js_output_file "$@"' || \
+	$(CLOSURE) $(CLOSUREARGS) || \
 	rm -f "$@"
 
 .PHONY: test_pbj closure all

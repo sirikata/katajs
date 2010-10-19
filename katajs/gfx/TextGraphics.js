@@ -1,5 +1,3 @@
-Kata.include("katajs/oh/GraphicsSimulation.js");
-
 /**
  *@constructor
  */
@@ -213,6 +211,8 @@ TextGraphics=function(callbackFunction,parentElement) {
 }
 
 // Register as a GraphicsSimulation if possible.
-Kata.defer(function() {
-               Kata.GraphicsSimulation.registerDriver("text", TextGraphics);
-           });
+Kata.require([
+    'katajs/oh/GraphicsSimulation.js'
+], function() {
+    Kata.GraphicsSimulation.registerDriver("text", TextGraphics);
+}, "katajs/gfx/TextGraphics.js");

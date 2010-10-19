@@ -1,7 +1,8 @@
 
-Kata.include("katajs/oh/Script.js");
 
-(function(){
+Kata.require([
+    'katajs/oh/Script.js'
+], function() {
     if (typeof(Example) === "undefined") {
         Example = {};
     }
@@ -54,6 +55,6 @@ Kata.include("katajs/oh/Script.js");
             console.log("ENVJSTEST: _handleGUIMessage unexpected event", msg.msg, msg.event)   
         }
     };
-})();
+}, 'tests/envjs/test_Blessed.js');
 
 Kata.DEBUG_FAKE_UUID=true;

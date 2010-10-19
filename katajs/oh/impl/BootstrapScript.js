@@ -30,12 +30,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/FilterChannel.js");
-Kata.include("katajs/core/MessageDispatcher.js");
-Kata.include("katajs/oh/Presence.js");
-Kata.include("katajs/core/URL.js");
 
-(function() {
+Kata.require([
+    'katajs/core/FilterChannel.js',
+    'katajs/core/MessageDispatcher.js',
+    'katajs/oh/Presence.js',
+    'katajs/core/URL.js'
+], function() {
      /** Bootstraps an object's script, enabling it to communicate
       *  with the HostedObject it was instantiated for.  This also
       *  sets up creation/destruction of Presences and makes sure they
@@ -54,15 +55,6 @@ Kata.include("katajs/core/URL.js");
      Kata.BootstrapScript = function(channel,args) {
          this.mChannel = channel;
 
-         Kata.include(args.realScript);
-
-         // Try to find the class
-         var clsTree = args.realClass.split(".");
-         var cls = self;
-         for (var i = 0; cls && i < clsTree.length; i++) {
-             cls = cls[clsTree[i]];
-         }
-
          // Setup dispatcher and register handlers
          var handlers = {};
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
@@ -73,11 +65,21 @@ Kata.include("katajs/core/URL.js");
 
          this.mPresences = {};
 
-
          // Create a filtered channel, so we get first crack at any messages
          var filtered_channel = new Kata.FilterChannel(channel, Kata.bind(this.receiveMessage, this));
-         // And finally, in case the script constructor does anything synchronously, make the script creation the final step
-         this.mScript = new cls(filtered_channel, args.realArgs);
+
+         Kata.require(
+             [args.realScript],
+             function() {
+                 // Try to find the class
+                 var clsTree = args.realClass.split(".");
+                 var cls = self;
+                 for (var i = 0; cls && i < clsTree.length; i++) {
+                     cls = cls[clsTree[i]];
+                 }
+                 // And finally, in case the script constructor does anything synchronously, make the script creation the final step
+                 this.mScript = new cls(filtered_channel, args.realArgs);
+             });
      };
 
      Kata.BootstrapScript.prototype.receiveMessage = function(channel, msg) {
@@ -103,4 +105,4 @@ Kata.include("katajs/core/URL.js");
          this.mScript.presenceInvalidated(msg, "Disconnected.");
      };
 
- })();
+}, "katajs/oh/impl/BootstrapScript.js");

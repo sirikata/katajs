@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/RemotePresence.js");
 
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/RemotePresence.js'
+], function() {
 
      var SUPER=Kata.RemotePresence.prototype;
      /** Presences live in the same thread as the script and maintain
@@ -247,4 +248,4 @@ Kata.defer(function() {
          Kata.notImplemented("Presence._handleQueryEvent");
      };
 
-});
+}, 'katajs/oh/Presence.js');

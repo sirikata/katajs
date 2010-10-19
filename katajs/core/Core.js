@@ -51,14 +51,75 @@ if (typeof(JSON) == "undefined") {JSON = {};}
   tags pointing to Core.js. */
 Kata.scriptRoot="";
 (function() {
-    var includedscripts = {"Core.js":true};
+    var includedscripts = {"katajs/core/Core.js":true};
+    var loadedDeps = {"katajs/core/Core.js":true};
 
-    if (Kata.precompiled) {
-        /** Use Kata.include to fetch dependent files. Ignores duplicates.
-         * @param {string} scriptfile  A script to include only once.
-         */
-        Kata.include = function(scriptfile) {};
-    } else if (typeof(importScripts) != "undefined") {
+     var deferred = {};
+
+     Kata.require = function(deps, body, provide) {
+         if (provide in loadedDeps) {
+             Kata.warn("JS file "+provide+" included twice.");
+             return;
+         }
+         Kata.log("Requiring: provide="+provide+"; deps="+deps);
+         var i;
+         for (i = 0; i < deps.length; i++) {
+             Kata.include(deps[i]);
+         }
+         var unfinishedDeps = {};
+         var remainingDeps = 0;
+         for (i = 0;i < deps.length; i++) {
+             if (!loadedDeps[deps[i]]) {
+                 unfinishedDeps[deps[i]] = true;
+                 remainingDeps++;
+             }
+         }
+         function runDep(finished) {
+             if (unfinishedDeps[finished]) {
+                 delete unfinishedDeps[finished];
+                 remainingDeps--;
+                 Kata.log("Finished "+finished+" for "+provide, remainingDeps);
+                 if (remainingDeps == 0) {
+                     Kata.log("*** running "+provide);
+                     body();
+                     if (provide)
+                         Kata.alreadyIncluded(provide);
+                 }
+             }
+         }
+         if (remainingDeps) {
+             for (i in unfinishedDeps) {
+                 deferred[i] = deferred[i] || [];
+                 deferred[i].push(runDep);
+             }
+         } else {
+             Kata.log("!!! run0dep "+provide);
+             body();
+             if (provide)
+                 Kata.alreadyIncluded(provide);
+         }
+     };
+
+     Kata.defer = function (f){if (f) Kata.require([], f, null);};
+
+     Kata.alreadyIncluded = function(provide) {
+         if (!provide) {
+             return;
+         }
+         if (loadedDeps[provide]) {
+             Kata.warn("JS file "+provide+" included twice.");
+         }
+         if (deferred[provide]) {
+             var deferList = deferred[provide];
+             delete deferred[provide];
+             for (var i = 0; i < deferList.length; i++) {
+                 deferList[i](provide);
+             }
+             loadedDeps[provide] = true;
+         }
+     };
+
+     if (typeof(importScripts) != "undefined") {
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
          * @param {string} scriptfile  A script to include only once.
          *
@@ -70,9 +131,9 @@ Kata.scriptRoot="";
             }
             includedscripts[scriptfile] = true;
             importScripts(Kata.scriptRoot+scriptfile);
+            Kata.alreadyIncluded(scriptfile);
         };
         Kata.evalInclude = Kata.include;
-        Kata.defer = function (f){if (f) f();};
     } else if (typeof(document) != "undefined" && document.write) {
         var scripttags = document.getElementsByTagName("script");
         var headTag = document.getElementsByTagName("head")[0];
@@ -88,28 +149,8 @@ Kata.scriptRoot="";
                 }
             }
         }
-        Kata.defer = 
-            (function() { 
-                 var deferList=[];
-                 return function (f) {
-                     if (f) {
-                         deferList.push(f);
-                     }else {
-                         for (var i=0;i<deferList.length;++i) {
-                             deferList[i]();
-                             Kata.include=Kata.evalInclude;//flip it back
-                         }
-                     }
-                 };})();
-        Kata.resolveDeferredHeaders=function() {
-            Kata.defer(null);
-        };
-        Kata.alreadyIncluded = function(scriptfile) {
-            if (includedscripts[scriptfile]) {
-                return;
-            }
-            includedscripts[scriptfile] = true;
-        };
+        window.pendingScripts = {};
+        var pendingId = 1;
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
          * @param {string} scriptfile  A script to include only once.
          *
@@ -120,36 +161,12 @@ Kata.scriptRoot="";
                 return;
             }
             includedscripts[scriptfile] = true;
-            /*
             var scriptTag = document.createElement("script");
-            scriptTag.setAttribute("src",Kata.scriptRoot+scriptfile);
-            scriptTag.setAttribute("type","text/javascript");
+            scriptTag.src = Kata.scriptRoot+scriptfile;
+            scriptTag.type = "text/javascript";
             headTag.appendChild(scriptTag);
-            */
-            document.write("<script type='text/javascript' src='"+
-                Kata.scriptRoot+scriptfile+"'></scr"+"ipt>");
-            
-            //console.log("importing script "+scriptfile+"...");
         };
-        Kata.evalInclude = function (scriptfile) {
-            if (includedscripts[scriptfile]) return;
-            includedscripts[scriptfile]=true;
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", Kata.scriptRoot+scriptfile, false);
-            xhr.send();
-            if (xhr.readyState==4 &&
-                (xhr.status==0 || xhr.status==200)) {
-                with(self){ // ie hack?
-                    self.eval(xhr.responseText);
-                }
-            } else {
-                console.log("Unable to load script file "+scriptfile+
-                    ": status is "+xhr.status+" "+xhr.statusText);
-                console.log("content type is "+
-                    xhr.getResponseHeader("Content-Type"));
-            }
-            //console.log("done importing script "+scriptfile);
-        };
+        Kata.evalInclude = Kata.include;
     } else {
         // Running without dom?
     }

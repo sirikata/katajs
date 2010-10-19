@@ -30,7 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function() {
+Kata.require([
+], function() {
 
     Kata.SpaceID = {};
 
@@ -42,4 +43,4 @@
         return '*';
     };
 
-})();
+}, 'katajs/core/SpaceID.js');

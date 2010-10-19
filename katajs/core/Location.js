@@ -30,7 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function() {
+Kata.require([
+], function() {
 
 /**
  * Returns the identity location updated at the current time
@@ -673,4 +674,4 @@ Kata.LocationReparent=function(loc,oldNode,newNode){
     return loc;
 };
 
-})();
+}, 'katajs/core/Location.js');

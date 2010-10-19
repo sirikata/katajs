@@ -819,6 +819,8 @@ VWObject.prototype.updateCamera = function(graphics) {
 };
 
 // Register as a GraphicsSimulation if possible.
-Kata.defer(function() {
-               Kata.GraphicsSimulation.registerDriver("o3d", O3DGraphics);
-           });
+Kata.require([
+    'katajs/oh/GraphicsSimulation.js'
+], function() {
+    Kata.GraphicsSimulation.registerDriver("o3d", O3DGraphics);
+}, "katajs/gfx/o3dgfx.js");

@@ -30,7 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function() {
+Kata.require([
+], function() {
 
     if (typeof(Kata.ODP) == "undefined")
         Kata.ODP = {};
@@ -45,4 +46,4 @@
         return 16777215;
     };
 
-})();
+}, 'katajs/oh/odp/PortID.js');
