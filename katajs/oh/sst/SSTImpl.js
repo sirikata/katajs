@@ -193,6 +193,7 @@ Kata.SST.Impl.BaseDatagramLayer.prototype.send=function(src,dest,data) {
     objectMessage.source_port=src.port;
     objectMessage.dest_object=dest.objectId();
     objectMessage.dest_port=dest.port;
+    objectMessage.unique = PROTO.I64.fromNumber(0);
     objectMessage.payload=data;
     return this.mRouter.route(objectMessage);
 };
@@ -243,8 +244,8 @@ Kata.SST.Impl.BaseDatagramLayer.prototype.releaseChannel=function(channel) {
     }
 };
 
-var SUCCESS_SST=0;
-var FAILURE_SST=-1;
+Kata.SST.SUCCESS = 0;
+Kata.SST.FAILURE = -1;
 /**
  * @param {Array} data
  * @param {PROTO.I64} channelSeqNum,
@@ -566,7 +567,10 @@ var createConnectionSST = function(localEndPoint,remoteEndPoint,cb){
 
 
     var channelid=getDatagramLayerSST(localEndPoint).getAvailableChannel();
-    var payload=[channelid&255,((channelid>>8)&255)];    
+    var payload=[
+        ((channelid>>8)&255),
+        channelid&255
+    ];
 
     conn.setLocalChannelID(channelid);
     conn.sendData(payload,false/*not an ack*/);
@@ -751,9 +755,9 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
         this.mState = CONNECTION_CONNECTED_SST;
         var originalListeningEndPoint=new Kata.SST.EndPoint(this.mRemoteEndPoint.endPoint, this.mRemoteEndPoint.port);
         
-        this.setRemoteChannelID(received_msg.payload[0]+received_msg.payload[1]*256);
+        this.setRemoteChannelID(received_msg.payload[0]*256+received_msg.payload[1]);
         
-        this.mRemoteEndPoint.port = received_msg.payload[2]+received_msg.payload[3]*256;
+        this.mRemoteEndPoint.port = received_msg.payload[2]*256+received_msg.payload[3];
         
         this.sendData( [], false/*not an ack*/ );
         var localEndPointId=this.mLocalEndPoint.uid();
@@ -761,7 +765,7 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
         if (connectionCallback)
         {
             delete sConnectionReturnCallbackMapSST[localEndPointId];
-            connectionCallback(SUCCESS_SST, this);
+            connectionCallback(Kata.SST.SUCCESS, this);
         }
     }
     else if (this.mState == CONNECTION_PENDING_RECEIVE_CONNECT_SST) {
@@ -784,7 +788,7 @@ Kata.SST.Connection.prototype.parsePacket=function(received_channel_msg, source_
 
 
     if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
-      this.handleInitPacket(received_stream_msg, source_port, dest_port);
+      this.handleInitPacket(received_stream_msg);
     }
     else if (received_stream_msg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
       this.handleReplyPacket(received_stream_msg);
@@ -810,11 +814,11 @@ Kata.SST.Connection.prototype.headerToStringDebug=function(received_stream_msg) 
 /**
  * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
-Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg, source_port, dest_port) {
+Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg) {
     var incomingLsid = received_stream_msg.lsid;
     
     if (!(incomingLsid in this.mIncomingSubstreamMap)){
-        var listeningStreamsCallback=this.mListeningStreamsCallbackMap[dest_port];
+        var listeningStreamsCallback=this.mListeningStreamsCallbackMap[received_stream_msg.dest_port];
       if (listeningStreamsCallback)
       {
         //create a new stream
@@ -822,8 +826,8 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg, so
         var newLSID = this.getNewLSID();
 
         var stream = new Kata.SST.Stream (received_stream_msg.psid, this,
-                                     dest_port,
-                                     source_port,
+                                     received_stream_msg.dest_port,
+                                     received_stream_msg.src_port,
                                      usid, newLSID,
                                      [], true, incomingLsid, null);
         this.mOutgoingSubstreamMap[newLSID] = stream;
@@ -856,7 +860,7 @@ Kata.SST.Connection.prototype.handleReplyPacket=function(received_stream_msg) {
           this.mIncomingSubstreamMap[incomingLsid] = stream;
 
         if (stream.mStreamReturnCallback){
-          stream.mStreamReturnCallback(SUCCESS_SST, stream);
+          stream.mStreamReturnCallback(Kata.SST.SUCCESS, stream);
           stream.receiveData(received_stream_msg, received_stream_msg.payload,
                               received_stream_msg.bsn);
         }
@@ -975,7 +979,7 @@ Kata.SST.serviceConnections = function() {
           delete sConnectionReturnCallbackMapSST[localEndPointId];
           delete sConnectionMapSST[it];//FIXME does this invalidate map?
 
-          cb(FAILURE_SST, conn);
+          cb(Kata.SST.FAILURE, conn);
         }
         conn.finalize();//FIXME Is this correct??
         break;//FIXME: must we break?
@@ -1008,7 +1012,7 @@ Kata.SST.Connection.prototype.datagram=function(data, local_port, remote_port,cb
      || this.mState == CONNECTION_PENDING_DISCONNECT_SST)
     {
       if (cb) {
-        cb(FAILURE_SST, data);
+        cb(Kata.SST.FAILURE, data);
       }
       return false;
     }
@@ -1041,7 +1045,7 @@ Kata.SST.Connection.prototype.datagram=function(data, local_port, remote_port,cb
 
     if (cb) {
       //invoke the callback function
-      cb(SUCCESS_SST, data);
+      cb(Kata.SST.SUCCESS, data);
     }
 
     return true;
@@ -1152,13 +1156,16 @@ var connectionHandleReceiveSST = function(datagramLayer, remoteEndPoint,localEnd
             sConnectionMapSST[newLocalEndPoint.uid()] = conn;
 
             conn.setLocalChannelID(availableChannel);
-            conn.setRemoteChannelID(received_payload[0]+received_payload[1]*256);
+            conn.setRemoteChannelID(received_payload[0]*256+received_payload[1]);
             conn.setState(CONNECTION_PENDING_RECEIVE_CONNECT_SST);
             
-            conn.sendData([availableChannel&255,
-                           (availableChannel>>8)&255,
-                           availablePort&255,
-                           (availablePort>>8)&255],false/*not an ack*/);
+            conn.sendData([
+                              (availableChannel>>8)&255,
+                              availableChannel&255,
+                              (availablePort>>8)&255,
+                              availablePort&255
+                          ],
+                          false/*not an ack*/);
       }
       else {
         Kata.log("No one listening on this connection\n"+localEndPointId);
@@ -1255,6 +1262,10 @@ Kata.SST.Stream = function(parentLSID, conn,
  * @type {number} uint16 port
  */
     this.mLocalPort=local_port;
+    /**
+     * @type {number} uint16 port
+     */
+    this.mRemotePort = remote_port;
     /**
      * @type {number} lower stream uint16 id for parent stream
      */
@@ -1554,8 +1565,8 @@ var connectionCreatedStreamSST = function( errCode, c) {
     if(!cb){
       Kata.error("Callback not defined for connectionCreatedStreamSST, "+localEndPointId);
     }
-    if (errCode != SUCCESS_SST) {
-      cb(FAILURE_SST, null );
+    if (errCode != Kata.SST.SUCCESS) {
+      cb(Kata.SST.FAILURE, null );
       return;
     }
     //Empty array? the original code has some sort of pointless loop on 1505 that makes an array of size 0
@@ -1595,7 +1606,7 @@ Kata.SST.Stream.prototype.serviceStream=function(curTime) {
 
         //send back an error to the app by calling mStreamReturnCallback
         //with an error code.
-        this.mStreamReturnCallback(FAILURE_SST, null );
+        this.mStreamReturnCallback(Kata.SST.FAILURE, null );
 
         return false;
       }
@@ -1721,7 +1732,7 @@ Kata.SST.Stream.prototype.sendToApp=function(skipLength) {
     //pass data up to the app from 0 to readyBufferSize;
     //
     if (this.mReadCallback && readyBufferSize > 0) {
-      this.mReadCallback(this.mReceiveBuffer);
+      this.mReadCallback(this.mReceiveBuffer.slice(0, readyBufferSize));
 
       //now move the window forward...
       this.mLastContiguousByteReceived = this.mLastContiguousByteReceived.add(PROTO.I64.fromNumber(readyBufferSize));
