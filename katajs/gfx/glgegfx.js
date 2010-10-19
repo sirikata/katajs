@@ -373,6 +373,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     };
 
     GLGEGraphics.prototype._keyDown = function(e){
+        if (Kata.suppressCanvasKeyInput) return;
         var ev = {};
         ev.type = e.type;
         ev.keyCode = e.keyCode;
@@ -401,7 +402,6 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     };
 
     GLGEGraphics.prototype._scrollWheel = function(e){
-        /// FIXME: figure out what event attributes to copy
         var ev = {};
         ev.type = e.type;
         ev.shiftKey = e.shiftKey;
