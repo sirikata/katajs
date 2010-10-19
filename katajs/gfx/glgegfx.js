@@ -70,14 +70,9 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mRenderTargets={};
     this.mUnsetParents={};
     this.mObjects={};
-
     function render(){
         thus.mCurTime=new Date();
-        if(typeof(GlobalLoadDone)=="function") {
-            GlobalLoadDone();//this should be done with message passing
-            GlobalLoadDone=null;
-        }
-        var now = parseInt(new Date().getTime());
+        var now = parseInt(thus.mCurTime.getTime());
         frameratebuffer = Math.round(((frameratebuffer * 9) + 1000 / (now - lasttime)) / 10);
         //mouselook();
         //checkkeys();
@@ -180,7 +175,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
-        clda.setDocument(this.mMeshURI);
+        clda.setDocument(this.mMeshURI, null, GlobalLoadDone);
         clda.setScaleX(1.0);
         clda.setScaleY(1.0);
         clda.setScaleZ(1.0);
