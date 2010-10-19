@@ -1,9 +1,10 @@
 
-Kata.include("katajs/oh/GraphicsScript.js");
-Kata.include("katajs/oh/behavior/NamedObject.js");
 
 var Example;
-(function(){
+Kata.require([
+    'katajs/oh/GraphicsScript.js',
+    'katajs/oh/behavior/NamedObject.js'
+], function() {
     if (typeof(Example) === "undefined") {
         Example = {};
     }
@@ -123,4 +124,4 @@ var Example;
             }
         }
     };
-})();
+}, 'examples/simple_script/BlessedScript.js');

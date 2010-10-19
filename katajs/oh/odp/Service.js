@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include('katajs/oh/odp/Port.js');
 
-(function() {
+Kata.require([
+    'katajs/oh/odp/Port.js'
+], function() {
 
     if (typeof(Kata.ODP) == "undefined")
         Kata.ODP = {};
@@ -91,4 +92,4 @@ Kata.include('katajs/oh/odp/Port.js');
         odp_port.deliver(src_ep, payload);
     };
 
-})();
+}, 'katajs/oh/odp/Service.js');

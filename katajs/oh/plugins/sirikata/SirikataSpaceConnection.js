@@ -30,19 +30,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/SpaceConnection.js");
-Kata.include("katajs/oh/SessionManager.js");
-Kata.include("katajs/network/TCPSST.js");
-Kata.include("externals/protojs/protobuf.js");
-Kata.include("externals/protojs/pbj.js");
 
-Kata.include("katajs/oh/plugins/sirikata/impl/TimedMotionVector.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/TimedMotionQuaternion.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/Session.pbj.js");
 
-Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
 
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/SpaceConnection.js',
+    'katajs/oh/SessionManager.js',
+    'katajs/network/TCPSST.js',
+    'externals/protojs/protobuf.js',
+    'externals/protojs/pbj.js',
+    'katajs/oh/plugins/sirikata/impl/TimedMotionVector.pbj.js',
+    'katajs/oh/plugins/sirikata/impl/TimedMotionQuaternion.pbj.js',
+    'katajs/oh/plugins/sirikata/impl/Session.pbj.js',
+    'katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js'
+], function() {
 
     var SUPER = Kata.SpaceConnection.prototype;
     /** Kata.SirikataSpaceConnection is an implementation of
@@ -242,4 +243,4 @@ Kata.defer(function() {
     };
 
     Kata.SessionManager.registerProtocolHandler("sirikata", Kata.SirikataSpaceConnection);
-});
+}, 'katajs/oh/plugins/sirikata/SirikataSpaceConnection.js');

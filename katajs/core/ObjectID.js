@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include('katajs/core/Math.uuid.js');
 
-(function() {
+Kata.require([
+    'katajs/core/Math.uuid.js'
+], function() {
 
     Kata.ObjectID = {};
 
@@ -48,4 +49,4 @@ Kata.include('katajs/core/Math.uuid.js');
         return 'ffffffff-ffff-ffff-ffff-ffffffffffff';
     };
 
-})();
+}, 'katajs/core/ObjectID.js');

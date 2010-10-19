@@ -114,7 +114,9 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                             true);
     
 };
-(function(){
+Kata.require([
+    'katajs/oh/GraphicsSimulation.js'
+], function(){
     function RenderTarget(graphicsSystem, canvas,textureCanvas) {
         this.mGraphicsSystem=graphicsSystem;
         this.mCanvas=canvas;
@@ -633,7 +635,6 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
 
 
     // Register as a GraphicsSimulation if possible.
-    Kata.defer(function() {
-                   Kata.GraphicsSimulation.registerDriver("GLGE", GLGEGraphics);
-               });
- })();
+    Kata.GraphicsSimulation.registerDriver("GLGE", GLGEGraphics);
+}, "katajs/gfx/glgegfx.js");
+

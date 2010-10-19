@@ -30,7 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function() {
+Kata.require([
+], function() {
 
      /** Constructs a dispatcher for messages. The caller provides a
       *  dictionary from Types to handler functions.
@@ -66,4 +67,4 @@
          return true;
      };
 
-})();
+}, 'katajs/core/MessageDispatcher.js');

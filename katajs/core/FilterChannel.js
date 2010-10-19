@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/Channel.js");
 
-(function() {
+Kata.require([
+    'katajs/core/Channel.js'
+], function() {
      /** A FilterChannel wraps another Channel and gives a callback a
       * chance to filter the message before passing it on to
       * listeners.
@@ -66,4 +67,4 @@ Kata.include("katajs/core/Channel.js");
          this.callListeners(msg);
      };
 
-})();
+}, 'katajs/core/FilterChannel.js');

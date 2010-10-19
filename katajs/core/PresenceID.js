@@ -30,10 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include('katajs/core/SpaceID.js');
-Kata.include('katajs/core/ObjectID.js');
 
-(function() {
+Kata.require([
+    'katajs/core/SpaceID.js',
+    'katajs/core/ObjectID.js'
+], function() {
 
     /** PresenceID is just a combination of SpaceID and ObjectID, giving a fully
      * qualified name for an object in a space.
@@ -78,4 +79,4 @@ Kata.include('katajs/core/ObjectID.js');
         return new Kata.PresenceID(Kata.SpaceID.any(), Kata.ObjectID.any());
     };
 
-})();
+}, 'katajs/core/PresenceID.js');

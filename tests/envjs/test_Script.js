@@ -1,7 +1,8 @@
 
-Kata.include("katajs/oh/Script.js");
 
-(function(){
+Kata.require([
+    'katajs/oh/Script.js'
+], function() {
     if (typeof(Example) === "undefined") {
         Example = {};
     }
@@ -46,4 +47,4 @@ Kata.include("katajs/oh/Script.js");
         }
     };
     Example.TestScript.instance = 0;
-})();
+}, 'tests/envjs/test_Script.js');

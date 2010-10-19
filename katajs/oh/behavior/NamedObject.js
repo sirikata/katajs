@@ -31,7 +31,8 @@
  */
 
 
-(function() {
+Kata.require([
+], function() {
 
     if (typeof(Kata.Behavior) == "undefined")
         Kata.Behavior = {};
@@ -147,4 +148,4 @@
          this._handleReply(reqinfo, null);
      };
 
-})();
+}, 'katajs/oh/behavior/NamedObject.js');
