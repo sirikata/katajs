@@ -133,7 +133,11 @@ Kata.include("katajs/core/MessageDispatcher.js");
      };
 
      Kata.HostedObject.prototype.proxEvent = function(space, observed, entered, properties) {
-         var msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered, properties.loc, properties.visual);
+         var msg;
+         if (typeof(properties) !== "undefined")
+             msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered, properties.loc, properties.visual);
+         else
+             msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered);
          this.sendScriptMessage(msg);
      };
 

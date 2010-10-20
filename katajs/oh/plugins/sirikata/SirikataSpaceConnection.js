@@ -324,7 +324,6 @@ Kata.defer(function() {
     };
 
     Kata.SirikataSpaceConnection.prototype._handleProximitySubstreamRead = function(objid, stream, data) {
-        Kata.warn("Proximity data for " + objid + " of size " + data.length);
         var objinfo = this.mConnectedObjects[objid];
         objinfo.proxdata = objinfo.proxdata.concat(data);
 
@@ -333,9 +332,51 @@ Kata.defer(function() {
             if (next_prox_msg === null) break;
 
             // Handle the message
-            var prox_msg = new Sirikata.Protocol.Prox.ProximityUpdate();
+            var prox_msg = new Sirikata.Protocol.Prox.ProximityResults();
             prox_msg.ParseFromStream(new PROTO.ByteArrayStream(next_prox_msg));
             // FIXME add actual use of proximity events
+            for(var i = 0; i < prox_msg.update.length; i++)
+                this._handleProximityUpdate(objid, prox_msg.t, prox_msg.update[i]);
+        }
+    };
+
+    Kata.SirikataSpaceConnection.prototype._handleProximityUpdate = function(objid, t, update) {
+        for(var add = 0; add < update.addition.length; add++) {
+            var observed = update.addition[add].object;
+            // Decode location, orientation, bounds, mesh
+            var properties = {};
+
+            // FIXME what is going on with this weird Location "class"?
+            properties.loc = Kata.LocationIdentity();
+
+            properties.loc.pos = update.addition[add].location.position;
+            properties.loc.vel = update.addition[add].location.velocity;
+            properties.loc.posTime = update.addition[add].location.t;
+
+            properties.loc.orient = update.addition[add].orientation.position;
+            // FIXME Location wants axis/vel instead of quaternion velocity
+            //properties.loc.(rotaxis,rotvel) = update.addition[add].orientation.velocity;
+            properties.loc.orientTime = update.addition[add].orientation.t;
+
+            properties.bounds = update.addition[add].bounds;
+
+            if (update.addition[add].HasField("mesh")) {
+                // FIXME: This is only an object with multiple
+                // properties (instead of just the mesh URL) because
+                // curretnly GraphicsScript relies on it being this
+                // way.
+                properties.visual = {
+                    anim : "",
+                    mesh : update.addition[add].mesh,
+                    up_axis : [1, 0, 0]
+                };
+            }
+            this.mParent.proxEvent(this.mSpaceURL, objid, observed, true, properties);
+        }
+
+        for(var rem = 0; rem < update.removal.length; rem++) {
+            var observed = update.removal[rem].object;
+            this.mParent.proxEvent(this.mSpaceURL, objid, observed, false);
         }
     };
 
