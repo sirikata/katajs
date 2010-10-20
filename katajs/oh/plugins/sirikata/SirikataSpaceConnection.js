@@ -44,6 +44,7 @@ Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
 
 Kata.include("katajs/oh/plugins/sirikata/impl/Prox.pbj.js");
 Kata.include("katajs/oh/plugins/sirikata/impl/Loc.pbj.js");
+Kata.include("katajs/oh/plugins/sirikata/impl/Frame.pbj.js");
 
 Kata.include("katajs/oh/sst/SSTImpl.js");
 
@@ -277,7 +278,6 @@ Kata.defer(function() {
                     new Kata.SST.EndPoint(objid, 0), odpRouter, odpDispatcher
                 );
 
-                this.mConnectedObjects[objid].locdata = [];
                 this.mConnectedObjects[objid].proxdata = [];
 
                 // Try to connect the initial stream
@@ -369,7 +369,6 @@ Kata.defer(function() {
             return;
         }
 
-        Kata.warn("Location update request: " + objid + " " + loc + " " + visual);
         spacestream.datagram(
             this._serializeMessage(container).getArray(),
             this.Ports.Location, this.Ports.Location
@@ -389,9 +388,42 @@ Kata.defer(function() {
     };
 
     Kata.SirikataSpaceConnection.prototype._handleLocationSubstreamRead = function(objid, stream, data) {
-        Kata.warn("Location data for " + objid + " of size " + data.length);
-        var objinfo = this.mConnectedObjects[objid];
-        objinfo.locdata = objinfo.locdata.concat(data);
+        // Currently we just assume each update is a standalone Frame
+
+        // Parse the surrounding frame
+        var framed_msg = new Sirikata.Protocol.Frame();
+        framed_msg.ParseFromStream(new PROTO.ByteArrayStream(data));
+
+        // Parse the internal loc update
+        var loc_update_msg = new Sirikata.Protocol.Loc.BulkLocationUpdate();
+        loc_update_msg.ParseFromStream(new PROTO.ByteArrayStream(framed_msg.payload));
+
+        for(var idx = 0; idx < loc_update_msg.update.length; idx++) {
+            var update = loc_update_msg.update[idx];
+            var from = update.object;
+
+            var loc = {};
+            if (update.location) {
+                loc.t = update.location.t;
+                loc.pos = update.location.position;
+                loc.vel = update.location.velocity;
+            }
+            // FIXME differing time values? Maybe use Location class to handle?
+            /*
+            if (update.orientation) {
+                loc.t = update.orientation.t;
+                loc.pos = update.orientation.position;
+                //loc.(rotaxis/angvel) = update.orientation.velocity;
+            }
+             */
+            // FIXME bounds
+            var visual;
+            if (update.mesh)
+                visual = update.mesh;
+
+            this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+        }
+
     };
 
     Kata.SirikataSpaceConnection.prototype._handleProximitySubstreamRead = function(objid, stream, data) {
