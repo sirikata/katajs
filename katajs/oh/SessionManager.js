@@ -98,6 +98,19 @@ Kata.include("katajs/core/URL.js");
          space_conn.connectObject(ho.getID(), auth, req.visual);
      };
 
+     /** Callback from SpaceConnection which allows us to alias an ID
+      *  while a connection setup is in progress to safely handle
+      *  events such as unreliable messages.
+      */
+     Kata.SessionManager.prototype.aliasIDs = function(id, presence_id) {
+         var obj = this.mObjects[id];
+         if (!obj) {
+             Kata.warn("Got ID aliasing for unknown object: " + id);
+             return;
+         }
+         this.mObjects[presence_id.object] = obj;
+     };
+
      /** Indicate a connection response to the SessionManager.  Should
       *  only be called by SpaceConnections.
       *  @param {string} id

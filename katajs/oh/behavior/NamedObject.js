@@ -134,6 +134,7 @@ Kata.include("externals/protojs/protobuf.js");
             reqinfo.remote.name = null;
         else
             reqinfo.remote.name = PROTO.decodeUTF8(name);
+
         if (this.mCB)
             this.mCB(reqinfo.remote, true);
         clearTimeout(reqinfo.timer);

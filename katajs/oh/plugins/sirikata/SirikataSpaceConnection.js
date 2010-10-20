@@ -43,6 +43,7 @@ Kata.include("katajs/oh/plugins/sirikata/impl/Session.pbj.js");
 Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
 
 Kata.include("katajs/oh/plugins/sirikata/impl/Prox.pbj.js");
+Kata.include("katajs/oh/plugins/sirikata/impl/Loc.pbj.js");
 
 Kata.include("katajs/oh/sst/SSTImpl.js");
 
@@ -253,9 +254,6 @@ Kata.defer(function() {
                 var id = this._getLocalID(objid);
                 Kata.warn("Successfully connected " + id);
 
-                var connect_info = this.mOutstandingConnectRequests[objid];
-                delete this.mOutstandingConnectRequests[objid];
-
                 // Send ack
                 var connect_ack_msg = new Sirikata.Protocol.Session.ConnectAck();
                 var ack_msg = new Sirikata.Protocol.Session.Container();
@@ -289,11 +287,9 @@ Kata.defer(function() {
                     Kata.bind(this._spaceSSTConnectCallback, this, objid)
                 );
 
-                // Indicate response to parent SessionManager
-                this.mParent.connectionResponse(
-                    id, true,
-                    {space : this.mSpaceURL, object : objid},
-                    connect_info.loc_bounds, connect_info.visual
+                // Allow the SessionManager to alias the ID until the swap to the Space's ID can be safely made
+                this.mParent.aliasIDs(
+                    id, {space : this.mSpaceURL, object : objid}
                 );
             }
             else if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Redirect) {
@@ -326,15 +322,69 @@ Kata.defer(function() {
         // And setup listeners for loc and prox
         stream.listenSubstream(this.Ports.Location, Kata.bind(this._handleLocationSubstream, this, objid));
         stream.listenSubstream(this.Ports.Proximity, Kata.bind(this._handleProximitySubstream, this, objid));
+
+        // With the successful connection + sst straem, we can indicate success to the parent SessionManager
+        var connect_info = this.mOutstandingConnectRequests[objid];
+        delete this.mOutstandingConnectRequests[objid];
+        var id = this._getLocalID(objid);
+        this.mParent.connectionResponse(
+            id, true,
+            {space : this.mSpaceURL, object : objid},
+            connect_info.loc_bounds, connect_info.visual
+        );
+    };
+
+    Kata.SirikataSpaceConnection.prototype.locUpdateRequest = function(objid, loc, visual) {
+        // Generate and send an update to Loc
+        var update_request = new Sirikata.Protocol.Loc.LocationUpdateRequest();
+
+        if (loc.pos) {
+            var pos = new Sirikata.Protocol.TimedMotionVector();
+            pos.t = 0;
+            pos.position = loc.pos;
+            pos.velocity = [0, 0, 0]; // FIXME velocity from loc
+            update_request.location = pos;
+        }
+
+        if (loc.orient) {
+            var orient = new Sirikata.Protocol.TimedMotionQuaternion();
+            orient.t = 0;
+            orient.position = loc.orient;
+            orient.velocity = [0, 0, 0, 1]; // FIXME angular velocity
+            update_request.orientation = orient;
+        }
+
+        if (loc.bounds)
+            update_request.bounds = loc.bounds;
+
+        if (loc.visual)
+            update_request.mesh = visual;
+
+        var container = new Sirikata.Protocol.Loc.Container();
+        container.update_request = update_request;
+
+        var spacestream = this.mConnectedObjects[objid].spaceStream;
+        if (!spacestream) {
+            Kata.warn("Tried to send loc update before stream to server was ready.");
+            return;
+        }
+
+        Kata.warn("Location update request: " + objid + " " + loc + " " + visual);
+        spacestream.datagram(
+            this._serializeMessage(container).getArray(),
+            this.Ports.Location, this.Ports.Location
+        );
     };
 
     Kata.SirikataSpaceConnection.prototype._handleLocationSubstream = function(objid, error, stream) {
-        Kata.warn("Location substream (error " + error + ")");
+        if (error != 0)
+            Kata.warn("Location substream (error " + error + ")");
         stream.registerReadCallback(Kata.bind(this._handleLocationSubstreamRead, this, objid, stream));
     };
 
     Kata.SirikataSpaceConnection.prototype._handleProximitySubstream = function(objid, error, stream) {
-        Kata.warn("Proximity substream (error " + error + ")");
+        if (error != 0)
+            Kata.warn("Proximity substream (error " + error + ")");
         stream.registerReadCallback(Kata.bind(this._handleProximitySubstreamRead, this, objid, stream));
     };
 

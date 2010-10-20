@@ -1386,6 +1386,10 @@ Kata.SST.Stream.prototype.finalize=function() {
     this.close(true);
 };
 
+/** Simple wrapper to send a datagram on this stream's underlying connection. */
+Kata.SST.Stream.prototype.datagram = function(data, local_port, remote_port,cb) {
+    return this.mConnection.datagram(data, local_port, remote_port, cb);
+};
 
   /**
     Start listening for child streams on the specified port. A remote stream
