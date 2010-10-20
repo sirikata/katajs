@@ -182,6 +182,11 @@ Kata.defer(function() {
         );
     };
 
+    Kata.SirikataSpaceConnection.prototype.sendODPMessage = function(src, src_port, dest, dest_port, payload) {
+        // ODP interface will likely change, underlying _sendODPMessage probably won't
+        this._sendODPMessage(src, src_port, dest, dest_port, payload);
+    };
+
     Kata.SirikataSpaceConnection.prototype._sendODPMessage = function(src, src_port, dest, dest_port, payload) {
         var odp_msg = new Sirikata.Protocol.Object.ObjectMessage();
         odp_msg.source_object = src;
@@ -189,7 +194,14 @@ Kata.defer(function() {
         odp_msg.dest_object = dest;
         odp_msg.dest_port = dest_port;
         odp_msg.unique = PROTO.I64.fromNumber(0);
-        odp_msg.payload = payload;
+        if (typeof(payload) !== "undefined") {
+            if (typeof(payload.length) === "undefined" || payload.length > 0) {
+                if (typeof(payload) == "string")
+                    odp_msg.payload = PROTO.encodeUTF8(payload);
+                else
+                    odp_msg.payload = payload;
+            }
+        }
 
         this._sendPreparedODPMessage(odp_msg);
     };
@@ -213,8 +225,17 @@ Kata.defer(function() {
         }
         else {
             var dest_obj_data = this.mConnectedObjects[odp_msg.dest_object];
-            if (dest_obj_data)
-                dest_obj_data.odpDispatcher.dispatchMessage(odp_msg);
+            if (dest_obj_data) {
+                var sst_handled = dest_obj_data.odpDispatcher.dispatchMessage(odp_msg);
+                if (!sst_handled) {
+                    this.mParent.receiveODPMessage(
+                        this.mSpaceURL,
+                        odp_msg.source_object, odp_msg.source_port,
+                        odp_msg.dest_object, odp_msg.dest_port,
+                        odp_msg.payload
+                    );
+                }
+            }
         }
     };
 
