@@ -70,14 +70,9 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mRenderTargets={};
     this.mUnsetParents={};
     this.mObjects={};
-
     function render(){
         thus.mCurTime=new Date();
-        if(typeof(GlobalLoadDone)=="function") {
-            GlobalLoadDone();//this should be done with message passing
-            GlobalLoadDone=null;
-        }
-        var now = parseInt(new Date().getTime());
+        var now = parseInt(thus.mCurTime.getTime());
         frameratebuffer = Math.round(((frameratebuffer * 9) + 1000 / (now - lasttime)) / 10);
         //mouselook();
         //checkkeys();
@@ -109,9 +104,20 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     document.addEventListener('keyup',
                             function(e){thus._keyUp(e);},
                             true);
-    canvas.addEventListener('wheel',
-                            function(e){thus._wheel(e);},
+    canvas.addEventListener('mousewheel',                           /// Chrome
+                            function(e){thus._scrollWheel(e);},
                             true);
+    canvas.addEventListener('DOMMouseScroll',                       /// FF
+                            function(e){thus._scrollWheel(e);},
+                            true);
+    canvas.addEventListener('contextmenu', 
+    function(e){
+        if (e.preventDefault) 
+            e.preventDefault();
+        else 
+            e.returnValue = false;
+        return false;
+    }, true);
     
 };
 Kata.require([
@@ -171,7 +177,7 @@ Kata.require([
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
-        clda.setDocument(this.mMeshURI);
+        clda.setDocument(this.mMeshURI, null, GlobalLoadDone);
         clda.setScaleX(1.0);
         clda.setScaleY(1.0);
         clda.setScaleZ(1.0);
@@ -328,22 +334,28 @@ Kata.require([
     
 
     GLGEGraphics.prototype._mouseDown = function(e){
-        if (e.button<2) this._buttonState="down";
+        this._buttonState |= Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
         var msg = {
             msg: "mousedown",
             event: ev
         };
+        if (ev.which==2) {
+            document.body.style.cursor="crosshair";
+        }
         this._inputCb(msg);
     };
     
     GLGEGraphics.prototype._mouseUp = function(e){
-        if (e.button<2) this._buttonState="up";
+        this._buttonState &= 7 - Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
         var msg = {
             msg: "mouseup",
             event: ev
-    };
+        };
+        if (ev.which == 2) {
+            document.body.style.cursor = "default";
+        }
         this._inputCb(msg);
     };
     
@@ -352,7 +364,7 @@ Kata.require([
      * otherwise we flood with messages.  Note right button is controlled by OS so we ignore
      */
     GLGEGraphics.prototype._mouseMove = function(e){
-        if (this._buttonState == "down") {
+        if (this._buttonState) {
             var ev = this._extractMouseEventInfo(e);
             var msg = {
                 msg: "mousemove",
@@ -363,6 +375,7 @@ Kata.require([
     };
 
     GLGEGraphics.prototype._keyDown = function(e){
+        if (Kata.suppressCanvasKeyInput) return;
         var ev = {};
         ev.type = e.type;
         ev.keyCode = e.keyCode;
@@ -391,15 +404,23 @@ Kata.require([
     };
 
     GLGEGraphics.prototype._scrollWheel = function(e){
-        /// FIXME: figure out what event attributes to copy
+        var ev = {};
+        ev.type = e.type;
+        ev.shiftKey = e.shiftKey;
+        ev.altKey = e.altKey;
+        ev.ctrlKey = e.ctrlKey;
+        if (e.wheelDelta != null) {         /// Chrome
+            ev.dy = e.wheelDelta;
+        }
+        else {                              /// Firefox
+            ev.dy = e.detail * -40;         /// -3 for Firefox == 120 for Chrome
+        }
         var msg = {
             msg: "wheel",
-            event: e
+            event: ev
         };
         this._inputCb(msg);
     };
-    
-
 
     GLGEGraphics.prototype.methodTable["Create"]=function(msg) {//this function creates a scene graph node
         var s = msg.spaceid;

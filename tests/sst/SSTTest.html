@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Really simple SST stream test</title>
+<script type="text/javascript" src="../../externals/protojs/protobuf.js"></script>
+<script type="text/javascript" src="../../externals/protojs/pbj.js"></script>
+<script type="text/javascript" src="../../katajs/core/Core.js"></script>
+<script type="text/javascript" src="SSTTest.js"></script>
+<script>
+var sst = new SSTTest();
+sst.createTestObjects(new Kata.SST.EndPoint("aaaa0000-0000-0000-0000-000000000000", 1234), new Kata.SST.EndPoint("bbbb0000-0000-0000-0000-000000000000", 2468));
+setInterval(Kata.SST.serviceConnections, 100);
+</script>
+</head>
+<body>
+</body>
+</html>

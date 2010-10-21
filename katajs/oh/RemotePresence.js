@@ -115,7 +115,7 @@ Kata.require([
 
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.position = function(time) {
-         if (time===undefined) console.log("inaccurate read of orientation");
+         if (time===undefined) console.log("inaccurate read of position");
          return this.mLocation.pos.concat();//FIXME drh do interpolation?
      };
      /** Get the current estimate of this object's velocity. */

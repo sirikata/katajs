@@ -1,5 +1,4 @@
-#!/opt/local/bin/python2.6
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # A simple wrapper for running lighttpd on your katajs.git
 # directory. Generates an appropriate configuration and runs lighttpd
@@ -16,13 +15,15 @@ server.modules              = (
             "mod_access",
             "mod_alias",
             "mod_accesslog",
-            "mod_compress"
+            "mod_compress",
+            "mod_dirlisting"
 )
 server.document-root       = "%(pwd)s/"
 server.errorlog            = "%(pwd)s/lighttpd.error.log"
 index-file.names           = ( "index.php", "index.html",
                                "index.htm", "default.htm",
                                "index.lighttpd.html" )
+dir-listing.activate       = "enable"
 accesslog.filename         = "%(pwd)s/lighttpd.access.log"
 url.access-deny            = ( "~", ".inc" )
 server.port               = 8888
