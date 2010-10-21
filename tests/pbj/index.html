@@ -63,15 +63,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       // To be sure things are working requires checking the output of
       // the stream_echo server to ensure it is outputting the
       // expected set of fields.
-
-      Kata.include("katajs/network/TCPSST.js");
-      Kata.include("externals/protojs/protobuf.js");
-      Kata.include("externals/protojs/pbj.js");
-      Kata.include("tests/pbj/Test.pbj.js");
-
-      var start_test = function() {
-        Kata.resolveDeferredHeaders();
-
+    var start_test = function() {
+      Kata.require(["katajs/network/TCPSST.js",
+                    ["externals/protojs/protobuf.js","externals/protojs/pbj.js","tests/pbj/Test.pbj.js"]
+      ], function() {
         var tcpsst_sock = new Kata.TCPSST("localhost", "9998");
         tcpsst_substream = tcpsst_sock.clone();
         var startPing = function() {
@@ -118,8 +113,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           }
         );
         startPing();
-      }
-      window.onload = start_test;
+      });
+    };
+    window.onload = start_test;
     </script>
   </head>
 

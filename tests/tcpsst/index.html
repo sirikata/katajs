@@ -55,11 +55,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       // TCPSST connection between JS on a WebSocket and a C++
       // stream_echo server works.
 
-      Kata.include("katajs/network/TCPSST.js");
-
-      var start_test = function() {
-        Kata.resolveDeferredHeaders();
-
+    var start_test = function() {
+      Kata.require(["katajs/network/TCPSST.js"
+      ], function() {
         var tcpsst_sock = new Kata.TCPSST("localhost", "9999");
         tcpsst_substream = tcpsst_sock.clone();
         tcpsst_substream.registerListener(
@@ -76,8 +74,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           },
           1000
         );
-      }
-      window.onload = start_test;
+      });
+    };
+    window.onload = start_test;
     </script>
   </head>
 
