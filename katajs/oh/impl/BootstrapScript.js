@@ -35,7 +35,8 @@ Kata.require([
     'katajs/core/FilterChannel.js',
     'katajs/core/MessageDispatcher.js',
     'katajs/oh/Presence.js',
-    'katajs/core/URL.js'
+    'katajs/core/URL.js',
+    'katajs/oh/impl/ScriptProtocol.js'
 ], function() {
      /** Bootstraps an object's script, enabling it to communicate
       *  with the HostedObject it was instantiated for.  This also
@@ -68,22 +69,41 @@ Kata.require([
          // Create a filtered channel, so we get first crack at any messages
          var filtered_channel = new Kata.FilterChannel(channel, Kata.bind(this.receiveMessage, this));
 
+         this.mPendingScriptLoad = [];
+         this.mScriptLoading = true;
+
+         var thus = this;
+
          Kata.require(
              [args.realScript],
              function() {
-                 // Try to find the class
-                 var clsTree = args.realClass.split(".");
-                 var cls = self;
-                 for (var i = 0; cls && i < clsTree.length; i++) {
-                     cls = cls[clsTree[i]];
-                 }
-                 // And finally, in case the script constructor does anything synchronously, make the script creation the final step
-                 this.mScript = new cls(filtered_channel, args.realArgs);
+                 thus._onFinishedLoading(filtered_channel, args);
              });
+
      };
 
+     Kata.BootstrapScript.prototype._onFinishedLoading = function(filtered_channel, args) {
+         this.mScriptLoading = false;
+         // Try to find the class
+         var clsTree = args.realClass.split(".");
+         var cls = self;
+         for (var i = 0; cls && i < clsTree.length; i++) {
+             cls = cls[clsTree[i]];
+         }
+         // And finally, in case the script constructor does anything synchronously, make the script creation the final step
+         this.mScript = new cls(filtered_channel, args.realArgs);
+         for (var i = 0; i < this.mPendingScriptLoad.length; i++) {
+             this.receiveMessage(this.mPendingScriptLoad[i][0], this.mPendingScriptLoad[i][1]);
+         }
+     }
+
      Kata.BootstrapScript.prototype.receiveMessage = function(channel, msg) {
-         return this.mMessageDispatcher.dispatch(channel, msg);
+         if (this.mScriptLoading) {
+             this.mPendingScriptLoad.push([channel, msg]);
+             return true; // FIXME: How do we know what messages the script would have supported?
+         } else {
+             return this.mMessageDispatcher.dispatch(channel, msg);
+         }
      };
 
      Kata.BootstrapScript.prototype._handleConnected = function(channel, msg) {

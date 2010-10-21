@@ -30,6 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
 var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mCurTime=new Date();
     this.callback=callbackFunction;
@@ -126,8 +128,10 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     }, true);
     
 };
+
 Kata.require([
-    'katajs/oh/GraphicsSimulation.js'
+    'katajs/oh/GraphicsSimulation.js',
+    ['katajs/gfx/WebGLCompat.js', 'externals/GLGE/glge_math.js', 'externals/GLGE/glge.js', 'externals/GLGE/glge_collada.js']
 ], function(){
     function RenderTarget(graphicsSystem, canvas,textureCanvas) {
         this.mGraphicsSystem=graphicsSystem;
@@ -583,7 +587,7 @@ Kata.require([
             if (msg.up_axis == "Z_UP") {
                 this.moveTo(vwObject, {
                     // FIXME: needs to be permanent, so future setOrientations will be relative to this
-                    orient: [-0.7071067805519557, 0, 0, 0.7071067818211394],
+                    orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
                 });
             }
             vwObject.update(this);

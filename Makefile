@@ -11,18 +11,24 @@ THESE_PBJJS=$(patsubst $(INPUTDIR)/%,$(OUTPUTDIR)/%.js,$(THESE_PBJ))
 ALL_PBJJS += $(THESE_PBJJS)
 
 ### Closure Vars
-###########CLOSURESRCS=externals/protojs/protobuf.js externals/protojs/pbj.js
-CLOSURESRCS=katajs/core/Core.js
+CLOSURESRCS=katajs/core/Core.js \
+	externals/protojs/protobuf.js externals/protojs/pbj.js \
+	externals/GLGE/glge_math.js externals/GLGE/glge.js externals/GLGE/glge_collada.js \
+	katajs/gfx/WebGLCompat.js katajs/gfx/glgegfx.js katajs/gfx/TextGraphics.js
 CLOSURESRCS+=$(shell find katajs/core katajs/oh katajs/network katajs/space -name '*.js' -and -not -name 'Core.js' -and -not -name 'GenericWorker.js' )
 
 CLOSUREOUT=katajs.compiled.js
 
 CLOSURE=java -jar externals/GLGE/closure/compiler.jar
-CLOSUREARGS=$(patsubst %,--js %,$(CLOSURESRCS))
+CLOSUREARGS=--js $$before
+CLOSUREARGS+=$(patsubst %,--js %,$(CLOSURESRCS))
+CLOSUREARGS+=--js $$after
 CLOSUREARGS+=--externs contrib/closure_preinclude.js
 CLOSUREARGS+=--formatting pretty_print
 CLOSUREARGS+=--compilation_level SIMPLE_OPTIMIZATIONS
 CLOSUREARGS+= --js_output_file $(CLOSUREOUT)
+
+COMMA=,
 
 #CLOSURE=python makeclosure.py
 #CLOSUREARGS=$(CLOSURESRCS)
@@ -54,6 +60,10 @@ $(OUTPUTDIR)/%.pbj.js: $(INPUTDIR)/%.pbj
 closure : $(CLOSUREOUT)
 
 $(CLOSUREOUT) : $(CLOSURESRCS)
+	before=`mktemp` && \
+	after=`mktemp` && \
+	echo "Kata={closureIncluded: {'katajs/core/Core.js':true $(patsubst %,$(COMMA) '%':true,$(CLOSURESRCS))}};" > $$before && \
+	echo "(function(){for(var i in Kata.closureIncluded){Kata.setIncluded(i);}})();" > $$after && \
 	$(CLOSURE) $(CLOSUREARGS) || \
 	rm -f "$@"
 

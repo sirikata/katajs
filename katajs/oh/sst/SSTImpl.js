@@ -30,12 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/Deque.js");
-
-Kata.include("katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
-
-(function() {
+Kata.require([
+    'katajs/core/Deque.js',
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js']
+], function() {
 
 var KataDequePushBack = function(x,y){x.push_back(y);};
 var KataDequePushFront = function(x,y){return x.push_front(y);};
@@ -1973,4 +1972,4 @@ Kata.SST.Stream.prototype.sendReplyPacket=function(data, remoteLSID) {
     this.mConnection.sendData(  buffer, false/*not an ack packet!*/);
   };
 
-})();
+}, 'katajs/oh/sst/SSTImpl.js');

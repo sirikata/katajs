@@ -51,75 +51,138 @@ if (typeof(JSON) == "undefined") {JSON = {};}
   tags pointing to Core.js. */
 Kata.scriptRoot="";
 (function() {
-    var includedscripts = {"katajs/core/Core.js":true};
+    var includedscripts = Kata.closureIncluded || {"katajs/core/Core.js":true};
     var loadedDeps = {"katajs/core/Core.js":true};
 
-     var deferred = {};
+    var deferred = {};
+    var depsPending = {};
+    Kata._currentScript = [];
 
-     Kata.require = function(deps, body, provide) {
-         if (provide in loadedDeps) {
-             Kata.warn("JS file "+provide+" included twice.");
-             return;
-         }
-         Kata.log("Requiring: provide="+provide+"; deps="+deps);
-         var i;
-         for (i = 0; i < deps.length; i++) {
-             Kata.include(deps[i]);
-         }
-         var unfinishedDeps = {};
-         var remainingDeps = 0;
-         for (i = 0;i < deps.length; i++) {
-             if (!loadedDeps[deps[i]]) {
-                 unfinishedDeps[deps[i]] = true;
-                 remainingDeps++;
-             }
-         }
-         function runDep(finished) {
-             if (unfinishedDeps[finished]) {
-                 delete unfinishedDeps[finished];
-                 remainingDeps--;
-                 Kata.log("Finished "+finished+" for "+provide, remainingDeps);
-                 if (remainingDeps == 0) {
-                     Kata.log("*** running "+provide);
-                     body();
-                     if (provide)
-                         Kata.alreadyIncluded(provide);
-                 }
-             }
-         }
-         if (remainingDeps) {
-             for (i in unfinishedDeps) {
-                 deferred[i] = deferred[i] || [];
-                 deferred[i].push(runDep);
-             }
-         } else {
-             Kata.log("!!! run0dep "+provide);
-             body();
-             if (provide)
-                 Kata.alreadyIncluded(provide);
-         }
-     };
+    Kata.getCurrentScript = function() {
+        return Kata._currentScript[Kata._currentScript.length - 1];
+    };
 
-     Kata.defer = function (f){if (f) Kata.require([], f, null);};
+    function runNewCurrentScript (scriptfile, body) {
+        Kata._currentScript.push(scriptfile);
+        try {
+            if (body) {
+                body();
+            }
+        } finally {
+            if (Kata.getCurrentScript() != scriptfile) Kata.warn('Error: ' +scriptfile+ ' != '+Kata.getCurrentScript());
+            if (scriptfile) {
+                Kata.setIncluded(scriptfile);
+            }
+            Kata._currentScript.pop();
+        }
+    }
 
-     Kata.alreadyIncluded = function(provide) {
-         if (!provide) {
-             return;
-         }
-         if (loadedDeps[provide]) {
-             Kata.warn("JS file "+provide+" included twice.");
-         }
-         if (deferred[provide]) {
-             var deferList = deferred[provide];
-             delete deferred[provide];
-             for (var i = 0; i < deferList.length; i++) {
-                 deferList[i](provide);
-             }
-             loadedDeps[provide] = true;
-         }
-     };
+    function orderedRequire(depList) {
+        function runRequire(i) {
+            return function() {
+                delete depsPending[depList[i]];
+                Kata.include(depList[i]);
+            };
+        }
+        for (var which = 0; which < depList.length; which++) {
+            while(includedscripts[depList[which]])
+                depList.splice(which, 1);
+        }
+        for (var which = 0; which < depList.length - 1; which++) {
+            deferred[depList[which]] = deferred[depList[which]] || [];
+            deferred[depList[which]].push(runRequire(which + 1));
+            depsPending[depList[which + 1]] = true;
+        }
+        if (depList.length) {
+            if (!depsPending[depList[0]]) {
+                Kata.include(depList[0]);
+            }
+        }
+    }
 
-     if (typeof(importScripts) != "undefined") {
+    Kata.require = function(deps, body, provide) {
+        // FIXME: What to do if provide argument is typo'ed?
+        if (provide && provide in loadedDeps) {
+            Kata.warn("JS file "+provide+" included twice.");
+            return;
+        }
+        if (depsPending[provide]) {
+            return;
+        }
+        //Kata.log("Requiring: provide="+provide+"; deps="+deps);
+        var i;
+        var unfinishedDeps = {};
+        var remainingDeps = 0;
+        for (i = 0;i < deps.length; i++) {
+            if (deps[i].push) {
+                for (var j = 0; j < deps[i].length; j++) {
+                    if (!loadedDeps[deps[i][j]]) {
+                        unfinishedDeps[deps[i][j]] = true;
+                        remainingDeps++;
+                    }
+                }
+            } else {
+                if (!loadedDeps[deps[i]]) {
+                    unfinishedDeps[deps[i]] = true;
+                    remainingDeps++;
+                }
+            }
+        }
+        function runDep(finished) {
+            if (unfinishedDeps[finished]) {
+                delete unfinishedDeps[finished];
+                remainingDeps--;
+                //Kata.log("Finished "+finished+" for "+provide, remainingDeps);
+                if (remainingDeps == 0) {
+                    if (provide) {
+                        delete depsPending[provide];
+                    }
+                    //Kata.log("*** running "+provide);
+                    runNewCurrentScript(provide, body);
+                }
+            }
+        }
+        if (remainingDeps) {
+            if (provide) {
+                depsPending[provide] = true;
+            }
+            for (i in unfinishedDeps) {
+                deferred[i] = deferred[i] || [];
+                deferred[i].push(runDep);
+            }
+            for (i = 0;i < deps.length; i++) {
+                if (deps[i].push) {
+                    orderedRequire(deps[i]);
+                } else if (!depsPending[deps[i]]) {
+                    Kata.include(deps[i]);
+                }
+            }
+        } else {
+            body();
+            Kata.setIncluded(provide);
+        }
+    };
+
+    Kata.defer = function (f){if (f) Kata.require([], f, null);};
+
+    Kata.setIncluded = function(provide) {
+        if (!provide) {
+            return;
+        }
+        if (depsPending[provide]) {
+            return;
+        }
+        if (deferred[provide]) {
+            var deferList = deferred[provide];
+            delete deferred[provide];
+            for (var i = 0; i < deferList.length; i++) {
+                deferList[i](provide);
+            }
+        }
+        loadedDeps[provide] = true;
+    };
+
+    if (typeof(importScripts) != "undefined") {
         /** Use Kata.include to fetch dependent files. Ignores duplicates.
          * @param {string} scriptfile  A script to include only once.
          *
@@ -130,8 +193,10 @@ Kata.scriptRoot="";
                 return;
             }
             includedscripts[scriptfile] = true;
-            importScripts(Kata.scriptRoot+scriptfile);
-            Kata.alreadyIncluded(scriptfile);
+            runNewCurrentScript(scriptfile, 
+                function() {
+                    importScripts(Kata.scriptRoot+scriptfile);
+                });
         };
         Kata.evalInclude = Kata.include;
     } else if (typeof(document) != "undefined" && document.write) {
@@ -161,9 +226,19 @@ Kata.scriptRoot="";
                 return;
             }
             includedscripts[scriptfile] = true;
-            var scriptTag = document.createElement("script");
+            var scriptTag, textNode;
+
+            scriptTag = document.createElement("script");
             scriptTag.src = Kata.scriptRoot+scriptfile;
             scriptTag.type = "text/javascript";
+
+            var scriptContent = function(){
+                if (Kata.getCurrentScript()) console.log('Error: '+scriptfile+' != '+Kata.getCurrentScript());
+                //Kata.log('===END LOAD+++ '+scriptfile);
+                Kata.setIncluded(scriptfile);
+                Kata._currentScript.pop();
+            };
+            scriptTag.addEventListener("load", scriptContent, true);
             headTag.appendChild(scriptTag);
         };
         Kata.evalInclude = Kata.include;
