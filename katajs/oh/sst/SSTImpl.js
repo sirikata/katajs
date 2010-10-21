@@ -33,8 +33,8 @@
 Kata.require([
     'katajs/core/Deque.js',
 
-    'katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js',
-    'katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js'
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js']
 ], function() {
 
 var KataDequePushBack = function(x,y){x.push_back(y);};

@@ -33,9 +33,9 @@
 Kata.require([
     'katajs/oh/plugins/sirikata/Frame.js',
     'katajs/oh/sst/SSTImpl.js',
-    'katajs/oh/plugins/sirikata/impl/Prox.pbj.js',
-    'katajs/oh/plugins/sirikata/impl/Loc.pbj.js',
-    'katajs/oh/plugins/sirikata/impl/Frame.pbj.js'
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Prox.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Loc.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Frame.pbj.js']
 ], function() {
 
     // FIXME having this sucks, we need to get rid of polling like the Sirikata code did

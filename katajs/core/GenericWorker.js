@@ -40,7 +40,13 @@ self.onmessage = function (ev) {
     // Bootstrapping root of source tree.
     // This may not be necessary if importscripts uses relative paths.
     var scriptroot = data[0];
-    importScripts(scriptroot+"katajs/core/Core.js");
+    try {
+        importScripts(scriptroot+"katajs.compiled.js");
+    } catch (e) {
+    }
+    if (typeof(Kata)==="undefined") {
+        importScripts(scriptroot+"katajs/core/Core.js");
+    }
     Kata.scriptRoot = scriptroot;
     Kata.bootstrapWorker=data[1];
     Kata.evalInclude("katajs/core/WebWorker.js");
