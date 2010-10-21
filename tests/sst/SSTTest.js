@@ -1,8 +1,6 @@
-//Kata.include("externals/protojs/protobuf.js");
 Kata.require([
-    'externals/protojs/pbj.js',
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/sst/SSTImpl.js'],
     'katajs/core/Math.uuid.js',
-    'katajs/oh/sst/SSTImpl.js'
 ], function() {
 
 function print(str) {

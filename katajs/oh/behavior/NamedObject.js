@@ -32,9 +32,9 @@
 
 // We use protocol buffers just to encode the string, we could also
 // setup real messages
-Kata.include("externals/protojs/protobuf.js");
 
 Kata.require([
+    'externals/protojs/protobuf.js'
 ], function() {
 
     if (typeof(Kata.Behavior) == "undefined")
