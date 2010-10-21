@@ -90,6 +90,11 @@ Kata.include("katajs/oh/odp/Endpoint.js");
     Kata.RemotePresence.prototype.endpoint = function(port) {
         return new Kata.ODP.Endpoint(this.mSpace, this.mID, port);
     };
+
+    /** Get the owning Presence for this RemotePresence. */
+    Kata.RemotePresence.prototype.owner = function() {
+        return this.mParent;
+    };
      
      /** Enable tracking for this RemotePresence, i.e. subscribe it
       * for updates.
