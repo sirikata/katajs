@@ -119,7 +119,7 @@ Kata.defer(function() {
              cb(presence);
          }
 
-         this.mBehaviors.every(function(beh) {
+         this.mBehaviors.forEach(function(beh) {
              if (beh.newPresence) beh.newPresence(presence);
          });
      };
@@ -135,7 +135,7 @@ Kata.defer(function() {
              delete this.mPresences[presence.space()];
          }
 
-         this.mBehaviors.every(function(beh) {
+         this.mBehaviors.forEach(function(beh) {
              if (beh.presenceInvalidated) beh.presenceInvalidated(presence);
          });
      };
@@ -205,7 +205,7 @@ Kata.defer(function() {
              this.mRemotePresences[key] = remote;
              presence.remotePresence(remote, true);
 
-             this.mBehaviors.every(function(beh) {
+             this.mBehaviors.forEach(function(beh) {
                  if (beh.remotePresence) beh.remotePresence(presence, remote, true);
              });
          }
@@ -219,7 +219,7 @@ Kata.defer(function() {
              delete this.mRemotePresences[key];
              presence.remotePresence(remote, false);
 
-             this.mBehaviors.every(function(beh) {
+             this.mBehaviors.forEach(function(beh) {
                  if (beh.remotePresence) beh.remotePresence(presence, remote, false);
              });
          }
