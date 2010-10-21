@@ -30,7 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function() {
+Kata.require([
+], function() {
 
      if (typeof(Kata.Loopback) == "undefined") { Kata.Loopback = {}; }
 
@@ -113,4 +114,4 @@
      Kata.Loopback.Loc.prototype.lookup = function(uuid) {
          return this.mObjects[uuid];
      };
-})();
+}, 'katajs/space/loop/Loc.js');

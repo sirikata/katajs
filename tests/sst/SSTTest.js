@@ -1,7 +1,7 @@
-//Kata.include("externals/protojs/protobuf.js");
-Kata.include("externals/protojs/pbj.js");
-Kata.include("katajs/core/Math.uuid.js");
-Kata.include("katajs/oh/sst/SSTImpl.js");
+Kata.require([
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/sst/SSTImpl.js'],
+    'katajs/core/Math.uuid.js',
+], function() {
 
 function print(str) {
     console.log.call(console, arguments);
@@ -50,3 +50,5 @@ SSTTest.prototype.createTestObjects = function(uuidA, uuidB) {
     Kata.SST.listenStream(this.acceptConnection, uuidB);
     Kata.SST.connectStream(uuidA, uuidB, this.establishedConnection);
 };
+
+}, 'tests/sst/SSTTest.js');

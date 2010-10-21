@@ -30,7 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function() {
+Kata.require([
+], function() {
 
     /** Kata.Frame provides simple framing because protocol buffers /
      * PBJ doesn't provide any built-in framing.  The format is a
@@ -64,4 +65,4 @@
         return data.splice(0, len);
     };
 
-})();
+}, 'katajs/oh/plugins/sirikata/Frame.js');

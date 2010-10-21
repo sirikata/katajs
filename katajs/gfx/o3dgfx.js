@@ -30,6 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 o3djs.base.o3d = o3d;
 o3djs.require('o3djs.webgl');
 o3djs.require('o3djs.util');
@@ -423,7 +424,13 @@ O3DGraphics.prototype.asyncInit=function (clientElements) {
     this.mViewWidth=1.0/clientElements.length;
     this._buttonState="up"
     this.send=function(obj) {
-        return this.methodTable[obj.msg].call(this, obj);
+        if (obj.msg in this.methodTable) {
+            return this.methodTable[obj.msg].call(this, obj);
+        } else {
+            Kata.warn("Invalid gfx method "+obj.msg);
+            Kata.log(obj);
+            return false;
+        }
     };
     this.destroy=function(){}
     for (var i=0;i<this.initEvents.length;++i) {
@@ -819,6 +826,9 @@ VWObject.prototype.updateCamera = function(graphics) {
 };
 
 // Register as a GraphicsSimulation if possible.
-Kata.defer(function() {
-               Kata.GraphicsSimulation.registerDriver("o3d", O3DGraphics);
-           });
+Kata.require([
+    'katajs/gfx/WebGLCompat.js',
+    'katajs/oh/GraphicsSimulation.js'
+], function() {
+    Kata.GraphicsSimulation.registerDriver("o3d", O3DGraphics);
+}, "katajs/gfx/o3dgfx.js");

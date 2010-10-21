@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/Channel.js");
 
-(function() {
+Kata.require([
+    'katajs/core/Channel.js'
+], function() {
 
     var SUPER = Kata.Channel.prototype;
     /**
@@ -75,4 +76,4 @@ Kata.include("katajs/core/Channel.js");
         this.mPartner.callListeners(data);
     };
 
-})();
+}, 'katajs/core/SimpleChannel.js');

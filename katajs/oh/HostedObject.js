@@ -30,11 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/ObjectHost.js");
-Kata.include("katajs/oh/impl/ScriptProtocol.js");
-Kata.include("katajs/core/MessageDispatcher.js");
 
-(function() {
+Kata.require([
+    'katajs/oh/impl/ScriptProtocol.js',
+    'katajs/core/MessageDispatcher.js'
+], function() {
 
     /** Base class for protocol-specific HostedObject implementations.
      * @constructor
@@ -133,7 +133,11 @@ Kata.include("katajs/core/MessageDispatcher.js");
      };
 
      Kata.HostedObject.prototype.proxEvent = function(space, observed, entered, properties) {
-         var msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered, properties.loc, properties.visual);
+         var msg;
+         if (typeof(properties) !== "undefined")
+             msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered, properties.loc, properties.visual);
+         else
+             msg = new Kata.ScriptProtocol.ToScript.QueryEvent(space, observed, entered);
          this.sendScriptMessage(msg);
      };
 
@@ -198,4 +202,4 @@ Kata.include("katajs/core/MessageDispatcher.js");
              Kata.bind(this.messageFromScript,this));
          script_worker.go();
      };
-})();
+}, 'katajs/oh/HostedObject.js');

@@ -31,7 +31,8 @@
  */
 
 
-(function() {
+Kata.require([
+], function() {
 
     Kata.Deque = function() {
         this.mSize=0;
@@ -133,4 +134,4 @@
         Kata.Deque.call(this);
     };
 
-})();
+}, 'katajs/core/Deque.js');

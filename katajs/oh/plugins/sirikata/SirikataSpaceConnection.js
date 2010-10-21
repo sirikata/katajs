@@ -30,25 +30,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/SpaceConnection.js");
-Kata.include("katajs/oh/SessionManager.js");
-Kata.include("katajs/network/TCPSST.js");
-Kata.include("externals/protojs/protobuf.js");
-Kata.include("externals/protojs/pbj.js");
-
-Kata.include("katajs/oh/plugins/sirikata/impl/TimedMotionVector.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/TimedMotionQuaternion.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/Session.pbj.js");
-
-Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
-
-Kata.include("katajs/oh/plugins/sirikata/impl/Prox.pbj.js");
-
-Kata.include("katajs/oh/sst/SSTImpl.js");
-
-Kata.include("katajs/oh/plugins/sirikata/Frame.js");
-
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/plugins/sirikata/Frame.js',
+    'katajs/oh/sst/SSTImpl.js',
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Prox.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Loc.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Frame.pbj.js']
+], function() {
 
     // FIXME having this sucks, we need to get rid of polling like the Sirikata code did
     setInterval(Kata.SST.serviceConnections, 100);
@@ -182,6 +170,11 @@ Kata.defer(function() {
         );
     };
 
+    Kata.SirikataSpaceConnection.prototype.sendODPMessage = function(src, src_port, dest, dest_port, payload) {
+        // ODP interface will likely change, underlying _sendODPMessage probably won't
+        this._sendODPMessage(src, src_port, dest, dest_port, payload);
+    };
+
     Kata.SirikataSpaceConnection.prototype._sendODPMessage = function(src, src_port, dest, dest_port, payload) {
         var odp_msg = new Sirikata.Protocol.Object.ObjectMessage();
         odp_msg.source_object = src;
@@ -189,7 +182,14 @@ Kata.defer(function() {
         odp_msg.dest_object = dest;
         odp_msg.dest_port = dest_port;
         odp_msg.unique = PROTO.I64.fromNumber(0);
-        odp_msg.payload = payload;
+        if (typeof(payload) !== "undefined") {
+            if (typeof(payload.length) === "undefined" || payload.length > 0) {
+                if (typeof(payload) == "string")
+                    odp_msg.payload = PROTO.encodeUTF8(payload);
+                else
+                    odp_msg.payload = payload;
+            }
+        }
 
         this._sendPreparedODPMessage(odp_msg);
     };
@@ -213,8 +213,17 @@ Kata.defer(function() {
         }
         else {
             var dest_obj_data = this.mConnectedObjects[odp_msg.dest_object];
-            if (dest_obj_data)
-                dest_obj_data.odpDispatcher.dispatchMessage(odp_msg);
+            if (dest_obj_data) {
+                var sst_handled = dest_obj_data.odpDispatcher.dispatchMessage(odp_msg);
+                if (!sst_handled) {
+                    this.mParent.receiveODPMessage(
+                        this.mSpaceURL,
+                        odp_msg.source_object, odp_msg.source_port,
+                        odp_msg.dest_object, odp_msg.dest_port,
+                        odp_msg.payload
+                    );
+                }
+            }
         }
     };
 
@@ -231,9 +240,6 @@ Kata.defer(function() {
             if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Success) {
                 var id = this._getLocalID(objid);
                 Kata.warn("Successfully connected " + id);
-
-                var connect_info = this.mOutstandingConnectRequests[objid];
-                delete this.mOutstandingConnectRequests[objid];
 
                 // Send ack
                 var connect_ack_msg = new Sirikata.Protocol.Session.ConnectAck();
@@ -258,7 +264,6 @@ Kata.defer(function() {
                     new Kata.SST.EndPoint(objid, 0), odpRouter, odpDispatcher
                 );
 
-                this.mConnectedObjects[objid].locdata = [];
                 this.mConnectedObjects[objid].proxdata = [];
 
                 // Try to connect the initial stream
@@ -268,11 +273,9 @@ Kata.defer(function() {
                     Kata.bind(this._spaceSSTConnectCallback, this, objid)
                 );
 
-                // Indicate response to parent SessionManager
-                this.mParent.connectionResponse(
-                    id, true,
-                    {space : this.mSpaceURL, object : objid},
-                    connect_info.loc_bounds, connect_info.visual
+                // Allow the SessionManager to alias the ID until the swap to the Space's ID can be safely made
+                this.mParent.aliasIDs(
+                    id, {space : this.mSpaceURL, object : objid}
                 );
             }
             else if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Redirect) {
@@ -305,26 +308,111 @@ Kata.defer(function() {
         // And setup listeners for loc and prox
         stream.listenSubstream(this.Ports.Location, Kata.bind(this._handleLocationSubstream, this, objid));
         stream.listenSubstream(this.Ports.Proximity, Kata.bind(this._handleProximitySubstream, this, objid));
+
+        // With the successful connection + sst straem, we can indicate success to the parent SessionManager
+        var connect_info = this.mOutstandingConnectRequests[objid];
+        delete this.mOutstandingConnectRequests[objid];
+        var id = this._getLocalID(objid);
+        this.mParent.connectionResponse(
+            id, true,
+            {space : this.mSpaceURL, object : objid},
+            connect_info.loc_bounds, connect_info.visual
+        );
+    };
+
+    Kata.SirikataSpaceConnection.prototype.locUpdateRequest = function(objid, loc, visual) {
+        // Generate and send an update to Loc
+        var update_request = new Sirikata.Protocol.Loc.LocationUpdateRequest();
+
+        if (loc.pos) {
+            var pos = new Sirikata.Protocol.TimedMotionVector();
+            pos.t = 0;
+            pos.position = loc.pos;
+            pos.velocity = [0, 0, 0]; // FIXME velocity from loc
+            update_request.location = pos;
+        }
+
+        if (loc.orient) {
+            var orient = new Sirikata.Protocol.TimedMotionQuaternion();
+            orient.t = 0;
+            orient.position = loc.orient;
+            orient.velocity = [0, 0, 0, 1]; // FIXME angular velocity
+            update_request.orientation = orient;
+        }
+
+        if (loc.bounds)
+            update_request.bounds = loc.bounds;
+
+        if (loc.visual)
+            update_request.mesh = visual;
+
+        var container = new Sirikata.Protocol.Loc.Container();
+        container.update_request = update_request;
+
+        var spacestream = this.mConnectedObjects[objid].spaceStream;
+        if (!spacestream) {
+            Kata.warn("Tried to send loc update before stream to server was ready.");
+            return;
+        }
+
+        spacestream.datagram(
+            this._serializeMessage(container).getArray(),
+            this.Ports.Location, this.Ports.Location
+        );
     };
 
     Kata.SirikataSpaceConnection.prototype._handleLocationSubstream = function(objid, error, stream) {
-        Kata.warn("Location substream (error " + error + ")");
+        if (error != 0)
+            Kata.warn("Location substream (error " + error + ")");
         stream.registerReadCallback(Kata.bind(this._handleLocationSubstreamRead, this, objid, stream));
     };
 
     Kata.SirikataSpaceConnection.prototype._handleProximitySubstream = function(objid, error, stream) {
-        Kata.warn("Proximity substream (error " + error + ")");
+        if (error != 0)
+            Kata.warn("Proximity substream (error " + error + ")");
         stream.registerReadCallback(Kata.bind(this._handleProximitySubstreamRead, this, objid, stream));
     };
 
     Kata.SirikataSpaceConnection.prototype._handleLocationSubstreamRead = function(objid, stream, data) {
-        Kata.warn("Location data for " + objid + " of size " + data.length);
-        var objinfo = this.mConnectedObjects[objid];
-        objinfo.locdata = objinfo.locdata.concat(data);
+        // Currently we just assume each update is a standalone Frame
+
+        // Parse the surrounding frame
+        var framed_msg = new Sirikata.Protocol.Frame();
+        framed_msg.ParseFromStream(new PROTO.ByteArrayStream(data));
+
+        // Parse the internal loc update
+        var loc_update_msg = new Sirikata.Protocol.Loc.BulkLocationUpdate();
+        loc_update_msg.ParseFromStream(new PROTO.ByteArrayStream(framed_msg.payload));
+
+        for(var idx = 0; idx < loc_update_msg.update.length; idx++) {
+            var update = loc_update_msg.update[idx];
+            var from = update.object;
+
+            var loc = {};
+            if (update.location) {
+                loc.t = update.location.t;
+                loc.pos = update.location.position;
+                loc.vel = update.location.velocity;
+            }
+            // FIXME differing time values? Maybe use Location class to handle?
+            /*
+            if (update.orientation) {
+                loc.t = update.orientation.t;
+                loc.pos = update.orientation.position;
+                //loc.(rotaxis/angvel) = update.orientation.velocity;
+            }
+             */
+            // FIXME bounds
+            var visual;
+            if (update.mesh)
+                visual = update.mesh;
+
+            this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+        }
+
     };
 
     Kata.SirikataSpaceConnection.prototype._handleProximitySubstreamRead = function(objid, stream, data) {
-        Kata.warn("Proximity data for " + objid + " of size " + data.length);
         var objinfo = this.mConnectedObjects[objid];
         objinfo.proxdata = objinfo.proxdata.concat(data);
 
@@ -333,11 +421,53 @@ Kata.defer(function() {
             if (next_prox_msg === null) break;
 
             // Handle the message
-            var prox_msg = new Sirikata.Protocol.Prox.ProximityUpdate();
+            var prox_msg = new Sirikata.Protocol.Prox.ProximityResults();
             prox_msg.ParseFromStream(new PROTO.ByteArrayStream(next_prox_msg));
             // FIXME add actual use of proximity events
+            for(var i = 0; i < prox_msg.update.length; i++)
+                this._handleProximityUpdate(objid, prox_msg.t, prox_msg.update[i]);
+        }
+    };
+
+    Kata.SirikataSpaceConnection.prototype._handleProximityUpdate = function(objid, t, update) {
+        for(var add = 0; add < update.addition.length; add++) {
+            var observed = update.addition[add].object;
+            // Decode location, orientation, bounds, mesh
+            var properties = {};
+
+            // FIXME what is going on with this weird Location "class"?
+            properties.loc = Kata.LocationIdentity();
+
+            properties.loc.pos = update.addition[add].location.position;
+            properties.loc.vel = update.addition[add].location.velocity;
+            properties.loc.posTime = update.addition[add].location.t;
+
+            properties.loc.orient = update.addition[add].orientation.position;
+            // FIXME Location wants axis/vel instead of quaternion velocity
+            //properties.loc.(rotaxis,rotvel) = update.addition[add].orientation.velocity;
+            properties.loc.orientTime = update.addition[add].orientation.t;
+
+            properties.bounds = update.addition[add].bounds;
+
+            if (update.addition[add].HasField("mesh")) {
+                // FIXME: This is only an object with multiple
+                // properties (instead of just the mesh URL) because
+                // curretnly GraphicsScript relies on it being this
+                // way.
+                properties.visual = {
+                    anim : "",
+                    mesh : update.addition[add].mesh,
+                    up_axis : [1, 0, 0]
+                };
+            }
+            this.mParent.proxEvent(this.mSpaceURL, objid, observed, true, properties);
+        }
+
+        for(var rem = 0; rem < update.removal.length; rem++) {
+            var observed = update.removal[rem].object;
+            this.mParent.proxEvent(this.mSpaceURL, objid, observed, false);
         }
     };
 
     Kata.SessionManager.registerProtocolHandler("sirikata", Kata.SirikataSpaceConnection);
-});
+}, 'katajs/oh/plugins/sirikata/SirikataSpaceConnection.js');

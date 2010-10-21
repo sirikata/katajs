@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/ObjectHost.js");
 
-(function() {
+Kata.require([
+    'katajs/oh/ObjectHost.js'
+], function() {
 
     /** A worker thread to instantiate an ObjectHost and manage the channel to
      * the main thread and the graphics system (which may be multiplexed?).
@@ -51,4 +52,4 @@ Kata.include("katajs/oh/ObjectHost.js");
         //this.mObjectHost.registerSimulation(physicsChannel, "physics");
     };
 
-})();
+}, 'katajs/oh/ObjectHostWorker.js');

@@ -30,10 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/Channel.js");
-Kata.include("katajs/core/Math.uuid.js");
 
-Kata.defer(function() {
+Kata.require([
+    'katajs/core/Channel.js',
+    'katajs/core/Math.uuid.js'
+], function() {
 
     function getMessageCallback(thus, which) {
         return function(ev) {
@@ -226,4 +227,4 @@ Kata.defer(function() {
         Kata.warn("WebSockets not available.");
     }
 
-});
+}, 'katajs/network/TCPSST.js');

@@ -30,7 +30,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function() {
+Kata.require([
+], function() {
     /**
      * An abstract parent for a two-way communication channel. You may send
      * messages to this channel, and another party may register listeners who
@@ -85,4 +86,4 @@
      */
     Kata.Channel.prototype.sendMessage = null;
 
-})();
+}, 'katajs/core/Channel.js');

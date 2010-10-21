@@ -30,12 +30,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/Deque.js");
+Kata.require([
+    'katajs/core/Deque.js',
 
-Kata.include("katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
-
-(function() {
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js']
+], function() {
 
 var KataDequePushBack = function(x,y){x.push_back(y);};
 var KataDequePushFront = function(x,y){return x.push_front(y);};
@@ -74,8 +74,9 @@ Kata.SST.ObjectMessageDispatcher.prototype.dispatchMessage = function(msg) {
     if (msg.dest_port in this.mObjectMessageRecipients) {
         var recipient = this.mObjectMessageRecipients[msg.dest_port];
         // BaseDatagramLayer
-        recipient.receiveMessage(msg);
+        return recipient.receiveMessage(msg);
     }
+    return false;
 };
 
 /**
@@ -202,7 +203,7 @@ Kata.SST.Impl.BaseDatagramLayer.prototype.send=function(src,dest,data) {
  * @param {!Sirikata.Protocol.Object.ObjectMessage} msg 
 */
 Kata.SST.Impl.BaseDatagramLayer.prototype.receiveMessage=function(msg)  {
-    connectionHandleReceiveSST(this,
+    return connectionHandleReceiveSST(this,
                             new Kata.SST.EndPoint(msg.source_object, msg.source_port),
                             new Kata.SST.EndPoint(msg.dest_object, msg.dest_port),
                             msg.payload);
@@ -776,6 +777,9 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
 	        this.parsePacket(received_msg, object_message.source_port, object_message.dest_port);
         }
     }
+
+    // We always say we handled this since we were explicitly listening on this port
+    return true;
 };
 /**
  * @param{!Protcol.SST.SSTChannelHeader} received_channel_msg
@@ -1119,12 +1123,20 @@ Kata.SST.Connection.prototype.close=function( force) {
  */
 var connectionHandleReceiveSST = function(datagramLayer, remoteEndPoint,localEndPoint,recvBuffer){
 
+    // Active connection
+    var whichLocalConnection = sConnectionMapSST[localEndPointId];
+    // or listening for one
+    var listeningConnection = sListeningConnectionsCallbackMapSST[localEndPointId];
+
+    if (typeof(whichLocalConnection) == "undefined" &&
+        typeof(listeneingConnection) == "undefined")
+        return false;
+
     var received_msg = new Sirikata.Protocol.SST.SSTChannelHeader();
     var parsed = received_msg.ParseFromArray(recvBuffer);
 
     var channelID = received_msg.channel_id;
     var localEndPointId=localEndPoint.uid();
-    var whichLocalConnection=sConnectionMapSST[localEndPointId];
     if (whichLocalConnection) {
       if (channelID == 0) {
               /*Someone's already connected at this port. Either don't reply or
@@ -1132,7 +1144,7 @@ var connectionHandleReceiveSST = function(datagramLayer, remoteEndPoint,localEnd
           
               Kata.log("Someone's already connected at this port on object " 
                    + localEndPoint.endPoint.uid());
-              return;
+              return true;
       }
       
       whichLocalConnection.receiveParsedMessage(parsed);
@@ -1140,7 +1152,6 @@ var connectionHandleReceiveSST = function(datagramLayer, remoteEndPoint,localEnd
     else if (channelID == 0) {
       /* it's a new channel request negotiation protocol
          packet ; allocate a new channel.*/
-        var listeningConnection=sListeningConnectionsCallbackMapSST[localEndPointId];
         if (listeningConnection) {
             var received_payload = received_msg.payload;
 
@@ -1168,9 +1179,10 @@ var connectionHandleReceiveSST = function(datagramLayer, remoteEndPoint,localEnd
                           false/*not an ack*/);
       }
       else {
-        Kata.log("No one listening on this connection\n"+localEndPointId);
+        Kata.log("Got non-init message on port we're listening on: "+localEndPointId);
       }
     }
+    return true;
 };
 
 var StreamBuffer = function(data, offset) {
@@ -1374,6 +1386,10 @@ Kata.SST.Stream.prototype.finalize=function() {
     this.close(true);
 };
 
+/** Simple wrapper to send a datagram on this stream's underlying connection. */
+Kata.SST.Stream.prototype.datagram = function(data, local_port, remote_port,cb) {
+    return this.mConnection.datagram(data, local_port, remote_port, cb);
+};
 
   /**
     Start listening for child streams on the specified port. A remote stream
@@ -1973,4 +1989,4 @@ Kata.SST.Stream.prototype.sendReplyPacket=function(data, remoteLSID) {
     this.mConnection.sendData(  buffer, false/*not an ack packet!*/);
   };
 
-})();
+}, 'katajs/oh/sst/SSTImpl.js');

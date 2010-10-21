@@ -1,8 +1,9 @@
 
-Kata.include("katajs/oh/GraphicsScript.js");
-Kata.include("katajs/oh/behavior/NamedObject.js");
 
-(function(){
+Kata.require([
+    'katajs/oh/GraphicsScript.js',
+    'katajs/oh/behavior/NamedObject.js'
+], function() {
     if (typeof(Example) === "undefined") {
         Example = {};
     }
@@ -52,4 +53,4 @@ Kata.include("katajs/oh/behavior/NamedObject.js");
         }
     };
     Example.TestScript.instance = 0;
-})();
+}, 'examples/simple_script/TestScript.js');
