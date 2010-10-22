@@ -61,6 +61,8 @@ Kata.include("katajs/core/MessageDispatcher.js");
         scriptHandlers[scriptTypes.GraphicsMessage] = Kata.bind(this._handleGraphicsMessage, this);
         scriptHandlers[scriptTypes.DisableGUIMessage] = Kata.bind(objectHost.unregisterSimulationCallback, objectHost, "graphics",this);//FIXME somehow call this when the object is destroyed
         scriptHandlers[scriptTypes.EnableGUIMessage] = Kata.bind(objectHost.registerSimulationCallback, objectHost, "graphics",this);
+        scriptHandlers[scriptTypes.GUIMessage] = Kata.bind(this._handleGUIMessage, this);
+
 
         this.mScriptMessageDispatcher = new Kata.MessageDispatcher(scriptHandlers);
     };
@@ -169,6 +171,14 @@ Kata.include("katajs/core/MessageDispatcher.js");
 
      Kata.HostedObject.prototype._handleGraphicsMessage = function (channel, request) {
          this.mObjectHost.sendToSimulation(request);//FIXME: broadcasts to all simulations, not just gfx
+     };
+
+     Kata.HostedObject.prototype._handleGUIMessage = function (channel, request) {
+         // We have to share the channel with graphics
+         // currently... should really have some
+         // (de)multiplexing. Instead, we currently use a special
+         // encoding we can detect on the other side.
+         this.mObjectHost.sendToSimulation({__gui : request});
      };
 
      Kata.HostedObject.prototype._handleSubscriptionRequest = function (channel, request) {

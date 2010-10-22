@@ -95,7 +95,9 @@ Kata.include("katajs/core/Time.js");
                  CreateObject : "fcre",
                  GraphicsMessage : "fgfm",
                  EnableGUIMessage : "feui",
-                 DisableGUIMessage : "fdui"
+                 DisableGUIMessage : "fdui",
+
+                 GUIMessage : "fgui"
              },
 
              reconstitute : function(data) {
@@ -115,7 +117,14 @@ Kata.include("katajs/core/Time.js");
              UnregisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.DisableGUIMessage;
                  this.event = event;  
-             },            
+             },
+
+             GUIMessage : function (msg, event) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GUIMessage;
+                 this.msg = msg;
+                 this.event = event;
+             },
+
              Disconnect : function(space, id) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Disconnect;
                  this.space = space;
