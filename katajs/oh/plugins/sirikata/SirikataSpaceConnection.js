@@ -446,6 +446,7 @@ Kata.defer(function() {
     Kata.SirikataSpaceConnection.prototype._handleProximityUpdate = function(objid, t, update) {
         for(var add = 0; add < update.addition.length; add++) {
             var observed = update.addition[add].object;
+            if (observed == objid) continue;
             // Decode location, orientation, bounds, mesh
             var properties = {};
 
@@ -479,6 +480,7 @@ Kata.defer(function() {
 
         for(var rem = 0; rem < update.removal.length; rem++) {
             var observed = update.removal[rem].object;
+            if (observed == objid) continue;
             this.mParent.proxEvent(this.mSpaceURL, objid, observed, false);
         }
     };
