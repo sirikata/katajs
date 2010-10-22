@@ -42,9 +42,6 @@ Kata.defer(function() {
      */
     Kata.GUISimulation = function (channel) {
         SUPER.constructor.call(this, channel);
-
-        this.mChannel = channel;
-        channel.registerListener(Kata.bind(this.receivedMessage, this));
     };
     Kata.extend(Kata.GUISimulation, SUPER);
 
