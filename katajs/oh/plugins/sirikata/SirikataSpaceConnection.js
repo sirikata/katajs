@@ -133,7 +133,8 @@ Kata.defer(function() {
         this.mOutstandingConnectRequests[objid] =
             {
                 loc_bounds : Kata.LocationIdentity(0),
-                visual : vis
+                visual : vis,
+                deferred_odp : []
             };
 
         var connect_msg = new Sirikata.Protocol.Session.Connect();
@@ -230,15 +231,33 @@ Kata.defer(function() {
             if (dest_obj_data) {
                 var sst_handled = dest_obj_data.odpDispatcher.dispatchMessage(odp_msg);
                 if (!sst_handled) {
-                    this.mParent.receiveODPMessage(
-                        this.mSpaceURL,
-                        odp_msg.source_object, odp_msg.source_port,
-                        odp_msg.dest_object, odp_msg.dest_port,
-                        odp_msg.payload
-                    );
+                    this._tryDeliverODP(odp_msg);
                 }
             }
         }
+    };
+
+    // Because we might get ODP messages before we've got the
+    // connection + sst fully setup and made the callback, we work
+    // through this method to either deliver the message if possible,
+    // or queue it up if we can't deliver it yet.
+    Kata.SirikataSpaceConnection.prototype._tryDeliverODP = function(odp_msg) {
+        // Queue it up if we have an outstanding connection request
+        var connect_info = this.mOutstandingConnectRequests[odp_msg.dest_object];
+        if (connect_info) {
+            connect_info.deferred_odp.push(odp_msg);
+            return;
+        }
+        this._deliverODP(odp_msg);
+    };
+
+    Kata.SirikataSpaceConnection.prototype._deliverODP = function(odp_msg) {
+        this.mParent.receiveODPMessage(
+            this.mSpaceURL,
+            odp_msg.source_object, odp_msg.source_port,
+            odp_msg.dest_object, odp_msg.dest_port,
+            odp_msg.payload
+        );
     };
 
     /* Handle session messages from the space server. */
@@ -332,6 +351,12 @@ Kata.defer(function() {
             {space : this.mSpaceURL, object : objid},
             connect_info.loc_bounds, connect_info.visual
         );
+
+        // And finally, having given the parent a chance to setup
+        // after getting the connection, we can flush buffered odp
+        // packets
+        for(var di = 0; di < connect_info.deferred_odp.length; di++)
+            this._deliverODP( connect_info.deferred_odp[di] );
     };
 
     Kata.SirikataSpaceConnection.prototype.locUpdateRequest = function(objid, loc, visual) {
