@@ -164,6 +164,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mParent = null;
         spaceroot.mScene.addChild(this.mNode);
     };
+
+    /// note: animation ignored
     VWObject.prototype.createMesh = function(path, animation, offset) {
         if (path == null) {
             throw "loadScene with null path";
@@ -175,7 +177,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
-        clda.setDocument(this.mMeshURI, null, GlobalLoadDone);
+        clda.setDocument(this.mMeshURI, null, typeof(GlobalLoadDone)=="undefined"?null:GlobalLoadDone);
         clda.setScaleX(1.0);
         clda.setScaleY(1.0);
         clda.setScaleZ(1.0);
@@ -571,7 +573,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
-            vwObject.createMesh(msg.mesh, msg.anim, [-msg.center[0],-msg.center[1],-msg.center[2]]);
+            vwObject.createMesh(msg.mesh, msg.anim, msg.offset?[-msg.center[0],-msg.center[1],-msg.center[2]]:null);
             if (msg.up_axis == "Z_UP") {
                 this.moveTo(vwObject, {
                     // FIXME: needs to be permanent, so future setOrientations will be relative to this
