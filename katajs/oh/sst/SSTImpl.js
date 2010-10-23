@@ -847,6 +847,8 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg) {
       }
     }else {
         Kata.log("Init message for connected stream"+this.headerToStringDebug(received_stream_msg));
+        // Re-reply to the init since we either dropped or were too slow.
+        this.mIncomingSubstreamMap[incomingLsid].sendReplyPacket(undefined, incomingLsid);
     }
 };
 
