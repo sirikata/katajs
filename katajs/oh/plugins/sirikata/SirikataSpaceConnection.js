@@ -83,8 +83,8 @@ Kata.defer(function() {
 
         //var port = 9998;
         var port = 7777;
-        if (spaceurl.port)
-            port = spaceurl.port;
+        if (Kata.URL.port(spaceurl))
+            port = Kata.URL.port(spaceurl);
         this.mSocket = new Kata.TCPSST(Kata.URL.host(spaceurl), port);
         this.mPrimarySubstream = this.mSocket.clone();
         this.mPrimarySubstream.registerListener(
