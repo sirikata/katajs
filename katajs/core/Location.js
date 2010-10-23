@@ -404,13 +404,13 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
       rotaxis:curLocation.rotaxis,
       rotvel:curLocation.rotvel
     };
-    if (msg.pos) {
+    if (msg.pos && msg.time && msg.time > curLocation.posTime) {
         retval.pos=msg.pos;
         retval.posTime=msg.time;
     }else {
         //curLocation.pos=prevLocation.pos;
         //curLocation.posTime=prevLocation.posTime;
-        if (msg.vel) {
+        if (msg.vel && msg.time && msg.time > curLocation.posTime) {
             //curLocation.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,Kata.deltaTime(curDate,curLocation.posTime));
             //curLocation.posTime=curDate;
 
@@ -418,14 +418,14 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
             retval.posTime=msg.time;
         }
     }
-    if (msg.vel) {
+    if (msg.vel && msg.time && msg.time > curLocation.posTime) {
         retval.vel=msg.vel;
         //console.log("Setting velocity to "+retval.vel+" was "+curLocation.vel+" and before "+prevLocation.vel+" Pos "+retval.pos+" was "+curLocation.pos+" and before "+prevLocation.pos);
     }else {
         //console.log("Setting position to "+retval.vel+" was "+curLocation.vel+" and before "+prevLocation.vel+" Pos "+retval.pos+" was "+curLocation.pos+" and before "+prevLocation.pos);
         curLocation.vel=prevLocation.vel;
     }
-    if (msg.orient) {
+    if (msg.orient && msg.time && msg.time > curLocation.orientTime) {
         retval.orient=msg.orient;
         retval.orientTime=msg.time;
     }else {
@@ -439,19 +439,19 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
             retval.orientTime=msg.time;
         }
     }
-    if (msg.rotvel&&msg.rotaxis) {
+    if (msg.rotvel&&msg.rotaxis && msg.time && msg.time > curLocation.orientTime) {
         retval.rotaxis=msg.rotaxis;
         retval.rotvel=msg.rotvel;
     }else {
-        curLocation.rotaxis=prevLocation.rotaxis;
-        curLocation.rotvel=prevLocation.rotvel;
+        retval.rotaxis=prevLocation.rotaxis;
+        retval.rotvel=prevLocation.rotvel;
     }
-    if (msg.scale) {
+    if (msg.scale && msg.time && msg.time > curLocation.scaleTime) {
         retval.scale=msg.scale;
         retval.scaleTime=msg.time;
     }else {
-        curLocation.scale=prevLocation.scale;
-        curLocation.scaleTime=prevLocation.scaleTime;
+        retval.scale=prevLocation.scale;
+        retval.scaleTime=prevLocation.scaleTime;
     }
     return retval;
 };
