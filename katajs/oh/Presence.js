@@ -128,19 +128,49 @@ Kata.defer(function() {
      };
 
      Kata.Presence.prototype.setPosition = function(val){
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {pos:val.concat(), time:Kata.now(this.mSpace)});
+         var msg = new Kata.ScriptProtocol.FromScript.Location(
+             this.mSpace, this.mID,
+             {
+                 pos:val.concat(),
+                 vel:this.velocity(),
+                 time:Kata.now(this.mSpace)
+             }
+         );
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVelocity = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {vel:val.concat(), time:Kata.now(this.mSpace)});
+         var now = Kata.now(this.mSpace);
+         var msg = new Kata.ScriptProtocol.FromScript.Location(
+             this.mSpace, this.mID,
+             {
+                 pos:this.position(now),
+                 vel:val.concat(),
+                 time:now
+             }
+         );
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setOrientation = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {orient:val.concat(), time:Kata.now(this.mSpace)});
+         var msg = new Kata.ScriptProtocol.FromScript.Location(
+             this.mSpace, this.mID,
+             {
+                 orient:val.concat(),
+                 rotaxis:this.rotationalAxis(), angvel:this.angularSpeed(),
+                 time:Kata.now(this.mSpace)
+             }
+         );
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setAngularRotation = function(axis, angvel) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {rotaxis:axis.concat(), angvel:angvel, time:Kata.now(this.mSpace)});
+         var now = Kata.now(this.mSpace);
+         var msg = new Kata.ScriptProtocol.FromScript.Location(
+             this.mSpace, this.mID,
+             {
+                 orient:this.orientation(now),
+                 rotaxis:axis.concat(), angvel:angvel,
+                 time:now
+             }
+         );
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setLocation = function(location) {
