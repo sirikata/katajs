@@ -1,0 +1,5 @@
+# Protocol directory for Sirikata plugin
+katajs/oh/plugins/sirikata/impl
+
+# Protocol directory for pbj Test
+tests/pbj/Test.pbj.js
