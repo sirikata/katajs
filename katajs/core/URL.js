@@ -78,7 +78,8 @@
         var colon=url.indexOf(":");
         if (colon==-1)
             return undefined;
-        return parseInt(url.substr(colon));
+        var port_str = url.substr(colon+1);
+        return parseInt(port_str);
     };
     Kata.URL.resource=function(url) {
         var colon = url.indexOf("://");
