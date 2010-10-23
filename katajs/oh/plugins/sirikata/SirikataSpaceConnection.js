@@ -363,11 +363,13 @@ Kata.defer(function() {
         // Generate and send an update to Loc
         var update_request = new Sirikata.Protocol.Loc.LocationUpdateRequest();
 
-        if (loc.pos) {
+        if (loc.pos || loc.vel) {
             var pos = new Sirikata.Protocol.TimedMotionVector();
-            pos.t = 0;
-            pos.position = loc.pos;
-            pos.velocity = [0, 0, 0]; // FIXME velocity from loc
+            pos.t = loc.time;
+            if (loc.pos)
+                pos.position = loc.pos;
+            if (loc.vel)
+                pos.velocity = loc.vel;
             update_request.location = pos;
         }
 
@@ -429,18 +431,16 @@ Kata.defer(function() {
 
             var loc = {};
             if (update.location) {
-                loc.t = update.location.t;
+                loc.time = update.location.t;
                 loc.pos = update.location.position;
                 loc.vel = update.location.velocity;
             }
             // FIXME differing time values? Maybe use Location class to handle?
-            /*
             if (update.orientation) {
-                loc.t = update.orientation.t;
-                loc.pos = update.orientation.position;
+                //loc.time = update.orientation.t;
+                loc.orient = update.orientation.position;
                 //loc.(rotaxis/angvel) = update.orientation.velocity;
             }
-             */
             // FIXME bounds
             var visual;
             if (update.mesh)
