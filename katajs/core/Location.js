@@ -278,8 +278,8 @@ Kata.LocationCopy = function(destination, source) {
         destination.orientTime=source.orientTime!==undefined?source.orientTime:source.time;
         destination.orient=source.orient.slice(0);
     }
-    if (source.angvel!==undefined && source.rotaxis!==undefined) {
-        destination.angvel=source.angvel;
+    if (source.rotvel!==undefined && source.rotaxis!==undefined) {
+        destination.rotvel=source.rotvel;
         destination.rotaxis=source.rotaxis.slice(0);
     }
     if (source.vel!==undefined){
@@ -299,8 +299,8 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         if (msg.orient!==undefined) {            
             destination.orient=msg.orient;
         }
-        if (msg.angvel!==undefined && msg.rotaxis!==undefined) {
-            destination.angvel=msg.angvel;
+        if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
+            destination.rotvel=msg.rotvel;
             destination.rotaxis=msg.rotaxis;
         }
         if (msg.vel!==undefined){
@@ -326,10 +326,10 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
             }
         }
         if (msg.orient!==undefined){
-            if (msg.angvel&&msg.rotaxis&&msg.orientTime) {
+            if (msg.rotvel&&msg.rotaxis&&msg.orientTime) {
                 destination.pos
                     =Kata._helperLocationExtrapolateQuaternion(msg.orient,
-                                                               msg.angvel,
+                                                               msg.rotvel,
                                                                msg.rotaxis,
                                                                Kata.deltaTime(t,
                                                                          msg.orientTime));
@@ -337,9 +337,9 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
                 destination.orient=msg.orient;
             }
         }
-        if (msg.angvel!==undefined && msg.rotaxis!==undefined) {
-            destination.angvel=msg.angvel;
-            destination.angvel=msg.angvel;
+        if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
+            destination.rotvel=msg.rotvel;
+            destination.rotvel=msg.rotvel;
         }
         if (msg.vel!==undefined){
             destination.vel=msg.vel;
@@ -474,7 +474,7 @@ Kata.LocationReset=function(msg,curLocation) {
     if (msg.vel!==undefined) {
         curLocation.vel=msg.vel;
     }
-    if (msg.angvel!==undefined && msg.rotaxis !==undefined) {
+    if (msg.rotvel!==undefined && msg.rotaxis !==undefined) {
         curLocation.rotaxis=msg.rotaxis;
     }
     if (msg.orient!==undefined) {
