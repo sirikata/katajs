@@ -85,6 +85,10 @@ Kata.defer(function() {
 
          this.mQuery = null;
          this.mQueryHander = null;
+
+         // Tracks the last requested location so we can avoid sending
+         // more requests than necessary.
+         this.mRequestedLocation = this.mLocation;
      };
      Kata.extend(Kata.Presence, SUPER);
 
@@ -127,57 +131,119 @@ Kata.defer(function() {
          this.mQueryHandler = cb;
      };
 
+
+    // Helpers for requested location
+    Kata.Presence.prototype._requestedPosition = function(time) {
+        var now_loc = Kata.LocationExtrapolate(this.mRequestedLocation, time);
+        return now_loc.pos.concat();
+    };
+    Kata.Presence.prototype._requestedVelocity = function() {
+        return this.mRequestedLocation.vel.concat();
+    };
+    Kata.Presence.prototype._requestedOrientation = function(time) {
+        var now_loc = Kata.LocationExtrapolate(this.mRequestedLocation, time);
+        return now_loc.orient.concat();
+    };
+    Kata.Presence.prototype._requestedAngularSpeed = function() {
+        return this.mRequestedLocation.rotvel;
+    };
+    Kata.Presence.prototype._requestedRotationalAxis = function() {
+        return this.mRequestedLocation.rotaxis.concat();
+    };
+
+
      Kata.Presence.prototype.setPosition = function(val){
+         var now = Kata.now(this.mSpace);
+
+         // If we've requested an identical value, ignore
+         var reqpos = this._requestedPosition(now);
+         if (reqpos[0] == val[0] &&
+             reqpos[1] == val[1] &&
+             reqpos[2] == val[2])
+             return;
+
+         var update = {
+             pos:val.concat(),
+             vel:this.velocity(),
+             time:Kata.now(this.mSpace)
+         };
          var msg = new Kata.ScriptProtocol.FromScript.Location(
-             this.mSpace, this.mID,
-             {
-                 pos:val.concat(),
-                 vel:this.velocity(),
-                 time:Kata.now(this.mSpace)
-             }
+             this.mSpace, this.mID, update
          );
+         this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, now);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVelocity = function(val) {
          var now = Kata.now(this.mSpace);
+
+         // If we've requested an identical value, ignore
+         var reqvel = this._requestedVelocity();
+         if (reqvel[0] == val[0] &&
+             reqvel[1] == val[1] &&
+             reqvel[2] == val[2])
+             return;
+
+         var update = {
+             pos:this.position(now),
+             vel:val.concat(),
+             time:now
+         };
          var msg = new Kata.ScriptProtocol.FromScript.Location(
-             this.mSpace, this.mID,
-             {
-                 pos:this.position(now),
-                 vel:val.concat(),
-                 time:now
-             }
+             this.mSpace, this.mID, update
          );
+         this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, now);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setOrientation = function(val) {
+         var now = Kata.now(this.mSpace);
+
+         var reqpos = this._requestedOrientation(now);
+         if (reqpos[0] == val[0] &&
+             reqpos[1] == val[1] &&
+             reqpos[2] == val[2] &&
+             reqpos[3] == val[3])
+             return;
+
+         var update = {
+             orient:val.concat(),
+             rotaxis:this.rotationalAxis(), angvel:this.angularSpeed(),
+             time:Kata.now(this.mSpace)
+         };
          var msg = new Kata.ScriptProtocol.FromScript.Location(
-             this.mSpace, this.mID,
-             {
-                 orient:val.concat(),
-                 rotaxis:this.rotationalAxis(), angvel:this.angularSpeed(),
-                 time:Kata.now(this.mSpace)
-             }
+             this.mSpace, this.mID, update
          );
+         this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, now);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setAngularRotation = function(axis, angvel) {
          var now = Kata.now(this.mSpace);
+
+         var reqvel = this._requestedAngularSpeed();
+         var reqaxis = this._requestedRotationalAxis();
+         if (reqvel == angvel &&
+             reqaxis[0] == axis[0] &&
+             reqaxis[1] == axis[1] &&
+             reqaxis[2] == axis[2])
+             return;
+
+         var update = {
+             orient:this.orientation(now),
+             rotaxis:axis.concat(), angvel:angvel,
+             time:now
+         };
          var msg = new Kata.ScriptProtocol.FromScript.Location(
-             this.mSpace, this.mID,
-             {
-                 orient:this.orientation(now),
-                 rotaxis:axis.concat(), angvel:angvel,
-                 time:now
-             }
+             this.mSpace, this.mID, update
          );
+         this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, now);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setLocation = function(location) {
+         var now = Kata.now(this.mSpace);
          if (location.time===undefined) {
-             location.time=Kata.now(this.mSpace)
+             location.time=Kata.now(this.mSpace);
          }
          var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, location);
+         this.mRequestedLocation = Kata.LocationUpdate(location, this.mRequestedLocation, null, now);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setBounds = function(val) {
