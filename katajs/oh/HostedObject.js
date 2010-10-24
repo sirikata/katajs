@@ -105,8 +105,10 @@ Kata.include("katajs/core/MessageDispatcher.js");
 
      Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, loc, visual) {
          var msg = null;
-         if (success)
-             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, loc, visual);
+         if (success) {
+             var bounds = undefined;
+             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, loc, bounds, visual);
+         }
          else
              msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object);
          this.sendScriptMessage(msg);
