@@ -564,6 +564,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 }
             }
             //vwObject.mPack.destroy();
+            this.mSpaceRoots[msg.space].mScene.removeChild(vwObject.mNode);
             delete this.mObjects[msg.id];
         }
     };
