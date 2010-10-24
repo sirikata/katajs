@@ -150,7 +150,19 @@ Kata.defer(function() {
     Kata.Presence.prototype._requestedRotationalAxis = function() {
         return this.mRequestedLocation.rotaxis.concat();
     };
+    /** Get the current estimate of this object's position. */
+    Kata.Presence.prototype._requestedLocation = function() {
+        var retval = {};
+        for (var i in this.mRequestedLocation) {
+            retval[i] = this.mRequestedLocation[i];
+        }
+        return retval;
+    };
 
+
+    Kata.Presence.prototype.predictedLocation = function() {
+        return this._requestedLocation();
+    };
 
      Kata.Presence.prototype.setPosition = function(val){
          var now = Kata.now(this.mSpace);

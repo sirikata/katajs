@@ -40,7 +40,7 @@ Kata.include("katajs/oh/odp/Endpoint.js");
       * information like location and mesh as well as allow you to
       * send messages to the object.
       *
-      * @param {Kata.Presence} parent 
+      * @param {Kata.Presence} parent
       * @param {Kata.URL} space
       * @param {Kata.PresenceID} id
       * @param {Location} location
@@ -85,7 +85,7 @@ Kata.include("katajs/oh/odp/Endpoint.js");
     Kata.RemotePresence.prototype.presenceID = function() {
         return new Kata.PresenceID(this.mSpace, this.mID);
     };
-     
+
     /** Get an ODP endpoint for this object on the specified port. */
     Kata.RemotePresence.prototype.endpoint = function(port) {
         return new Kata.ODP.Endpoint(this.mSpace, this.mID, port);
@@ -95,7 +95,7 @@ Kata.include("katajs/oh/odp/Endpoint.js");
     Kata.RemotePresence.prototype.owner = function() {
         return this.mParent;
     };
-     
+
      /** Enable tracking for this RemotePresence, i.e. subscribe it
       * for updates.
       */
@@ -152,6 +152,16 @@ Kata.include("katajs/oh/odp/Endpoint.js");
          }
          return retval;
      };
+
+    /** Gets the current best estimate of this object's positon. This
+     * may include updates applied locally but not verified from the
+     * server yet.
+     */
+    Kata.RemotePresence.prototype.predictedLocation = function() {
+        // For RemotePresences we currently don't apply any prediction.
+        return this.location();
+    };
+
      /** Get the current estimate of this object's bounds. */
      Kata.RemotePresence.prototype.bounds = function() {
          return this.mLocation.scale.concat();//FIXME drh do interpolation?

@@ -240,7 +240,7 @@ Kata.defer(function() {
          if (remotePresence) {
              var presence = this.mPresences[data.space];
              if (presence.inGFXSceneGraph) {//if this particular presence has gfx enabled
-                 var msg = new Kata.ScriptProtocol.FromScript.GFXMoveNode(this.mPresence.space(), this.mPresence.id(), remotePresence, data);
+                 var msg = new Kata.ScriptProtocol.FromScript.GFXMoveNode(this.mPresence.space(), this.mPresence.id(), remotePresence, { loc : remotePresence.predictedLocation() });
                  this._sendHostedObjectMessage(msg);
              }
          }
