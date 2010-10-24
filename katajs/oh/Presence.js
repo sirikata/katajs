@@ -160,6 +160,21 @@ Kata.defer(function() {
     };
 
 
+    Kata.Presence.prototype.predictedPosition = function(time) {
+        return this._requestedPosition(time);
+    };
+    Kata.Presence.prototype.predictedVelocity = function() {
+        return this._requestedVelocity();
+    };
+    Kata.Presence.prototype.predictedOrientation = function(time) {
+        return this._requestedOrientation(time);
+    };
+    Kata.Presence.prototype.predictedAngularSpeed = function() {
+        return this._requestedAngularSpeed();
+    };
+    Kata.Presence.prototype.predictedRotationalAxis = function() {
+        return this._requestesdRotationalAxis();
+    };
     Kata.Presence.prototype.predictedLocation = function() {
         return this._requestedLocation();
     };

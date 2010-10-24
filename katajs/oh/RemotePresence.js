@@ -153,6 +153,22 @@ Kata.include("katajs/oh/odp/Endpoint.js");
          return retval;
      };
 
+    // Predicted location information
+    Kata.RemotePresence.prototype.predictedPosition = function(time) {
+        return this.position(time);
+    };
+    Kata.RemotePresence.prototype.predictedVelocity = function() {
+        return this.velocity();
+    };
+    Kata.RemotePresence.prototype.predictedOrientation = function(time) {
+        return this.orientation(time);
+    };
+    Kata.RemotePresence.prototype.predictedAngularSpeed = function() {
+        return this.angularSpeed();
+    };
+    Kata.RemotePresence.prototype.predictedRotationalAxis = function() {
+        return this.rotationalAxis();
+    };
     /** Gets the current best estimate of this object's positon. This
      * may include updates applied locally but not verified from the
      * server yet.
