@@ -50,10 +50,12 @@ Kata.include("katajs/oh/sst/SSTImpl.js");
 
 Kata.include("katajs/oh/plugins/sirikata/Frame.js");
 
+Kata.include("katajs/oh/plugins/sirikata/Sync.js");
+
 Kata.defer(function() {
 
     // FIXME having this sucks, we need to get rid of polling like the Sirikata code did
-    setInterval(Kata.SST.serviceConnections, 100);
+    setInterval(Kata.SST.serviceConnections, 10);
 
     var SUPER = Kata.SpaceConnection.prototype;
     /** Kata.SirikataSpaceConnection is an implementation of
@@ -90,6 +92,16 @@ Kata.defer(function() {
         this.mPrimarySubstream.registerListener(
             Kata.bind(this._receivedData, this)
         );
+
+
+        this.mODPHandlers = {};
+
+        // Time sync -- this needs to be updated to use the Sirikata sync protocol.
+        this.mSync = new Kata.Sirikata.SyncClient(
+            this,
+            new Kata.ODP.Endpoint(this.mSpaceURL, Kata.ObjectID.random(), this.Ports.TimeSync),
+            new Kata.ODP.Endpoint(this.mSpaceURL, Kata.ObjectID.nil(), this.Ports.TimeSync)
+        );
     };
     Kata.extend(Kata.SirikataSpaceConnection, Kata.SpaceConnection.prototype);
 
@@ -97,6 +109,7 @@ Kata.defer(function() {
         Session : 1,
         Proximity : 2,
         Location : 3,
+        TimeSync : 4,
         Space : 253
     };
 
@@ -118,6 +131,23 @@ Kata.defer(function() {
     Kata.SirikataSpaceConnection.prototype._getLocalID = function(objid) {
         return this.mLocalIDs[objid];
     };
+
+
+    // Time related helpers
+    Kata.SirikataSpaceConnection.prototype._toLocalTime = function(t) {
+        if (t instanceof Date)
+            return new Date(t.getTime() - this.mSync.offset());
+        else
+            return new Date(t - this.mSync.offset());
+    };
+    Kata.SirikataSpaceConnection.prototype._toSpaceTime = function(t) {
+        if (t instanceof Date)
+            return new Date(t.getTime() + this.mSync.offset());
+        else
+            return new Date(t + this.mSync.offset());
+    };
+
+
 
     Kata.SirikataSpaceConnection.prototype._serializeMessage = function(msg) {
         var serialized = new PROTO.ByteArrayStream();
@@ -225,16 +255,33 @@ Kata.defer(function() {
         // Special case: Session messages
         if (odp_msg.source_object == Kata.ObjectID.nil() && odp_msg.dest_port == this.Ports.Session) {
             this._handleSessionMessage(odp_msg);
+            return;
         }
-        else {
-            var dest_obj_data = this.mConnectedObjects[odp_msg.dest_object];
-            if (dest_obj_data) {
-                var sst_handled = dest_obj_data.odpDispatcher.dispatchMessage(odp_msg);
-                if (!sst_handled) {
-                    this._tryDeliverODP(odp_msg);
-                }
+
+        // Always try our shortcut handlers
+        var shortcut_handler = this.mODPHandlers[odp_msg.dest_object + odp_msg.dest_port];
+        if (shortcut_handler) {
+            shortcut_handler(
+                this.mSpaceURL,
+                odp_msg.source_object, odp_msg.source_port,
+                odp_msg.dest_object, odp_msg.dest_port,
+                odp_msg.payload
+            );
+            return;
+        }
+
+        var dest_obj_data = this.mConnectedObjects[odp_msg.dest_object];
+        if (dest_obj_data) {
+            var sst_handled = dest_obj_data.odpDispatcher.dispatchMessage(odp_msg);
+            if (!sst_handled) {
+                this._tryDeliverODP(odp_msg);
             }
         }
+    };
+
+    /** Register to receive ODP messages from this connection. Use sparingly. */
+    Kata.SirikataSpaceConnection.prototype._receiveODPMessage = function(dest, dest_port, cb) {
+        this.mODPHandlers[dest + dest_port] = cb;
     };
 
     // Because we might get ODP messages before we've got the
@@ -365,7 +412,7 @@ Kata.defer(function() {
 
         if (loc.pos || loc.vel) {
             var pos = new Sirikata.Protocol.TimedMotionVector();
-            pos.t = loc.time;
+            pos.t = this._toSpaceTime(loc.time);
             if (loc.pos)
                 pos.position = loc.pos;
             if (loc.vel)
@@ -375,7 +422,7 @@ Kata.defer(function() {
 
         if (loc.orient) {
             var orient = new Sirikata.Protocol.TimedMotionQuaternion();
-            orient.t = 0;
+            orient.t = this._toSpaceTime(loc.time);
             orient.position = loc.orient;
             orient.velocity = [0, 0, 0, 1]; // FIXME angular velocity
             update_request.orientation = orient;
@@ -431,16 +478,18 @@ Kata.defer(function() {
 
             var loc = {};
             if (update.location) {
-                loc.time = update.location.t;
+                // Note: currently we expect this to be in milliseconds, not a Date
+                loc.time = this._toLocalTime(update.location.t).getTime();
                 loc.pos = update.location.position;
                 loc.vel = update.location.velocity;
             }
             // FIXME differing time values? Maybe use Location class to handle?
-            if (update.orientation) {
-                //loc.time = update.orientation.t;
-                loc.orient = update.orientation.position;
-                //loc.(rotaxis/angvel) = update.orientation.velocity;
-            }
+            //if (update.orientation) {
+            //    // Note: currently we expect this to be in milliseconds, not a Date
+            //    loc.time = this._toLocalTime(update.orientation.t).getTime();
+            //    loc.orient = update.orientation.position;
+            //    //loc.(rotaxis/angvel) = update.orientation.velocity;
+            //}
             // FIXME bounds
             var visual;
             if (update.mesh)
@@ -480,12 +529,14 @@ Kata.defer(function() {
 
             properties.loc.pos = update.addition[add].location.position;
             properties.loc.vel = update.addition[add].location.velocity;
-            properties.loc.posTime = update.addition[add].location.t;
+            // Note: currently we expect this to be in milliseconds, not a Date
+            properties.loc.posTime = this._toLocalTime(update.addition[add].location.t).getTime();
 
             properties.loc.orient = update.addition[add].orientation.position;
             // FIXME Location wants axis/vel instead of quaternion velocity
             //properties.loc.(rotaxis,rotvel) = update.addition[add].orientation.velocity;
-            properties.loc.orientTime = update.addition[add].orientation.t;
+            // Note: currently we expect this to be in milliseconds, not a Date
+            properties.loc.orientTime = this._toLocalTime(update.addition[add].orientation.t).getTime();
 
             properties.bounds = update.addition[add].bounds;
 

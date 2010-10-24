@@ -164,7 +164,7 @@ Kata.defer(function() {
 
          var update = {
              pos:val.concat(),
-             vel:this.velocity(),
+             vel:this._requestedVelocity(),
              time:Kata.now(this.mSpace)
          };
          var msg = new Kata.ScriptProtocol.FromScript.Location(
@@ -184,7 +184,7 @@ Kata.defer(function() {
              return;
 
          var update = {
-             pos:this.position(now),
+             pos:this._requestedPosition(now),
              vel:val.concat(),
              time:now
          };
@@ -206,7 +206,7 @@ Kata.defer(function() {
 
          var update = {
              orient:val.concat(),
-             rotaxis:this.rotationalAxis(), angvel:this.angularSpeed(),
+             rotaxis:this._requestedRotationalAxis(), angvel:this._requestedAngularSpeed(),
              time:Kata.now(this.mSpace)
          };
          var msg = new Kata.ScriptProtocol.FromScript.Location(
@@ -227,7 +227,7 @@ Kata.defer(function() {
              return;
 
          var update = {
-             orient:this.orientation(now),
+             orient:this._requestedOrientation(now),
              rotaxis:axis.concat(), angvel:angvel,
              time:now
          };
@@ -316,6 +316,8 @@ Kata.defer(function() {
       * @returns {Kata.RemotePresence} the remote presence that the loc event was meant for
       */
      Kata.Presence.prototype._handleLocEvent = function(msg, remotePresences) {
+         var now = Kata.now(this.mSpace);
+
          if (this.id() === msg.observed) {
 //             Kata.warn("Self loc update: " + this.id());
              this._updateLoc(msg.loc, msg.visual);
