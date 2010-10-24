@@ -476,26 +476,37 @@ Kata.defer(function() {
             var update = loc_update_msg.update[idx];
             var from = update.object;
 
-            var loc = {};
-            if (update.location) {
-                // Note: currently we expect this to be in milliseconds, not a Date
-                loc.time = this._toLocalTime(update.location.t).getTime();
-                loc.pos = update.location.position;
-                loc.vel = update.location.velocity;
-            }
-            // FIXME differing time values? Maybe use Location class to handle?
-            //if (update.orientation) {
-            //    // Note: currently we expect this to be in milliseconds, not a Date
-            //    loc.time = this._toLocalTime(update.orientation.t).getTime();
-            //    loc.orient = update.orientation.position;
-            //    //loc.(rotaxis/angvel) = update.orientation.velocity;
-            //}
-            // FIXME bounds
+            // Note: Currently things go wonky if we include
+            // combinations of location and orientation in
+            // presenceLocUpdates. To work around this, we generate
+            // separate events for each type of information we've
+            // received.  The visual parameter is handled seperately,
+            // so we just fill it in before any calls to
+            // presenceLocUpdate.
             var visual;
             if (update.mesh)
                 visual = update.mesh;
 
-            this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+            if (update.location) {
+                var loc = {};
+                // Note: currently we expect this to be in milliseconds, not a Date
+                loc.time = this._toLocalTime(update.location.t).getTime();
+                loc.pos = update.location.position;
+                loc.vel = update.location.velocity;
+
+                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+            }
+            // FIXME differing time values? Maybe use Location class to handle?
+            if (update.orientation) {
+                var loc = {};
+                // Note: currently we expect this to be in milliseconds, not a Date
+                loc.time = this._toLocalTime(update.orientation.t).getTime();
+                loc.orient = update.orientation.position;
+                //loc.(rotaxis/angvel) = update.orientation.velocity;
+                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+            }
+
+            // FIXME bounds
         }
 
     };
