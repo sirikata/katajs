@@ -232,18 +232,27 @@ Kata.defer(function() {
          this.processRenderables();//garbage collect dead renderables;
          return remotePresence;
      };
+
+     Kata.GraphicsScript.prototype.updateGFX = function(remotePresence) {
+         var presence = this.mPresences[remotePresence.space()];
+         if (!presence.inGFXSceneGraph) //only if this particular presence has gfx enabled
+             return;
+
+         var msg = new Kata.ScriptProtocol.FromScript.GFXMoveNode(
+             presence.space(),
+             presence.id(),
+             remotePresence,
+             { loc : remotePresence.predictedLocation() }
+         );
+         this._sendHostedObjectMessage(msg);
+     };
      /**
       * Override Script._handlePresenceLocUpdate
       */
      Kata.GraphicsScript.prototype._handlePresenceLocUpdate = function(channel, data){
          var remotePresence = SUPER._handlePresenceLocUpdate.call(this, channel, data);
-         if (remotePresence) {
-             var presence = this.mPresences[data.space];
-             if (presence.inGFXSceneGraph) {//if this particular presence has gfx enabled
-                 var msg = new Kata.ScriptProtocol.FromScript.GFXMoveNode(this.mPresence.space(), this.mPresence.id(), remotePresence, { loc : remotePresence.predictedLocation() });
-                 this._sendHostedObjectMessage(msg);
-             }
-         }
+         if (remotePresence)
+             this.updateGFX(remotePresence);
          return remotePresence;
      };
      /**
