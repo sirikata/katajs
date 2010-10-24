@@ -120,8 +120,8 @@ Kata.defer(function() {
       */
      Kata.GraphicsScript.prototype._enableGraphics = function (presence,canvasId,textureObjectSpace, textureObjectUUID,textureName) {
          var space=presence.space();
-		 // don't give camera a mesh
-         this.renderRemotePresence(presence,presence,true);
+		 // presence may have mesh
+         this.renderRemotePresence(presence,presence);
          for (var remotePresenceId in this.mRemotePresences) {
              var remotePresence=this.mRemotePresences[remotePresenceId];
              if (remotePresence.space()==space) { 
