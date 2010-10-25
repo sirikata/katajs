@@ -134,16 +134,18 @@ Kata.defer(function() {
          var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(),presence.id(),presence.id());
          this._sendHostedObjectMessage(msg);
 
+         /// create camera with a fake ID so it's not attached to presence
+         var cameraID = Kata.ObjectID.random();
          var msg = new Kata.ScriptProtocol.FromScript.GFXCreateNode(presence.space(),presence.id(), presence);
-         msg.id = "thisisthecameraID";
+         msg.id = cameraID;
          this._sendHostedObjectMessage(msg);
-
          msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
-         msg.id = "thisisthecameraID";
+         msg.id = cameraID;
 		 msg.msg = "Camera";
          this._sendHostedObjectMessage(msg);
          msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
-         msg.id = "thisisthecameraID";
+         msg.id = cameraID;
+
          this._sendHostedObjectMessage(msg);
          if (this.mNumGraphicsSystems++==0) {
              var duration=new Date(0);
