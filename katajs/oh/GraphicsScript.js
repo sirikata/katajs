@@ -159,14 +159,17 @@ Kata.defer(function() {
              duration.setSeconds(2);
              this.mGraphicsTimer=this.timer(duration,Kata.bind(this.processRenderables,this),true);             
          }
-         setInterval(Kata.bind(this.cameraPeriodicUpdate, this), 50);
+         setInterval(Kata.bind(this.cameraPeriodicUpdate, this), 20);
      };
 
      Kata.GraphicsScript.prototype.setCameraPosOrient = function(pos, orient, lag){
          if (lag==null) lag = .9;     /// 0 = no lag; 1.0 = infinite
          this._camLag = lag;
-         this._camPosTarget = pos;
-         this._camOrient = orient;
+         if (pos) {
+             if (lag==0) this._camPos = pos;
+             this._camPosTarget = pos;
+         }
+         if (orient) this._camOrient = orient;
      }
 
      Kata.GraphicsScript.prototype.cameraPeriodicUpdate = function(){
