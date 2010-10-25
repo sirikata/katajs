@@ -158,7 +158,7 @@ Kata.defer(function() {
 
      };
      
-     Kata.GraphicsScript.prototype.setCameraPos = function(pos){
+     Kata.GraphicsScript.prototype.setCameraPosOrient = function(pos, orient){
          msg = {}
          msg.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
          msg.msg = "Move";
@@ -166,6 +166,7 @@ Kata.defer(function() {
          msg.id = Kata.BlessedCameraID;
          msg.spaceid = Kata.BlessedCameraSpaceid;
          msg.pos = pos;
+         msg.orient = orient;
          console.log("DEBUG setCameraPos:", msg);
          this._sendHostedObjectMessage(msg);
      }
