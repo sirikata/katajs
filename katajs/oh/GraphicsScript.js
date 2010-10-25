@@ -133,10 +133,17 @@ Kata.defer(function() {
          }
          var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(),presence.id(),presence.id());
          this._sendHostedObjectMessage(msg);
+
+         var msg = new Kata.ScriptProtocol.FromScript.GFXCreateNode(presence.space(),presence.id(), presence);
+         msg.id = "thisisthecameraID";
+         this._sendHostedObjectMessage(msg);
+
          msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
+         msg.id = "thisisthecameraID";
 		 msg.msg = "Camera";
          this._sendHostedObjectMessage(msg);
          msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
+         msg.id = "thisisthecameraID";
          this._sendHostedObjectMessage(msg);
          if (this.mNumGraphicsSystems++==0) {
              var duration=new Date(0);
