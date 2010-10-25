@@ -59,8 +59,9 @@ Kata.defer(function() {
          this.mNumGraphicsSystems=0;
          this._camPos = [0,0,0];
          this._camPosTarget = [0,0,0]
-         this._camLag = 0.9;
          this._camOrient = [0,0,0,1];
+         this._camOrientTarget = [0,0,0,1];
+         this._camLag = 0.9;
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
          this.mMessageDispatcher.add(msgTypes.GUIMessage, Kata.bind(this._handleGUIMessage, this));
      };
@@ -169,12 +170,18 @@ Kata.defer(function() {
              if (lag==0) this._camPos = pos;
              this._camPosTarget = pos;
          }
-         if (orient) this._camOrient = orient;
+         if (orient) {
+             if (lag==0) this._camOrient = orient;
+             this._camOrientTarget = orient;
+         }
      }
 
      Kata.GraphicsScript.prototype.cameraPeriodicUpdate = function(){
          for (i in this._camPos) {
              this._camPos[i] = this._camPos[i] * this._camLag + this._camPosTarget[i] * (1.0-this._camLag);
+         }
+         for (i in this._camOrient) {
+             this._camOrient[i] = this._camOrient[i] * this._camLag + this._camOrientTarget[i] * (1.0-this._camLag);
          }
          msg = {}
          msg.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
