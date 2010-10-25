@@ -42,8 +42,11 @@ Kata.defer(function() {
       * @constructor
       * @param channel channel for communication with main thread
       * @param args arguments provided by the creator of the object
+      * @param update_hook a hook of the form f(presence,
+      * remotePresence) invoked when updates are going to be passed to
+      * the graphics system.
       */
-     Kata.GraphicsScript = function(channel, args) {
+     Kata.GraphicsScript = function(channel, args, update_hook) {
          SUPER.constructor.call(this, channel, args);
          /**
           *  @type {Array} Array of indexes into the mRemotePresences map that have a chance of being rendered
@@ -59,6 +62,8 @@ Kata.defer(function() {
          this.mNumGraphicsSystems=0;
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
          this.mMessageDispatcher.add(msgTypes.GUIMessage, Kata.bind(this._handleGUIMessage, this));
+
+         this.mUpdateHook = update_hook;
      };
      Kata.extend(Kata.GraphicsScript, SUPER);
 
@@ -245,6 +250,8 @@ Kata.defer(function() {
              { loc : remotePresence.predictedLocation() }
          );
          this._sendHostedObjectMessage(msg);
+         if (this.mUpdateHook)
+             this.mUpdateHook(presence, remotePresence);
      };
      /**
       * Override Script._handlePresenceLocUpdate
