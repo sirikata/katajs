@@ -57,6 +57,8 @@ Kata.defer(function() {
          this.mRenderableRemotePresenceIndex=0;
          this.mGraphicsTimer=null;
          this.mNumGraphicsSystems=0;
+         this._camPos = [0,0,0];
+         this._camOrient = [0,0,0,1];
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
          this.mMessageDispatcher.add(msgTypes.GUIMessage, Kata.bind(this._handleGUIMessage, this));
      };
@@ -157,17 +159,20 @@ Kata.defer(function() {
          }
 
      };
-     
-     Kata.GraphicsScript.prototype.setCameraPosOrient = function(pos, orient){
+
+     Kata.GraphicsScript.prototype.setCameraPosOrient = function(pos, orient, lag){
+         if (lag==null) lag = .9;     /// 0 = no lag; 1.0 = infinite
+         for (i in pos) {
+             this._camPos[i] = this._camPos[i] * lag + pos[i] * (1.0-lag);
+         }
          msg = {}
          msg.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
          msg.msg = "Move";
          msg.space = Kata.BlessedCameraSpace;
          msg.id = Kata.BlessedCameraID;
          msg.spaceid = Kata.BlessedCameraSpaceid;
-         msg.pos = pos;
+         msg.pos = this._camPos;
          msg.orient = orient;
-//         console.log("DEBUG setCameraPos:", msg);
          this._sendHostedObjectMessage(msg);
      }
 
