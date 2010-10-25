@@ -155,14 +155,16 @@ Kata.defer(function() {
         return serialized;
     };
 
-    Kata.SirikataSpaceConnection.prototype.connectObject = function(id, auth, vis) {
+    Kata.SirikataSpaceConnection.prototype.connectObject = function(id, auth, scale, vis) {
         var objid = this._getObjectID(id);
 
         //Kata.warn("Connecting " + id + " == " + objid);
 
+        var reqloc = Kata.LocationIdentity(0);
+        if (scale) reqloc.scale = [scale, scale, scale];
         this.mOutstandingConnectRequests[objid] =
             {
-                loc_bounds : Kata.LocationIdentity(0),
+                loc_bounds : reqloc,
                 visual : vis,
                 deferred_odp : []
             };
@@ -182,7 +184,10 @@ Kata.defer(function() {
         orient.position = [0, 0, 0, 0];
         orient.velocity = [0, 0, 0, 0];
         connect_msg.orientation = orient;
-        connect_msg.bounds = [0, 0, 0, 1];
+        if (scale)
+            connect_msg.bounds = [0, 0, 0, scale];
+        else
+            connect_msg.bounds = [0, 0, 0, 1];
         // FIXME don't always register queries, allow specifying angle
         connect_msg.query_angle = 0.0000001;
         if (vis && vis.mesh)
@@ -550,6 +555,10 @@ Kata.defer(function() {
             properties.loc.orientTime = this._toLocalTime(update.addition[add].orientation.t).getTime();
 
             properties.bounds = update.addition[add].bounds;
+            var scale = update.addition[add].bounds[3];
+            properties.loc.scale = [scale, scale, scale];
+            // FIXME bounds and scale don't get their own time. Why does Location even have this?
+            properties.loc.scaleTime = this._toLocalTime(update.addition[add].location.t).getTime();
 
             if (update.addition[add].HasField("mesh")) {
                 // FIXME: This is only an object with multiple

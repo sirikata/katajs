@@ -105,10 +105,11 @@ Kata.include("katajs/core/Time.js");
                  return data;
              },
 
-             Connect : function(space, auth) {
+             Connect : function(space, auth, scale) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Connect;
                  this.space = space;
                  this.auth = auth;
+                 this.scale = scale;
              },
              RegisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.EnableGUIMessage;
@@ -216,7 +217,7 @@ Kata.include("katajs/core/Time.js");
                  if (remotePresence.rMesh) {
                      messageList.push(new Kata.ScriptProtocol.FromScript.GFXUpdateVisualMesh(space, 
                         observer, remotePresence.id(), remotePresence.rMesh, remotePresence.rAnim, remotePresence.rUpAxis,
-                        remotePresence.rCenter));
+                        remotePresence.rCenter, remotePresence.scale()));
                  }else {
                     //MIGHT be a light or somesuch
                  }
@@ -229,7 +230,7 @@ Kata.include("katajs/core/Time.js");
                  this.id = id;
              },
              // Generates either a Mesh, Light, WebView, or Camera message, or the Destroy variants.
-             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim, up, center) {
+             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim, up, center, scale) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
                  if (mesh == null) {
                      this.msg = "DestroyMesh";
@@ -239,6 +240,7 @@ Kata.include("katajs/core/Time.js");
                      this.anim = anim;
                      this.up_axis = up;
                      this.center = center;
+                     this.scale = scale;
                  }
              },
              GFXAttachCamera : function(space, observer, id, canvasId) {

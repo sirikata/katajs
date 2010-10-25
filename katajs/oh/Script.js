@@ -96,7 +96,7 @@ Kata.defer(function() {
       *  @param {function(Kata.Presence)} cb callback to invoke upon completion
       */
      Kata.Script.prototype.connect = function(args, auth, cb) {
-         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth);
+         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth, args.scale);
          msg.visual=args.visual;
          this.mConnectRequests[args.space] = cb;
          this._sendHostedObjectMessage(msg);

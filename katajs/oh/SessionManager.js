@@ -95,7 +95,9 @@ Kata.include("katajs/core/URL.js");
          this.mObjects[ho.getID()] = ho;
 
          // And try to connect
-         space_conn.connectObject(ho.getID(), auth, req.visual);
+         var scale = 1.0;
+         if (req.scale) scale = req.scale;
+         space_conn.connectObject(ho.getID(), auth, scale, req.visual);
      };
 
      /** Callback from SpaceConnection which allows us to alias an ID

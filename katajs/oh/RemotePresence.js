@@ -143,6 +143,10 @@ Kata.include("katajs/oh/odp/Endpoint.js");
      Kata.RemotePresence.prototype.rotationalAxis = function() {
          return this.mLocation.rotaxis.concat();//FIXME drh do interpolation?
      };
+     /** Get the current estimate of this object's scale. */
+     Kata.RemotePresence.prototype.scale = function() {
+         return this.mLocation.scale.concat();//FIXME drh do interpolation?
+     };
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.location = function() {
          var retval={
@@ -168,6 +172,9 @@ Kata.include("katajs/oh/odp/Endpoint.js");
     };
     Kata.RemotePresence.prototype.predictedRotationalAxis = function() {
         return this.rotationalAxis();
+    };
+    Kata.RemotePresence.prototype.predictedScale = function() {
+        return this.scale();
     };
     /** Gets the current best estimate of this object's positon. This
      * may include updates applied locally but not verified from the

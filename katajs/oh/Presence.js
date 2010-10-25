@@ -150,6 +150,9 @@ Kata.defer(function() {
     Kata.Presence.prototype._requestedRotationalAxis = function() {
         return this.mRequestedLocation.rotaxis.concat();
     };
+    Kata.Presence.prototype._requestedScale = function() {
+        return this.mRequestedLocation.scale.concat();
+    };
     /** Get the current estimate of this object's position. */
     Kata.Presence.prototype._requestedLocation = function() {
         var retval = {};
@@ -174,6 +177,9 @@ Kata.defer(function() {
     };
     Kata.Presence.prototype.predictedRotationalAxis = function() {
         return this._requestesdRotationalAxis();
+    };
+    Kata.Presence.prototype.predictedScale = function() {
+        return this._scaleRotationalAxis();
     };
     Kata.Presence.prototype.predictedLocation = function() {
         return this._requestedLocation();
