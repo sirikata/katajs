@@ -167,7 +167,7 @@ Kata.defer(function() {
          msg.spaceid = Kata.BlessedCameraSpaceid;
          msg.pos = pos;
          msg.orient = orient;
-         console.log("DEBUG setCameraPos:", msg);
+//         console.log("DEBUG setCameraPos:", msg);
          this._sendHostedObjectMessage(msg);
      }
 
