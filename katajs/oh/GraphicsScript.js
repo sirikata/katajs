@@ -58,6 +58,8 @@ Kata.defer(function() {
          this.mGraphicsTimer=null;
          this.mNumGraphicsSystems=0;
          this._camPos = [0,0,0];
+         this._camPosTarget = [0,0,0]
+         this._camLag = 0.9;
          this._camOrient = [0,0,0,1];
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
          this.mMessageDispatcher.add(msgTypes.GUIMessage, Kata.bind(this._handleGUIMessage, this));
@@ -157,13 +159,19 @@ Kata.defer(function() {
              duration.setSeconds(2);
              this.mGraphicsTimer=this.timer(duration,Kata.bind(this.processRenderables,this),true);             
          }
-
+         setInterval(Kata.bind(this.cameraPeriodicUpdate, this), 50);
      };
 
      Kata.GraphicsScript.prototype.setCameraPosOrient = function(pos, orient, lag){
          if (lag==null) lag = .9;     /// 0 = no lag; 1.0 = infinite
-         for (i in pos) {
-             this._camPos[i] = this._camPos[i] * lag + pos[i] * (1.0-lag);
+         this._camLag = lag;
+         this._camPosTarget = pos;
+         this._camOrient = orient;
+     }
+
+     Kata.GraphicsScript.prototype.cameraPeriodicUpdate = function(){
+         for (i in this._camPos) {
+             this._camPos[i] = this._camPos[i] * this._camLag + this._camPosTarget[i] * (1.0-this._camLag);
          }
          msg = {}
          msg.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
@@ -172,7 +180,7 @@ Kata.defer(function() {
          msg.id = Kata.BlessedCameraID;
          msg.spaceid = Kata.BlessedCameraSpaceid;
          msg.pos = this._camPos;
-         msg.orient = orient;
+         msg.orient = this._camOrient;
          this._sendHostedObjectMessage(msg);
      }
 
