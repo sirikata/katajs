@@ -263,4 +263,13 @@ Kata.defer(function() {
          return true;
      };
      
+    Kata.GraphicsScript.prototype.animate = function(presence, remotePresence, animation) {
+        var msg = new Kata.ScriptProtocol.FromScript.GFXAnimate(
+            presence.space(),
+            presence.id(),
+            remotePresence,
+            animation
+        );
+        this._sendHostedObjectMessage(msg);
+    };
  });

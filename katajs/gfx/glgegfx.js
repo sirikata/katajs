@@ -269,6 +269,21 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
          [0, 1, 0]); // up
          */
     };
+    VWObject.prototype.animate = function(anim_name) {
+        var meshes = this.mNode.getChildren();
+        if (!meshes || meshes.length > 1)
+            Kata.warn("Couldn't handle animate request.");
+        var mesh = meshes[0];
+
+        if (anim_name == this.mCurAnimation) return;
+
+        var actions = mesh.getColladaActions();
+        var new_anim = actions[anim_name];
+        if (!new_anim) return;
+
+        this.mCurAnimation = anim_name;
+        mesh.setAction(new_anim, 400, true);
+    };
 
     function SpaceRoot(glgegfx, element, spaceID) {
         this.mElement = element;
@@ -540,6 +555,10 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         var vwObject=this.mObjects[msg.id];
         this.moveTo(vwObject,msg);
         vwObject.update(this);
+    };
+    GLGEGraphics.prototype.methodTable["Animate"]=function(msg) {
+        var vwObject = this.mObjects[msg.id];
+        vwObject.animate(msg.animation);
     };
     GLGEGraphics.prototype.methodTable["Destroy"]=function(msg) {
         if (msg.id in this.mObjects) {

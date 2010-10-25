@@ -205,6 +205,14 @@ Kata.include("katajs/core/Time.js");
                  if (data)
                      Kata.LocationCopyUnifyTime(data.loc,this);
              },
+             GFXAnimate : function(space, observer, remotePresence, animation) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="Animate";
+                 this.space = space+observer;
+                 this.id = remotePresence.id();
+                 this.spaceid = this.space;
+                 this.animation = animation;
+             },
              GFXDestroyNode : function(space, observer, remotePresence) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
 
