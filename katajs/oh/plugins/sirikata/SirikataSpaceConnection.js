@@ -189,7 +189,7 @@ Kata.defer(function() {
         else
             connect_msg.bounds = [0, 0, 0, 1];
         // FIXME don't always register queries, allow specifying angle
-        connect_msg.query_angle = 0.0000001;
+        connect_msg.query_angle = 0.00000000000000000000000001;
         if (vis && vis.mesh)
             connect_msg.mesh = vis.mesh;
 
