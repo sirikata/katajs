@@ -35,8 +35,14 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.callback=callbackFunction;
     var thus=this;
     {
-        var canvas;
+        var canvas, gl;
         canvas = document.createElement('canvas');
+        if (canvas) gl = canvas.getContext("experimental-webgl", {});
+        if (!canvas || !gl) {
+            if (typeof(globalNoWebGLError) != "undefined") {
+                globalNoWebGLError();
+            }
+        }
         canvas.style.width = "100%";
         canvas.style.height = "100%";
         parentElement.appendChild(canvas);
