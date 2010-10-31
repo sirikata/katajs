@@ -43,6 +43,9 @@ self.onmessage = function (ev) {
     try {
         importScripts(scriptroot+"katajs.compiled.js");
     } catch (e) {
+        try {
+            console.log("Exception loading katajs.compiled.js", e);
+        }
     }
     if (typeof(Kata)==="undefined") {
         importScripts(scriptroot+"katajs/core/Core.js");
