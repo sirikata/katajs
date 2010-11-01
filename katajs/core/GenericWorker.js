@@ -48,7 +48,11 @@ self.onmessage = function (ev) {
         } catch (e) {}
     }
     if (typeof(Kata)==="undefined") {
-        importScripts(scriptroot+"katajs/core/Core.js");
+        try {
+            importScripts(scriptroot+"katajs/core/Core.js");
+        } catch (e) {
+            throw "Failed to import katajs/core/Core.js at scriptroot "+scriptroot+": "+e;
+        }
     }
     Kata.scriptRoot = scriptroot;
     Kata.bootstrapWorker=data[1];
