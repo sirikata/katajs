@@ -30,9 +30,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/Simulation.js");
-
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/Simulation.js'
+], function() {
     var SUPER = Kata.Simulation.prototype;
     /** GUISimulation is a simple wrapper for the base Simulation
      * class which decodes GUI messages before passing them on for
@@ -60,4 +60,4 @@ Kata.defer(function() {
     Kata.GUISimulation.prototype.handleGUIMessage = function (channel, data) {
     };
 
-});
+}, 'katajs/oh/GUISimulation.js');

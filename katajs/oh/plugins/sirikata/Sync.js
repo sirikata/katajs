@@ -30,10 +30,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/plugins/sirikata/impl/TimeSync.pbj.js");
-
-Kata.defer(
-function() {
+Kata.require([
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimeSync.pbj.js']
+], function() {
 
     if (typeof(Kata.Sirikata) == 'undefined')
         Kata.Sirikata = {};
@@ -116,4 +115,4 @@ function() {
 
     };
 
-});
+}, 'katajs/oh/plugins/sirikata/Sync.js');

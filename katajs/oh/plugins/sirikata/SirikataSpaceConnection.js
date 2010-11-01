@@ -37,13 +37,13 @@ Kata.require([
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimedMotionVector.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimedMotionQuaternion.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Session.pbj.js'],
-    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js']
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Prox.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Loc.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Frame.pbj.js'],
     'katajs/oh/sst/SSTImpl.js',
     'katajs/oh/plugins/sirikata/Frame.js',
-    'katajs/oh/plugins/sirikata/Sync.js',
+    'katajs/oh/plugins/sirikata/Sync.js'
 ], function() {
 
     // FIXME having this sucks, we need to get rid of polling like the Sirikata code did
