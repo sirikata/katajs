@@ -30,15 +30,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/SpaceConnection.js");
-Kata.include("katajs/oh/SessionManager.js");
 
 // See note about how connections work. Generally connection classes
 // shouldn't include anything from a space implementation (and
 // generally can't since the space implementation is not available.
-Kata.include("katajs/space/loop/Space.js");
 
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/SpaceConnection.js',
+    'katajs/oh/SessionManager.js',
+    'katajs/space/loop/Space.js'
+], function() {
 
      var SUPER = Kata.SpaceConnection.prototype;
      /** Kata.LoopbackSpaceConnection is an implementation of
@@ -133,4 +134,4 @@ Kata.defer(function() {
      // Simulated local space
      loopspace = new Kata.LoopbackSpace( Kata.URL("loop://localhost") );
 
-});
+}, 'katajs/oh/plugins/loop/LoopbackSpaceConnection.js');

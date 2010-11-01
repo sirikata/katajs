@@ -6,7 +6,8 @@ if (typeof(console) == "undefined") {
 	debug_console = true;
 }
 
-(function() {
+Kata.require([
+], function() {
     var currentTime = (new Date()).getTime();
     var scheduled=false;
     Kata.scheduleNowUpdates=function(time){
@@ -31,4 +32,4 @@ if (typeof(console) == "undefined") {
             currentTime = newTime;
         return currentTime;
     };
-})();
+}, 'katajs/core/Time.js');

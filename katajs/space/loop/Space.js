@@ -30,15 +30,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/SpaceConnection.js");
-Kata.include("katajs/core/Time.js");
-Kata.include("katajs/core/Math.uuid.js");
-Kata.include("katajs/space/loop/Loc.js");
-Kata.include("katajs/space/loop/EveryoneProx.js");
-Kata.include("katajs/space/loop/Subscription.js");
-Kata.include("katajs/core/Location.js");
 
-(function() {
+Kata.require([
+    'katajs/oh/SpaceConnection.js',
+    'katajs/core/Time.js',
+    'katajs/core/Math.uuid.js',
+    'katajs/space/loop/Loc.js',
+    'katajs/space/loop/EveryoneProx.js',
+    'katajs/space/loop/Subscription.js',
+    'katajs/core/Location.js'
+], function() {
 
      /** A simple loopback space.  To simulate a network, the loopback
       * space delays all calls with a timeout.
@@ -230,4 +231,4 @@ Kata.include("katajs/core/Location.js");
      Kata.LoopbackSpace.prototype.sendMessage = function(from, to, payload) {
      };
 
-})();
+}, 'katajs/space/loop/Space.js');

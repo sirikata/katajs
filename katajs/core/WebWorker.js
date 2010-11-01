@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/SimpleChannel.js");
 
-(function() {
+Kata.require([
+    'katajs/core/SimpleChannel.js'
+], function() {
     /** @variable {boolean} If true, uses Workers on supported Javascript
      * engines. If false, never uses workers, and runs code synchronously.
      */
@@ -66,17 +67,9 @@ Kata.include("katajs/core/SimpleChannel.js");
      */
     Kata.FakeWebWorker = function (jsFile, clsName, args) {
         this.mChannel = new Kata.SimpleChannel;
-        var clsTree = clsName.split(".");
-        Kata.evalInclude(jsFile);
-        var cls = self;
-        for (var i = 0; cls && i < clsTree.length; i++) {
-            cls = cls[clsTree[i]];
-        }
         this.mArgs = args;
-        this.mClass = cls;
-        if (!cls) {
-            Kata.error(clsName+" is undefined.");
-        }
+        this.mClassName = clsName;
+        this.mJSFile = jsFile;
         if (network_debug) console.log("new webworker");
     };
     /** Runs the WebWorker. At this point, it is possible to receive a
@@ -85,12 +78,30 @@ Kata.include("katajs/core/SimpleChannel.js");
      */
     Kata.FakeWebWorker.prototype.go = function() {
         var opposingChannel=new Kata.SimpleChannel(this.mChannel);
-        var cls = this.mClass;
-        if (network_debug) console.log("going!");
-        this.mChild = new cls (
-            opposingChannel,
-            this.mArgs);
+        if (!this.mClassName || !this.mArgs) {
+            Kata.error("WebWorker.go() called twice");
+            return;
+        }
+        var args = this.mArgs;
+        var clsName = this.mClassName;
+        var clsTree = clsName.split(".");
+        delete this.mClassName;
         delete this.mArgs;
+        Kata.require(
+            [this.mJSFile],
+            function() {
+                var cls = self;
+                for (var i = 0; cls && i < clsTree.length; i++) {
+                    cls = cls[clsTree[i]];
+                }
+                if (!cls) {
+                    Kata.error(clsName+" is undefined:" + this.mJSFile);
+                }
+                if (network_debug) console.log("going!");
+                this.mChild = new cls (
+                    opposingChannel,
+                    args);
+            });
     };
 
     /**
@@ -113,9 +124,6 @@ Kata.include("katajs/core/SimpleChannel.js");
         Kata.error("ERROR at "+file+":"+line+": "+data);
     };
 
-})();
-
-(function() {
     // Define a Channel for FakeWebWorker.
 
     function getCallback(thus) {
@@ -147,9 +155,8 @@ Kata.include("katajs/core/SimpleChannel.js");
     Kata.FakeWebWorker.Channel.prototype.sendMessage = function (data) {
         this.mMessagePort.postMessage(data);
     };
-})();
 
-(function() {
+
     // And finally, figure out what to do about WebWorker.  If possible, use
     // native WebWorkers.  If not, just alias FakeWebWorker.  In both cases,
     // the FakeWebWorker channel class is reusable.
@@ -159,7 +166,6 @@ Kata.include("katajs/core/SimpleChannel.js");
             thus.gotError(ev.message, ev.filename, ev.lineno);
         };
     }
-
 
     if (Kata.WEB_WORKERS_ENABLED && typeof(Worker)!="undefined") {
         /**
@@ -208,6 +214,4 @@ Kata.include("katajs/core/SimpleChannel.js");
     } else {
         Kata.WebWorker = Kata.FakeWebWorker;
     }
-})();
-(function() {
-})();
+}, 'katajs/core/WebWorker.js');

@@ -31,7 +31,8 @@
  */
 
 if (typeof(Kata) == "undefined") {Kata = {};}
-(function() {
+Kata.require([
+], function() {
 
     /**
      * Simulation is a simple interface for something that can talk to the
@@ -51,4 +52,4 @@ if (typeof(Kata) == "undefined") {Kata = {};}
     Kata.Simulation.prototype.receivedMessage = function (channel, data) {
     };
 
-})();
+}, 'katajs/oh/Simulation.js');

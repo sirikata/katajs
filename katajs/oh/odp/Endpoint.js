@@ -30,12 +30,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include('katajs/core/SpaceID.js');
-Kata.include('katajs/core/ObjectID.js');
-Kata.include('katajs/core/PresenceID.js');
-Kata.include('katajs/oh/odp/PortID.js');
 
-(function() {
+Kata.require([
+    'katajs/core/SpaceID.js',
+    'katajs/core/ObjectID.js',
+    'katajs/core/PresenceID.js',
+    'katajs/oh/odp/PortID.js'
+], function() {
 
     if (typeof(Kata.ODP) == "undefined")
         Kata.ODP = {};
@@ -87,4 +88,4 @@ Kata.include('katajs/oh/odp/PortID.js');
         return 'ODP.Endpoint(' + this.toConciseString() + ')';
     };
 
-})();
+}, 'katajs/oh/odp/Endpoint.js');

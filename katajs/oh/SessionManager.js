@@ -30,9 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/URL.js");
 
-(function() {
+Kata.require([
+    'katajs/core/URL.js'
+], function() {
     /** Kata.SessionManager manages sessions with spaces.  Internally, it
      *  tracks only as many ObjectHost <-> Space connections as necessary.
      *  It multiplexes individual sessions over these connections, and
@@ -191,8 +192,6 @@ Kata.include("katajs/core/URL.js");
          space_conn.unsubscribe(id, observed);
      };
 
-})();
+}, 'katajs/oh/SessionManager.js');
 
 // Needs to register using registerProtocolHandler.
-Kata.include("katajs/oh/plugins/loop/LoopbackSpaceConnection.js");
-Kata.include("katajs/oh/plugins/sirikata/SirikataSpaceConnection.js");

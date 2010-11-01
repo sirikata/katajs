@@ -30,13 +30,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/impl/ScriptProtocol.js");
-Kata.include("katajs/oh/Presence.js");
-Kata.include("katajs/oh/RemotePresence.js");
-Kata.include("katajs/oh/odp/Port.js");
-Kata.include("katajs/oh/odp/Service.js");
 
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/impl/ScriptProtocol.js',
+    'katajs/oh/Presence.js',
+    'katajs/oh/RemotePresence.js',
+    'katajs/oh/odp/Port.js',
+    'katajs/oh/odp/Service.js'
+], function() {
 
      /** Script is the base class for all scripts.  It should cover
       * all the necessary basic inter-thread communication.  It
@@ -259,4 +260,4 @@ Kata.defer(function() {
      Kata.Script.prototype._handleStorageEvent = function(data) {
      };
 
-});
+}, 'katajs/oh/Script.js');

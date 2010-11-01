@@ -30,10 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/Time.js");
-Kata.include("katajs/oh/odp/Endpoint.js");
 
-(function() {
+Kata.require([
+    'katajs/core/Time.js',
+    'katajs/oh/odp/Endpoint.js'
+], function() {
 
      /** A RemotePresence represents another object in the world you
       * can interact with.  It will keep a shadow copy of basic
@@ -207,4 +208,4 @@ Kata.include("katajs/oh/odp/Endpoint.js");
              this.mVisual = visual;
          }
      };
-})();
+}, 'katajs/oh/RemotePresence.js');

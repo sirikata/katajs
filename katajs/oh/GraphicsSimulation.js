@@ -29,9 +29,10 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-Kata.include("katajs/oh/Simulation.js");
 
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/Simulation.js'
+], function() {
 
     var SUPER = Kata.Simulation.prototype;
     /** GraphicsSimulation is a wrapper around katajs. It must be instantiated
@@ -99,4 +100,4 @@ Kata.defer(function() {
 //         console.log("GraphicsSimulation._handleInputMessage:",msg);
          this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg.msg, msg.event));
      };
-});
+}, 'katajs/oh/GraphicsSimulation.js');

@@ -30,11 +30,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/core/URL.js");
-Kata.include("katajs/core/Location.js");
-Kata.include("katajs/core/Time.js");
 
-(function() {
+Kata.require([
+    'katajs/core/URL.js',
+    'katajs/core/Location.js',
+    'katajs/core/Time.js'
+], function() {
 
      /** Script protocol contains classes for inter-thread
       * communication with a script, i.e. the objects that should be
@@ -350,4 +351,4 @@ Kata.include("katajs/core/Time.js");
          }
      };
 
-})();
+}, 'katajs/oh/impl/ScriptProtocol.js');

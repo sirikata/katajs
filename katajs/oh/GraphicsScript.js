@@ -30,10 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/Script.js");
-Kata.include("katajs/oh/impl/ScriptProtocol.js");
 
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/Script.js',
+    'katajs/oh/impl/ScriptProtocol.js'
+], function() {
      var SUPER = Kata.Script.prototype;
      /** GraphicsScript is an extension of the core Script interface
       * which provides convenience methods for interacting with an
@@ -327,4 +328,5 @@ Kata.defer(function() {
         );
         this._sendHostedObjectMessage(msg);
     };
- });
+
+}, "katajs/oh/GraphicsScript.js");

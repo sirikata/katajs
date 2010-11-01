@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	<!-- Core must be loaded before web-socket-js because it cludges window.console -->
 	<script type="text/javascript" src="../../katajs/core/Core.js"></script>
+	<script type="text/javascript" src="../../katajs.compiled.js"></script>
 <!--
 	<script type="text/javascript" src="../../externals/web-socket-js/FABridge.js"></script>
 	<script type="text/javascript" src="../../externals/web-socket-js/swfobject.js"></script>
@@ -52,42 +53,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	<script type="text/javascript" src="../../katajs/gfx/WebGLCompat.js"></script>
 
-	<script type="text/javascript" src="../../externals/o3djs/base.js"></script>
-	<script type="text/javascript" src="../../externals/o3d-webgl/base.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge_math.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge_input.js"></script>
 	<script type="text/javascript" src="../../externals/GLGE/glge_collada.js"></script>
     <script type="text/javascript">
 
-      Kata.include("katajs/oh/MainThread.js");
+      Kata.require(["katajs/oh/MainThread.js",
 // "Plugins" - load files which add specific implementations. This is left up to the user since some may be expensive to load.
-	Kata.include("katajs/oh/SpaceConnection.js");
-	Kata.include("katajs/space/loop/Space.js");
-	Kata.include("katajs/oh/GraphicsSimulation.js");
-	Kata.include("katajs/gfx/kjsgfx.js");
-    Kata.include("katajs/core/Location.js");
-	Kata.include("katajs/gfx/TextGraphics.js");
-	Kata.include("katajs/gfx/o3dgfx.js");
-	Kata.include("katajs/oh/Script.js");
-	Kata.include("katajs/oh/ObjectHost.js");
-	Kata.include("katajs/oh/impl/BootstrapScript.js");
-	Kata.include("katajs/oh/GraphicsScript.js");
-    </script>
-
-<!-- "Plugins" - load files which add specific implementations. This
-is left up to the user since some may be expensive to load.
--->
-    <script>
+        "katajs/oh/SpaceConnection.js",
+        "katajs/space/loop/Space.js",
+        "katajs/oh/GraphicsSimulation.js",
+        "katajs/core/Location.js",
+        "katajs/gfx/glgegfx.js",
+        "katajs/gfx/TextGraphics.js",
+        "katajs/oh/Script.js",
+        "katajs/oh/ObjectHost.js",
+        "katajs/oh/impl/BootstrapScript.js",
+        "katajs/oh/GraphicsScript.js"
+    ], function() {
+     Kata.WEB_WORKERS_ENABLED=true;
         var kata, graphics;
-        var driver = "o3d"; // "o3d" or "glge"
+        var driver = "GLGE"; // "o3d" or "glge"
 
         var connectRequested = false;
         var docReady = false;
-        function setDocReady() { docReady = true; loadGFX(); }
-        function setConnectRequested() { connectRequested = true; loadGFX(); }
+        window.setDocReady = function() { docReady = true; loadGFX(); }
+        window.setConnectRequested = function() { connectRequested = true; loadGFX(); }
 
-        function loadGFX() {
+        window.loadGFX = function() {
             if (!docReady || !connectRequested) return;
 
             var spaceurl = document.getElementById("spaceurl").value;
@@ -101,14 +95,15 @@ is left up to the user since some may be expensive to load.
                           );
             graphics = new Kata.GraphicsSimulation(driver, window.kata.getChannel(), document.getElementById("container"));
         }
-        if (driver == "glge") {
+        if (driver == "GLGE") {
             doc = new GLGE.Document;
             doc.onLoad = setDocReady;
             doc.load("scene.xml");
+            window.g_GLGE_doc = doc;
         } else {
            window.onload = setDocReady;
         }
-        Kata.resolveDeferredHeaders();
+    })
     </script>
   </head>
 

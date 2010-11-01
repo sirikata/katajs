@@ -30,29 +30,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/SpaceConnection.js");
-Kata.include("katajs/oh/SessionManager.js");
-Kata.include("katajs/network/TCPSST.js");
-Kata.include("externals/protojs/protobuf.js");
-Kata.include("externals/protojs/pbj.js");
-
-Kata.include("katajs/oh/plugins/sirikata/impl/TimedMotionVector.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/TimedMotionQuaternion.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/Session.pbj.js");
-
-Kata.include("katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js");
-
-Kata.include("katajs/oh/plugins/sirikata/impl/Prox.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/Loc.pbj.js");
-Kata.include("katajs/oh/plugins/sirikata/impl/Frame.pbj.js");
-
-Kata.include("katajs/oh/sst/SSTImpl.js");
-
-Kata.include("katajs/oh/plugins/sirikata/Frame.js");
-
-Kata.include("katajs/oh/plugins/sirikata/Sync.js");
-
-Kata.defer(function() {
+Kata.require([
+    'katajs/oh/SpaceConnection.js',
+    'katajs/oh/SessionManager.js',
+    'katajs/network/TCPSST.js',
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimedMotionVector.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimedMotionQuaternion.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Session.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js']
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Prox.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Loc.pbj.js'],
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Frame.pbj.js'],
+    'katajs/oh/sst/SSTImpl.js',
+    'katajs/oh/plugins/sirikata/Frame.js',
+    'katajs/oh/plugins/sirikata/Sync.js',
+], function() {
 
     // FIXME having this sucks, we need to get rid of polling like the Sirikata code did
     setInterval(Kata.SST.serviceConnections, 10);
@@ -582,4 +574,4 @@ Kata.defer(function() {
     };
 
     Kata.SessionManager.registerProtocolHandler("sirikata", Kata.SirikataSpaceConnection);
-});
+}, 'katajs/oh/plugins/sirikata/SirikataSpaceConnection.js');

@@ -32,9 +32,9 @@
 
 // We use protocol buffers just to encode the string, we could also
 // setup real messages
-Kata.include("externals/protojs/protobuf.js");
-
-(function() {
+Kata.require([
+    'externals/protojs/protobuf.js'
+], function() {
 
     if (typeof(Kata.Behavior) == "undefined")
         Kata.Behavior = {};
@@ -154,4 +154,4 @@ Kata.include("externals/protojs/protobuf.js");
          this._handleReply(reqinfo, null);
      };
 
- })();
+}, 'katajs/oh/behavior/NamedObject.js');

@@ -2,4 +2,7 @@
 katajs/oh/plugins/sirikata/impl
 
 # Protocol directory for pbj Test
-tests/pbj/Test.pbj.js
+tests/pbj/*.pbj.js
+
+# Closure compiled output
+katajs.compiled.js

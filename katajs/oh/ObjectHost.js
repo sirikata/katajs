@@ -30,10 +30,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.include("katajs/oh/SessionManager.js");
-Kata.include("katajs/core/URL.js");
 
-(function() {
+Kata.require([
+    'katajs/oh/HostedObject.js',
+    'katajs/oh/SessionManager.js',
+    'katajs/core/URL.js'
+], function() {
 
     /** Kata.ObjectHost is the main interface to access HostedObject's. It also
      * manages the list of open space connections, and communication between
@@ -169,6 +171,5 @@ Kata.include("katajs/core/URL.js");
          this.mSessionManager.unsubscribe(space, id, observe);
      };
 
-})();
+}, 'katajs/oh/ObjectHost.js');
 
-Kata.include("katajs/oh/HostedObject.js");
