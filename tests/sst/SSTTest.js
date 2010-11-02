@@ -1,6 +1,9 @@
+function SSTTest() {
+    this.dispatcher = new Kata.SST.ObjectMessageDispatcher;
+};
 Kata.require([
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/sst/SSTImpl.js'],
-    'katajs/core/Math.uuid.js',
+    'katajs/core/Math.uuid.js'
 ], function() {
 
 function print(str) {
@@ -20,10 +23,6 @@ TestObjectMessageRouter.prototype.route = function(msg) {
     //getConnectionSST(this.mTargetEndpoint).receiveMessage(msg);
     console.log("Routing to "+this.mTargetEndpoint+"\n", msg);
     this.mDispatcher.dispatchMessage(msg);
-};
-
-function SSTTest() {
-    this.dispatcher = new Kata.SST.ObjectMessageDispatcher;
 };
 SSTTest.prototype.establishedConnection = function(error, stream) {
     print("established, error = "+error+"\n", stream);
@@ -51,4 +50,4 @@ SSTTest.prototype.createTestObjects = function(uuidA, uuidB) {
     Kata.SST.connectStream(uuidA, uuidB, this.establishedConnection);
 };
 
-});
+},'../katajs/tests/sst/SSTTest.js');
