@@ -39,7 +39,16 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     {
         var canvas, gl;
         canvas = document.createElement('canvas');
-        if (canvas) gl = canvas.getContext("experimental-webgl", {});
+        if (canvas) {
+            try {
+                gl = canvas.getContext("experimental-webgl", {});
+            } 
+            catch (e) {
+                if (typeof(globalNoWebGLError) != "undefined") {
+                    globalNoWebGLError();
+                }
+            }
+        }
         if (!canvas || !gl) {
             if (typeof(globalNoWebGLError) != "undefined") {
                 globalNoWebGLError();
