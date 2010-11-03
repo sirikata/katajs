@@ -1124,20 +1124,22 @@ Kata.SST.Connection.prototype.close=function( force) {
  */
 var connectionHandleReceiveSST = function(datagramLayer, remoteEndPoint,localEndPoint,recvBuffer){
 
+    var localEndPointId=localEndPoint.uid();
     // Active connection
     var whichLocalConnection = sConnectionMapSST[localEndPointId];
     // or listening for one
     var listeningConnection = sListeningConnectionsCallbackMapSST[localEndPointId];
 
-    if (typeof(whichLocalConnection) == "undefined" &&
-        typeof(listeneingConnection) == "undefined")
+    if (!whichLocalConnection && !listeningConnection) {
+        Kata.log("whichLocal and listening are both null for "+localEndPointId);
         return false;
+    }
 
     var received_msg = new Sirikata.Protocol.SST.SSTChannelHeader();
     var parsed = received_msg.ParseFromArray(recvBuffer);
 
     var channelID = received_msg.channel_id;
-    var localEndPointId=localEndPoint.uid();
+
     if (whichLocalConnection) {
       if (channelID == 0) {
               /*Someone's already connected at this port. Either don't reply or
