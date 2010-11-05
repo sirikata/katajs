@@ -116,13 +116,13 @@ Kata.scriptRoot="";
         for (i = 0;i < deps.length; i++) {
             if (deps[i].push) {
                 for (var j = 0; j < deps[i].length; j++) {
-                    if (!loadedDeps[deps[i][j]]) {
+                    if (!loadedDeps[deps[i][j]] && !(deps[i][j] in unfinishedDeps)) {
                         unfinishedDeps[deps[i][j]] = true;
                         remainingDeps++;
                     }
                 }
             } else {
-                if (!loadedDeps[deps[i]]) {
+                if (!loadedDeps[deps[i]] && !(deps[i] in unfinishedDeps)) {
                     unfinishedDeps[deps[i]] = true;
                     remainingDeps++;
                 }
