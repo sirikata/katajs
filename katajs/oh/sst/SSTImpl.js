@@ -326,7 +326,7 @@ Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
     /**
      * @type {number}
      */
-    this.mRTOMilliseconds=1000;
+    this.mRTOMilliseconds=2000;
     /**
      * @type {boolean}
      */
@@ -393,12 +393,25 @@ Kata.SST.Connection.prototype.serviceConnection=function (curTime) {
     // should start from ssthresh, the slow start lower threshold, but starting
     // from 1 for now. Still need to implement slow start.
     if (this.mState == CONNECTION_DISCONNECTED_SST) return false;
-    
+    else if (this.mState == CONNECTION_PENDING_DISCONNECT) {
+        if (KataDequeEmpty(this.mQueuedSegments)) {
+        this.mState = CONNECTION_DISCONNECTED_SST;
+        return false;
+      }
+    }
+
+    var disconnectedStreams=[];//vector <LSID>
     //firstly, service the streams
     for (it in this.mOutgoingSubstreamMap) 
     {    
+      if (this.mOutgoingSubstreamMap[it].getState() == DISCONNECTED_STREAM_SST) {
+          disconnectedStreams[disconnectedStreams.length]=it;
+          continue;
+      }
       if ( (this.mOutgoingSubstreamMap[it].serviceStream(curTime)) == false) {
-	      return false;///FIXME: is this correct?
+          //the root stream was unable to connect, so it's ok to return false
+          //immediately, so that this connection can be closed.
+	      return false;
       }
     }
 
@@ -406,7 +419,7 @@ Kata.SST.Connection.prototype.serviceConnection=function (curTime) {
 
       this.numSegmentsSent = 0;
 
-      for (var i = 0; (!KataDequeEmpty(this.mQueuedSegments)) && i < this.mCwnd; i++) {
+      for (var i = 0; (!KataDequeEmpty(this.mQueuedSegments)) && KataDequeLength(this.mOutstandingSegments) <= this.mCwnd; i++) {
 	      var segment = KataDequeFront(this.mQueuedSegments);
 
 	      var sstMsg=new Sirikata.Protocol.SST.SSTChannelHeader();
@@ -442,58 +455,63 @@ Kata.SST.Connection.prototype.serviceConnection=function (curTime) {
       }
 
       if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
-	      return false;
+	      return false; //the connection was unable to contact the other endpoint.
       }
 
-      var all_sent_packets_acked = true;
-      var no_packets_acked = true;
-      for (var i=0; i < this.mOutstandingSegments.size(); i++) {
-          var segment = KataDequeIndex(this.mOutstandingSegments,i);
+//p      var all_sent_packets_acked = true;
+//p      var no_packets_acked = true;
+//p      for (var i=0; i < this.mOutstandingSegments.size(); i++) {
+//p          var segment = KataDequeIndex(this.mOutstandingSegments,i);
 
-          if (segment.mAckTime == null) {
-              all_sent_packets_acked = false;
-          }
-          else {
-              no_packets_acked = false;
-              if (this.mFirstRTO ) {
-                  this.mRTOMilliseconds = ((segment.mAckTime.getTime() - segment.mTransmitTime.getTime())) ;
-                  this.mFirstRTO = false;
-              }
-              else {
-                  this.mRTOMilliseconds = CC_ALPHA_SST * this.mRTOMilliseconds +
-                      (1.0-CC_ALPHA_SST) * (segment.mAckTime.getTime() - segment.mTransmitTime.getTime());
-              }
-          }
-      }
+//p          if (segment.mAckTime == null) {
+//p              all_sent_packets_acked = false;
+//p          }
+//p          else {
+//p              no_packets_acked = false;
+//p              if (this.mFirstRTO ) {
+//p                  this.mRTOMilliseconds = ((segment.mAckTime.getTime() - segment.mTransmitTime.getTime())) ;
+//p                  this.mFirstRTO = false;
+//p              }
+//p              else {
+//p                  this.mRTOMilliseconds = CC_ALPHA_SST * this.mRTOMilliseconds +
+//p                      (1.0-CC_ALPHA_SST) * (segment.mAckTime.getTime() - segment.mTransmitTime.getTime());
+//p              }
+//p          }
+//p      }
 
       //printf("mRTOMicroseconds=%d\n", (int)mRTOMicroseconds);
-
-      if (this.numSegmentsSent >= this.mCwnd) {
-        if (all_sent_packets_acked) {
-          this.mCwnd += 1;
-        }
-        else {
-          this.mCwnd /= 2;
-        }
+      if (!KataDequeEmpty(this.mOutstandingSegments)) {
+          this.mCwnd /=2;
       }
-      else {
-        if (all_sent_packets_acked) {
-          this.mCwnd = (this.mCwnd + this.numSegmentsSent) / 2;
-        }
-        else {
-          this.mCwnd /= 2;
-        }
-      }
+//p      if (this.numSegmentsSent >= this.mCwnd) {
+//p        if (all_sent_packets_acked) {
+//p          this.mCwnd += 1;
+//p        }
+//p        else {
+//p          this.mCwnd /= 2;
+//p        }
+//p      }
+//p      else {
+//p        if (all_sent_packets_acked) {
+//p          this.mCwnd = (this.mCwnd + this.numSegmentsSent) / 2;
+//p        }
+//p        else {
+//p          this.mCwnd /= 2;
+//p        }
+//p      }
 
       if (this.mCwnd < 1) {
+        KataDequeClear(this.mOutstandingSegments);
         this.mCwnd = 1;
       }
 
-      KataDequeClear(this.mOutstandingSegments);
+//p      KataDequeClear(this.mOutstandingSegments);
 
       this.inSendingMode = true;
     }
-    
+    for (var it=0;it<disconnectedStreams.length;++it) {
+        delete this.mOutgoingSubstreamMap[it];
+    }
     return true;
 };
 
@@ -562,6 +580,7 @@ var createConnectionSST = function(localEndPoint,remoteEndPoint,cb){
 
     var conn =  new Kata.SST.Connection(localEndPoint, remoteEndPoint);
     sConnectionMapSST[endPointUid] = conn;
+    sConnectionReturnCallbackMapSST[endPointUid] = cb;
 
     conn.setState(CONNECTION_PENDING_CONNECT_SST);
 
@@ -575,7 +594,6 @@ var createConnectionSST = function(localEndPoint,remoteEndPoint,cb){
     conn.setLocalChannelID(channelid);
     conn.sendData(payload,false/*not an ack*/);
 
-    sConnectionReturnCallbackMapSST[localEndPoint.uid()] = cb;
 
     return true;
 };
@@ -678,15 +696,7 @@ Kata.SST.Connection.prototype.sendData=function(data, sstStreamHeaderTypeIsAck){
 
     var pushedIntoQueue = false;
 
-    if ( !sstStreamHeaderTypeIsAck ) {
-      if (KataDequeLength(this.mQueuedSegments) < MAX_QUEUED_SEGMENTS_SST) {
-	      KataDequePushBack(this.mQueuedSegments,new Kata.SST.Impl.ChannelSegment(data,
-                                                               this.mTransmitSequenceNumber,
-                                                               this.mLastReceivedSequenceNumber) );
-	      pushedIntoQueue = true;
-      }
-    }
-    else {
+    if ( sstStreamHeaderTypeIsAck ) {
       var sstMsg=new Sirikata.Protocol.SST.SSTChannelHeader();
       sstMsg.channel_id= this.mRemoteChannelID;
       sstMsg.transmit_sequence_number=this.mTransmitSequenceNumber;
@@ -696,7 +706,14 @@ Kata.SST.Connection.prototype.sendData=function(data, sstStreamHeaderTypeIsAck){
       sstMsg.payload=data;
 
       this.sendSSTChannelPacket(sstMsg);
-    }
+    }else {
+      if (KataDequeLength(this.mQueuedSegments) < MAX_QUEUED_SEGMENTS_SST) {
+	      KataDequePushBack(this.mQueuedSegments,new Kata.SST.Impl.ChannelSegment(data,
+                                                               this.mTransmitSequenceNumber,
+                                                               this.mLastReceivedSequenceNumber) );
+	      pushedIntoQueue = true;
+      }
+    }    
 
     this.mTransmitSequenceNumber=this.mTransmitSequenceNumber.unsigned_add(PROTO.I64.ONE);
 
@@ -705,6 +722,9 @@ Kata.SST.Connection.prototype.sendData=function(data, sstStreamHeaderTypeIsAck){
 
 Kata.SST.Connection.prototype.setState=function(state) {
     this.mState=state;
+};
+Kata.SST.Connection.prototype.getState=function() {
+    return this.mState;
 };
 
 /**
@@ -730,16 +750,30 @@ Kata.SST.Connection.prototype.markAcknowledgedPacket=function(receivedAckNum){
     for (var i = 0; i < len; i++) {
         var segment=KataDequeIndex(this.mOutstandingSegments,i);
         if (segment.mChannelSequenceNumber.equals(receivedAckNum)) {
-	        segment.mAckTime = new Date();
-            return true;
+	        segment.mAckTime = new Date();//FIXME DRH port
+            if (this.mFirstRTO) {
+                this.mRTOMilliseconds = (segment.mAckTime - segment.mTransmitTime);
+                this.mFirstRTO=false;
+            }
+            else {
+                this.mRTOMilliseconds = CC_ALPHA_SST * this.mRTOMilliseconds +
+                    (1.0-CC_ALPHA_SST) * (segment.mAckTime - segment.mTransmitTime);
+            }
+            this.inSendingMode=true;
+            //setDelay(Kata.bind(this.serviceConnectionNoReturn,this),0);
+            if (Math.random()*this.mCwnd<1) {
+                this.mCwnd+=1;
+            }
+            KataDequeErase(this.mOutstandingSegments,i);//FIXME expensive
+            //FIXME DRH: erase item
+            break;
         }
     }
-    return false;
 };
 
 /**
  * @param {Sirikata.Protocol.Object.ObjectMessage} object_message the data to be received
- */
+ * DRH deleted
 Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
     var recv_buff = object_message.payload;
     var received_msg = new Sirikata.Protocol.SST.SSTChannelHeader;
@@ -759,7 +793,7 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
         
         this.mRemoteEndPoint.port = received_msg.payload[2]*256+received_msg.payload[3];
         
-        this.sendData( [], false/*not an ack*/ );
+        this.sendData( [], false );//false means not an ack
         var localEndPointId=this.mLocalEndPoint.uid();
         var connectionCallback=sConnectionReturnCallbackMapSST[localEndPointId];
         if (connectionCallback)
@@ -780,6 +814,8 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
     // We always say we handled this since we were explicitly listening on this port
     return true;
 };
+*/
+
 /**
  * @param{!Protcol.SST.SSTChannelHeader} received_channel_msg
  */
@@ -940,6 +976,54 @@ Kata.SST.Connection.prototype.handleDatagram=function(received_stream_msg) {
     this.mTransmitSequenceNumber=this.mTransmitSequenceNumber.unsigned_add(PROTO.I64.ONE);
 };
 
+Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
+    var recv_buff = object_message.payload;
+    var received_msg = new Sirikata.Protocol.SST.SSTChannelHeader;
+    received_msg.ParseFromArray(recv_buff);
+
+    this.mLastReceivedSequenceNumber = received_msg.transmit_sequence_number;
+
+    var receivedAckNum = received_msg.ack_sequence_number;
+
+    this.markAcknowledgedPacket(receivedAckNum);
+
+    if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
+        this.mState = CONNECTION_CONNECTED_SST;
+        var originalListeningEndPoint=new Kata.SST.EndPoint(this.mRemoteEndPoint.endPoint, this.mRemoteEndPoint.port);
+        
+        this.setRemoteChannelID(received_msg.payload[0]*256+received_msg.payload[1]);
+        
+        this.mRemoteEndPoint.port = received_msg.payload[2]*256+received_msg.payload[3];
+        
+        this.sendData( [], false );//false means not an ack
+        var localEndPointId=this.mLocalEndPoint.uid();
+        var connectionCallback=sConnectionReturnCallbackMapSST[localEndPointId];
+        if (connectionCallback)
+        {
+            delete sConnectionReturnCallbackMapSST[localEndPointId];
+            connectionCallback(Kata.SST.SUCCESS, this);
+        }
+    }
+    else if (this.mState == CONNECTION_PENDING_RECEIVE_CONNECT_SST) {
+      this.mState = CONNECTION_CONNECTED_SST;
+    }
+    else if (this.mState == CONNECTION_CONNECTED_SST) {
+        if (received_msg.payload && received_msg.payload.length > 0) {
+	        this.parsePacket(received_msg, object_message.source_port, object_message.dest_port);
+        }
+    }
+
+    // We always say we handled this since we were explicitly listening on this port
+    return true;
+};
+/**
+ * @param {Kata.SST.Stream} stream the stream which to erase from the outgoing substream map
+ */
+Kata.SST.Connection.prototype.eraseDisconnectedStream=function(stream) {
+    delete this.mOutgoingSubstreamMap[stream.mLSID];
+};
+
+//DRH Port stop
 /**
  * FIXME: how do you get this thing called?!
  */
@@ -965,7 +1049,7 @@ var closeConnectionsSST = function() {
   sConnectionMapSST={};  
 };
 
-Kata.SST.serviceConnections = function() {
+Kata.SST.service = function() {
     var curTime = new Date();
 
     for (it in sConnectionMapSST)
@@ -977,14 +1061,14 @@ Kata.SST.serviceConnections = function() {
 
       if (!keepConnection) {
 
-        if (connState == CONNECTION_PENDING_CONNECT_SST) {
+        if (connState == CONNECTION_PENDING_CONNECT_SST || connState == CONNECTION_DISCONNECTED_SST) {
           var localEndPointId=conn.mLocalEndPoint.uid();
           var cb = sConnectionReturnCallbackMapSST[localEndPointId];
 
           delete sConnectionReturnCallbackMapSST[localEndPointId];
           delete sConnectionMapSST[it];//FIXME does this invalidate map?
-
-          cb(Kata.SST.FAILURE, conn);
+          if (connState == CONNECTION_PENDING_CONNECT_SST)
+              cb(Kata.SST.FAILURE, conn);
         }
         conn.finalize();//FIXME Is this correct??
         break;//FIXME: must we break?
@@ -1105,7 +1189,7 @@ Kata.SST.Connection.prototype.registerReadOrderedDatagramCallback=function( cb )
 Kata.SST.Connection.prototype.close=function( force) {
     /* (this.mState != CONNECTION_DISCONNECTED_SST) implies close() wasnt called
        through the destructor. */
-    if (this.mState != CONNECTION_DISCONNECTED_SST) {
+    if (force && this.mState != CONNECTION_DISCONNECTED_SST) {//FIXME DRH: do we need to compare force here
       delete sConnectionMapSST[this.mLocalEndPoint.uid()];
     }
 
@@ -1210,7 +1294,7 @@ var StreamBuffer = function(data, offset) {
 
 var MAX_PAYLOAD_SIZE_STREAM_SST=1000;
 var MAX_QUEUE_LENGTH_STREAM_SST=4000000;
-var MAX_RECEIVE_WINDOW_STREAM_SST=15000;
+var MAX_RECEIVE_WINDOW_STREAM_SST=10000;
 var FL_ALPHA_STREAM_SST=0.8;
 var INV_FL_ALPHA_STREAM_SST=1.0-FL_ALPHA_STREAM_SST;
 var MAX_INIT_RETRANSMISSIONS_STREAM_SST=5;
@@ -1300,7 +1384,7 @@ Kata.SST.Stream = function(parentLSID, conn,
     /**
      * @type {number} milliseconds 
      */
-    this.mStreamRTOMilliseconds=200;
+    this.mStreamRTOMilliseconds=2000;
     /**
      * @type {number}
      */
@@ -1361,6 +1445,7 @@ Kata.SST.Stream = function(parentLSID, conn,
      * @type {Hash} FIXME maps int64 to buffer.... need to carefully consider int64
      */
     this.mChannelToBufferMap={};
+    this.mChannelToStreamOffsetMap={};
     
 /**
  * @type {number} size of the StreamBuffer deque in bytes
@@ -1594,6 +1679,10 @@ var connectionCreatedStreamSST = function( errCode, c) {
 
 /**
  * @param {Date} curTime 
+ * @return false only if this is the root stream of a connection and it was
+ *  unable to connect. In that case, the connection for this stream needs to
+ *  be closed and the 'false' return value is an indication of this for
+ *  the underlying connection.
  */
 Kata.SST.Stream.prototype.serviceStream=function(curTime) {
     if (this.mState != CONNECTED_STREAM_SST && this.mState != DISCONNECTED_STREAM_SST) {
@@ -1608,7 +1697,7 @@ Kata.SST.Stream.prototype.serviceStream=function(curTime) {
         this.mLastSendTime = curTime;
 
         this.mNumInitRetransmissions++;
-        this.mStreamRTOMilliseconds = (this.mStreamRTOMilliseconds * 2);
+//p     this.mStreamRTOMilliseconds = (this.mStreamRTOMilliseconds * 2);
         return true;
       }
 
@@ -1673,6 +1762,7 @@ Kata.SST.Stream.prototype.serviceStream=function(curTime) {
           var key=channelID.hash();
           if ( !this.mChannelToBufferMap[key]) {
             this.mChannelToBufferMap[key] = buffer;
+            this.mChannelToStreamOffsetMap[key] = buffer.mOffset;
           }
 
           KataDequePopFront(this.mQueuedBuffers);
@@ -1727,7 +1817,9 @@ Kata.SST.Stream.prototype.resendUnackedPackets=function() {
      this.mNumOutstandingBytes = 0;
 
      if (!channelToBufferMapEmpty) {
-       this.mStreamRTOMilliseconds *= 2;
+       if (this.mStreamRTOMilliseconds < 2000) {//FIXME should this be a constant
+           this.mStreamRTOMilliseconds *= 1;
+       }
        this.mChannelToBufferMap={};
      }
   };
@@ -1761,6 +1853,9 @@ Kata.SST.Stream.prototype.sendToApp=function(skipLength) {
       for (var i = 0; i < len; i++) {
         this.mReceiveBuffer[i] = this.mReceiveBuffer[i + readyBufferSize];
       }
+      for (var i = (MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize); i < MAX_RECEIVER_WINDOW_STREAM_SST;++i) {
+        this.mReceiveBuffer[i] = 0;
+      }
       this.mReceiveBuffer.length = len;
 
       this.mReceiveWindowSize += readyBufferSize;
@@ -1778,45 +1873,45 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
     if (streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
       this.mConnected = true;
     }
-    else if (streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
-      var offsetHash=offset.hash();
-      var channelBuffer=this.mChannelToBufferMap[offsetHash];
-      if (channelBuffer) {
-        var dataOffset = channelBuffer.mOffset;
-        this.mNumOutstandingBytes -= channelBuffer.mBuffer.length;
-
-        channelBuffer.mAckTime = new Date();
-
-        this.updateRTO(channelBuffer.mTransmitTime, channelBuffer.mAckTime);
-
-        if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes >= 0.5 ) {
-          this.mTransmitWindowSize = Math.round(pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
-        }
-        else {
-          this.mTransmitWindowSize = 0;
-        }
-
-        //printf("REMOVED ack packet at offset %d\n", (int)mChannelToBufferMap[offset]->mOffset);
-
-        delete this.mChannelToBufferMap[offsetHash];
-          /*
-           * @type {Array} uint64 values stored
-           */
-        var channelOffsets=[];
-        for(var it in this.mChannelToBufferMap)
-        {
-          if (this.mChannelToBufferMap[it].mOffset == dataOffset) {
-            channelOffsets.push(it);
-          }
-        }
-
-        for (var i=0; i< channelOffsets.length; i++) {
-          delete this.mChannelToBufferMap[channelOffsets[i]];
-        }
-      }else {
-          Kata.log("unknown packet corresponding to offset "+offsetHash+" not found in map");
-      }
-    }
+//p    else if (streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.ACK) {
+//p      var offsetHash=offset.hash();
+//p      var channelBuffer=this.mChannelToBufferMap[offsetHash];
+//p      if (channelBuffer) {
+//p        var dataOffset = channelBuffer.mOffset;
+//p        this.mNumOutstandingBytes -= channelBuffer.mBuffer.length;
+//p
+//p        channelBuffer.mAckTime = new Date();
+//p
+//p        this.updateRTO(channelBuffer.mTransmitTime, channelBuffer.mAckTime);
+//p
+//p        if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes >= 0.5 ) {
+//p          this.mTransmitWindowSize = Math.round(pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
+//p        }
+//p        else {
+//p          this.mTransmitWindowSize = 0;
+//p        }
+//p
+//p        //printf("REMOVED ack packet at offset %d\n", (int)mChannelToBufferMap[offset]->mOffset);
+//p
+//p        delete this.mChannelToBufferMap[offsetHash];
+//p          /*
+//p           * @type {Array} uint64 values stored
+//p           */
+//p        var channelOffsets=[];
+//p        for(var it in this.mChannelToBufferMap)
+//p        {
+//p          if (this.mChannelToBufferMap[it].mOffset == dataOffset) {
+//p            channelOffsets.push(it);
+//p          }
+//p        }
+//p
+//p        for (var i=0; i< channelOffsets.length; i++) {
+//p          delete this.mChannelToBufferMap[channelOffsets[i]];
+//p        }
+//p      }else {
+//p          Kata.log("unknown packet corresponding to offset "+offsetHash+" not found in map");
+//p      }
+//p    }
     else if (streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.DATA || streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.INIT) {
 
       if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes < .5){
@@ -1882,6 +1977,61 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
         }
       }
     }
+    //handle any ACKS that might be included in the message...
+    var offsetHash=offset.hash();
+    if (offsetHash in this.mChannelToBufferMap) {
+      var buf=this.mChannelToBufferMap[offset];
+      var dataOffset = buf.mOffset;
+      this.mNumOutstandingBytes -= buf.mBufferLength;
+
+      buf.mAckTime = new Date();
+
+      this.updateRTO(buf.mTransmitTime, buf.mAckTime);
+
+      if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes >= 0.5 ) {
+        this.mTransmitWindowSize = Math.round(pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
+      }
+      else {
+        this.mTransmitWindowSize = 0;
+      }
+
+      //printf("REMOVED ack packet at offset %d\n", (int)mChannelToBufferMap[offset]->mOffset);
+
+      delete this.mChannelToBufferMap[offsetHash];
+
+          /*
+           * @type {Array} uint64 values stored
+           */
+      var channelOffsets=[];
+      for(var it in this.mChannelToBufferMap)
+      {
+        if (this.mChannelToBufferMap[it].mOffset.equals(dataOffset)) {
+          channelOffsets.push(it);
+        }
+      }
+      for (var i=0; i< channelOffsets.length; i++) {
+        delete this.mChannelToBufferMap[channelOffsets[i]];
+      }
+    }
+    else {
+      // ACK received but not found in mChannelToBufferMap
+      if (offsetHash in this.mChannelToStreamOffsetMap) {
+        var dataOffset = this.mChannelToStreamOffsetMap[offsetHash];
+        delete this.mChannelToStreamOffsetMap[offsetHash];
+
+        var channelOffsets=[];
+        for (it in this.mChannelToBufferMap)
+          {
+            if (this.mChannelToBufferMap[it].mOffset.equals(dataOffset)) {
+              channelOffsets.push(it);
+            }
+          }
+        var len=channelOffsets.length;
+        for (var i=0; i< len; i++) {
+          delete this.mChannelToBufferMap[channelOffsets[i]];
+        }
+      }
+    }  
   };
 /**
  * @param {Date} sampleStartTime
