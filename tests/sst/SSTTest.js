@@ -49,5 +49,11 @@ SSTTest.prototype.createTestObjects = function(uuidA, uuidB) {
     Kata.SST.listenStream(this.acceptConnection, uuidB);
     Kata.SST.connectStream(uuidA, uuidB, this.establishedConnection);
 };
+SSTTest.doSSTTest=function () {
+    var sst = new SSTTest();
+    sst.createTestObjects(new Kata.SST.EndPoint("aaaa0000-0000-0000-0000-000000000000", 1234), new Kata.SST.EndPoint("bbbb0000-0000-0000-0000-000000000000", 2468));
+    setInterval(Kata.SST.service, 100);
+    
+};
 
 },'../katajs/tests/sst/SSTTest.js');

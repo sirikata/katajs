@@ -132,5 +132,11 @@
     Kata.Deque.prototype.clear=function() {
         Kata.Deque.call(this);
     };
+    Kata.Deque.prototype.erase=function(index) {
+        for (var i=this.mHead+index;i+1<this.mSize;++i) {
+            this.mArray[i]=this.mArray[i+1];
+        }
+        this.pop_back();
+    };
 
 })();

@@ -46,7 +46,7 @@ var KataDequeLength = function(x){return x.size();};
 var KataDequeEmpty = function(x){return x.empty();};
 var KataDequeIndex = function(x,y){return x.index(y);};
 var KataDequeClear = function(x){return x.clear();};
-
+var KataDequeErase = function(x,index) {return x.erase(index);};
 if (typeof(Kata.SST) == "undefined") {Kata.SST = {};}
 if (typeof(Kata.SST.Impl) == "undefined") {Kata.SST.Impl = {};}
 
@@ -393,7 +393,7 @@ Kata.SST.Connection.prototype.serviceConnection=function (curTime) {
     // should start from ssthresh, the slow start lower threshold, but starting
     // from 1 for now. Still need to implement slow start.
     if (this.mState == CONNECTION_DISCONNECTED_SST) return false;
-    else if (this.mState == CONNECTION_PENDING_DISCONNECT) {
+    else if (this.mState == CONNECTION_PENDING_DISCONNECT_SST) {
         if (KataDequeEmpty(this.mQueuedSegments)) {
         this.mState = CONNECTION_DISCONNECTED_SST;
         return false;
@@ -404,7 +404,7 @@ Kata.SST.Connection.prototype.serviceConnection=function (curTime) {
     //firstly, service the streams
     for (it in this.mOutgoingSubstreamMap) 
     {    
-      if (this.mOutgoingSubstreamMap[it].getState() == DISCONNECTED_STREAM_SST) {
+      if (this.mOutgoingSubstreamMap[it].mState == DISCONNECTED_STREAM_SST) {
           disconnectedStreams[disconnectedStreams.length]=it;
           continue;
       }
@@ -722,9 +722,6 @@ Kata.SST.Connection.prototype.sendData=function(data, sstStreamHeaderTypeIsAck){
 
 Kata.SST.Connection.prototype.setState=function(state) {
     this.mState=state;
-};
-Kata.SST.Connection.prototype.getState=function() {
-    return this.mState;
 };
 
 /**
@@ -1853,7 +1850,7 @@ Kata.SST.Stream.prototype.sendToApp=function(skipLength) {
       for (var i = 0; i < len; i++) {
         this.mReceiveBuffer[i] = this.mReceiveBuffer[i + readyBufferSize];
       }
-      for (var i = (MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize); i < MAX_RECEIVER_WINDOW_STREAM_SST;++i) {
+      for (var i = (MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize); i < MAX_RECEIVE_WINDOW_STREAM_SST;++i) {
         this.mReceiveBuffer[i] = 0;
       }
       this.mReceiveBuffer.length = len;
@@ -1978,7 +1975,7 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
       }
     }
     //handle any ACKS that might be included in the message...
-    var offsetHash=offset.hash();
+    var offsetHash=offset;//.hash();
     if (offsetHash in this.mChannelToBufferMap) {
       var buf=this.mChannelToBufferMap[offset];
       var dataOffset = buf.mOffset;
