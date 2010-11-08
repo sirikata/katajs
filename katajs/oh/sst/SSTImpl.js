@@ -872,7 +872,7 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg) {
         listeningStreamsCallback(0, stream);
 
         stream.receiveData(received_stream_msg, received_stream_msg.payload,
-                            received_stream_msg.bsn);
+                            PROTO.I64.fromNumber(received_stream_msg.bsn));//FIXME i64
       }
       else {
         Kata.log("Not listening to streams at: " + this.headerToStringDebug(received_stream_msg));
@@ -900,7 +900,7 @@ Kata.SST.Connection.prototype.handleReplyPacket=function(received_stream_msg) {
         if (stream.mStreamReturnCallback){
           stream.mStreamReturnCallback(Kata.SST.SUCCESS, stream);
           stream.receiveData(received_stream_msg, received_stream_msg.payload,
-                              received_stream_msg.bsn);
+                              PROTO.I64.fromNumber(received_stream_msg.bsn));//FIXME i64 should be really i64
         }
       }
       else {
@@ -921,7 +921,7 @@ Kata.SST.Connection.prototype.handleDataPacket=function(received_stream_msg) {
 
 	  stream_ptr.receiveData( received_stream_msg,
 			       received_stream_msg.payload,
-			       received_stream_msg.bsn
+			       PROTO.I64.fromNumber(received_stream_msg.bsn)//FIXME i64
 			       );
     }
 };
@@ -1975,7 +1975,7 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
       }
     }
     //handle any ACKS that might be included in the message...
-    var offsetHash=PROTO.I64.prototype.hash.call(offset);//.hash();
+    var offsetHash=offset.hash();
     if (offsetHash in this.mChannelToBufferMap) {
       var buf=this.mChannelToBufferMap[offsetHash];
       var dataOffset = buf.mOffset;
@@ -2002,7 +2002,7 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
       var channelOffsets=[];
       for(var it in this.mChannelToBufferMap)
       {
-        if (PROTO.I64.prototype.equals.call(this.mChannelToBufferMap[it].mOffset,dataOffset)) {
+        if (this.mChannelToBufferMap[it].mOffset.equals(dataOffset)) {
           channelOffsets.push(it);
         }
       }
@@ -2019,7 +2019,7 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
         var channelOffsets=[];
         for (it in this.mChannelToBufferMap)
           {
-            if (PROTO.I64.prototype.equals.call(this.mChannelToBufferMap[it].mOffset,dataOffset)) {
+            if (this.mChannelToBufferMap[it].mOffset.equals(dataOffset)) {
               channelOffsets.push(it);
             }
           }
