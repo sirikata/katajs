@@ -1975,9 +1975,9 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
       }
     }
     //handle any ACKS that might be included in the message...
-    var offsetHash=offset;//.hash();
+    var offsetHash=PROTO.I64.prototype.hash.call(offset);//.hash();
     if (offsetHash in this.mChannelToBufferMap) {
-      var buf=this.mChannelToBufferMap[offset];
+      var buf=this.mChannelToBufferMap[offsetHash];
       var dataOffset = buf.mOffset;
       this.mNumOutstandingBytes -= buf.mBufferLength;
 
@@ -2002,7 +2002,7 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
       var channelOffsets=[];
       for(var it in this.mChannelToBufferMap)
       {
-        if (this.mChannelToBufferMap[it].mOffset.equals(dataOffset)) {
+        if (PROTO.I64.prototype.equals.call(this.mChannelToBufferMap[it].mOffset,dataOffset)) {
           channelOffsets.push(it);
         }
       }
@@ -2019,7 +2019,7 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
         var channelOffsets=[];
         for (it in this.mChannelToBufferMap)
           {
-            if (this.mChannelToBufferMap[it].mOffset.equals(dataOffset)) {
+            if (PROTO.I64.prototype.equals.call(this.mChannelToBufferMap[it].mOffset,dataOffset)) {
               channelOffsets.push(it);
             }
           }
