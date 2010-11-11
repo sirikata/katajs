@@ -340,7 +340,7 @@ Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
     /**
      * @type {number}
      */
-    this.mRTOMilliseconds=2000;
+    this.mRTOMilliseconds=60.125;
     /**
      * @type {boolean}
      */
@@ -409,6 +409,7 @@ Kata.SST.Connection.prototype.sendSSTChannelPacket=function(sstMsg){
  */
 Kata.SST.Connection.prototype.serviceConnection=function () {
     var curTime = new Date();
+    //console.log(curTime+" Servicing "+this.mLocalEndPoint.uid());
     //DRH FIXME DRH why call conn.localEndPoint() without looking at result
     // should start from ssthresh, the slow start lower threshold, but starting
     // from 1 for now. Still need to implement slow start.
@@ -1437,7 +1438,7 @@ Kata.SST.Stream = function(parentLSID, conn,
     /**
      * @type {number} milliseconds 
      */
-    this.mStreamRTOMilliseconds=2000;
+    this.mStreamRTOMilliseconds=60.125;
     /**
      * @type {number}
      */
@@ -1745,6 +1746,7 @@ var connectionCreatedStreamSST = function( errCode, c) {
 Kata.SST.Stream.prototype.serviceStream=function() {
     this.conn = this.mConnection;
     var curTime= new Date();
+    //console.log(curTime+" Servicing Stream"+this.mConnection.mLocalEndPoint.uid());
     if (this.mState != CONNECTED_STREAM_SST && this.mState != DISCONNECTED_STREAM_SST) {
 
       if (!this.mConnected && this.mNumInitRetransmissions < MAX_INIT_RETRANSMISSIONS_STREAM_SST ) {
