@@ -1460,7 +1460,7 @@ Kata.SST.Stream = function(parentLSID, conn,
 /**
  * @type {number} number of bytes put to the wire
  */
-    this.mNumBytesSent=this.mInitialDataLength || 0;
+    this.mNumBytesSent=PROTO.I64.fromNumber(this.mInitialDataLength || 0);
     if (initial_data.length>this.mInitialData.length){
         this.write(initial_data.slice(this.mInitialData.length,initial_data.length));
     }
@@ -1512,7 +1512,7 @@ Kata.SST.Stream.prototype.write=function(data) {
       }
       KataDequePushBack(this.mQueuedBuffers,new StreamBuffer(data, this.mNumBytesSent));
       this.mCurrentQueueLength += len;
-      this.mNumBytesSent += len;
+      this.mNumBytesSent = this.mNumBytesSent.unsigned_add(PROTO.I64.fromNumber(len));
 
       return len;
     }
@@ -1530,7 +1530,7 @@ Kata.SST.Stream.prototype.write=function(data) {
         KataDequePushBack(this.mQueuedBuffers.push_back,new StreamBuffer(data.slice(currOffset, curOffset+buffLen), this.mNumBytesSent));
         currOffset += buffLen;
         this.mCurrentQueueLength += buffLen;
-        this.mNumBytesSent += buffLen;
+        this.mNumBytesSent = this.mNumBytesSent.unsigned_add(PROTO.I64.fromNumber(buffLen));
 
         count++;
       }
@@ -1844,7 +1844,7 @@ Kata.SST.Stream.prototype.sendToApp=function(skipLength) {
 
       //now move the window forward...
       this.mLastContiguousByteReceived = this.mLastContiguousByteReceived.add(PROTO.I64.fromNumber(readyBufferSize));
-      this.mNextByteExpected = this.mLastContiguousByteReceived.add(PROTO.I64.ONE);
+      this.mNextByteExpected = this.mLastContiguousByteReceived.unsigned_add(PROTO.I64.ONE);
 
       var len = MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize;
       for (var i = 0; i < len; i++) {
