@@ -1948,6 +1948,7 @@ Kata.SST.Stream.prototype.sendToApp=function(skipLength) {
 Kata.SST.Stream.prototype.receiveData=function(streamMsg,
                     buffer, offset )
   {
+    //Kata.log("BUFFER IS "+buffer + " offset is "+offset)
     if (streamMsg.type == Sirikata.Protocol.SST.SSTStreamHeader.StreamPacketType.REPLY) {
       this.mConnected = true;
     }
@@ -2044,12 +2045,12 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
           }
 
           this.mReceiveWindowSize -= len;
-
+            //Kata.log("AA "+"Last byte in buffer"+lastByteInBuffer+" vs "+this.mLastContiguousByteReceived.lsw+" NextEXP "+this.mNextByteExpected+" vs "+offset+" offset in buffer "+offsetInBuffer+":"+buffer);
           for (var i=0;i<len;++i) {
               var loc=offsetInBuffer+i;
               this.mReceiveBuffer[loc]=buffer[i];
           }
-
+            //Kata.error("BB "+" Next byte exp "+this.mNextByteExpected+":"+this.mReceiveBuffer);
           this.sendAckPacket();
         }
         else {
@@ -2192,7 +2193,6 @@ Kata.SST.Stream.prototype.sendDataPacket=function( data, offset) {
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;
     sstMsg.dest_port=this.mRemotePort;
-
     sstMsg.bsn=offset;
 
     sstMsg.payload=data;
