@@ -1847,11 +1847,12 @@ Kata.SST.Stream.prototype.sendToApp=function(skipLength) {
       this.mNextByteExpected = this.mLastContiguousByteReceived.unsigned_add(PROTO.I64.ONE);
 
       var len = MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize;
-      for (var i = 0; i < len; i++) {
+      var i;
+      for (i = 0; i < len; i++) {
         this.mReceiveBuffer[i] = this.mReceiveBuffer[i + readyBufferSize];
       }
-      for (var i = (MAX_RECEIVE_WINDOW_STREAM_SST - readyBufferSize); i < MAX_RECEIVE_WINDOW_STREAM_SST;++i) {
-        this.mReceiveBuffer[i] = 0;
+      for (; i < MAX_RECEIVE_WINDOW_STREAM_SST;++i) {
+        this.mReceiveBuffer[i] = undefined;
       }
       this.mReceiveBuffer.length = len;
 
@@ -1919,17 +1920,20 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
       //printf("offset=%d,  mLastContiguousByteReceived=%d, mNextByteExpected=%d\n", (int)offset,  (int)mLastContiguousByteReceived, (int)mNextByteExpected);
 
       var lastContigByteMSW = this.mLastContiguousByteReceived.msw;
-      var offset64 = new PROTO.I64(lastContigByteMSW, offset, 1);
+      var offset64 = offset;//new PROTO.I64(lastContigByteMSW, offset, 1);
       var offsetInBuffer = (offset64.sub(this.mLastContiguousByteReceived)).lsw-1;
-      if ( offset == this.mNextByteExpected.lsw) {
+      
+      if ( offset.lsw == this.mNextByteExpected.lsw) {
         if (offsetInBuffer + buffer.length <= MAX_RECEIVE_WINDOW_STREAM_SST) {
             var len=buffer.length;
             this.mReceiveWindowSize -= len;
+            //Kata.log("A "+len+": "+offsetInBuffer+" X "+ buffer)
+            //Kata.log("XM"+this.mReceiveBuffer);
             for (var i=0;i<len;++i) {
                 var loc=offsetInBuffer+i;
                 this.mReceiveBuffer[loc]=buffer[i];
             }
-
+            //Kata.log("M"+len+":"+this.mReceiveBuffer);
             this.sendToApp(len);
 
             //send back an ack.
@@ -1944,14 +1948,14 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
         var len=buffer.length;
         
         //std::cout << offsetInBuffer << "  ,  " << offsetInBuffer+len << "\n";
-        var lastByteInBuffer=offset+len-1;
+        var lastByteInBuffer=offset.lsw+len-1;
         var beforeWindow=lastByteInBuffer - this.mLastContiguousByteReceived.lsw;
         // is 2 billion the right number?
         if (Math.abs(beforeWindow) > 2147483647) {
             beforeWindow = -beforeWindow;
         }
         if (beforeWindow <= 0) {
-          Kata.log("Acking packet which we had already received previously\n", lastByteInBuffer, this.mLastContiguousByteReceived.lsw, offset, len);
+          //Kata.log("Acking packet which we had already received previously\n", lastByteInBuffer, this.mLastContiguousByteReceived.lsw, offset, len);
           this.sendAckPacket();
         }
         else if (offsetInBuffer + len <= MAX_RECEIVE_WINDOW_STREAM_SST) {

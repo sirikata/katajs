@@ -28,13 +28,16 @@ SSTTest.prototype.establishedConnection = function(error, stream) {
     print("established, error = "+error+"\n", stream);
     stream.write([2,7,1,8,2,8,1,8]);
     var t = this;
-    stream.registerReadCallback(function(){SSTTest.prototype.receiveMessage.apply(t, arguments);stream.write([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]);});
+    var INCR=30;
+
+    stream.registerReadCallback(function(){SSTTest.prototype.receiveMessage.apply(t, arguments);stream.write([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,INCR++]);});
 };
 SSTTest.prototype.acceptConnection = function(error, stream) {
     print("accepted, error = "+error+"\n", stream);
     stream.write([3,1,4,1,5,9,2,7]);
     var t = this;
-    stream.registerReadCallback(function(){SSTTest.prototype.receiveMessage.apply(t, arguments);stream.write([3,0,4,0,5,0]);});
+    var INCR=0;
+    stream.registerReadCallback(function(){SSTTest.prototype.receiveMessage.apply(t, arguments);stream.write([3,0,4,0,5,INCR++]);});
 
 };
 SSTTest.prototype.receiveMessage = function(msg) {
