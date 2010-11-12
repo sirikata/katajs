@@ -958,8 +958,8 @@ Kata.SST.Connection.prototype.handleDatagram=function(received_stream_msg) {
         // Extract dispatch information
         var dest_port = received_stream_msg.dest_port;
         var datagramCallbacks=[];
-        if (dest_port in this.mReadDatagramCallbacks.find(dest_port)) {
-            datagramCallbacks = mReadDatagramCallbacks[dest_port];
+        if (dest_port in this.mReadDatagramCallbacks) {
+            datagramCallbacks = this.mReadDatagramCallbacks[dest_port];
         }
         var numDatagramCallbacks=datagramCallbacks.length;        
         // The datagram is all here, just deliver
@@ -1168,7 +1168,7 @@ Kata.SST.Connection.prototype.datagram=function(data, local_port, remote_port,cb
             sstMsg.src_port=local_port;
             sstMsg.dest_port=remote_port;
 
-            sstMsg.payload = data.slice(curOffset,curOffset+buffLen);
+            sstMsg.payload = data.slice(currOffset,currOffset+buffLen);
 
             var buffer = sstMsg.SerializeToArray();
 
@@ -1187,7 +1187,7 @@ Kata.SST.Connection.prototype.datagram=function(data, local_port, remote_port,cb
         }
     }
 
-    if (cb != NULL) {
+    if (cb) {
       //invoke the callback function
       cb(Kata.SST.SUCCESS, data);
     }
@@ -1586,7 +1586,7 @@ Kata.SST.Stream.prototype.write=function(data) {
           break;
         }
 
-        KataDequePushBack(this.mQueuedBuffers.push_back,new StreamBuffer(data.slice(currOffset, curOffset+buffLen), this.mNumBytesSent));
+        KataDequePushBack(this.mQueuedBuffers.push_back,new StreamBuffer(data.slice(currOffset, currOffset+buffLen), this.mNumBytesSent));
         currOffset += buffLen;
         this.mCurrentQueueLength += buffLen;
         this.mNumBytesSent = this.mNumBytesSent.unsigned_add(PROTO.I64.fromNumber(buffLen));
