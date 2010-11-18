@@ -62,7 +62,7 @@ closure : $(CLOSUREOUT)
 $(CLOSUREOUT) : $(CLOSURESRCS)
 	before=`mktemp` && \
 	after=`mktemp` && \
-	echo "Kata={closureIncluded: {'katajs/core/Core.js':true $(patsubst %,$(COMMA) '%':true,$(CLOSURESRCS))}};" > $$before && \
+	echo "if(typeof(Kata)=='undefined')Kata={};Kata.closureIncluded={'katajs/core/Core.js':true $(patsubst %,$(COMMA) '%':true,$(CLOSURESRCS))};" > $$before && \
 	echo "(function(){for(var i in Kata.closureIncluded){Kata.setIncluded(i);}})();" > $$after && \
 	$(CLOSURE) $(CLOSUREARGS) || \
 	rm -f "$@"

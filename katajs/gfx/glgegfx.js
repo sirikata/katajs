@@ -185,7 +185,9 @@ Kata.require([
         this.mParent = null;
         spaceroot.mScene.addChild(this.mNode);
     };
-    VWObject.prototype.createMesh = function(path, animation, offset) {
+
+    /// note: animation ignored
+    VWObject.prototype.createMesh = function(path, animation, offset, scale) {
         if (path == null) {
             throw "loadScene with null path";
         }
@@ -196,10 +198,11 @@ Kata.require([
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
-        clda.setDocument(this.mMeshURI, null, GlobalLoadDone);
-        clda.setScaleX(1.0);
-        clda.setScaleY(1.0);
-        clda.setScaleZ(1.0);
+        clda.setDocument(this.mMeshURI, null, typeof(GlobalLoadDone)=="undefined"?null:GlobalLoadDone);
+        if (!scale) scale = [1.0, 1.0, 1.0];
+        clda.setScaleX(scale[0]);
+        clda.setScaleY(scale[1]);
+        clda.setScaleZ(scale[2]);
         clda.setQuatX(0.0);
         clda.setQuatY(0.0);
         clda.setQuatZ(0.0);
@@ -263,7 +266,9 @@ Kata.require([
     VWObject.prototype.updateTransformation = function(graphics) {
         var l=Kata.LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
         this.mNode.setLoc(l.pos[0],l.pos[1],l.pos[2]);
-        this.mNode.setScale(l.scale[0],l.scale[1],l.scale[2]);
+        // Setting scale on cameras does wonky things to lighting
+        if (this.mCamera === null)
+            this.mNode.setScale(l.scale[0],l.scale[1],l.scale[2]);
         this.mNode.setQuat(l.orient[0],l.orient[1],l.orient[2],l.orient[3]);
         if (this.stationary(graphics.mCurTime)) {
             graphics.removeObjectUpdate(this);        
@@ -272,7 +277,7 @@ Kata.require([
         return l;
     };
     VWObject.prototype.updateCamera = function(graphics) {
-        var location=this.updateTransformation(graphics);
+        var location=this.updateTransformation(graphics, true);
         /*
         var mat = o3djs.quaternions.quaternionToRotation(location.orient);
         //console.log(mat);
@@ -284,6 +289,21 @@ Kata.require([
          [0, 0, 0],  // target
          [0, 1, 0]); // up
          */
+    };
+    VWObject.prototype.animate = function(anim_name) {
+        var meshes = this.mNode.getChildren();
+        if (!meshes || meshes.length > 1)
+            Kata.warn("Couldn't handle animate request.");
+        var mesh = meshes[0];
+
+        if (anim_name == this.mCurAnimation) return;
+
+        var actions = mesh.getColladaActions();
+        var new_anim = actions[anim_name];
+        if (!new_anim) return;
+
+        this.mCurAnimation = anim_name;
+        mesh.setAction(new_anim, 400, true);
     };
 
     function SpaceRoot(glgegfx, element, spaceID) {
@@ -557,6 +577,10 @@ Kata.require([
         this.moveTo(vwObject,msg);
         vwObject.update(this);
     };
+    GLGEGraphics.prototype.methodTable["Animate"]=function(msg) {
+        var vwObject = this.mObjects[msg.id];
+        vwObject.animate(msg.animation);
+    };
     GLGEGraphics.prototype.methodTable["Destroy"]=function(msg) {
         if (msg.id in this.mObjects) {
             var vwObject=this.mObjects[msg.id];
@@ -583,6 +607,7 @@ Kata.require([
                 }
             }
             //vwObject.mPack.destroy();
+            this.mSpaceRoots[msg.space].mScene.removeChild(vwObject.mNode);
             delete this.mObjects[msg.id];
         }
     };
@@ -592,7 +617,7 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
-            vwObject.createMesh(msg.mesh, msg.anim, [-msg.center[0],-msg.center[1],-msg.center[2]]);
+            vwObject.createMesh(msg.mesh, msg.anim, msg.offset?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale);
             if (msg.up_axis == "Z_UP") {
                 this.moveTo(vwObject, {
                     // FIXME: needs to be permanent, so future setOrientations will be relative to this

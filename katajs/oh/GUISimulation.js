@@ -1,5 +1,5 @@
-/*  Kata WebWorkers wrapper script
- *  GenericWorker.js
+/*  Kata Javascript Network Layer
+ *  GUISimulation.js
  *
  *  Copyright (c) 2010, Patrick Reiter Horn
  *  All rights reserved.
@@ -30,43 +30,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** Wrapper to handle entry from a Worker thread the same as if workers are
- * disabled. Uses Kata.include to include dependent files.
- */
-self.onmessage = function (ev) {
-    self.onmessage = function(){};
-    var data = ev.data;
+Kata.require([
+    'katajs/oh/Simulation.js'
+], function() {
+    var SUPER = Kata.Simulation.prototype;
+    /** GUISimulation is a simple wrapper for the base Simulation
+     * class which decodes GUI messages before passing them on for
+     * handling, and properly ignores other messages.
+     * @constructor
+     * @param {Kata.Channel} channel  A channel to the object host.
+     */
+    Kata.GUISimulation = function (channel) {
+        SUPER.constructor.call(this, channel);
+    };
+    Kata.extend(Kata.GUISimulation, SUPER);
 
-    // Bootstrapping root of source tree.
-    // This may not be necessary if importscripts uses relative paths.
-    var scriptroot = data[0];
-    try {
-        importScripts(scriptroot+"katajs.compiled.js");
-    } catch (e) {
-        try {
-            console.log("Exception loading katajs.compiled.js", e);
-        } catch (e) {}
-    }
-    if (typeof(Kata)==="undefined") {
-        try {
-            importScripts(scriptroot+"katajs/core/Core.js");
-        } catch (e) {
-            throw "Failed to import katajs/core/Core.js at scriptroot "+scriptroot+": "+e;
+    /**
+     * Received a message from the object host. Override this method.
+     * @param {Kata.Channel} channel  The sender. Usually equals this.mChannel.
+     * @param {object} data  A message usually in JavascriptGraphicsApi format.
+     */
+    Kata.GUISimulation.prototype.receivedMessage = function (channel, data) {
+        if (data.__gui) {
+            this.handleGUIMessage(data.__gui);
         }
-    }
-    Kata.scriptRoot = scriptroot;
-    Kata.bootstrapWorker=data[1];
-    Kata.evalInclude("katajs/core/WebWorker.js");
-    // Fetch classname to instanciate and arguments.
-    var jsFile = data[2];
-    var clsName = data[3].split(".");
-    var args = data[4];
-    Kata.evalInclude(jsFile);
-    // Our class name can be in a namespace heirarchy.
-    var cls = self;
-    for (var i = 0; i < clsName.length; i++) {
-        cls = cls[clsName[i]];
-    }
-    // We don't use the return value--but using 'new' here makes a unique this.
-    new cls (new Kata.WebWorker.Channel(self), args);
-}
+    };
+
+
+    Kata.GUISimulation.prototype.handleGUIMessage = function (channel, data) {
+    };
+
+}, 'katajs/oh/GUISimulation.js');

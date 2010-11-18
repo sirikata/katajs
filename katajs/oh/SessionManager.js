@@ -96,7 +96,22 @@ Kata.require([
          this.mObjects[ho.getID()] = ho;
 
          // And try to connect
-         space_conn.connectObject(ho.getID(), auth, req.visual);
+         var scale = 1.0;
+         if (req.scale) scale = req.scale;
+         space_conn.connectObject(ho.getID(), auth, scale, req.visual);
+     };
+
+     /** Callback from SpaceConnection which allows us to alias an ID
+      *  while a connection setup is in progress to safely handle
+      *  events such as unreliable messages.
+      */
+     Kata.SessionManager.prototype.aliasIDs = function(id, presence_id) {
+         var obj = this.mObjects[id];
+         if (!obj) {
+             Kata.warn("Got ID aliasing for unknown object: " + id);
+             return;
+         }
+         this.mObjects[presence_id.object] = obj;
      };
 
      /** Indicate a connection response to the SessionManager.  Should

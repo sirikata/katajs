@@ -96,7 +96,9 @@ Kata.require([
                  CreateObject : "fcre",
                  GraphicsMessage : "fgfm",
                  EnableGUIMessage : "feui",
-                 DisableGUIMessage : "fdui"
+                 DisableGUIMessage : "fdui",
+
+                 GUIMessage : "fgui"
              },
 
              reconstitute : function(data) {
@@ -104,10 +106,11 @@ Kata.require([
                  return data;
              },
 
-             Connect : function(space, auth) {
+             Connect : function(space, auth, scale) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Connect;
                  this.space = space;
                  this.auth = auth;
+                 this.scale = scale;
              },
              RegisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.EnableGUIMessage;
@@ -116,7 +119,14 @@ Kata.require([
              UnregisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.DisableGUIMessage;
                  this.event = event;  
-             },            
+             },
+
+             GUIMessage : function (msg, event) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GUIMessage;
+                 this.msg = msg;
+                 this.event = event;
+             },
+
              Disconnect : function(space, id) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Disconnect;
                  this.space = space;
@@ -196,6 +206,14 @@ Kata.require([
                  if (data)
                      Kata.LocationCopyUnifyTime(data.loc,this);
              },
+             GFXAnimate : function(space, observer, remotePresence, animation) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="Animate";
+                 this.space = space+observer;
+                 this.id = remotePresence.id();
+                 this.spaceid = this.space;
+                 this.animation = animation;
+             },
              GFXDestroyNode : function(space, observer, remotePresence) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
 
@@ -208,7 +226,7 @@ Kata.require([
                  if (remotePresence.rMesh) {
                      messageList.push(new Kata.ScriptProtocol.FromScript.GFXUpdateVisualMesh(space, 
                         observer, remotePresence.id(), remotePresence.rMesh, remotePresence.rAnim, remotePresence.rUpAxis,
-                        remotePresence.rCenter));
+                        remotePresence.rCenter, remotePresence.scale()));
                  }else {
                     //MIGHT be a light or somesuch
                  }
@@ -221,7 +239,7 @@ Kata.require([
                  this.id = id;
              },
              // Generates either a Mesh, Light, WebView, or Camera message, or the Destroy variants.
-             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim, up, center) {
+             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim, up, center, scale) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
                  if (mesh == null) {
                      this.msg = "DestroyMesh";
@@ -231,6 +249,7 @@ Kata.require([
                      this.anim = anim;
                      this.up_axis = up;
                      this.center = center;
+                     this.scale = scale;
                  }
              },
              GFXAttachCamera : function(space, observer, id, canvasId) {

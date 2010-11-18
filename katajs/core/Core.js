@@ -69,11 +69,11 @@ Kata.scriptRoot="";
                 body();
             }
         } finally {
-            if (Kata.getCurrentScript() != scriptfile) Kata.warn('Error: ' +scriptfile+ ' != '+Kata.getCurrentScript());
+            if (Kata.getCurrentScript() != scriptfile) Kata.log('Error11: ' +scriptfile+ ' != '+Kata.getCurrentScript(), Kata._currentScript);
+            Kata._currentScript.pop();
             if (scriptfile) {
                 Kata.setIncluded(scriptfile);
             }
-            Kata._currentScript.pop();
         }
     }
 
@@ -116,13 +116,13 @@ Kata.scriptRoot="";
         for (i = 0;i < deps.length; i++) {
             if (deps[i].push) {
                 for (var j = 0; j < deps[i].length; j++) {
-                    if (!loadedDeps[deps[i][j]]) {
+                    if (!loadedDeps[deps[i][j]] && !(deps[i][j] in unfinishedDeps)) {
                         unfinishedDeps[deps[i][j]] = true;
                         remainingDeps++;
                     }
                 }
             } else {
-                if (!loadedDeps[deps[i]]) {
+                if (!loadedDeps[deps[i]] && !(deps[i] in unfinishedDeps)) {
                     unfinishedDeps[deps[i]] = true;
                     remainingDeps++;
                 }
@@ -195,7 +195,12 @@ Kata.scriptRoot="";
             includedscripts[scriptfile] = true;
             runNewCurrentScript(scriptfile, 
                 function() {
-                    importScripts(Kata.scriptRoot+scriptfile);
+                    try {
+                        importScripts(Kata.scriptRoot+scriptfile);
+                    } catch (e) {
+                        Kata.log("Error in importScripts("+Kata.scriptRoot+scriptfile+")");
+                        throw e;
+                    }
                 });
         };
         Kata.evalInclude = Kata.include;
@@ -233,10 +238,9 @@ Kata.scriptRoot="";
             scriptTag.type = "text/javascript";
 
             var scriptContent = function(){
-                if (Kata.getCurrentScript()) console.log('Error: '+scriptfile+' != '+Kata.getCurrentScript());
+                if (Kata.getCurrentScript()) Kata.log('Error: '+scriptfile+' != '+Kata.getCurrentScript(), Kata._currentScript);
                 //Kata.log('===END LOAD+++ '+scriptfile);
                 Kata.setIncluded(scriptfile);
-                Kata._currentScript.pop();
             };
             scriptTag.addEventListener("load", scriptContent, true);
             headTag.appendChild(scriptTag);
@@ -434,6 +438,7 @@ Kata.scriptRoot="";
                 type : type,
                 contents : note
             });
+            console.trace && console.trace();
             return;
         }
 
@@ -489,10 +494,10 @@ Kata.scriptRoot="";
         // e.g. by checking for window.
         switch (data.debug) {
         case "error":
-            Kata.error(debugId+" "+data.contents);
+            Kata.log(debugId+" "+data.contents);
             break;
         case "warn":
-            Kata.warn(debugId+" "+data.contents, data.type);
+            Kata.log(debugId + data.type + ": " + data.contents);
             break;
         case "log":
             data.contents.splice(0, 0, debugId);

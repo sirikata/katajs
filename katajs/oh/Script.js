@@ -97,7 +97,7 @@ Kata.require([
       *  @param {function(Kata.Presence)} cb callback to invoke upon completion
       */
      Kata.Script.prototype.connect = function(args, auth, cb) {
-         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth);
+         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth, args.scale);
          msg.visual=args.visual;
          this.mConnectRequests[args.space] = cb;
          this._sendHostedObjectMessage(msg);
@@ -120,7 +120,7 @@ Kata.require([
              cb(presence);
          }
 
-         this.mBehaviors.every(function(beh) {
+         this.mBehaviors.forEach(function(beh) {
              if (beh.newPresence) beh.newPresence(presence);
          });
      };
@@ -136,7 +136,7 @@ Kata.require([
              delete this.mPresences[presence.space()];
          }
 
-         this.mBehaviors.every(function(beh) {
+         this.mBehaviors.forEach(function(beh) {
              if (beh.presenceInvalidated) beh.presenceInvalidated(presence);
          });
      };
@@ -206,7 +206,7 @@ Kata.require([
              this.mRemotePresences[key] = remote;
              presence.remotePresence(remote, true);
 
-             this.mBehaviors.every(function(beh) {
+             this.mBehaviors.forEach(function(beh) {
                  if (beh.remotePresence) beh.remotePresence(presence, remote, true);
              });
          }
@@ -220,7 +220,7 @@ Kata.require([
              delete this.mRemotePresences[key];
              presence.remotePresence(remote, false);
 
-             this.mBehaviors.every(function(beh) {
+             this.mBehaviors.forEach(function(beh) {
                  if (beh.remotePresence) beh.remotePresence(presence, remote, false);
              });
          }

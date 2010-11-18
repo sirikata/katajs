@@ -1,2 +1,8 @@
-katajs.compiled.js
+# Protocol directory for Sirikata plugin
+katajs/oh/plugins/sirikata/impl
+
+# Protocol directory for pbj Test
 tests/pbj/*.pbj.js
+
+# Closure compiled output
+katajs.compiled.js

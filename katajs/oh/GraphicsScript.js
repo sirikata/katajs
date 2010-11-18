@@ -43,8 +43,11 @@ Kata.require([
       * @constructor
       * @param channel channel for communication with main thread
       * @param args arguments provided by the creator of the object
+      * @param update_hook a hook of the form f(presence,
+      * remotePresence) invoked when updates are going to be passed to
+      * the graphics system.
       */
-     Kata.GraphicsScript = function(channel, args) {
+     Kata.GraphicsScript = function(channel, args, update_hook) {
          SUPER.constructor.call(this, channel, args);
          /**
           *  @type {Array} Array of indexes into the mRemotePresences map that have a chance of being rendered
@@ -58,8 +61,15 @@ Kata.require([
          this.mRenderableRemotePresenceIndex=0;
          this.mGraphicsTimer=null;
          this.mNumGraphicsSystems=0;
+         this._camPos = [0,0,0];
+         this._camPosTarget = [0,0,0]
+         this._camOrient = [0,0,0,1];
+         this._camOrientTarget = [0,0,0,1];
+         this._camLag = 0.9;
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
          this.mMessageDispatcher.add(msgTypes.GUIMessage, Kata.bind(this._handleGUIMessage, this));
+
+         this.mUpdateHook = update_hook;
      };
      Kata.extend(Kata.GraphicsScript, SUPER);
 
@@ -121,8 +131,8 @@ Kata.require([
       */
      Kata.GraphicsScript.prototype._enableGraphics = function (presence,canvasId,textureObjectSpace, textureObjectUUID,textureName) {
          var space=presence.space();
-		 // don't give camera a mesh
-         this.renderRemotePresence(presence,presence,true);
+		 // presence may have mesh
+         this.renderRemotePresence(presence,presence);
          for (var remotePresenceId in this.mRemotePresences) {
              var remotePresence=this.mRemotePresences[remotePresenceId];
              if (remotePresence.space()==space) { 
@@ -134,18 +144,61 @@ Kata.require([
          }
          var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(),presence.id(),presence.id());
          this._sendHostedObjectMessage(msg);
+
+         /// create camera with a fake ID so it's not attached to presence
+         Kata.BlessedCameraID = Kata.ObjectID.random();
+         var msg = new Kata.ScriptProtocol.FromScript.GFXCreateNode(presence.space(),presence.id(), presence);
+         msg.id = Kata.BlessedCameraID;
+         Kata.BlessedCameraSpace = msg.space;
+         Kata.BlessedCameraSpaceid = msg.spaceid;
+         
+         this._sendHostedObjectMessage(msg);
          msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
+         msg.id = Kata.BlessedCameraID;
 		 msg.msg = "Camera";
          this._sendHostedObjectMessage(msg);
          msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
+         msg.id = Kata.BlessedCameraID;
+
          this._sendHostedObjectMessage(msg);
          if (this.mNumGraphicsSystems++==0) {
              var duration=new Date(0);
              duration.setSeconds(2);
              this.mGraphicsTimer=this.timer(duration,Kata.bind(this.processRenderables,this),true);             
          }
-
+         setInterval(Kata.bind(this.cameraPeriodicUpdate, this), 20);
      };
+
+     Kata.GraphicsScript.prototype.setCameraPosOrient = function(pos, orient, lag){
+         if (lag==null) lag = .9;     /// 0 = no lag; 1.0 = infinite
+         this._camLag = lag;
+         if (pos) {
+             if (lag==0) this._camPos = pos;
+             this._camPosTarget = pos;
+         }
+         if (orient) {
+             if (lag==0) this._camOrient = orient;
+             this._camOrientTarget = orient;
+         }
+     }
+
+     Kata.GraphicsScript.prototype.cameraPeriodicUpdate = function(){
+         for (i in this._camPos) {
+             this._camPos[i] = this._camPos[i] * this._camLag + this._camPosTarget[i] * (1.0-this._camLag);
+         }
+         for (i in this._camOrient) {
+             this._camOrient[i] = this._camOrient[i] * this._camLag + this._camOrientTarget[i] * (1.0-this._camLag);
+         }
+         msg = {}
+         msg.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+         msg.msg = "Move";
+         msg.space = Kata.BlessedCameraSpace;
+         msg.id = Kata.BlessedCameraID;
+         msg.spaceid = Kata.BlessedCameraSpaceid;
+         msg.pos = this._camPos;
+         msg.orient = this._camOrient;
+         this._sendHostedObjectMessage(msg);
+     }
 
      /**
       * Goes through one remotePresence per timer call and checks whether it is renderable
@@ -233,18 +286,29 @@ Kata.require([
          this.processRenderables();//garbage collect dead renderables;
          return remotePresence;
      };
+
+     Kata.GraphicsScript.prototype.updateGFX = function(remotePresence) {
+         var presence = this.mPresences[remotePresence.space()];
+         if (!presence.inGFXSceneGraph) //only if this particular presence has gfx enabled
+             return;
+
+         var msg = new Kata.ScriptProtocol.FromScript.GFXMoveNode(
+             presence.space(),
+             presence.id(),
+             remotePresence,
+             { loc : remotePresence.predictedLocation() }
+         );
+         this._sendHostedObjectMessage(msg);
+         if (this.mUpdateHook)
+             this.mUpdateHook(presence, remotePresence);
+     };
      /**
       * Override Script._handlePresenceLocUpdate
       */
      Kata.GraphicsScript.prototype._handlePresenceLocUpdate = function(channel, data){
          var remotePresence = SUPER._handlePresenceLocUpdate.call(this, channel, data);
-         if (remotePresence) {
-             var presence = this.mPresences[data.space];
-             if (presence.inGFXSceneGraph) {//if this particular presence has gfx enabled
-                 var msg = new Kata.ScriptProtocol.FromScript.GFXMoveNode(this.mPresence.space(), this.mPresence.id(), remotePresence, data);
-                 this._sendHostedObjectMessage(msg);
-             }
-         }
+         if (remotePresence)
+             this.updateGFX(remotePresence);
          return remotePresence;
      };
      /**
@@ -255,4 +319,14 @@ Kata.require([
          return true;
      };
      
+    Kata.GraphicsScript.prototype.animate = function(presence, remotePresence, animation) {
+        var msg = new Kata.ScriptProtocol.FromScript.GFXAnimate(
+            presence.space(),
+            presence.id(),
+            remotePresence,
+            animation
+        );
+        this._sendHostedObjectMessage(msg);
+    };
+
 }, "katajs/oh/GraphicsScript.js");

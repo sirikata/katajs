@@ -41,7 +41,7 @@ Kata.require([
       * information like location and mesh as well as allow you to
       * send messages to the object.
       *
-      * @param {Kata.Presence} parent 
+      * @param {Kata.Presence} parent
       * @param {Kata.URL} space
       * @param {Kata.PresenceID} id
       * @param {Location} location
@@ -86,12 +86,17 @@ Kata.require([
     Kata.RemotePresence.prototype.presenceID = function() {
         return new Kata.PresenceID(this.mSpace, this.mID);
     };
-     
+
     /** Get an ODP endpoint for this object on the specified port. */
     Kata.RemotePresence.prototype.endpoint = function(port) {
         return new Kata.ODP.Endpoint(this.mSpace, this.mID, port);
     };
-     
+
+    /** Get the owning Presence for this RemotePresence. */
+    Kata.RemotePresence.prototype.owner = function() {
+        return this.mParent;
+    };
+
      /** Enable tracking for this RemotePresence, i.e. subscribe it
       * for updates.
       */
@@ -115,25 +120,33 @@ Kata.require([
 
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.position = function(time) {
-         if (time===undefined) console.log("inaccurate read of position");
-         return this.mLocation.pos.concat();//FIXME drh do interpolation?
+         if (time===undefined)
+             console.log("inaccurate read of position");
+         var now_loc = Kata.LocationExtrapolate(this.mLocation, time);
+         return now_loc.pos.concat();
      };
      /** Get the current estimate of this object's velocity. */
      Kata.RemotePresence.prototype.velocity = function() {
-         return this.mLocation.vel.concat();//FIXME drh do interpolation?
+         return this.mLocation.vel.concat();
      };
      /** Get the current estimate of this object's orientation. */
      Kata.RemotePresence.prototype.orientation = function(time) {
-         if (time===undefined) console.log("inaccurate read of orientation");
-         return this.mLocation.orient.concat();//FIXME drh do interpolation?
+         if (time===undefined)
+             console.log("inaccurate read of orientation");
+         var now_loc = Kata.LocationExtrapolate(this.mLocation, time);
+         return now_loc.orient.concat();
      };
      /** Get the current estimate of this object's angular speed. */
      Kata.RemotePresence.prototype.angularSpeed = function() {
-         return this.mLocation.angvel.concat();//FIXME drh do interpolation?
+         return this.mLocation.rotvel;
      };
      /** Get the current estimate of this object's rotational axis. */
      Kata.RemotePresence.prototype.rotationalAxis = function() {
          return this.mLocation.rotaxis.concat();//FIXME drh do interpolation?
+     };
+     /** Get the current estimate of this object's scale. */
+     Kata.RemotePresence.prototype.scale = function() {
+         return this.mLocation.scale.concat();//FIXME drh do interpolation?
      };
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.location = function() {
@@ -144,6 +157,35 @@ Kata.require([
          }
          return retval;
      };
+
+    // Predicted location information
+    Kata.RemotePresence.prototype.predictedPosition = function(time) {
+        return this.position(time);
+    };
+    Kata.RemotePresence.prototype.predictedVelocity = function() {
+        return this.velocity();
+    };
+    Kata.RemotePresence.prototype.predictedOrientation = function(time) {
+        return this.orientation(time);
+    };
+    Kata.RemotePresence.prototype.predictedAngularSpeed = function() {
+        return this.angularSpeed();
+    };
+    Kata.RemotePresence.prototype.predictedRotationalAxis = function() {
+        return this.rotationalAxis();
+    };
+    Kata.RemotePresence.prototype.predictedScale = function() {
+        return this.scale();
+    };
+    /** Gets the current best estimate of this object's positon. This
+     * may include updates applied locally but not verified from the
+     * server yet.
+     */
+    Kata.RemotePresence.prototype.predictedLocation = function() {
+        // For RemotePresences we currently don't apply any prediction.
+        return this.location();
+    };
+
      /** Get the current estimate of this object's bounds. */
      Kata.RemotePresence.prototype.bounds = function() {
          return this.mLocation.scale.concat();//FIXME drh do interpolation?

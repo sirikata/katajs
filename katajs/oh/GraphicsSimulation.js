@@ -73,6 +73,9 @@ Kata.require([
      *     object host.
      */
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
+        // FIXME gui messages share this channel
+        if (data.__gui) return;
+
         data = Kata.ScriptProtocol.FromScript.reconstitute(data);
         SUPER.receivedMessage.apply(this, arguments);
 //        console.log("Graphics received message from ObjectHost:", data, data.msg);

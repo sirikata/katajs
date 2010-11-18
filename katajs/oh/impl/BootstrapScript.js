@@ -91,6 +91,10 @@ Kata.require([
              cls = cls[clsTree[i]];
          }
          // And finally, in case the script constructor does anything synchronously, make the script creation the final step
+         if (!cls) {
+             Kata.error("Class "+args.realClass+" from file "+args.realScript+" could not be found!");
+             return;
+         }
          this.mScript = new cls(filtered_channel, args.realArgs);
          for (var i = 0; i < this.mPendingScriptLoad.length; i++) {
              this.receiveMessage(this.mPendingScriptLoad[i][0], this.mPendingScriptLoad[i][1]);

@@ -281,8 +281,8 @@ Kata.LocationCopy = function(destination, source) {
         destination.orientTime=source.orientTime!==undefined?source.orientTime:source.time;
         destination.orient=source.orient.slice(0);
     }
-    if (source.angvel!==undefined && source.rotaxis!==undefined) {
-        destination.angvel=source.angvel;
+    if (source.rotvel!==undefined && source.rotaxis!==undefined) {
+        destination.rotvel=source.rotvel;
         destination.rotaxis=source.rotaxis.slice(0);
     }
     if (source.vel!==undefined){
@@ -302,8 +302,8 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         if (msg.orient!==undefined) {            
             destination.orient=msg.orient;
         }
-        if (msg.angvel!==undefined && msg.rotaxis!==undefined) {
-            destination.angvel=msg.angvel;
+        if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
+            destination.rotvel=msg.rotvel;
             destination.rotaxis=msg.rotaxis;
         }
         if (msg.vel!==undefined){
@@ -329,10 +329,10 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
             }
         }
         if (msg.orient!==undefined){
-            if (msg.angvel&&msg.rotaxis&&msg.orientTime) {
+            if (msg.rotvel&&msg.rotaxis&&msg.orientTime) {
                 destination.pos
                     =Kata._helperLocationExtrapolateQuaternion(msg.orient,
-                                                               msg.angvel,
+                                                               msg.rotvel,
                                                                msg.rotaxis,
                                                                Kata.deltaTime(t,
                                                                          msg.orientTime));
@@ -340,9 +340,9 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
                 destination.orient=msg.orient;
             }
         }
-        if (msg.angvel!==undefined && msg.rotaxis!==undefined) {
-            destination.angvel=msg.angvel;
-            destination.angvel=msg.angvel;
+        if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
+            destination.rotvel=msg.rotvel;
+            destination.rotvel=msg.rotvel;
         }
         if (msg.vel!==undefined){
             destination.vel=msg.vel;
@@ -407,13 +407,13 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
       rotaxis:curLocation.rotaxis,
       rotvel:curLocation.rotvel
     };
-    if (msg.pos) {
+    if (msg.pos && msg.time && msg.time > curLocation.posTime) {
         retval.pos=msg.pos;
         retval.posTime=msg.time;
     }else {
         //curLocation.pos=prevLocation.pos;
         //curLocation.posTime=prevLocation.posTime;
-        if (msg.vel) {
+        if (msg.vel && msg.time && msg.time > curLocation.posTime) {
             //curLocation.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,Kata.deltaTime(curDate,curLocation.posTime));
             //curLocation.posTime=curDate;
 
@@ -421,14 +421,14 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
             retval.posTime=msg.time;
         }
     }
-    if (msg.vel) {
+    if (msg.vel && msg.time && msg.time > curLocation.posTime) {
         retval.vel=msg.vel;
         //console.log("Setting velocity to "+retval.vel+" was "+curLocation.vel+" and before "+prevLocation.vel+" Pos "+retval.pos+" was "+curLocation.pos+" and before "+prevLocation.pos);
     }else {
         //console.log("Setting position to "+retval.vel+" was "+curLocation.vel+" and before "+prevLocation.vel+" Pos "+retval.pos+" was "+curLocation.pos+" and before "+prevLocation.pos);
         curLocation.vel=prevLocation.vel;
     }
-    if (msg.orient) {
+    if (msg.orient && msg.time && msg.time > curLocation.orientTime) {
         retval.orient=msg.orient;
         retval.orientTime=msg.time;
     }else {
@@ -442,19 +442,19 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
             retval.orientTime=msg.time;
         }
     }
-    if (msg.rotvel&&msg.rotaxis) {
+    if (msg.rotvel&&msg.rotaxis && msg.time && msg.time > curLocation.orientTime) {
         retval.rotaxis=msg.rotaxis;
         retval.rotvel=msg.rotvel;
     }else {
-        curLocation.rotaxis=prevLocation.rotaxis;
-        curLocation.rotvel=prevLocation.rotvel;
+        retval.rotaxis=prevLocation.rotaxis;
+        retval.rotvel=prevLocation.rotvel;
     }
-    if (msg.scale) {
+    if (msg.scale && msg.time && msg.time > curLocation.scaleTime) {
         retval.scale=msg.scale;
         retval.scaleTime=msg.time;
     }else {
-        curLocation.scale=prevLocation.scale;
-        curLocation.scaleTime=prevLocation.scaleTime;
+        retval.scale=prevLocation.scale;
+        retval.scaleTime=prevLocation.scaleTime;
     }
     return retval;
 };
@@ -477,7 +477,7 @@ Kata.LocationReset=function(msg,curLocation) {
     if (msg.vel!==undefined) {
         curLocation.vel=msg.vel;
     }
-    if (msg.angvel!==undefined && msg.rotaxis !==undefined) {
+    if (msg.rotvel!==undefined && msg.rotaxis !==undefined) {
         curLocation.rotaxis=msg.rotaxis;
     }
     if (msg.orient!==undefined) {

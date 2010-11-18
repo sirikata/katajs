@@ -30,7 +30,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// We use protocol buffers just to encode the string, we could also
+// setup real messages
 Kata.require([
+    'externals/protojs/protobuf.js'
 ], function() {
 
     if (typeof(Kata.Behavior) == "undefined")
@@ -82,7 +85,7 @@ Kata.require([
 
     Kata.Behavior.NamedObject.prototype._handleMessage = function(src, dest, payload) {
         var odp_port = this._getPort(dest.presenceID());
-        odp_port.send(src, this.mName);
+        odp_port.send(src, PROTO.encodeUTF8(this.mName));
     };
 
     /** NamedObjectObserver is a NamedObject which also requests the names of
@@ -127,9 +130,13 @@ Kata.require([
     };
 
     Kata.Behavior.NamedObjectObserver.prototype._handleReply = function(reqinfo, name) {
-        reqinfo.remote.name = name;
+        if (name === null)
+            reqinfo.remote.name = null;
+        else
+            reqinfo.remote.name = PROTO.decodeUTF8(name);
+
         if (this.mCB)
-            this.mCB(reqinfo.remote, name);
+            this.mCB(reqinfo.remote, true);
         clearTimeout(reqinfo.timer);
         delete this.mQueriedObjects[reqinfo.remote.presenceID()];
     };
@@ -137,7 +144,7 @@ Kata.require([
     Kata.Behavior.NamedObjectObserver.prototype._handleMessage = function(src, dest, payload) {
         var queried_reqinfo = this.mQueriedObjects[src.presenceID()];
         // If we sent a query and we have non-zero response length, this is a reply
-        if (queried_reqinfo && payload.length > 0)
+        if (queried_reqinfo && payload && payload.length > 0)
             this._handleReply(queried_reqinfo, payload);
         else // Otherwise, its just a request and should be answered as NamedObject does
             this.SUPER._handleMessage.call(this, src, dest, payload);

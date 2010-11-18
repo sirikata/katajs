@@ -96,6 +96,7 @@ Kata.require([
                  uuid : uuid
              };
          var obj_loc =Kata.LocationIdentity(Kata.now(this.mID));
+         obj_loc.scale = [ cb.scale, cb.scale, cb.scale ];
          //FIXME: update with initial position
          this.mLoc.add(uuid, obj_loc, cb.visual);
          this.mProx.addObject(uuid);
