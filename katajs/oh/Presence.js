@@ -246,7 +246,7 @@ Kata.require([
 
          var update = {
              orient:val.concat(),
-             rotaxis:this._requestedRotationalAxis(), angvel:this._requestedAngularSpeed(),
+             rotaxis:this._requestedRotationalAxis(), rotvel:this._requestedAngularSpeed(),
              time:Kata.now(this.mSpace)
          };
          var msg = new Kata.ScriptProtocol.FromScript.Location(
@@ -274,7 +274,7 @@ Kata.require([
 
         var update = {
             orient:this._requestedOrientation(now),
-            rotaxis:axis.concat(), angvel:angvel,
+            rotaxis:axis.concat(), rotvel:angvel,
             time:now
         };
         var msg = new Kata.ScriptProtocol.FromScript.Location(

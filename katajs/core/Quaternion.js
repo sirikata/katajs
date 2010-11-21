@@ -69,7 +69,7 @@ Kata.require([
         );
     };
 
-    Kata.Quaternion.identify = function() {
+    Kata.Quaternion.identity = function() {
         return new Kata.Quaternion();
     };
 
@@ -79,7 +79,7 @@ Kata.require([
 
     Kata.Quaternion.prototype.toAngleAxis = function() {
         var fSqrLength = this[0]*this[0] + this[1]*this[1] + this[2]*this[2];
-        var tmpw=w;
+        var tmpw=this[3];
         var eps = 1e-06;
         if (tmpw > 1.0 && tmpw < 1.0+eps)
             tmpw = 1.0;
@@ -88,7 +88,7 @@ Kata.require([
         if (fSqrLength > 1e-08 && tmpw <= 1 && tmpw >= -1)
         {
             var returnAngleRadians = 2.0 * Math.acos(tmpw);
-            var length = sqrt(fSqrLength);
+            var len = Math.sqrt(fSqrLength);
             var returnAxis = [ this[0]/len, this[1]/len, this[2]/len ];
             return { angle: returnAngleRadians, axis: returnAxis };
         }

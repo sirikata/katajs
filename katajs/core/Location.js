@@ -31,6 +31,7 @@
  */
 
 Kata.require([
+    'katajs/core/Quaternion.js'
 ], function() {
 
 /**
