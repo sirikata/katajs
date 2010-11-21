@@ -330,7 +330,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
             }
         }
         if (msg.orient!==undefined){
-            if (msg.rotvel&&msg.rotaxis&&msg.orientTime) {
+            if (msg.rotvel !== undefined && msg.rotaxis !== undefined && msg.orientTime !== undefined) {
                 destination.pos
                     =Kata._helperLocationExtrapolateQuaternion(msg.orient,
                                                                msg.rotvel,
@@ -341,9 +341,9 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
                 destination.orient=msg.orient;
             }
         }
-        if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
+        if (msg.rotvel !== undefined && msg.rotaxis !== undefined) {
             destination.rotvel=msg.rotvel;
-            destination.rotvel=msg.rotvel;
+            destination.rotaxis=msg.rotaxis;
         }
         if (msg.vel!==undefined){
             destination.vel=msg.vel;
@@ -435,7 +435,7 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     }else {
         //curLocation.orient=prevLocation.orient;
         //curLocation.orientTime=prevLocation.orientTime;
-        if (msg.rotvel&&msg.rotaxis) {
+        if (msg.rotvel !== undefined && msg.rotaxis !== undefined) {
             //curLocation.orient=Kata._helperLocationExtrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
             //curLocation.orientTime=curDate;
 
@@ -443,7 +443,7 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
             retval.orientTime=msg.time;
         }
     }
-    if (msg.rotvel&&msg.rotaxis && msg.time && msg.time > curLocation.orientTime) {
+    if (msg.rotvel !== undefined && msg.rotaxis !== undefined && msg.time !== undefined && msg.time > curLocation.orientTime) {
         retval.rotaxis=msg.rotaxis;
         retval.rotvel=msg.rotvel;
     }else {
