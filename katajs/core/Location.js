@@ -30,8 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Kata.require([
-], function() {
+Kata.require([], function() {
 
 /**
  * Returns the identity location updated at the current time
@@ -311,9 +310,9 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         }        
     }else{
         var t=msg.scaleTime;
-        if (t===undefined||msg.posTime>t)
+        if (t===undefined||msg.posTime>=t)
             t=msg.posTime;
-        if (t===undefined||msg.orientTime>t)
+        if (t===undefined||msg.orientTime>=t)
             t=msg.orientTime;
         if (msg.scale!==undefined){
             destination.scale=msg.scale;
@@ -387,7 +386,10 @@ Kata.LocationSet=function(msg) {
  * Takes a current and prev location samples and 
  * returns a new location that has the previous location properties where the msg does not specify the values
  * and uses the messages values where they are specified
- *  then the currentLocation is updated with prevLocations values if the would otherwise be the same as curLocation
+ * then the currentLocation is updated with prevLocations values if the would otherwise be the same as curLocation
+ * also checks to make sure the time is not OLDER than the last update. If the time is the same assume that it 
+ * is newer within the accuracy of the javascript timer. 
+ * 
  * @param msg the network message being received
  * @param {!Location} curLocation the currently known latest update (modified with prevLocation items that have not changed in new update)
  * @param {!Location} prevLocation the update before the current update
@@ -407,13 +409,13 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
       rotaxis:curLocation.rotaxis,
       rotvel:curLocation.rotvel
     };
-    if (msg.pos && msg.time && msg.time > curLocation.posTime) {
+    if (msg.pos && msg.time && msg.time >= curLocation.posTime) {
         retval.pos=msg.pos;
         retval.posTime=msg.time;
     }else {
         //curLocation.pos=prevLocation.pos;
         //curLocation.posTime=prevLocation.posTime;
-        if (msg.vel && msg.time && msg.time > curLocation.posTime) {
+        if (msg.vel && msg.time && msg.time >= curLocation.posTime) {
             //curLocation.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,Kata.deltaTime(curDate,curLocation.posTime));
             //curLocation.posTime=curDate;
 
@@ -421,14 +423,14 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
             retval.posTime=msg.time;
         }
     }
-    if (msg.vel && msg.time && msg.time > curLocation.posTime) {
+    if (msg.vel && msg.time && msg.time >= curLocation.posTime) {
         retval.vel=msg.vel;
         //console.log("Setting velocity to "+retval.vel+" was "+curLocation.vel+" and before "+prevLocation.vel+" Pos "+retval.pos+" was "+curLocation.pos+" and before "+prevLocation.pos);
     }else {
         //console.log("Setting position to "+retval.vel+" was "+curLocation.vel+" and before "+prevLocation.vel+" Pos "+retval.pos+" was "+curLocation.pos+" and before "+prevLocation.pos);
         curLocation.vel=prevLocation.vel;
     }
-    if (msg.orient && msg.time && msg.time > curLocation.orientTime) {
+    if (msg.orient && msg.time && msg.time >= curLocation.orientTime) {
         retval.orient=msg.orient;
         retval.orientTime=msg.time;
     }else {
@@ -442,14 +444,14 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
             retval.orientTime=msg.time;
         }
     }
-    if (msg.rotvel&&msg.rotaxis && msg.time && msg.time > curLocation.orientTime) {
+    if (msg.rotvel&&msg.rotaxis && msg.time && msg.time >= curLocation.orientTime) {
         retval.rotaxis=msg.rotaxis;
         retval.rotvel=msg.rotvel;
     }else {
         retval.rotaxis=prevLocation.rotaxis;
         retval.rotvel=prevLocation.rotvel;
     }
-    if (msg.scale && msg.time && msg.time > curLocation.scaleTime) {
+    if (msg.scale && msg.time && msg.time >= curLocation.scaleTime) {
         retval.scale=msg.scale;
         retval.scaleTime=msg.time;
     }else {
