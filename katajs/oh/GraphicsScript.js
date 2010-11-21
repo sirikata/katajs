@@ -81,8 +81,8 @@ Kata.require([
       * @param {Kata.Presence} presence The presence that graphics should be enabled for
       * @param {number} canvasId Optional canvas ID, which, if specified, indicates which canvas is the preferred attachment point. Otherwise it's first come, first serve for canvas 0 followed by canvas 1 (if present), etc
       */
-     Kata.GraphicsScript.prototype.enableGraphicsViewport = function (presence,canvasId) {
-         this._enableGraphics(presence,canvasId);
+     Kata.GraphicsScript.prototype.enableGraphicsViewport = function (presence,canvasId, attachCamera) {
+         this._enableGraphics(presence, canvasId, undefined, undefined, undefined, attachCamera);
      };
 
      /**
@@ -129,45 +129,56 @@ Kata.require([
       * Attach the current presence as a camera unit to either the canvasId or, if undefined, the specified texture. 
       * Also notify the graphics system of all current renderables.
       */
-     Kata.GraphicsScript.prototype._enableGraphics = function (presence,canvasId,textureObjectSpace, textureObjectUUID,textureName) {
-         var space=presence.space();
-		 // presence may have mesh
-         this.renderRemotePresence(presence,presence);
-         for (var remotePresenceId in this.mRemotePresences) {
-             var remotePresence=this.mRemotePresences[remotePresenceId];
-             if (remotePresence.space()==space) { 
-                 this.mRenderableRemotePresences[this.mRenderableRemotePresences.length]=remotePresenceId;
-                 if (this.shouldRender(presence,remotePresence)&&!remotePresence.inGFXSceneGraph) {
-                     this.renderRemotePresence(presence,remotePresence);
-                 }
-             }
-         }
-         var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(),presence.id(),presence.id());
-         this._sendHostedObjectMessage(msg);
-
-         /// create camera with a fake ID so it's not attached to presence
-         Kata.BlessedCameraID = Kata.ObjectID.random();
-         var msg = new Kata.ScriptProtocol.FromScript.GFXCreateNode(presence.space(),presence.id(), presence);
-         msg.id = Kata.BlessedCameraID;
-         Kata.BlessedCameraSpace = msg.space;
-         Kata.BlessedCameraSpaceid = msg.spaceid;
-         
-         this._sendHostedObjectMessage(msg);
-         msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
-         msg.id = Kata.BlessedCameraID;
-		 msg.msg = "Camera";
-         this._sendHostedObjectMessage(msg);
-         msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(),presence.id(),presence.id(),canvasId,textureObjectSpace,textureObjectUUID,textureName);
-         msg.id = Kata.BlessedCameraID;
-
-         this._sendHostedObjectMessage(msg);
-         if (this.mNumGraphicsSystems++==0) {
-             var duration=new Date(0);
-             duration.setSeconds(2);
-             this.mGraphicsTimer=this.timer(duration,Kata.bind(this.processRenderables,this),true);             
-         }
-         setInterval(Kata.bind(this.cameraPeriodicUpdate, this), 20);
-     };
+     Kata.GraphicsScript.prototype._enableGraphics = function(presence, canvasId, textureObjectSpace, textureObjectUUID, textureName, attachCamera){
+         var space = presence.space();
+         // presence may have mesh
+        this.renderRemotePresence(presence, presence);
+        for (var remotePresenceId in this.mRemotePresences) {
+            var remotePresence = this.mRemotePresences[remotePresenceId];
+            if (remotePresence.space() == space) {
+                this.mRenderableRemotePresences[this.mRenderableRemotePresences.length] = remotePresenceId;
+                if (this.shouldRender(presence, remotePresence) && !remotePresence.inGFXSceneGraph) {
+                    this.renderRemotePresence(presence, remotePresence);
+                }
+            }
+        }
+        var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(), presence.id(), presence.id());
+        this._sendHostedObjectMessage(msg);
+        
+        if (attachCamera) {
+            var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(), presence.id(), presence.id());
+            this._sendHostedObjectMessage(msg);
+            msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(), presence.id(), presence.id(), canvasId, textureObjectSpace, textureObjectUUID, textureName);
+            msg.msg = "Camera";
+            this._sendHostedObjectMessage(msg);
+            msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(), presence.id(), presence.id(), canvasId, textureObjectSpace, textureObjectUUID, textureName);
+            this._sendHostedObjectMessage(msg);
+        }
+        else {
+            /// create camera with a fake ID so it's not attached to presence
+            Kata.BlessedCameraID = Kata.ObjectID.random();
+            var msg = new Kata.ScriptProtocol.FromScript.GFXCreateNode(presence.space(), presence.id(), presence);
+            msg.id = Kata.BlessedCameraID;
+            Kata.BlessedCameraSpace = msg.space;
+            Kata.BlessedCameraSpaceid = msg.spaceid;
+            
+            this._sendHostedObjectMessage(msg);
+            msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(), presence.id(), presence.id(), canvasId, textureObjectSpace, textureObjectUUID, textureName);
+            msg.id = Kata.BlessedCameraID;
+            msg.msg = "Camera";
+            this._sendHostedObjectMessage(msg);
+            msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(), presence.id(), presence.id(), canvasId, textureObjectSpace, textureObjectUUID, textureName);
+            msg.id = Kata.BlessedCameraID;
+            
+            this._sendHostedObjectMessage(msg);
+            setInterval(Kata.bind(this.cameraPeriodicUpdate, this), 20);
+        }
+        if (this.mNumGraphicsSystems++ == 0) {
+            var duration = new Date(0);
+            duration.setSeconds(2);
+            this.mGraphicsTimer = this.timer(duration, Kata.bind(this.processRenderables, this), true);
+        }
+    };
 
      Kata.GraphicsScript.prototype.setCameraPosOrient = function(pos, orient, lag){
          if (lag==null) lag = .9;     /// 0 = no lag; 1.0 = infinite
