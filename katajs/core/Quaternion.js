@@ -40,6 +40,12 @@ Kata.require([
             this[2] = 0.0;
             this[3] = 1.0;
         }
+        else if (arguments.length == 1) {
+            this[0] = arguments[0][0];
+            this[1] = arguments[0][1];
+            this[2] = arguments[0][2];
+            this[3] = arguments[0][3];
+        }
         else if (arguments.length == 4) {
             this[0] = arguments[0];
             this[1] = arguments[1];
@@ -174,7 +180,7 @@ Kata.require([
     Kata.Quaternion.prototype.exp = function(s) {
         // FIXME there's probably a much more efficient way to do this
         var angle_axis = toAngleAxis;
-        return Kata.Quaternion.fromAxisAngle(angle_axis.axis, angle_axis.angle*n);
+        return Kata.Quaternion.fromAxisAngle(angle_axis.axis, angle_axis.angle*s);
     };
 
 }, 'katajs/core/Quaternion.js');

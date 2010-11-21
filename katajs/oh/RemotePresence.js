@@ -144,6 +144,10 @@ Kata.require([
      Kata.RemotePresence.prototype.rotationalAxis = function() {
          return this.mLocation.rotaxis.concat();//FIXME drh do interpolation?
      };
+     /** Get the current estimate of this object's rotational velocity. */
+     Kata.RemotePresence.prototype.rotationalVelocity = function() {
+         return Kata.LocationOrientationVelocity(this.mLocation);
+     };
      /** Get the current estimate of this object's scale. */
      Kata.RemotePresence.prototype.scale = function() {
          return this.mLocation.scale.concat();//FIXME drh do interpolation?
@@ -174,6 +178,10 @@ Kata.require([
     Kata.RemotePresence.prototype.predictedRotationalAxis = function() {
         return this.rotationalAxis();
     };
+    Kata.RemotePresence.prototype.predictedRotationalVelocity = function() {
+        return this.rotationalVelocity();
+    };
+
     Kata.RemotePresence.prototype.predictedScale = function() {
         return this.scale();
     };

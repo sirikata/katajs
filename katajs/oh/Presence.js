@@ -151,6 +151,9 @@ Kata.require([
     Kata.Presence.prototype._requestedRotationalAxis = function() {
         return this.mRequestedLocation.rotaxis.concat();
     };
+    Kata.Presence.prototype._requestedRotationalVelocity = function() {
+        return Kata.LocationOrientationVelocity(this.mRequestedLocation);
+    };
     Kata.Presence.prototype._requestedScale = function() {
         return this.mRequestedLocation.scale.concat();
     };
@@ -179,8 +182,11 @@ Kata.require([
     Kata.Presence.prototype.predictedRotationalAxis = function() {
         return this._requestesdRotationalAxis();
     };
+    Kata.Presence.prototype.predictedRotationalVelocity = function() {
+        return this._requestesdRotationalVelocity();
+    };
     Kata.Presence.prototype.predictedScale = function() {
-        return this._scaleRotationalAxis();
+        return this._requestedScale();
     };
     Kata.Presence.prototype.predictedLocation = function() {
         return this._requestedLocation();
@@ -249,28 +255,34 @@ Kata.require([
          this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, now);
          this._sendHostedObjectMessage(msg);
      };
-     Kata.Presence.prototype.setAngularRotation = function(axis, angvel) {
-         var now = Kata.now(this.mSpace);
+    /** Set angular velocity of the object using a quaternion. */
+    Kata.Presence.prototype.setAngularVelocity = function(ang_vel) {
+        if (! "toAngleAxis" in ang_vel) ang_vel = new Kata.Quaternion(ang_vel);
+        var aa = ang_vel.toAngleAxis();
+        var angvel = aa.angle;
+        var axis = aa.axis;
 
-         var reqvel = this._requestedAngularSpeed();
-         var reqaxis = this._requestedRotationalAxis();
-         if (reqvel == angvel &&
-             reqaxis[0] == axis[0] &&
-             reqaxis[1] == axis[1] &&
-             reqaxis[2] == axis[2])
-             return;
+        var now = Kata.now(this.mSpace);
 
-         var update = {
-             orient:this._requestedOrientation(now),
-             rotaxis:axis.concat(), angvel:angvel,
-             time:now
-         };
-         var msg = new Kata.ScriptProtocol.FromScript.Location(
-             this.mSpace, this.mID, update
-         );
-         this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, now);
-         this._sendHostedObjectMessage(msg);
-     };
+        var reqvel = this._requestedAngularSpeed();
+        var reqaxis = this._requestedRotationalAxis();
+        if (reqvel == angvel &&
+            reqaxis[0] == axis[0] &&
+            reqaxis[1] == axis[1] &&
+            reqaxis[2] == axis[2])
+            return;
+
+        var update = {
+            orient:this._requestedOrientation(now),
+            rotaxis:axis.concat(), angvel:angvel,
+            time:now
+        };
+        var msg = new Kata.ScriptProtocol.FromScript.Location(
+            this.mSpace, this.mID, update
+        );
+        this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, now);
+        this._sendHostedObjectMessage(msg);
+    };
      Kata.Presence.prototype.setLocation = function(location) {
          var now = Kata.now(this.mSpace);
          if (location.time===undefined) {

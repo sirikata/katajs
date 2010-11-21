@@ -674,4 +674,8 @@ Kata.LocationReparent=function(loc,oldNode,newNode){
     return loc;
 };
 
+Kata.LocationOrientationVelocity=function(loc) {
+    return Kata.Quaternion.fromAxisAngle(loc.rotaxis, loc.rotvel);
+};
+
 }, 'katajs/core/Location.js');
