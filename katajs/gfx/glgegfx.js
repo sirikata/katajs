@@ -264,7 +264,7 @@ Kata.require([
     };
     
     VWObject.prototype.updateTransformation = function(graphics) {
-        var l=Kata.LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
+        var l=Kata.LocationExtrapolate(this.mCurLocation, graphics.mCurTime);
         this.mNode.setLoc(l.pos[0],l.pos[1],l.pos[2]);
         // Setting scale on cameras does wonky things to lighting
         if (!this.mCamera) {
@@ -703,4 +703,3 @@ Kata.require([
     // Register as a GraphicsSimulation if possible.
     Kata.GraphicsSimulation.registerDriver("GLGE", GLGEGraphics);
 }, "katajs/gfx/glgegfx.js");
-

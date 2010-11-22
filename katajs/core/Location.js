@@ -328,8 +328,8 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
             }
         }
         if (msg.orient!==undefined){
-            if (msg.rotvel&&msg.rotaxis&&msg.orientTime) {
-                destination.pos
+            if (msg.rotvel !== undefined && msg.rotaxis !== undefined && msg.orientTime !== undefined) {
+                destination.orient
                     =Kata._helperLocationExtrapolateQuaternion(msg.orient,
                                                                msg.rotvel,
                                                                msg.rotaxis,
@@ -339,9 +339,9 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
                 destination.orient=msg.orient;
             }
         }
-        if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
+        if (msg.rotvel !== undefined && msg.rotaxis !== undefined) {
             destination.rotvel=msg.rotvel;
-            destination.rotvel=msg.rotvel;
+            destination.rotaxis=msg.rotaxis;
         }
         if (msg.vel!==undefined){
             destination.vel=msg.vel;
@@ -439,7 +439,7 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     }else {
         //curLocation.orient=prevLocation.orient;
         //curLocation.orientTime=prevLocation.orientTime;
-        if (msg.rotvel&&msg.rotaxis) {
+        if (msg.rotvel !== undefined && msg.rotaxis !== undefined) {
             //curLocation.orient=Kata._helperLocationExtrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
             //curLocation.orientTime=curDate;
 
@@ -447,19 +447,19 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
             retval.orientTime=msg.time;
         }
     }
-    if (msg.rotvel&&msg.rotaxis && msg.time && msg.time >= curLocation.orientTime) {
+    if (msg.rotvel !== undefined && msg.rotaxis !== undefined && msg.time !== undefined && msg.time >= curLocation.orientTime) {
         retval.rotaxis=msg.rotaxis;
         retval.rotvel=msg.rotvel;
     }else {
-        retval.rotaxis=prevLocation.rotaxis;
-        retval.rotvel=prevLocation.rotvel;
+        retval.rotaxis=curLocation.rotaxis;
+        retval.rotvel=curLocation.rotvel;
     }
     if (msg.scale && msg.time && msg.time >= curLocation.scaleTime) {
         retval.scale=msg.scale;
         retval.scaleTime=msg.time;
     }else {
-        retval.scale=prevLocation.scale;
-        retval.scaleTime=prevLocation.scaleTime;
+        retval.scale=curLocation.scale;
+        retval.scaleTime=curLocation.scaleTime;
     }
     return retval;
 };
@@ -677,6 +677,10 @@ Kata.LocationReparent=function(loc,oldNode,newNode){
         loc =Kata.LocationInverseCompose(loc,newNode[i][0],newNode[i][1]);
     }
     return loc;
+};
+
+Kata.LocationOrientationVelocity=function(loc) {
+    return Kata.Quaternion.fromAxisAngle(loc.rotaxis, loc.rotvel);
 };
 
 }, 'katajs/core/Location.js');

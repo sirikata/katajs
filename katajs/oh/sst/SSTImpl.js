@@ -456,8 +456,12 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
     else {
         
       if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
-          setTimeout(Kata.bind(this.cleanup,this),0);
-	      return false; //the connection was unable to contact the other endpoint.
+          // FIXME connection retries. Also, this is getting triggered
+          // *really* quickly when the initial sendData, which
+          // *probably means it will only ever work for local host or
+          // *maybe a LAN
+          //setTimeout(Kata.bind(this.cleanup,this),0);
+	  //    return false; //the connection was unable to contact the other endpoint.
       }
 
 //p      var all_sent_packets_acked = true;
