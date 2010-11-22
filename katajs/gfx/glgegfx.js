@@ -618,7 +618,7 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
-            vwObject.createMesh(this, msg.mesh, msg.anim, msg.offset?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale);
+            vwObject.createMesh(this, msg.mesh, msg.anim, msg.center?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale);
             if (msg.up_axis == "Z_UP") {
                 this.moveTo(vwObject, {
                     // FIXME: needs to be permanent, so future setOrientations will be relative to this
