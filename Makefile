@@ -58,6 +58,9 @@ $(OUTPUTDIR)/%.pbj.js: $(INPUTDIR)/%.pbj
 ### Closure Rules
 
 closure : $(CLOSUREOUT)
+depends:
+	git submodule init
+	git submodule update
 
 $(CLOSUREOUT) : $(CLOSURESRCS)
 	before=`mktemp` && \
