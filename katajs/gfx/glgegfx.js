@@ -187,7 +187,7 @@ Kata.require([
     };
 
     /// note: animation ignored
-    VWObject.prototype.createMesh = function(path, animation, offset, scale) {
+    VWObject.prototype.createMesh = function(gfx, path, animation, offset, scale) {
         if (path == null) {
             throw "loadScene with null path";
         }
@@ -198,7 +198,7 @@ Kata.require([
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
-        clda.setDocument(this.mMeshURI, null, typeof(GlobalLoadDone)=="undefined"?null:GlobalLoadDone);
+        clda.setDocument(this.mMeshURI, null, function(){gfx._inputCb({msg:"loaded",id:thus.mID});});
         if (!scale) scale = [1.0, 1.0, 1.0];
         clda.setScaleX(scale[0]);
         clda.setScaleY(scale[1]);
@@ -618,7 +618,7 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
-            vwObject.createMesh(msg.mesh, msg.anim, msg.offset?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale);
+            vwObject.createMesh(this, msg.mesh, msg.anim, msg.offset?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale);
             if (msg.up_axis == "Z_UP") {
                 this.moveTo(vwObject, {
                     // FIXME: needs to be permanent, so future setOrientations will be relative to this

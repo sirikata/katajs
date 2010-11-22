@@ -342,13 +342,13 @@ O3DGraphics.prototype.removeObjectUpdate = function(vwObj) {
     delete this.mObjectUpdates[vwObj.mID];
 };
 
-VWObject.prototype.sceneLoadedCallback = function(renderTarg, pack, parent, exception) {
+VWObject.prototype.sceneLoadedCallback = function(o3d, renderTarg, pack, parent, exception) {
     if (exception) {
         console.log("loading failed: "+this.mMeshURI,exception);
         alert("Could not load: " + this.mMeshURI + "\n" + exception);
     } else {
         console.log("loading finished.");
-        if(typeof(GlobalLoadDone)=="function") GlobalLoadDone();        // this should be done with message passing
+        o3d._inputCb({msg:"loaded",id:this.mID});
         // Generate draw elements and setup material draw lists.
         o3djs.pack.preparePack(pack, renderTarg.mViewInfo);
 
@@ -369,7 +369,7 @@ VWObject.prototype.sceneLoadedCallback = function(renderTarg, pack, parent, exce
     }
 };
 
-VWObject.prototype.createMesh = function(path, animation) {
+VWObject.prototype.createMesh = function(o3d, path, animation) {
     if (path == null) {
         throw "loadScene with null path";
     }
@@ -395,7 +395,7 @@ VWObject.prototype.createMesh = function(path, animation) {
             function(p, par, exc) {
                 if (thus.mMeshURI == path) {
                     thus.mMeshPack = p;
-                    thus.sceneLoadedCallback(
+                    thus.sceneLoadedCallback(o3d,
                         renderTarg, 
                         p, par, exc);
                 }
@@ -648,7 +648,7 @@ O3DGraphics.prototype.methodTable["Mesh"]=function(msg) {
     //q.innerHTML="Mesh "+msg.mesh;
     if (msg.mesh && msg.id in this.mObjects) {
         var vwObject=this.mObjects[msg.id];
-        vwObject.createMesh(msg.mesh, msg.anim);
+        vwObject.createMesh(this, msg.mesh, msg.anim);
         if (msg.up_axis == "Z_UP") {
             this.moveTo(vwObject, {
                 // FIXME: needs to be permanent, so future setOrientations will be relative to this
