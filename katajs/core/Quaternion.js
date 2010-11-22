@@ -56,6 +56,7 @@ Kata.require([
             throw "Invalid Quaternion constructor arguments.";
         }
     };
+    // FIXME this doesn't work...
     SUPER = Array.prototype;
     Kata.extend(Kata.Quaternion, SUPER);
 
@@ -75,6 +76,10 @@ Kata.require([
 
     Kata.Quaternion.zero = function() {
         return new Kata.Quaternion(0, 0, 0, 0);
+    };
+
+    Kata.Quaternion.prototype.array = function() {
+        return [ this[0], this[1], this[2], this[3] ];
     };
 
     Kata.Quaternion.prototype.toAngleAxis = function() {

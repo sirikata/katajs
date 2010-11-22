@@ -173,8 +173,8 @@ Kata.require([
         connect_msg.loc = loc;
         var orient = new Sirikata.Protocol.TimedMotionQuaternion();
         orient.t = 0;
-        orient.position = [0, 0, 0, 0];
-        orient.velocity = [0, 0, 0, 0];
+        orient.position = [0, 0, 0, 1];
+        orient.velocity = [0, 0, 0, 1];
         connect_msg.orientation = orient;
         if (scale)
             connect_msg.bounds = [0, 0, 0, scale];
@@ -417,11 +417,13 @@ Kata.require([
             update_request.location = pos;
         }
 
-        if (loc.orient) {
+        if (loc.orient || (loc.rotvel != undefined && loc.rotaxis != undefined)) {
             var orient = new Sirikata.Protocol.TimedMotionQuaternion();
             orient.t = this._toSpaceTime(loc.time);
-            orient.position = loc.orient;
-            orient.velocity = [0, 0, 0, 1]; // FIXME angular velocity
+            if (loc.orient)
+                orient.position = loc.orient;
+            if (loc.rotvel != undefined && loc.rotaxis != undefined)
+                orient.velocity = Kata.Quaternion.fromAxisAngle(loc.rotaxis, loc.rotvel).array(); // FIXME angular velocity
             update_request.orientation = orient;
         }
 
@@ -499,7 +501,10 @@ Kata.require([
                 // Note: currently we expect this to be in milliseconds, not a Date
                 loc.time = this._toLocalTime(update.orientation.t).getTime();
                 loc.orient = update.orientation.position;
-                //loc.(rotaxis/angvel) = update.orientation.velocity;
+                var orientvel = new Kata.Quaternion(update.orientation.velocity);
+                var ovel_aa = orientvel.toAngleAxis();
+                loc.rotaxis = ovel_aa.axis;
+                loc.rotvel = ovel_aa.angle;
                 this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
             }
 
@@ -541,8 +546,10 @@ Kata.require([
             properties.loc.posTime = this._toLocalTime(update.addition[add].location.t).getTime();
 
             properties.loc.orient = update.addition[add].orientation.position;
-            // FIXME Location wants axis/vel instead of quaternion velocity
-            //properties.loc.(rotaxis,rotvel) = update.addition[add].orientation.velocity;
+            var orientvel = new Kata.Quaternion(update.addition[add].orientation.velocity);
+            var ovel_aa = orientvel.toAngleAxis();
+            properties.loc.rotaxis = ovel_aa.axis;
+            properties.loc.rotvel = ovel_aa.angle;
             // Note: currently we expect this to be in milliseconds, not a Date
             properties.loc.orientTime = this._toLocalTime(update.addition[add].orientation.t).getTime();
 
