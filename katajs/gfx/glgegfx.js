@@ -198,7 +198,29 @@ Kata.require([
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
-        clda.setDocument(this.mMeshURI, null, function(){gfx._inputCb({msg:"loaded",id:thus.mID});});
+        clda.setDocument(this.mMeshURI, 
+                         null, 
+                         function(){
+                             if (true){
+                                 var bv=clda.getBoundingVolume(true);
+                                 var minv=[bv.center[0]-.5*bv.dims[0],
+                                           bv.center[1]-.5*bv.dims[1],
+                                           bv.center[2]-.5*bv.dims[2]
+                                          ];
+                                 var maxv=[bv.center[0]+.5*bv.dims[0],
+                                           bv.center[1]+.5*bv.dims[1],
+                                           bv.center[2]+.5*bv.dims[2]
+                                          ];
+                                 var maxx=[-minv[0]>maxv[0]?-minv[0]:maxv[0],
+                                           -minv[1]>maxv[1]?-minv[1]:maxv[1],
+                                           -minv[2]>maxv[2]?-minv[2]:maxv[2]
+                                          ];
+                                 clda.setScaleX(maxx[0]?scale[0]/maxx[0]:1);
+                                 clda.setScaleY(maxx[1]?scale[1]/maxx[1]:1);
+                                 clda.setScaleZ(maxx[2]?scale[2]/maxx[2]:1);
+                             }
+                             gfx._inputCb({msg:"loaded",id:thus.mID});
+                         });
         if (!scale) scale = [1.0, 1.0, 1.0];
         clda.setScaleX(scale[0]);
         clda.setScaleY(scale[1]);
