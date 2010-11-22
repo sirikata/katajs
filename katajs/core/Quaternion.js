@@ -179,7 +179,7 @@ Kata.require([
      */
     Kata.Quaternion.prototype.exp = function(s) {
         // FIXME there's probably a much more efficient way to do this
-        var angle_axis = toAngleAxis;
+        var angle_axis = this.toAngleAxis();
         return Kata.Quaternion.fromAxisAngle(angle_axis.axis, angle_axis.angle*s);
     };
 
