@@ -447,15 +447,15 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
         retval.rotaxis=msg.rotaxis;
         retval.rotvel=msg.rotvel;
     }else {
-        retval.rotaxis=prevLocation.rotaxis;
-        retval.rotvel=prevLocation.rotvel;
+        retval.rotaxis=curLocation.rotaxis;
+        retval.rotvel=curLocation.rotvel;
     }
     if (msg.scale && msg.time && msg.time > curLocation.scaleTime) {
         retval.scale=msg.scale;
         retval.scaleTime=msg.time;
     }else {
-        retval.scale=prevLocation.scale;
-        retval.scaleTime=prevLocation.scaleTime;
+        retval.scale=curLocation.scale;
+        retval.scaleTime=curLocation.scaleTime;
     }
     return retval;
 };
