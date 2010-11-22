@@ -152,7 +152,7 @@ Kata.require([
         return this.mRequestedLocation.rotaxis.concat();
     };
     Kata.Presence.prototype._requestedRotationalVelocity = function() {
-        return Kata.LocationOrientationVelocity(this.mRequestedLocation);
+        return Kata.Quaternion.fromLocationAngularVelocity(this.mRequestedLocation);
     };
     Kata.Presence.prototype._requestedScale = function() {
         return this.mRequestedLocation.scale.concat();

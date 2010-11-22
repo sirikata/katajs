@@ -146,7 +146,7 @@ Kata.require([
      };
      /** Get the current estimate of this object's rotational velocity. */
      Kata.RemotePresence.prototype.rotationalVelocity = function() {
-         return Kata.LocationOrientationVelocity(this.mLocation);
+         return Kata.Quaternion.fromLocationAngularVelocity(this.mLocation);
      };
      /** Get the current estimate of this object's scale. */
      Kata.RemotePresence.prototype.scale = function() {

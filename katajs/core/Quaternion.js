@@ -70,6 +70,10 @@ Kata.require([
         );
     };
 
+    Kata.Quaternion.fromLocationAngularVelocity=function(loc) {
+        return Kata.Quaternion.fromAxisAngle(loc.rotaxis, loc.rotvel);
+    };
+
     Kata.Quaternion.identity = function() {
         return new Kata.Quaternion();
     };
@@ -187,5 +191,6 @@ Kata.require([
         var angle_axis = this.toAngleAxis();
         return Kata.Quaternion.fromAxisAngle(angle_axis.axis, angle_axis.angle*s);
     };
+
 
 }, 'katajs/core/Quaternion.js');
