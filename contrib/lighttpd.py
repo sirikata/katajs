@@ -74,6 +74,7 @@ mimetype.assign             = (
   ".txt"          =>      "text/plain",
   ".dtd"          =>      "text/xml",
   ".xml"          =>      "text/xml",
+  ".dae"          =>      "text/xml",
   ".mpeg"         =>      "video/mpeg",
   ".mpg"          =>      "video/mpeg",
   ".mov"          =>      "video/quicktime",
