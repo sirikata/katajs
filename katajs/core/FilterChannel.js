@@ -50,7 +50,7 @@ Kata.require([
 
          this._channel.registerListener( Kata.bind(this._filterMessage, this) );
      };
-     SUPER = Kata.Channel.prototype;
+     var SUPER = Kata.Channel.prototype;
      Kata.extend(Kata.FilterChannel, SUPER);
 
      Kata.FilterChannel.prototype.callListeners = function (data) {

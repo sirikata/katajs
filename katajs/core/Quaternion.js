@@ -57,7 +57,7 @@ Kata.require([
         }
     };
     // FIXME this doesn't work...
-    SUPER = Array.prototype;
+    var SUPER = Array.prototype;
     Kata.extend(Kata.Quaternion, SUPER);
 
     Kata.Quaternion.fromAxisAngle = function(axis, angle) {
