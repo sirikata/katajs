@@ -331,7 +331,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         }
         if (msg.orient!==undefined){
             if (msg.rotvel !== undefined && msg.rotaxis !== undefined && msg.orientTime !== undefined) {
-                destination.pos
+                destination.orient
                     =Kata._helperLocationExtrapolateQuaternion(msg.orient,
                                                                msg.rotvel,
                                                                msg.rotaxis,
