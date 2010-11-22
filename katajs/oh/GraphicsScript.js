@@ -196,7 +196,8 @@ Kata.require([
          msg.id = Kata.BlessedCameraID;
          msg.spaceid = Kata.BlessedCameraSpaceid;
          msg.pos = this._camPos;
-         msg.orient = this._camOrient;
+         msg.orient = new Kata.Quaternion(this._camOrient);
+         msg.orient = msg.orient.normal();
          this._sendHostedObjectMessage(msg);
      }
 
