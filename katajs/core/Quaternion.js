@@ -156,7 +156,7 @@ Kata.require([
             var quat_axis = [ this[0], this[1], this[2] ];
             var uv = Kata.Quaternion._vec3_cross(quat_axis, other);
             var uuv = Kata.Quaternion._vec3_cross(quat_axis, uv);
-            uv = [uv[0]*2.0*w, uv[1]*2.0*w, uv[2]*2.0*w];
+            uv = [uv[0]*2.0*this[3], uv[1]*2.0*this[3], uv[2]*2.0*this[3]];
             uuv = [uuv[0] * 2.0, uuv[1] * 2.0, uuv[2] * 2.0];
             return [other[0] + uv[0] + uuv[0],
                     other[1] + uv[1] + uuv[1],
