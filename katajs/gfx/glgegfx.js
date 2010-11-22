@@ -178,8 +178,8 @@ Kata.require([
         this.mSpaceID = spaceid;
         //this.mPack = pack;
         this.mNode = new GLGE.Group(id);
-        this.mCurLocation=Kata.LocationIdentityNow();
-        this.mPrevLocation=Kata.LocationIdentityNow(new Date(0));
+        this.mCurLocation=Kata.LocationIdentity(new Date(0));
+        this.mPrevLocation=Kata.LocationIdentity(new Date(0));
         this.mNode.mKataObject=this;
         this.update = this.updateTransformation;
         this.mParent = null;
@@ -267,8 +267,9 @@ Kata.require([
         var l=Kata.LocationInterpolate(this.mCurLocation,this.mPrevLocation,graphics.mCurTime);
         this.mNode.setLoc(l.pos[0],l.pos[1],l.pos[2]);
         // Setting scale on cameras does wonky things to lighting
-        if (this.mCamera === null)
+        if (!this.mCamera) {
             this.mNode.setScale(l.scale[0],l.scale[1],l.scale[2]);
+        }
         this.mNode.setQuat(l.orient[0],l.orient[1],l.orient[2],l.orient[3]);
         if (this.stationary(graphics.mCurTime)) {
             graphics.removeObjectUpdate(this);        
@@ -565,7 +566,7 @@ Kata.require([
             vwObject.mPrevLocation=Kata.LocationReparent(vwObject.mPrevLocation,prevParentNode,curParentNode);
             vwObject.mCurLocation=Kata.LocationReparent(vwObject.mCurLocation,prevParentNode,curParentNode);
         }
-        var newLoc=Kata.LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation,this.mCurTime);
+        var newLoc=Kata.LocationUpdate(msg,vwObject.mCurLocation,vwObject.mPrevLocation,msg.time||this.mCurTime);
         vwObject.mPrevLocation=vwObject.mCurLocation;
         vwObject.mCurLocation=newLoc;
         if (!vwObject.stationary(this.mCurTime)) {

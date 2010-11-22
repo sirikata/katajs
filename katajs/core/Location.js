@@ -412,6 +412,7 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
     if (msg.pos && msg.time && msg.time >= curLocation.posTime) {
         retval.pos=msg.pos;
         retval.posTime=msg.time;
+        //Kata.warn("ACCEPTING UPDATE "+JSON.stringify(msg));
     }else {
         //curLocation.pos=prevLocation.pos;
         //curLocation.posTime=prevLocation.posTime;
@@ -421,6 +422,8 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
 
             retval.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,Kata.deltaTime(msg.time,curLocation.posTime));
             retval.posTime=msg.time;
+        }else if (msg.pos && msg.time) {
+            //Kata.error("DROPPING UPDATE "+JSON.stringify(msg)+ " because "+msg.time+" is not greater than "+curLocation.posTime.getTime());
         }
     }
     if (msg.vel && msg.time && msg.time >= curLocation.posTime) {
