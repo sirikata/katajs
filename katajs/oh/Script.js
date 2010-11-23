@@ -152,7 +152,7 @@ Kata.require([
       *
       */
      Kata.Script.prototype.timer = function(freq, cb, repeat) {
-         Kata.notImplemented("Script.timer");
+//         Kata.notImplemented("Script.timer");
          return null;
      };
 
