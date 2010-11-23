@@ -203,21 +203,17 @@ Kata.require([
                          function(){
                              if (true){
                                  var bv=clda.getBoundingVolume(true);
-                                 var minv=[bv.center[0]-.5*bv.dims[0],
-                                           bv.center[1]-.5*bv.dims[1],
-                                           bv.center[2]-.5*bv.dims[2]
-                                          ];
-                                 var maxv=[bv.center[0]+.5*bv.dims[0],
-                                           bv.center[1]+.5*bv.dims[1],
-                                           bv.center[2]+.5*bv.dims[2]
-                                          ];
-                                 var maxx=[-minv[0]>maxv[0]?-minv[0]:maxv[0],
-                                           -minv[1]>maxv[1]?-minv[1]:maxv[1],
-                                           -minv[2]>maxv[2]?-minv[2]:maxv[2]
-                                          ];
-                                 clda.setScaleX(maxx[0]?scale[0]/maxx[0]:1);
-                                 clda.setScaleY(maxx[1]?scale[1]/maxx[1]:1);
-                                 clda.setScaleZ(maxx[2]?scale[2]/maxx[2]:1);
+                                 var maxv=GLGE.lengthVec3(bv.dims)/2;
+                                 var colladaUnitRescale=1/maxv;
+                                 //console.log("Scaling by "+colladaUnitRescale+" instead of "+scale);
+                                 //console.log("Offsetting by -["+bv.center+"] instead of "+offset);
+                                 clda.setScaleX(maxv?scale[0]*colladaUnitRescale:1);
+                                 clda.setScaleY(maxv?scale[1]*colladaUnitRescale:1);
+                                 clda.setScaleZ(maxv?scale[2]*colladaUnitRescale:1);
+                                 clda.setLocX(offset[0]-bv.center[0]);
+                                 clda.setLocY(offset[1]-bv.center[1]);
+                                 clda.setLocZ(offset[2]-bv.center[2]);            
+
                              }
                              gfx._inputCb({msg:"loaded",id:thus.mID});
                          });
@@ -640,7 +636,7 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
-            vwObject.createMesh(this, msg.mesh, msg.anim, msg.center?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale);
+            vwObject.createMesh(this, msg.mesh, msg.anim, msg.center?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale, msg.bounds);
             if (msg.up_axis == "Z_UP") {
                 this.moveTo(vwObject, {
                     // FIXME: needs to be permanent, so future setOrientations will be relative to this
