@@ -203,7 +203,7 @@ Kata.require([
                          function(){
                              if (true){
                                  var bv=clda.getBoundingVolume(true);
-                                 var maxv=GLGE.lengthVec3(bv.dims)/2;
+                                 var maxv=bv.radius;
                                  var colladaUnitRescale=1/maxv;
                                  //console.log("Scaling by "+colladaUnitRescale+" instead of "+scale);
                                  //console.log("Offsetting by -["+bv.center+"] instead of "+offset);
