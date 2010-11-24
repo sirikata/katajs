@@ -194,6 +194,8 @@ Kata.require([
         if (path.lastIndexOf(".dae")==-1) {
             path += ".dae";            
         }
+        if (offset === undefined || offset === null)
+            offset = [0, 0, 0];
         console.log("Loading: " + path);
         this.mMeshURI = path;
         var thus = this;
