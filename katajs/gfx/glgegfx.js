@@ -184,6 +184,8 @@ Kata.require([
         this.update = this.updateTransformation;
         this.mParent = null;
         spaceroot.mScene.addChild(this.mNode);
+
+        this.mLoaded = false;
     };
 
     /// note: animation ignored
@@ -215,6 +217,16 @@ Kata.require([
             clda.setLocZ(offset[2]-(bv.center[2])*colladaUnitRescale);            
             gfx._inputCb({msg:"loaded",id:thus.mID});
             clda.removeEventListener("loaded",loadedCallback);
+
+            thus.mLoaded = true;
+
+            // If somebody set an animation *while* we were loading, honor that request now
+            if (thus.mCurAnimation) {
+                // Clear out first to make sure we actually run it
+                var anim = thus.mCurAnimation;
+                thus.mCurAnimation = "";
+                thus.animate(anim);
+            }
         };
         clda.addEventListener("loaded",loadedCallback);
         clda.setDocument(this.mMeshURI);
@@ -321,7 +333,12 @@ Kata.require([
 
         var actions = mesh.getColladaActions();
         var new_anim = actions[anim_name];
-        if (!new_anim) return;
+        if (!new_anim) {
+            // When loading, still record current animation so we can start it when loading finishes
+            if (!this.mLoaded)
+                this.mCurAnimation = anim_name;
+            return;
+        }
 
         this.mCurAnimation = anim_name;
         mesh.setAction(new_anim, 400, true);
