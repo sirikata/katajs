@@ -114,6 +114,9 @@ Kata.require([
 		 	}
 		 }
          remotePresence.inGFXSceneGraph = true;
+         // Give everything a chance to run an initial update pass
+         this.updateGFX(remotePresence);
+
          //FIXME: not sure what this line was trying to accomplishthis.appearanceRemotePresence(presence, remotePresence);
      };
      /**
