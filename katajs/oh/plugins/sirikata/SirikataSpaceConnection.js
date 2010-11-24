@@ -46,9 +46,6 @@ Kata.require([
     'katajs/oh/plugins/sirikata/Sync.js'
 ], function() {
 
-    // FIXME having this sucks, we need to get rid of polling like the Sirikata code did
-    setInterval(Kata.SST.serviceConnections, 10);
-
     var SUPER = Kata.SpaceConnection.prototype;
     /** Kata.SirikataSpaceConnection is an implementation of
      * Kata.SpaceConnection which connects to a local space server,
