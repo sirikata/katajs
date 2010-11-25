@@ -581,13 +581,13 @@ Kata.require([
                     this.mUnsetParents[msg.parent][msg.id]=vwObject;
                     vwObject.mUnsetParent=msg.parent;
                     var spaceRoot = this.mSpaceRoots[vwObject.mSpaceID];
-                    if (vvwObject.mParent) {
+                    if (vwObject.mParent) {
                         vwObject.mParent.mNode.removeChild(vwObject.mNode);
                         spaceRoot.mScene.addChild(vwObject.mNode);
                         vwObject.mParent=null;
                     }
                     curParent=null;
-                    curParentNode=sceneRoot.mScene;
+                    curParentNode=this.mSpaceRoots[vwObject.mSpaceID].mScene;
                 }
             }else {
                 if (vwObject.mParent) {                    
