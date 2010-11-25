@@ -213,7 +213,7 @@ Kata.require([
             clda.setScaleY(maxv?scale[1]*colladaUnitRescale:1);
             clda.setScaleZ(maxv?scale[2]*colladaUnitRescale:1);
             clda.setLocX(offset[0]-(bv.center[0])*colladaUnitRescale);
-            clda.setLocY(offset[1]-(bv.center[1])*colladaUnitRescale);
+            clda.setLocY(offset[1]-(bv.center[1])*colladaUnitRescale + 1);
             clda.setLocZ(offset[2]-(bv.center[2])*colladaUnitRescale);            
             gfx._inputCb({msg:"loaded",id:thus.mID});
             clda.removeEventListener("loaded",loadedCallback);
