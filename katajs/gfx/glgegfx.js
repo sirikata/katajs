@@ -87,6 +87,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mRenderTargets={};
     this.mUnsetParents={};
     this.mObjects={};
+    this._keyDownMap = {};
     function render(){
         thus.mCurTime=new Date();
         var now = parseInt(thus.mCurTime.getTime());
@@ -453,6 +454,7 @@ Kata.require([
 
     GLGEGraphics.prototype._keyDown = function(e){
         if (Kata.suppressCanvasKeyInput) return;
+        this._keyDownMap[e.keyCode]=-1;
         var ev = {};
         ev.type = e.type;
         ev.keyCode = e.keyCode;
@@ -467,6 +469,9 @@ Kata.require([
     };
 
     GLGEGraphics.prototype._keyUp = function(e) {
+        if (!this._keyDownMap[e.keyCode]) {
+            return;
+        }
         var ev = {};
         ev.type = e.type;
         ev.keyCode = e.keyCode;
@@ -477,7 +482,14 @@ Kata.require([
             msg: "keyup",
             event: ev
         };
-        this._inputCb(msg);
+        var me=this;
+        this._keyDownMap[e.keyCode] = 1;
+        setTimeout(function () {                            /// wait to see if we're part of a bogus key repeat
+            if (me._keyDownMap[e.keyCode] == 1) {           /// if fail, then keydown (or another keyup?) occured in last 50 ms
+                me._keyDownMap[e.keyCode] = 0;              /// if no other events on this key, fire the real keyup event & clear map
+                me._inputCb(msg);
+            }
+        }, 50);
     };
 
     GLGEGraphics.prototype._scrollWheel = function(e){
