@@ -248,19 +248,18 @@ Kata.require([
         return clda;
     };
 
-    VWObject.prototype.createCamera = function(fov,hither,yon) {
-        this.mHither = hither;
-        this.mYon = yon;
+    VWObject.prototype.createCamera = function(fov,near,far) {
         this.mFOV = fov;
         this.mCamera=new GLGE.Camera(this.mID+"C");
+        this.mCamera.setFovY(fov*GLGEGraphics.canvasAspect);
+        this.mCamera.setNear(near);
+        this.mCamera.setFar(far);
         if (GLGEGraphics.canvasAspect) this.mCamera.setAspect(GLGEGraphics.canvasAspect);
         this.mNode.addChild(this.mCamera);
         this.update = this.updateCamera;
     };
     VWObject.prototype.destroyCamera = function() {
         this.detachRenderTarget();
-        delete this.mHither;
-        delete this.mYon;
         delete this.mFOV;
         this.mNode.removeChild(this.mCamera);
         delete this.mCamera;
@@ -681,12 +680,10 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Camera"]=function(msg) {
         if (msg.id in this.mObjects) {
             var vwObject=this.mObjects[msg.id];
-            var pi=3.1415926536;
-            vwObject.createCamera(45*pi/180.,
-                                  0.1,
-                                  50000);
+            vwObject.createCamera(Kata.GraphicsSimulation.YFOV_DEGREES,
+                                  Kata.GraphicsSimulation.CAMERA_NEAR,
+                                  Kata.GraphicsSimulation.CAMERA_FAR);
             this.mCamera = vwObject.mCamera;    /// need to keep track of camera in case of canvas resize
-            this.mCamera.setFar(2000);          /// not sure why we need this but otherwise it defaults to 1000
         }
     };
     GLGEGraphics.prototype.methodTable["AttachCamera"]=function(msg) {

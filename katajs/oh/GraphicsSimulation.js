@@ -63,6 +63,10 @@ Kata.require([
         this.mGFX = new drv(function(obj){},domElement);
         this.mGFX.setInputCallback(Kata.bind(this._handleInputMessage,this));
     };
+
+    Kata.GraphicsSimulation.YFOV_DEGREES = 23.3;
+    Kata.GraphicsSimulation.CAMERA_NEAR = 0.1;
+    Kata.GraphicsSimulation.CAMERA_FAR = 2000.0;
     
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 

@@ -124,7 +124,8 @@ RenderTarget.prototype.updateProjection = function() {
   // Create a perspective projection matrix.
   if (this.mCamera) {
     this.mViewInfo.drawContext.projection = o3djs.math.matrix4.perspective(
-      this.mCamera.mFOV, this.mWidth / this.mHeight,
+      this.mCamera.mFOV * this.mHeight / this.mWidth,
+      this.mWidth / this.mHeight,
       this.mCamera.mHither, this.mCamera.mYon);
   }
 }
@@ -674,9 +675,9 @@ O3DGraphics.prototype.methodTable["DestroyLight"]=function(msg) {
 O3DGraphics.prototype.methodTable["Camera"]=function(msg) {
     if (msg.id in this.mObjects) {
         var vwObject=this.mObjects[msg.id];
-        vwObject.createCamera(o3djs.math.degToRad(45),
-                              0.1,
-                              50000);
+        vwObject.createCamera(o3djs.math.degToRad(Kata.GraphicsSimulation.YFOV_DEGREES),
+                              Kata.GraphicsSimulation.CAMERA_NEAR,
+                              Kata.GraphicsSimulation.CAMERA_FAR);
     }
 };
 O3DGraphics.prototype.methodTable["AttachCamera"]=function(msg) {
