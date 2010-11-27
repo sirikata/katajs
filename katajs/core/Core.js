@@ -321,7 +321,7 @@ Kata.scriptRoot="";
         Kata.log = function(var_args) {
             console.log.apply(console, arguments);
         };
-    } else {
+    } else if (debug_console) {
         /** Logs msg to the console, in addition to some json object.
          * @param {...(object|string)} var_args  Logs some optional JSON data.
          */
@@ -373,6 +373,9 @@ Kata.scriptRoot="";
                 document.body.appendChild(p);
             }
         };
+    } else {
+        Kata.log = console.log = function() {
+        }
     }
 
     /** Sets the status on the window if possible (i.e. if called from the

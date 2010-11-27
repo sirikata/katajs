@@ -592,20 +592,20 @@ Kata.require([
                     }
                     this.mUnsetParents[msg.parent][msg.id]=vwObject;
                     vwObject.mUnsetParent=msg.parent;
-                    var spaceRoot = this.mSpaceRoot[vwObject.mSpaceID];
-                    if (vvwObject.mParent) {
+                    var spaceRoot = this.mSpaceRoots[vwObject.mSpaceID];
+                    if (vwObject.mParent) {
                         vwObject.mParent.mNode.removeChild(vwObject.mNode);
                         spaceRoot.mScene.addChild(vwObject.mNode);
                         vwObject.mParent=null;
                     }
                     curParent=null;
-                    curParentNode=sceneRoot.mScene;
+                    curParentNode=this.mSpaceRoots[vwObject.mSpaceID].mScene;
                 }
             }else {
                 if (vwObject.mParent) {                    
                     prevParentNode.removeChild(vwObject.mNode);
                     curParent=null;
-                    curParentNode=this.mSpaceRoot[vwObject.mSpaceID].mScene;
+                    curParentNode=this.mSpaceRoots[vwObject.mSpaceID].mScene;
                     curParentNode.addChild(vwObject.mNode);
                     vwObject.mParent=null;
                 }
