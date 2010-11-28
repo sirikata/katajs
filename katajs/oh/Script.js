@@ -196,6 +196,10 @@ Kata.require([
          return space+objectid;
      };
 
+    Kata.Script.prototype.getRemotePresence = function(presenceID) {
+        return this.mRemotePresences[ Kata.Script.remotePresenceKey(presenceID.space(), presenceID.object()) ];
+    };
+
      Kata.Script.prototype._handleQueryEvent = function(channel, msg) {
          var presence = this.mPresences[msg.space];
          var remote=null;
