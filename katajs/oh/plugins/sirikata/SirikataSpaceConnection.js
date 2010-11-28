@@ -82,7 +82,6 @@ Kata.require([
             Kata.bind(this._receivedData, this)
         );
 
-
         this.mODPHandlers = {};
 
         // Time sync -- this needs to be updated to use the Sirikata sync protocol.
@@ -240,8 +239,22 @@ Kata.require([
         this.mPrimarySubstream.sendMessage( serialized.getString() );
     };
 
+    Kata.SirikataSpaceConnection.prototype._handleDisconnected = function(substream) {
+        // We only have the one substream currently, it had better be the right one
+        if (substream !== this.mPrimarySubstream) return;
+
+        // All objects connected through us get disconnected
+        for(var objid in this.mConnectedObjects) {
+            this.mParent.disconnected(objid, this.mSpaceURL);
+        }
+        this.mParent.spaceConnectionDisconnected(this);
+    };
+
     Kata.SirikataSpaceConnection.prototype._receivedData = function(substream, data) {
-        if (data === undefined || data === null) return;
+        if (data === undefined || data === null) {
+            this._handleDisconnected(substream);
+            return;
+        }
 
         var odp_msg = new Sirikata.Protocol.Object.ObjectMessage();
         odp_msg.ParseFromStream(new PROTO.Base64Stream(data));

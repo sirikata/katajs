@@ -114,6 +114,12 @@ Kata.require([
          this.sendScriptMessage(msg);
      };
 
+    /** Invoked by SessionManager when forcefully disconnected from space. */
+    Kata.HostedObject.prototype.disconnected = function(space) {
+        var msg = new Kata.ScriptProtocol.ToScript.Disconnected(space);
+        this.sendScriptMessage(msg);
+    };
+
      Kata.HostedObject.prototype._handleDisconnect = function (channel, request) {
          this.mObjectHost.disconnect(this, request);
      };

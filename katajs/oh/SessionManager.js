@@ -146,6 +146,30 @@ Kata.require([
         space_conn.disconnectObject(req.id);
     };
 
+    /** Invoked by SpaceConnections when an object is forcefully
+     *  disconnected from the space.
+     */
+    Kata.SessionManager.prototype.disconnected = function(objid, space) {
+        var obj = this.mObjects[objid];
+        if (!obj) {
+            Kata.warn("Got disconnection event for unknown object: " + objid);
+            return;
+        }
+
+        obj.disconnected(space);
+    };
+
+    /** Invoked by SpaceConnections when they are disconnected from
+     *  the space. Guarantees the space connection won't continue to
+     *  be used.
+     */
+    Kata.SessionManager.prototype.spaceConnectionDisconnected = function(space_conn) {
+        for(var conn in this.mSpaceConnections) {
+            if (space_conn === this.mSpaceConnections[conn])
+                delete this.mSpaceConnections[conn];
+        }
+    };
+
      Kata.SessionManager.prototype.sendODPMessage = function(space, src_obj, src_port, dst_obj, dst_port, payload) {
          var space_conn = this.mSpaceConnections[space];
          space_conn.sendODPMessage(src_obj, src_port, dst_obj, dst_port, payload);
@@ -169,7 +193,8 @@ Kata.require([
      /** Send an update request to the space. */
      Kata.SessionManager.prototype.locUpdateRequest = function(space, id, loc, visual) {
          var space_conn = this.mSpaceConnections[space];
-         space_conn.locUpdateRequest(id, loc, visual);
+         if (space_conn !== undefined)
+             space_conn.locUpdateRequest(id, loc, visual);
      };
 
      /** Should be invoked by SpaceConnection classes when a location

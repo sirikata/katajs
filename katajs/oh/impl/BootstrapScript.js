@@ -99,7 +99,7 @@ Kata.require([
          for (var i = 0; i < this.mPendingScriptLoad.length; i++) {
              this.receiveMessage(this.mPendingScriptLoad[i][0], this.mPendingScriptLoad[i][1]);
          }
-     }
+     };
 
      Kata.BootstrapScript.prototype.receiveMessage = function(channel, msg) {
          if (this.mScriptLoading) {
@@ -126,7 +126,7 @@ Kata.require([
          if (!invalidated) return;
 
          delete this.mPresences[msg.space];
-         this.mScript.presenceInvalidated(msg, "Disconnected.");
+         this.mScript.presenceInvalidated(invalidated, "Disconnected.");
      };
 
 }, "katajs/oh/impl/BootstrapScript.js");
