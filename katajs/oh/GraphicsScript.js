@@ -344,4 +344,15 @@ Kata.require([
         this._sendHostedObjectMessage(msg);
     };
 
+    Kata.GraphicsScript.prototype.setLabel = function(presence, remoteID, label, offset) {
+        var msg = new Kata.ScriptProtocol.FromScript.GFXLabel(
+            presence.space(),
+            presence.id(),
+            remoteID.object(),
+            label,
+            offset
+        );
+        this._sendHostedObjectMessage(msg);
+    };
+
 }, "katajs/oh/GraphicsScript.js");

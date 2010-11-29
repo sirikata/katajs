@@ -214,6 +214,15 @@ Kata.require([
                  this.spaceid = this.space;
                  this.animation = animation;
              },
+             GFXLabel : function(space, observer, remoteID, label, offset) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="Label";
+                 this.space = space+observer;
+                 this.id = remoteID;
+                 this.spaceid = this.space;
+                 this.label = label;
+                 this.offset = offset;
+             },
              GFXDestroyNode : function(space, observer, remotePresence) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
 

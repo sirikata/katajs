@@ -179,6 +179,8 @@ Kata.require([
         this.mSpaceID = spaceid;
         //this.mPack = pack;
         this.mNode = new GLGE.Group(id);
+        this.mMesh = null;
+        this.mLabel = null;
         this.mCurLocation=Kata.LocationIdentity(new Date(0));
         this.mPrevLocation=Kata.LocationIdentity(new Date(0));
         this.mNode.mKataObject=this;
@@ -246,6 +248,7 @@ Kata.require([
             clda.setLocZ(offset[2]);            
         }
         this.mNode.addCollada(clda);
+        this.mMesh = clda;
         return clda;
     };
 
@@ -324,10 +327,9 @@ Kata.require([
          */
     };
     VWObject.prototype.animate = function(anim_name) {
-        var meshes = this.mNode.getChildren();
-        if (!meshes || meshes.length > 1)
+        var mesh = this.mMesh;
+        if (!mesh)
             Kata.warn("Couldn't handle animate request.");
-        var mesh = meshes[0];
 
         if (anim_name == this.mCurAnimation) return;
 
@@ -342,6 +344,37 @@ Kata.require([
 
         this.mCurAnimation = anim_name;
         mesh.setAction(new_anim, 400, true);
+    };
+    VWObject.prototype.label = function(label, offset) {
+        var label_node = this.mLabel;
+        if (label_node === null) {
+            // create
+            label_node = new GLGE.Text();
+            this.mLabel = label_node;
+
+            // FIXME text seems broken in glge, breaking on a
+            // sort. Adding a bogus material is sufficient to get it
+            // working.
+            label_node.multimaterials = [ new GLGE.MultiMaterial() ];
+            var material=new GLGE.Material();
+            label_node.multimaterials[0].setMaterial(material);
+
+            this.mNode.addChild(label_node);
+        }
+        if (offset === undefined) offset = [0, 0, 0];
+        label_node.setScaleX(.1);
+        label_node.setScaleY(.1);
+        label_node.setScaleZ(.1);
+        label_node.setQuatX(0.0);
+        label_node.setQuatY(0.0);
+        label_node.setQuatZ(0.0);
+        label_node.setQuatW(1.0);
+        label_node.setLocX(offset[0]);
+        label_node.setLocY(offset[1]);
+        label_node.setLocZ(offset[2]);
+        label_node.setColor({r:0.0,g:0.0,b:0.0});
+        label_node.setSize(200);
+        label_node.setText(label);
     };
 
     function SpaceRoot(glgegfx, element, spaceID) {
@@ -629,6 +662,11 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Animate"]=function(msg) {
         var vwObject = this.mObjects[msg.id];
         vwObject.animate(msg.animation);
+    };
+    GLGEGraphics.prototype.methodTable["Label"]=function(msg) {
+        var vwObject = this.mObjects[msg.id];
+        if (vwObject)
+            vwObject.label(msg.label, msg.offset);
     };
     GLGEGraphics.prototype.methodTable["Destroy"]=function(msg) {
         if (msg.id in this.mObjects) {
