@@ -11,8 +11,13 @@ import tempfile
 def main():
 
     port = 8888
+    gzip_setting = ""
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
+    if len(sys.argv) > 2:
+        gzip_setting = """compress.cache-dir         = "%s"
+compress.filetype          = ("text/plain","text/css", "text/xml", "text/javascript")
+""" % ( sys.argv[2] )
 
     conf = """
 server.modules              = (
@@ -31,6 +36,7 @@ dir-listing.activate       = "enable"
 accesslog.filename         = "%(pwd)s/lighttpd.access.log"
 url.access-deny            = ( "~", ".inc" )
 server.port               = %(port)d
+%(gzip)s
 #include_shell "/usr/share/lighttpd/create-mime.assign.pl"
 # Set up the appropriate MIME type mappings
 mimetype.assign             = (
@@ -88,7 +94,7 @@ mimetype.assign             = (
   ".tar.bz2"      =>      "application/x-bzip-compressed-tar"
  )
 #include_shell "/usr/share/lighttpd/include-conf-enabled.pl"
-""" % { 'pwd' : os.getcwd(), 'port' : port }
+""" % { 'pwd' : os.getcwd(), 'port' : port, 'gzip' : gzip_setting }
     print conf
 
     tmp_conf_file = file('lighttpd.cfg', 'w') #tempfile.NamedTemporaryFile(delete = False)
