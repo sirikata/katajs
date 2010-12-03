@@ -205,14 +205,24 @@ Kata.require([
          var remote=null;
          var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
          if (msg.entered) {
-             // New object, create presence and notify
-             remote = new Kata.RemotePresence(presence, msg.space, msg.observed, msg.loc, msg.visual);
-             this.mRemotePresences[key] = remote;
-             presence.remotePresence(remote, true);
+             // Check if we have one that's in the process of being killed
+             remote = this.mRemotePresences[key];
+             if (remote) {
+                 remote._doKill = false;
+             }
+             else {
+                 // New object, create presence and notify
+                 remote = new Kata.RemotePresence(presence, msg.space, msg.observed, msg.loc, msg.visual);
+                 this.mRemotePresences[key] = remote;
+                 presence.remotePresence(remote, true);
 
-             this.mBehaviors.forEach(function(beh) {
-                 if (beh.remotePresence) beh.remotePresence(presence, remote, true);
-             });
+                 this.mBehaviors.forEach(
+                     function(beh) {
+                         if (beh.remotePresence) beh.remotePresence(presence, remote, true);
+                     }
+                 );
+                 this._handleQueryEventDelegate(remote, msg);
+             }
          }
          else {
              // Object exited, invalidate presence and notify
@@ -221,14 +231,27 @@ Kata.require([
                  Kata.warn("Got removal prox event for unknown object.");
                  return remote;
              }
-             delete this.mRemotePresences[key];
-             presence.remotePresence(remote, false);
+             remote._doKill = true;
+             var self = this;
+             setTimeout(
+                 function() {
+                     delete self.mRemotePresences[key];
+                     presence.remotePresence(remote, false);
 
-             this.mBehaviors.forEach(function(beh) {
-                 if (beh.remotePresence) beh.remotePresence(presence, remote, false);
-             });
+                     self.mBehaviors.forEach(
+                         function(beh) {
+                             if (beh.remotePresence) beh.remotePresence(presence, remote, false);
+                         }
+                     );
+                     self._handleQueryEventDelegate(remote, msg);
+                 },
+                 10000
+             );
          }
          return remote;
+     };
+
+     Kata.Script.prototype._handleQueryEventDelegate = function(channel, msg) {
      };
 
     /** Internal helper method to construct and send an ODP message. */

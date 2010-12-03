@@ -281,8 +281,7 @@ Kata.require([
      /**
       *
       */
-     Kata.GraphicsScript.prototype._handleQueryEvent=function(channel,data) {
-         var remotePresence=SUPER._handleQueryEvent.call(this,channel,data);
+     Kata.GraphicsScript.prototype._handleQueryEventDelegate=function(remotePresence,data) {
          if (remotePresence) {
              var presence=this.mPresences[data.space];
              if (presence.inGFXSceneGraph) {//if this particular presence has gfx enabled
