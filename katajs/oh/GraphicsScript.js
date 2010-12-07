@@ -149,8 +149,6 @@ Kata.require([
         this._sendHostedObjectMessage(msg);
         
         if (attachCamera) {
-            var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(), presence.id(), presence.id());
-            this._sendHostedObjectMessage(msg);
             msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(), presence.id(), presence.id(), canvasId, textureObjectSpace, textureObjectUUID, textureName);
             msg.msg = "Camera";
             this._sendHostedObjectMessage(msg);
