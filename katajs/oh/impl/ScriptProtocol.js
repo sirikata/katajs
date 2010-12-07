@@ -324,10 +324,11 @@ Kata.require([
                  this.space = space;
              },
              
-             GUIMessage : function (msg, event) {
+             GUIMessage : function (msg) {
+                 for (field in msg) {
+                     this[field]=msg[field];
+                 }
                  this.__type = Kata.ScriptProtocol.ToScript.Types.GUIMessage;
-                 this.msg = msg;
-                 this.event = event;  
              },
 
              ReceiveODPMessage : function(space, source_object, source_port, dest_object, dest_port, payload) {

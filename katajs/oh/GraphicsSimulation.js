@@ -79,7 +79,6 @@ Kata.require([
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
         // FIXME gui messages share this channel
         if (data.__gui) return;
-
         data = Kata.ScriptProtocol.FromScript.reconstitute(data);
         SUPER.receivedMessage.apply(this, arguments);
 //        console.log("Graphics received message from ObjectHost:", data, data.msg);
@@ -102,6 +101,6 @@ Kata.require([
      */
      Kata.GraphicsSimulation.prototype._handleInputMessage = function(msg){
 //         console.log("GraphicsSimulation._handleInputMessage:",msg);
-         this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg.msg, msg.event));
+         this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg));
      };
 }, 'katajs/oh/GraphicsSimulation.js');
