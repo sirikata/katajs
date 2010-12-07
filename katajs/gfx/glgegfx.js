@@ -781,7 +781,15 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["DestroyIFrame"]=function(msg) {
         //destroyX(msg,"IFrame");
     };
-
+    GLGEGraphics.prototype.methodTable["CaptureCanvas"]=function(msg) {
+        Kata.warn("DEBUG: CaptureCanvas");
+        var msg = {
+            msg: "canvasCapture",
+            img: this.mClientElement.toDataURL()
+        };
+        Kata.warn("DEBUG: CaptureCanvas bytes in img: " + msg.img.length);
+        this._inputCb(msg);
+    };
 
 
     // Register as a GraphicsSimulation if possible.
