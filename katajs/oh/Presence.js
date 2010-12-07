@@ -90,6 +90,11 @@ Kata.require([
          // Tracks the last requested location so we can avoid sending
          // more requests than necessary.
          this.mRequestedLocation = this.mLocation;
+
+         // Tracks location updates that arrived before their prox
+         // update. This can happen since loc subscriptions and prox
+         // updates are on different streams.
+         this.mOrphanLocUpdates = {};
      };
      Kata.extend(Kata.Presence, SUPER);
 
@@ -313,6 +318,14 @@ Kata.require([
      Kata.Presence.prototype.remotePresence = function(remote, added) {
          if (this.mQueryHandler)
              this.mQueryHandler(remote, added);
+
+         var presid = remote.presenceID();
+         var loc_msgs = this.mOrphanLocUpdates[presid];
+         if (added && loc_msgs !== undefined) {
+             for(var li = 0; li < loc_msgs.length; li++)
+                 remote._updateLoc(loc_msgs[li].loc, loc_msgs[li].visual);
+             delete this.mOrphanLocUpdates[presid];
+         }
      };
 
      Kata.Presence.prototype.subscribe = function(observed) {
@@ -373,10 +386,30 @@ Kata.require([
              var key = Kata.Script.remotePresenceKey(msg.space,msg.observed);
              var remote = remotePresences[key];
 //             Kata.warn("Remote presence loc update: " + key);
-             if (remote)
+             if (remote) {
                  remote._updateLoc(msg.loc, msg.visual);
+             }
+             else {
+                 // Stash changes to pick up with later prox
+                 // update. Note that we preserve all updates because
+                 // they may contain partial information. We could be
+                 // more careful and save memory, but these lists of updates
+                 // should never get too large
+                 var presid = new Kata.PresenceID(msg.space,msg.observed);
+                 if (!this.mOrphanLocUpdates[presid])
+                     this.mOrphanLocUpdates[presid] = [];
+                 this.mOrphanLocUpdates[presid].push(msg);
+                 // Extra long timeout should be safe but not keep too
+                 // much data around
+                 setTimeout(Kata.bind(this._clearOrphanLocUpdates, this, presid), 60000);
+             }
+
              return remote;
          }
+     };
+
+     Kata.Presence.prototype._clearOrphanLocUpdates = function(presid) {
+         delete this.mOrphanLocUpdates[presid];
      };
 
      /** Handle an update to the visual representation of objects

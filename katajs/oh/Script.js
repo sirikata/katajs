@@ -281,7 +281,11 @@ Kata.require([
          var presence = this.mPresences[msg.space];
          if (presence) {
              return presence._handleLocEvent(msg, this.mRemotePresences);
-         }else return presence;
+         }
+         else {
+             Kata.warn("Got loc update destined for unknown object.");
+             return presence;
+         }
      };
 
      Kata.Script.prototype._handleStorageEvent = function(data) {
