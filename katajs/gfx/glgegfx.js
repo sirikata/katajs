@@ -782,7 +782,6 @@ Kata.require([
         //destroyX(msg,"IFrame");
     };
     GLGEGraphics.prototype.methodTable["CaptureCanvas"]=function(msg) {
-        Kata.warn("DEBUG: CaptureCanvas");
         var msg = {
             msg: "canvasCapture",
             img: this.mClientElement.toDataURL()
