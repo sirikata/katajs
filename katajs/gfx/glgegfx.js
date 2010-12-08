@@ -781,8 +781,13 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["DestroyIFrame"]=function(msg) {
         //destroyX(msg,"IFrame");
     };
-
-
+    GLGEGraphics.prototype.methodTable["CaptureCanvas"]=function(msg) {
+        var msg = {
+            msg: "canvasCapture",
+            img: this.mClientElement.toDataURL()
+        };
+        this._inputCb(msg);
+    };
 
     // Register as a GraphicsSimulation if possible.
     Kata.GraphicsSimulation.registerDriver("GLGE", GLGEGraphics);
