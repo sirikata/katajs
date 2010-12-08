@@ -106,15 +106,18 @@ Kata.require([
                  return data;
              },
 
-             Connect : function(space, auth, scale) {
+             Connect : function(space, auth, loc, vis) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Connect;
                  this.space = space;
                  this.auth = auth;
-                 this.scale = scale;
+                 if (loc)
+                     Kata.LocationCopyUnifyTime(loc,this);
+                 if (vis)
+                     this.visual = vis;
              },
              RegisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.EnableGUIMessage;
-                 this.event = event;  
+                 this.event = event;
              },            
              UnregisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.DisableGUIMessage;

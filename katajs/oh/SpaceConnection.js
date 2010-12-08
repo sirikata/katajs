@@ -58,7 +58,7 @@ Kata.require([
       * @param {string} vis the visual representation for the object
       * 
       */
-     Kata.SpaceConnection.prototype.connectObject = function(id, auth, scale, vis) {
+     Kata.SpaceConnection.prototype.connectObject = function(id, auth, loc, vis) {
          Kata.notImplemented("SpaceConnection.connectObject");
      };
 

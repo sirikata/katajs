@@ -143,13 +143,72 @@ Kata.require([
         return serialized;
     };
 
-    Kata.SirikataSpaceConnection.prototype.connectObject = function(id, auth, scale, vis) {
+    // Helper method to generate the parts of a loc update message
+    // from a location object. Returns object with fields (loc, orient, bounds, visual)
+    Kata.SirikataSpaceConnection.prototype._generateLocUpdateParts = function(loc, with_defaults) {
+        var result = with_defaults ?
+            {
+                loc: undefined,
+                orient: undefined,
+                bounds: [0, 0, 0, 1],
+                visual: ""
+            } :
+            {
+                loc: undefined,
+                orient: undefined,
+                bounds: undefined,
+                visual: undefined
+            };
+
+
+        if (loc.pos || loc.vel) {
+            var pos = new Sirikata.Protocol.TimedMotionVector();
+            pos.t = this._toSpaceTime(loc.time);
+            if (loc.pos)
+                pos.position = loc.pos;
+            if (loc.vel)
+                pos.velocity = loc.vel;
+            result.loc = pos;
+        }
+
+        if (loc.orient || (loc.rotvel != undefined && loc.rotaxis != undefined)) {
+            var orient = new Sirikata.Protocol.TimedMotionQuaternion();
+            orient.t = this._toSpaceTime(loc.time);
+            if (loc.orient)
+                orient.position = loc.orient;
+            if (loc.rotvel != undefined && loc.rotaxis != undefined)
+                orient.velocity = Kata.Quaternion.fromAxisAngle(loc.rotaxis, loc.rotvel).array(); // FIXME angular velocity
+            result.orient = orient;
+        }
+
+        if (loc.scale) {
+            if (loc.scale.length === undefined) { // single number
+                result.bounds = [0, 0, 0, loc.scale];
+            }
+            else if (loc.scale.length == 3) {
+                // FIXME how to deal with differing values?
+                result.bounds = [0, 0, 0, loc.scale[0]];
+            }
+            else if (loc.scale.length == 4) {
+                result.bounds = loc.scale;
+            }
+        }
+
+        if (loc.visual)
+            result.visual = loc.visual.mesh;
+
+        return result;
+    };
+
+
+    Kata.SirikataSpaceConnection.prototype.connectObject = function(id, auth, loc, vis) {
         var objid = this._getObjectID(id);
 
         //Kata.warn("Connecting " + id + " == " + objid);
 
         var reqloc = Kata.LocationIdentity(0);
-        if (scale) reqloc.scale = [scale, scale, scale];
+        Kata.LocationCopyUnifyTime(loc, reqloc);
+        reqloc.visual = loc.visual;
         this.mOutstandingConnectRequests[objid] =
             {
                 loc_bounds : reqloc,
@@ -161,25 +220,20 @@ Kata.require([
 
         connect_msg.type = Sirikata.Protocol.Session.Connect.ConnectionType.Fresh;
         connect_msg.object = objid;
-        // FIXME most of these should be customizable
-        var loc = new Sirikata.Protocol.TimedMotionVector();
-        loc.t = 0;
-        loc.position = [0, 0, 0];
-        loc.velocity = [0, 0, 0];
-        connect_msg.loc = loc;
-        var orient = new Sirikata.Protocol.TimedMotionQuaternion();
-        orient.t = 0;
-        orient.position = [0, 0, 0, 1];
-        orient.velocity = [0, 0, 0, 1];
-        connect_msg.orientation = orient;
-        if (scale)
-            connect_msg.bounds = [0, 0, 0, scale];
-        else
-            connect_msg.bounds = [0, 0, 0, 1];
+
+        var loc_parts = this._generateLocUpdateParts(reqloc, true);
+
+        if (loc_parts.loc)
+            connect_msg.loc = loc_parts.loc;
+        if (loc_parts.orient)
+            connect_msg.orientation = loc_parts.orient;
+        if (loc_parts.bounds)
+            connect_msg.bounds = loc_parts.bounds;
+        if (loc_parts.visual)
+            connect_msg.mesh = loc_parts.visual;
+
         // FIXME don't always register queries, allow specifying angle
         connect_msg.query_angle = 0.00000000000000000000000001;
-        if (vis && vis.mesh)
-            connect_msg.mesh = vis.mesh;
 
         var session_msg = new Sirikata.Protocol.Session.Container();
         session_msg.connect = connect_msg;
@@ -417,31 +471,16 @@ Kata.require([
         // Generate and send an update to Loc
         var update_request = new Sirikata.Protocol.Loc.LocationUpdateRequest();
 
-        if (loc.pos || loc.vel) {
-            var pos = new Sirikata.Protocol.TimedMotionVector();
-            pos.t = this._toSpaceTime(loc.time);
-            if (loc.pos)
-                pos.position = loc.pos;
-            if (loc.vel)
-                pos.velocity = loc.vel;
-            update_request.location = pos;
-        }
+        var loc_parts = this._generateLocUpdateParts(loc, false);
 
-        if (loc.orient || (loc.rotvel != undefined && loc.rotaxis != undefined)) {
-            var orient = new Sirikata.Protocol.TimedMotionQuaternion();
-            orient.t = this._toSpaceTime(loc.time);
-            if (loc.orient)
-                orient.position = loc.orient;
-            if (loc.rotvel != undefined && loc.rotaxis != undefined)
-                orient.velocity = Kata.Quaternion.fromAxisAngle(loc.rotaxis, loc.rotvel).array(); // FIXME angular velocity
-            update_request.orientation = orient;
-        }
-
-        if (loc.bounds)
-            update_request.bounds = loc.bounds;
-
-        if (loc.visual)
-            update_request.mesh = visual;
+        if (loc_parts.loc)
+            update_request.location = loc_parts.loc;
+        if (loc_parts.orient)
+            update_request.orientation = loc_parts.orient;
+        if (loc_parts.bounds)
+            update_request.bounds = loc_parts.bounds;
+        if (loc_parts.visual)
+            update_request.mesh = loc_parts.visual;
 
         var container = new Sirikata.Protocol.Loc.Container();
         container.update_request = update_request;
@@ -548,7 +587,7 @@ Kata.require([
             var properties = {};
 
             // FIXME what is going on with this weird Location "class"?
-            properties.loc = Kata.LocationIdentity();
+            properties.loc = Kata.LocationIdentity(0);
 
             properties.loc.pos = update.addition[add].location.position;
             properties.loc.vel = update.addition[add].location.velocity;
