@@ -782,11 +782,19 @@ Kata.require([
         //destroyX(msg,"IFrame");
     };
     GLGEGraphics.prototype.methodTable["CaptureCanvas"]=function(msg) {
+      try {
         var msg = {
             msg: "canvasCapture",
-            img: this.mClientElement.toDataURL?this.mClientElement.toDataURL():"",
+            img: this.mClientElement.toDataURL()
         };
-        this._inputCb(msg);
+      }
+      catch (e) {
+        var msg = {
+            msg: "canvasCapture",
+            img: ""
+        };
+      }
+      this._inputCb(msg);
     };
 
     // Register as a GraphicsSimulation if possible.
