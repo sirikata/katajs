@@ -784,7 +784,7 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["CaptureCanvas"]=function(msg) {
         var msg = {
             msg: "canvasCapture",
-            img: this.mClientElement.toDataURL?this.mClientElement.toDataURL():"";
+            img: this.mClientElement.toDataURL?this.mClientElement.toDataURL():"",
         };
         this._inputCb(msg);
     };
