@@ -96,6 +96,25 @@ Kata.require([
          this._drivers[type] = klass;
      };
 
+    /** Have the GraphicsSimulation do any static initialization that
+     *  has to be performed before the simulation actually begins.
+     *  For instance, this will usually involve setting up the
+     *  rendering context in the DOM.  The last parameter is a
+     *  callback that will be invoked when the GraphicsSimulation is
+     *  preparted to start running.
+     */
+    Kata.GraphicsSimulation.initializeDriver = function(type) {
+        if (!this._drivers || !this._drivers[type]) {
+            Kata.error("Couldn't find graphics driver: " + type);
+            return;
+        }
+        var klass = this._drivers[type];
+        var new_args = new Array(arguments.length-1);
+        for(var i = 1; i < arguments.length; i++)
+            new_args[i-1] = arguments[i];
+        klass.initialize.apply(undefined, new_args);
+    };
+
     /**
      * handle input data from graphics driver
      */

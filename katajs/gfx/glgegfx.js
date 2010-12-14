@@ -143,6 +143,14 @@ Kata.require([
     'katajs/oh/GraphicsSimulation.js',
     ['katajs/gfx/WebGLCompat.js', 'externals/GLGE/glge_math.js', 'externals/GLGE/glge.js', 'externals/GLGE/glge_collada.js']
 ], function(){
+
+    /** Static initialization method. */
+    GLGEGraphics.initialize = function(scenefile, cb) {
+        g_GLGE_doc = new GLGE.Document();
+        g_GLGE_doc.onLoad = cb;
+        g_GLGE_doc.load(scenefile);
+    }
+
     function RenderTarget(graphicsSystem, canvas,textureCanvas) {
         this.mGraphicsSystem=graphicsSystem;
         this.mCanvas=canvas;
