@@ -34,6 +34,7 @@ Kata.require([
     'katajs/oh/SpaceConnection.js',
     'katajs/oh/SessionManager.js',
     'katajs/network/TCPSST.js',
+    'katajs/core/Quaternion.js',
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimedMotionVector.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimedMotionQuaternion.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Session.pbj.js'],
