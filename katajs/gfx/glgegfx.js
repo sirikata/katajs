@@ -239,8 +239,8 @@ Kata.require([
         clda.setScaleY(scale[1]);
         clda.setScaleZ(scale[2]);
         clda.setRotMatrix(GLGE.Mat4([1, 0 , 0,  0,
-					                 0, 0, -1, 0,
-					                 0, 1, 0, 0,
+					                 0, 0, 1, 0,
+					                 0, -1, 0, 0,
 					                 0, 0, 0, 1]));
 
         if (offset) {
