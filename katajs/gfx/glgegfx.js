@@ -238,10 +238,11 @@ Kata.require([
         clda.setScaleX(scale[0]);
         clda.setScaleY(scale[1]);
         clda.setScaleZ(scale[2]);
-        clda.setQuatX(0.0);
-        clda.setQuatY(0.0);
-        clda.setQuatZ(0.0);
-        clda.setQuatW(1.0);
+        clda.setRotMatrix(GLGE.Mat4([1, 0 , 0,  0,
+					                 0, 0, -1, 0,
+					                 0, 1, 0, 0,
+					                 0, 0, 0, 1]));
+
         if (offset) {
             clda.setLocX(offset[0]);
             clda.setLocY(offset[1]);
