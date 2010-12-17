@@ -705,12 +705,13 @@ Kata.require([
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
             vwObject.createMesh(this, msg.mesh, msg.anim, msg.center?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale, msg.bounds);
-            if (msg.up_axis == "Z_UP") {
-                this.moveTo(vwObject, {
-                    // FIXME: needs to be permanent, so future setOrientations will be relative to this
-                    orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
-                });
-            }
+            /// old cruft code, disabling
+            //if (msg.up_axis == "Z_UP") {
+            //    this.moveTo(vwObject, {
+            //        // FIXME: needs to be permanent, so future setOrientations will be relative to this
+            //        orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
+            //    });
+            //}
             vwObject.update(this);
         }
     };
