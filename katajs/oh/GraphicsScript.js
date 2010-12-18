@@ -301,7 +301,7 @@ Kata.require([
 
      Kata.GraphicsScript.prototype.updateGFX = function(remotePresence) {
          var presence = this.mPresences[remotePresence.space()];
-         if (!presence.inGFXSceneGraph) //only if this particular presence has gfx enabled
+         if (!presence || !presence.inGFXSceneGraph) //only if this particular presence has gfx enabled
              return;
 
          var msg = new Kata.ScriptProtocol.FromScript.GFXMoveNode(

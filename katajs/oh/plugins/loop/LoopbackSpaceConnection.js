@@ -70,7 +70,8 @@ Kata.require([
      };
      Kata.extend(Kata.LoopbackSpaceConnection, Kata.SpaceConnection.prototype);
 
-     Kata.LoopbackSpaceConnection.prototype.connectObject = function(id, auth, scale, vis) {
+     Kata.LoopbackSpaceConnection.prototype.connectObject = function(id, auth, loc, vis) {
+         // FIXME use full loc information
          this.mSpace.connectObject(
              id,
              {
@@ -78,7 +79,7 @@ Kata.require([
                  message : Kata.bind(this.receiveODPMessage, this),
                  prox : Kata.bind(this.proxEvent, this),
                  presenceLocUpdate : Kata.bind(this.presenceLocUpdate, this),
-                 scale: scale,
+                 scale: loc.scale[0], // FIXME
                  visual: vis
              }
          );

@@ -71,6 +71,7 @@ Kata.require([
 
         if (!this.mListener) {
             Kata.error("Kata.Channel mListener not set");
+            return;
         }
         if (this.mListener.call) {
             this.mListener(this, data);

@@ -98,7 +98,7 @@ Kata.require([
          // And try to connect
          var scale = 1.0;
          if (req.scale) scale = req.scale;
-         space_conn.connectObject(ho.getID(), auth, scale, req.visual);
+         space_conn.connectObject(ho.getID(), auth, req, req.visual);
      };
 
      /** Callback from SpaceConnection which allows us to alias an ID
