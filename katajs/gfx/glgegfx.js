@@ -238,11 +238,13 @@ Kata.require([
         clda.setScaleX(scale[0]);
         clda.setScaleY(scale[1]);
         clda.setScaleZ(scale[2]);
+        /// danx0r: removing this hack, it's now dealt with in glge etc
+        /*
         clda.setRotMatrix(GLGE.Mat4([1, 0 , 0,  0,
 					                 0, 0, 1, 0,
 					                 0, -1, 0, 0,
 					                 0, 0, 0, 1]));
-
+        */
         if (offset) {
             clda.setLocX(offset[0]);
             clda.setLocY(offset[1]);
