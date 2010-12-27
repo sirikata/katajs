@@ -88,6 +88,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mUnsetParents={};
     this.mObjects={};
     this._keyDownMap = {};
+    this._enabledEvents = {};
+    this._lastMouseDown = null;
     function render(){
         thus.mCurTime=new Date();
         var now = parseInt(thus.mCurTime.getTime());
@@ -454,6 +456,7 @@ Kata.require([
     GLGEGraphics.prototype._mouseDown = function(e){
         this._buttonState |= Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
+        this._lastMouseDown = ev;
         var msg = {
             msg: "mousedown",
             event: ev
@@ -464,6 +467,7 @@ Kata.require([
         this._inputCb(msg);
     };
     
+    var DRAG_THRESHOLD = Kata.GraphicsSimulation.DRAG_THRESHOLD;
     GLGEGraphics.prototype._mouseUp = function(e){
         this._buttonState &= 7 - Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
@@ -475,6 +479,47 @@ Kata.require([
             document.body.style.cursor = "default";
         }
         this._inputCb(msg);
+        // In HTML, the click event fires after mouseup
+        var downev = this._lastMouseDown;
+        if (downev) {
+            var deltax = downev.x - ev.x;
+            var deltay = downev.y - ev.y;
+            if ((deltax > -DRAG_THRESHOLD && deltax < DRAG_THRESHOLD &&
+                 deltay > -DRAG_THRESHOLD && deltay < DRAG_THRESHOLD)) {
+                this._mouseClick(e);
+            }
+        }
+    };
+    GLGEGraphics.prototype._mouseClick = function(e) {
+        var ev = this._extractMouseEventInfo(e);
+        var msg = {
+            msg: "click",
+            event: ev
+        };
+        this._inputCb(msg);
+        if (this._enabledEvents["pick"]) {
+            for (var spaceid in this.mSpaceRoots) {
+                var scene = this.mSpaceRoots[spaceid].mScene;
+                var pickresult = scene.pick(ev.x, ev.y);
+                var obj = pickresult.object;
+                while (obj && !obj.mKataObject) {
+                    obj = obj.parent;
+                }
+                var objid = obj && obj.mKataObject && obj.mKataObject.mID;
+                if (!objid) objid = null;
+		        // object,distance,coord,normal,texture;
+                msg = {
+                    msg: "pick",
+                    event: ev,
+                    space: spaceid,
+                    id: objid,
+                    pos: pickresult.coord,
+                    normal: pickresult.normal
+                };
+                console.log("Got pick: "+msg.id, msg);
+                this._inputCb(msg);
+            }
+        }
     };
     
     /*
@@ -482,7 +527,7 @@ Kata.require([
      * otherwise we flood with messages.  Note right button is controlled by OS so we ignore
      */
     GLGEGraphics.prototype._mouseMove = function(e){
-        if (this._buttonState) {
+        if (this._enabledEvents["mousemove"] && this._buttonState) {
             var ev = this._extractMouseEventInfo(e);
             var msg = {
                 msg: "mousemove",
@@ -687,7 +732,7 @@ Kata.require([
                 var kataObject=children[i].mKataObject;
                 if (kataObject) {
                     
-                    this.mUnsetParents[msg.id][kataObject.mId]=kataObject;
+                    this.mUnsetParents[msg.id][kataObject.mID]=kataObject;
                     kataObject.mUnsetParent=msg.id;
                     kataObject.mParent=null;
                     var spaceRoot=this.mSpaceRoots[children[i].mKataObject.mSpaceId];
@@ -780,6 +825,17 @@ Kata.require([
         if (msg.id in this.mObjects) {
             var vwObject=this.mObjects[msg.id];
             vwObject.destroyCamera();
+        }
+    };
+
+    GLGEGraphics.prototype.methodTable["Enable"]=function(msg) {
+        if (msg.type) {
+            this._enabledEvents[msg.type] = true;
+        }
+    };
+    GLGEGraphics.prototype.methodTable["Disable"]=function(msg) {
+        if (this._enabledEvents[msg.type]) {
+            delete this._enabledEvents[msg.type];
         }
     };
 
