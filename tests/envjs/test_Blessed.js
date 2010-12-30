@@ -41,18 +41,18 @@ Kata.require([
     };
     Example.BlessedScript.prototype._handleGUIMessage = function (channel, msg) {
         if (msg.msg == "keydown") {
-            console.log("ENVJSTEST: _handleGUIMessage:", msg.msg, msg.event.keyCode)   
+            console.log("ENVJSTEST: _handleGUIMessage:", msg.msg, msg.keyCode)
         }
         else if (msg.msg == "mousedown") {
-            console.log("ENVJSTEST: _handleGUIMessage:",  msg.msg, msg.event.which)   
+            console.log("ENVJSTEST: _handleGUIMessage:",  msg.msg, msg.button)
         }
-        else if (msg.msg == "mousemove") {
+        else if (msg.msg == "drag") {
             var q = [0,1,0,0]
-            console.log("ENVJSTEST: _handleGUIMessage:",  msg.msg, msg.event.x, msg.event.y,q)   
+            console.log("ENVJSTEST: _handleGUIMessage:",  msg.msg, msg.x, msg.y, q)
             Example.blessedInstance.mPresence.setOrientation(q)
         }
         else {
-            console.log("ENVJSTEST: _handleGUIMessage unexpected event", msg.msg, msg.event)   
+            console.log("ENVJSTEST: _handleGUIMessage unexpected event", msg.msg, msg.event)
         }
     };
 }, 'tests/envjs/test_Blessed.js');

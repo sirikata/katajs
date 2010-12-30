@@ -90,7 +90,9 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this._keyDownMap = {};
     this._enabledEvents = {};
     this._lastMouseDown = null;
+    this._mouseMoveSinceLastRender = false;
     function render(){
+        thus._mouseMoveSinceLastRender = false;
         thus.mCurTime=new Date();
         var now = parseInt(thus.mCurTime.getTime());
         frameratebuffer = Math.round(((frameratebuffer * 9) + 1000 / (now - lasttime)) / 10);
@@ -392,6 +394,7 @@ Kata.require([
         //this.mPack = this.mElement.client.createPack();
 //        this.mScene = new GLGE.Scene(spaceID);
         this.mScene = g_GLGE_doc.getElement("mainscene");
+        this.mScene.mSpaceID = spaceID;
         this.mDefaultRenderView = new RenderTarget(glgegfx, element, null);
         //this.mDefaultRenderView.createBasicView([0,0,0,0], [0,0,0,0]);
         //FIXME not sure what to do with this this.initializeDrawList(this.mDefaultRenderView.mViewInfo);
@@ -416,108 +419,136 @@ Kata.require([
         this._inputCb = cb;
     };
     
-    GLGEGraphics.prototype._extractMouseEventInfo = function(e){
-        var ev = {};
-        ev.type = e.type;
-        ev.shiftKey = e.shiftKey;
-        ev.altKey = e.altKey;
-        ev.ctrlKey = e.ctrlKey;
-        ev.which = e.button;
-        ev.x = e.clientX;
-        ev.y = e.clientY;
-        ev.screenX = e.screenX;
-        ev.screenY = e.screenY;
-        ev.clientX = e.clientX;
-        ev.clientY = e.clientY;
-        var el = null;
-        if (typeof(e.srcElement) != "undefined") {
-            el = e.srcElement;
-            ev.width = e.srcElement.clientWidth;
-            ev.height = e.srcElement.clientHeight;
+    function cloneEvent(e) {
+        var ret = {};
+        for (var key in e) {
+            if (key != "charCode" && key.toUpperCase() != key) {
+                if (typeof(e[key]) == "number" || typeof(e[key]) == "string") {
+                    ret[key] = e[key];
+                }
+            }
         }
-        else if (typeof(e.target != "undefined")) {
-            el = e.target;
-            ev.width = e.target.width;
-            ev.height = e.target.height;
-        }
-        else {
-            ev.width = 0;
-            ev.height = 0;
-        }
+        return ret;
+    }
+
+    GLGEGraphics.prototype._extractMouseEventInfo = function(e, msgname){
+        var ev = {
+            msg: msgname || e.type,
+            event: cloneEvent(e),
+            shiftKey: e.shiftKey,
+            altKey: e.altKey,
+            ctrlKey: e.ctrlKey,
+            button: e.button,
+            x: e.clientX,
+            y: e.clientY,
+            camerapos: null,
+            dir: null,
+            spaceid: null,
+            clientX: e.clientX,
+            clientY: e.clientY,
+            width: 0,
+            height: 0
+        };
+        var el = this.mClientElement;
+        ev.width = el.width;
+        ev.height = el.height;
+        // In Firefox we need to use clientX.
         while (el != null) {
+            ev.x += el.scrollLeft || 0;
+            ev.y += el.scrollTop || 0;
             ev.x -= el.offsetLeft || 0;
             ev.y -= el.offsetTop || 0;
-            el = el.offsetParent;
+            if (el == document.body && !el.offsetParent) {
+                el = document.documentElement;
+            } else {
+                el = el.offsetParent;
+            }
+        }
+        // offsetX only works in Chrome.
+        // Also doesn't work for mouseup events outside the canvas.
+        var scene = this.renderer && this.renderer.getScene();
+        if (scene) {
+            var ray = scene.makeRay(ev.x, ev.y);
+            if (ray) {
+                ev.camerapos = ray.origin;
+                ev.dir = ray.coord;
+            }
+            ev.spaceid = scene.mSpaceID;
         }
         return ev;
     };
-    
+
+    GLGEGraphics.prototype._rayTrace = function(pos, dir, result) {
+        var scene = this.renderer.getScene();
+        var pickresult = scene.ray(pos, dir);
+        var obj = pickresult && pickresult.object;
+        while (obj && !obj.mKataObject) {
+            obj = obj.parent;
+        }
+        var objid = obj && obj.mKataObject && obj.mKataObject.mID;
+        if (!objid) objid = null;
+		// object,distance,coord,normal,texture;
+        result.spaceid = scene.mSpaceID;
+        result.id = objid;
+        result.pos = pickresult && pickresult.coord;
+        result.normal = pickresult && pickresult.normal;
+        return result.id && true || false;
+    };
 
     GLGEGraphics.prototype._mouseDown = function(e){
-        this._buttonState |= Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
+        this._buttonState |= (1<<ev.button);
         this._lastMouseDown = ev;
-        var msg = {
-            msg: "mousedown",
-            event: ev
-        };
-        if (ev.which==2) {
+        if (ev.button==2) {
             document.body.style.cursor="crosshair";
         }
-        this._inputCb(msg);
+        this._inputCb(ev);
+
+        var thus = this;
+        var mousemove = function(e){
+            thus._mouseMove(e);
+        };
+        var mouseup = function(e){
+            thus._mouseUp(e);
+            document.removeEventListener('mouseup', mouseup, true);
+            document.removeEventListener('mousemove', mousemove, true);
+        };
+        // capture mouse motion and release.
+        document.addEventListener('mouseup', mouseup, true);
+        document.addEventListener('mousemove', mousemove, true);
+
+        if (this._enabledEvents["pick"]) {
+            ev = this._extractMouseEventInfo(e, "pick");
+            this._rayTrace(ev.camerapos, ev.dir, ev);
+            this._inputCb(ev);
+        }
+        // Prevent selecting.
+        e.preventDefault && e.preventDefault();
     };
     
     var DRAG_THRESHOLD = Kata.GraphicsSimulation.DRAG_THRESHOLD;
     GLGEGraphics.prototype._mouseUp = function(e){
-        this._buttonState &= 7 - Math.pow(2, e.button);
         var ev = this._extractMouseEventInfo(e);
-        var msg = {
-            msg: "mouseup",
-            event: ev
-        };
-        if (ev.which == 2) {
+        this._buttonState &= (~(1<<ev.button));
+        if (ev.button == 2) {
             document.body.style.cursor = "default";
         }
-        this._inputCb(msg);
+        this._inputCb(ev);
         // In HTML, the click event fires after mouseup
         var downev = this._lastMouseDown;
         if (downev) {
             var deltax = downev.x - ev.x;
             var deltay = downev.y - ev.y;
-            if ((deltax > -DRAG_THRESHOLD && deltax < DRAG_THRESHOLD &&
-                 deltay > -DRAG_THRESHOLD && deltay < DRAG_THRESHOLD)) {
-                this._mouseClick(e);
-            }
-        }
-    };
-    GLGEGraphics.prototype._mouseClick = function(e) {
-        var ev = this._extractMouseEventInfo(e);
-        var msg = {
-            msg: "click",
-            event: ev
-        };
-        this._inputCb(msg);
-        if (this._enabledEvents["pick"]) {
-            for (var spaceid in this.mSpaceRoots) {
-                var scene = this.mSpaceRoots[spaceid].mScene;
-                var pickresult = scene.pick(ev.x, ev.y);
-                var obj = pickresult.object;
-                while (obj && !obj.mKataObject) {
-                    obj = obj.parent;
-                }
-                var objid = obj && obj.mKataObject && obj.mKataObject.mID;
-                if (!objid) objid = null;
-		        // object,distance,coord,normal,texture;
-                msg = {
-                    msg: "pick",
-                    event: ev,
-                    space: spaceid,
-                    id: objid,
-                    pos: pickresult.coord,
-                    normal: pickresult.normal
-                };
-                console.log("Got pick: "+msg.id, msg);
-                this._inputCb(msg);
+            if ((downev.dragging ||
+                     deltax < -DRAG_THRESHOLD || deltax > DRAG_THRESHOLD ||
+                     deltay < -DRAG_THRESHOLD || deltay > DRAG_THRESHOLD)) {
+                ev = this._extractMouseEventInfo(e, "drop");
+                ev.dx = deltax;
+                ev.dy = deltay;
+                this._inputCb(ev);
+            } else {
+                ev = this._extractMouseEventInfo(e, "click");
+                this._inputCb(ev);
             }
         }
     };
@@ -527,29 +558,46 @@ Kata.require([
      * otherwise we flood with messages.  Note right button is controlled by OS so we ignore
      */
     GLGEGraphics.prototype._mouseMove = function(e){
-        if (this._enabledEvents["mousemove"] && this._buttonState) {
-            var ev = this._extractMouseEventInfo(e);
-            var msg = {
-                msg: "mousemove",
-                event: ev
-            };
-            this._inputCb(msg);
+        var ev = this._extractMouseEventInfo(e);
+        if (this._mouseMoveSinceLastRender) {
+            return;
+        }
+        this._mouseMoveSinceLastRender = true;
+        if (this._enabledEvents["mousemove"]) {
+            this._inputCb(ev);
+        }
+        if (this._buttonState) {
+            var downev = this._lastMouseDown;
+            if (downev) {
+                var deltax = downev.x - ev.x;
+                var deltay = downev.y - ev.y;
+                if ((downev.dragging ||
+                     deltax < -DRAG_THRESHOLD || deltax > DRAG_THRESHOLD ||
+                     deltay < -DRAG_THRESHOLD || deltay > DRAG_THRESHOLD)) {
+                    downev.dragging = true;
+                    if (this._enabledEvents["drag"]) {
+                        ev = this._extractMouseEventInfo(e, "drag");
+                        ev.dx = deltax;
+                        ev.dy = deltay;
+                        this._inputCb(ev);
+                    }
+                }
+            }
         }
     };
 
     GLGEGraphics.prototype._keyDown = function(e){
         if (Kata.suppressCanvasKeyInput) return;
-        this._keyDownMap[e.keyCode]=-1;
-        var ev = {};
-        ev.type = e.type;
-        ev.keyCode = e.keyCode;
-        ev.shiftKey = e.shiftKey;
-        ev.altKey = e.altKey;
-        ev.ctrlKey = e.ctrlKey;
         var msg = {
             msg: "keydown",
-            event: ev
+            event: cloneEvent(e),
+            repeat: !!this._keyDownMap[e.keyCode],
+            keyCode: e.keyCode,
+            shiftKey: e.shiftKey,
+            altKey: e.altKey,
+            ctrlKey: e.ctrlKey
         };
+        this._keyDownMap[e.keyCode]=-1;
         this._inputCb(msg);
     };
 
@@ -557,15 +605,13 @@ Kata.require([
         if (!this._keyDownMap[e.keyCode]) {
             return;
         }
-        var ev = {};
-        ev.type = e.type;
-        ev.keyCode = e.keyCode;
-        ev.shiftKey = e.shiftKey;
-        ev.altKey = e.altKey;
-        ev.ctrlKey = e.ctrlKey;
         var msg = {
             msg: "keyup",
-            event: ev
+            event: cloneEvent(e),
+            keyCode: e.keyCode,
+            shiftKey: e.shiftKey,
+            altKey: e.altKey,
+            ctrlKey: e.ctrlKey
         };
         var me=this;
         this._keyDownMap[e.keyCode] = 1;
@@ -578,22 +624,35 @@ Kata.require([
     };
 
     GLGEGraphics.prototype._scrollWheel = function(e){
-        var ev = {};
-        ev.type = e.type;
-        ev.shiftKey = e.shiftKey;
-        ev.altKey = e.altKey;
-        ev.ctrlKey = e.ctrlKey;
-        if (e.wheelDelta != null) {         /// Chrome
-            ev.dy = e.wheelDelta;
-        }
-        else {                              /// Firefox
-            ev.dy = e.detail * -40;         /// -3 for Firefox == 120 for Chrome
-        }
         var msg = {
             msg: "wheel",
-            event: ev
+            event: cloneEvent(e),
+            shiftKey: e.shiftKey,
+            altKey: e.altKey,
+            ctrlKey: e.ctrlKey,
+            dy: 0,
+            dx: 0
         };
+        if (e.wheelDeltaX || e.wheelDeltaY) {         /// Chrome
+            msg.dy = e.wheelDeltaY || 0;
+            msg.dx = -e.wheelDeltaX || 0;
+        }
+        else if (e.wheelDelta) {
+            msg.dy = e.wheelDelta;
+        }
+        else if (e.detail){                              /// Firefox
+            if (e.axis == 1) {
+                msg.dx = e.detail * 40;         /// -3 for Firefox == 120 for Chrome
+            } else {
+                msg.dy = e.detail * -40;
+            }
+        }
         this._inputCb(msg);
+
+        // Prevent scrolling containing page as well.
+        // FIXME: This is kinda annoying because the page gets stuck (just like with Flash).
+        // We need some concept of focus for this to work well methinks.
+        //e.preventDefault && e.preventDefault();
     };
 
     GLGEGraphics.prototype.methodTable["Create"]=function(msg) {//this function creates a scene graph node
@@ -602,7 +661,7 @@ Kata.require([
             s="";
         }
         if (!(s in this.mSpaceRoots)) {
-            var dl =new SpaceRoot(this, this.mClientElement);
+            var dl =new SpaceRoot(this, this.mClientElement, s);
             this.mSpaceRoots[s] = dl;
 
             var rootsEmpty=true;

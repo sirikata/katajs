@@ -81,7 +81,7 @@ Kata.require([
             this.dragStartX = parseInt(msg.event.offsetX)-this.cameraPointX;
             this.dragStartY = parseInt(msg.event.offsetY)-this.cameraPointY;
         }
-        if (msg.msg == "mousemove") {
+        if (msg.msg == "drag") {
             this.cameraPointX = parseInt(msg.event.offsetX) - this.dragStartX;
             this.cameraPointY = parseInt(msg.event.offsetY) - this.dragStartY;
             var q = this._euler2Quat(this.cameraPointX*-.25, this.cameraPointY*-.25, 0);
