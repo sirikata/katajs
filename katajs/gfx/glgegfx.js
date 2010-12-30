@@ -537,8 +537,8 @@ Kata.require([
         // In HTML, the click event fires after mouseup
         var downev = this._lastMouseDown;
         if (downev) {
-            var deltax = downev.x - ev.x;
-            var deltay = downev.y - ev.y;
+            var deltax = ev.x - downev.x;
+            var deltay = ev.y - downev.y;
             if ((downev.dragging ||
                      deltax < -DRAG_THRESHOLD || deltax > DRAG_THRESHOLD ||
                      deltay < -DRAG_THRESHOLD || deltay > DRAG_THRESHOLD)) {
@@ -569,8 +569,8 @@ Kata.require([
         if (this._buttonState) {
             var downev = this._lastMouseDown;
             if (downev) {
-                var deltax = downev.x - ev.x;
-                var deltay = downev.y - ev.y;
+                var deltax = ev.x - downev.x;
+                var deltay = ev.y - downev.y;
                 if ((downev.dragging ||
                      deltax < -DRAG_THRESHOLD || deltax > DRAG_THRESHOLD ||
                      deltay < -DRAG_THRESHOLD || deltay > DRAG_THRESHOLD)) {
@@ -579,6 +579,7 @@ Kata.require([
                         ev = this._extractMouseEventInfo(e, "drag");
                         ev.dx = deltax;
                         ev.dy = deltay;
+                        ev.button = downev.button;
                         this._inputCb(ev);
                     }
                 }
