@@ -97,8 +97,7 @@ Kata.require([
       *  @param {function(Kata.Presence)} cb callback to invoke upon completion
       */
      Kata.Script.prototype.connect = function(args, auth, cb) {
-         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth, args.scale);
-         msg.visual=args.visual;
+         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth, args.loc, args.visual);
          this.mConnectRequests[args.space] = cb;
          this._sendHostedObjectMessage(msg);
      };
@@ -281,7 +280,11 @@ Kata.require([
          var presence = this.mPresences[msg.space];
          if (presence) {
              return presence._handleLocEvent(msg, this.mRemotePresences);
-         }else return presence;
+         }
+         else {
+             Kata.warn("Got loc update destined for unknown object.");
+             return presence;
+         }
      };
 
      Kata.Script.prototype._handleStorageEvent = function(data) {

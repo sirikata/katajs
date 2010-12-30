@@ -148,9 +148,11 @@ Kata.require([
         var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(), presence.id(), presence.id());
         this._sendHostedObjectMessage(msg);
         
+        msg = new Kata.ScriptProtocol.FromScript.GFXEnableEvent(presence.space(), "drag");
+        this._sendHostedObjectMessage(msg);
+        msg = new Kata.ScriptProtocol.FromScript.GFXEnableEvent(presence.space(), "pick"); // FIXME: Should be configurable.
+        this._sendHostedObjectMessage(msg);
         if (attachCamera) {
-            var msg = new Kata.ScriptProtocol.FromScript.RegisterGUIMessage(presence.space(), presence.id(), presence.id());
-            this._sendHostedObjectMessage(msg);
             msg = new Kata.ScriptProtocol.FromScript.GFXAttachCamera(presence.space(), presence.id(), presence.id(), canvasId, textureObjectSpace, textureObjectUUID, textureName);
             msg.msg = "Camera";
             this._sendHostedObjectMessage(msg);
@@ -303,7 +305,7 @@ Kata.require([
 
      Kata.GraphicsScript.prototype.updateGFX = function(remotePresence) {
          var presence = this.mPresences[remotePresence.space()];
-         if (!presence.inGFXSceneGraph) //only if this particular presence has gfx enabled
+         if (!presence || !presence.inGFXSceneGraph) //only if this particular presence has gfx enabled
              return;
 
          var msg = new Kata.ScriptProtocol.FromScript.GFXMoveNode(

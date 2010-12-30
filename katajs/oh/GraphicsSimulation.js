@@ -67,6 +67,7 @@ Kata.require([
     Kata.GraphicsSimulation.YFOV_DEGREES = 23.3;
     Kata.GraphicsSimulation.CAMERA_NEAR = 0.1;
     Kata.GraphicsSimulation.CAMERA_FAR = 2000.0;
+    Kata.GraphicsSimulation.DRAG_THRESHOLD = 5; // pixels
     
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 
@@ -79,7 +80,6 @@ Kata.require([
     Kata.GraphicsSimulation.prototype.receivedMessage = function (channel, data) {
         // FIXME gui messages share this channel
         if (data.__gui) return;
-
         data = Kata.ScriptProtocol.FromScript.reconstitute(data);
         SUPER.receivedMessage.apply(this, arguments);
 //        console.log("Graphics received message from ObjectHost:", data, data.msg);
@@ -97,11 +97,30 @@ Kata.require([
          this._drivers[type] = klass;
      };
 
+    /** Have the GraphicsSimulation do any static initialization that
+     *  has to be performed before the simulation actually begins.
+     *  For instance, this will usually involve setting up the
+     *  rendering context in the DOM.  The last parameter is a
+     *  callback that will be invoked when the GraphicsSimulation is
+     *  preparted to start running.
+     */
+    Kata.GraphicsSimulation.initializeDriver = function(type) {
+        if (!this._drivers || !this._drivers[type]) {
+            Kata.error("Couldn't find graphics driver: " + type);
+            return;
+        }
+        var klass = this._drivers[type];
+        var new_args = new Array(arguments.length-1);
+        for(var i = 1; i < arguments.length; i++)
+            new_args[i-1] = arguments[i];
+        klass.initialize.apply(undefined, new_args);
+    };
+
     /**
      * handle input data from graphics driver
      */
      Kata.GraphicsSimulation.prototype._handleInputMessage = function(msg){
 //         console.log("GraphicsSimulation._handleInputMessage:",msg);
-         this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg.msg, msg.event));
+         this.mChannel.sendMessage(new Kata.ScriptProtocol.ToScript.GUIMessage(msg));
      };
 }, 'katajs/oh/GraphicsSimulation.js');
