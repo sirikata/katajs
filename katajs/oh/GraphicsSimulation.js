@@ -67,6 +67,7 @@ Kata.require([
     Kata.GraphicsSimulation.YFOV_DEGREES = 23.3;
     Kata.GraphicsSimulation.CAMERA_NEAR = 0.1;
     Kata.GraphicsSimulation.CAMERA_FAR = 2000.0;
+    Kata.GraphicsSimulation.DRAG_THRESHOLD = 5; // pixels
     
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 

@@ -270,8 +270,9 @@ Kata.require([
                  this.target=canvasId;
              },
              GFXAttachCameraTexture : function(space, observer, id, textureObjectSpace, textureObjectID, texture) {
-                 Kata.ScriptProtocol.FromScript.GraphicsMessage.constructor.call(this, space, observer, id);
+                 Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
 
+                 this.msg="AttachCameraTexture";
                  this.space = space+observer;
                  this.id = id;
                  this.texobjid=textureObjectId;
@@ -280,8 +281,32 @@ Kata.require([
              },
              GFXDetachCamera : function(space, observer, id) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
+                 this.msg="DetachCamera";
                  this.space = space+observer;
                  this.id = id;
+             },
+
+             GFXEnableEvent : function(space, type) {
+                 this.msg="Enable";
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.space = space;
+                 this.type = type;
+             },
+             GFXDisableEvent : function(space, type) {
+                 this.msg="Disable";
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.space = space;
+                 this.type = type;
+             },
+             GFXRaytrace : function(space, requestid, pos, dir, multiple, infinite) {
+                 this.msg="Raytrace";
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.space = space; // space uuid
+                 this.requestid = requestid; // number/string
+                 this.pos = pos; // position vector
+                 this.dir = dir; // unit vector
+                 this.multiple = multiple; // boolean
+                 this.infinite = infinite; // boolean
              }
          },
 

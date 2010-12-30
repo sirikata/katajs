@@ -301,16 +301,17 @@ Kata.scriptRoot="";
         if (!level) {
             level = "";
         }
+        var end = level + "}";
         level += "    ";
         var datastr;
-        if (typeof(msg)!="object") {
+        if (typeof(msg)!="object" || msg === null) {
             return "" + msg;
         }
         datastr = "{\n";
         for (var k in msg) {
-            datastr += level+k+": "+Kata.stringify(msg[k])+",\n";
+            datastr += level+k+": "+Kata.stringify(msg[k], level)+",\n";
         }
-        datastr += "}";
+        datastr += end;
         return datastr;
     };
 
@@ -321,28 +322,31 @@ Kata.scriptRoot="";
         Kata.log = function(var_args) {
             console.log.apply(console, arguments);
         };
+    } else if (typeof(document)=="undefined" || typeof(window)=="undefined") {
+        /** Logs msg to the parent web worker, in addition to some json object.
+         * @param {...(object|string)} var_args  Logs some optional JSON data.
+         */
+        Kata.log = console.log = function(var_args) {
+            var args = [];
+            for (var i = 0; i < arguments.length; i++) {
+                args[i] = arguments[i];
+                if (typeof(args[i])=="object") {
+                    args[i] = Kata.stringify(args[i]);
+                } else if (typeof(args[i])!="string") {
+                    args[i] = "" + args[i];
+                }
+            }
+            self.postMessage({
+                msg : __magic_debug_msg_string,
+                debug : "log",
+                contents : args
+            });
+        };
     } else if (debug_console) {
         /** Logs msg to the console, in addition to some json object.
          * @param {...(object|string)} var_args  Logs some optional JSON data.
          */
         Kata.log = console.log = function(var_args) {
-            if (typeof(document)=="undefined" || typeof(window)=="undefined") {
-                var args = [];
-                for (var i = 0; i < arguments.length; i++) {
-                    args[i] = arguments[i];
-                    if (typeof(args[i])=="object") {
-                        args[i] = Kata.stringify(args[i]);
-                    } else if (typeof(args[i])!="string") {
-                        args[i] = "" + args[i];
-                    }
-                }
-                self.postMessage({
-                    msg : __magic_debug_msg_string,
-                    debug : "log",
-                    contents : args
-                });
-                return;
-            }
             window.status = ""+arguments[0];
             var p = document.createElement("p");
             p.style.border="1px solid black";
