@@ -162,6 +162,7 @@ Kata.require([
         this.mTextureCamera = null;
         this.mCamera=null;
         this.mSpaceRoot=null;//not attached
+        this.mOriginalMaterials=null;
     }
     RenderTarget.prototype.attachScene=function(spaceRoot,camera) {
         this.mSpaceRoot=spaceRoot;
@@ -387,6 +388,56 @@ Kata.require([
         label_node.setColor({r:0.0,g:0.0,b:0.0});
         label_node.setSize(200);
         label_node.setText(label);
+    };
+    VWObject.prototype.setHighlight = function(enable) {
+        function visitAllMaterials(obj, func) {
+            var multimat = obj.multimaterials;
+            if (multimat) {
+                for (var i = 0; i < multimat.length; i++) {
+                    func(multimat[i]);
+                }
+            }
+            var children = obj.children;
+            if (children) {
+                for (var i = 0; i < children.length; i++) {
+                    visitAllMaterials(children[i], func);
+                }
+            }
+        }
+        if (enable) {
+            var copyMaterial = false;
+            if (!this.mOriginalMaterials) {
+                copyMaterial = true;
+                this.mOriginalMaterials = true;
+            }
+            visitAllMaterials(this.mMesh, function(obj)
+            {
+                var newMaterial;
+                if (copyMaterial) {
+                    var materialHighlight = function(){};
+                    materialHighlight.prototype = obj.getMaterial();
+                    newMaterial = new materialHighlight();
+                    newMaterial.mOriginalMaterial = obj.getMaterial();
+                } else {
+                    newMaterial = obj.getMaterial();
+                }
+                newMaterial.setEmit(1.0);
+                newMaterial.setColor("#ff0000");
+                newMaterial.setAmbient(1.0);
+                obj.setMaterial(newMaterial);
+            });
+        } else {
+            if (this.mOriginalMaterials) {
+                this.mOriginalMaterials = false;
+                visitAllMaterials(this.mMesh, function(obj)
+                {
+                    var oldMaterial = obj.getMaterial().mOriginalMaterial;
+                    if (oldMaterial) {
+                        obj.setMaterial(oldMaterial);
+                    }
+                });
+            }
+        }
     };
 
     function SpaceRoot(glgegfx, element, spaceID) {
@@ -896,6 +947,16 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Disable"]=function(msg) {
         if (this._enabledEvents[msg.type]) {
             delete this._enabledEvents[msg.type];
+        }
+    };
+    GLGEGraphics.prototype.methodTable["Highlight"]=function(msg) {
+        var obj = this.mObjects[msg.id];
+        if (obj) {
+            if (msg.clear) {
+                obj.setHighlight(false);
+            } else {
+                obj.setHighlight(true);
+            }
         }
     };
 
