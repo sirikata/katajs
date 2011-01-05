@@ -523,6 +523,8 @@ Kata.require([
             this._inputCb(ev);
         }
         // Prevent selecting.
+        window.focus();
+        e.target.focus();
         e.preventDefault && e.preventDefault();
     };
     
