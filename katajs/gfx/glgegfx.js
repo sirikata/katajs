@@ -38,6 +38,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.newEvents=true;
     this.doubleBuffer=false;
     this.mAnimatingObjects={};
+    this.windowVisible=true;
     var thus=this;
     {
         var canvas, gl;
@@ -109,15 +110,13 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         }
         if (!thus.newEvents)
             for (animObject in thus.mAnimatingObjects) {
-                thus.newEvents=true;
+                thus.newEvents=(thus.newEvents||thus.windowVisible);//only make it draw if the window is visible or there are new events
                 break;
             }
         if (thus.doubleBuffer && !thus.newEvents) {
             thus.doubleBuffer=false;
             thus.renderer.render();            
-        }
-
-        if (thus.newEvents || thus.doubleBuffer) {
+        }else if (thus.newEvents || thus.doubleBuffer) {
             thus.renderer.render();
             thus.newEvents=false;
             thus.doubleBuffer=true;
@@ -129,10 +128,22 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         
     }
     function initialTextureLoadHack(){
-        thus.doubleBuffer=true;//only render once, not the double buffer render of an event
+        var anyAnim=false;
+        for (animObject in thus.mAnimatingObjects) {
+            anyAnim=true;
+            break;
+        }
+        thus.doubleBuffer=!anyAnim;//only render once, not the double buffer render of an event
     }
     setInterval(initialTextureLoadHack,533);
     setInterval(render, 16);
+    
+    window.addEventListener('focus',
+                            function (e){thus.windowVisible=true;},
+                            true);
+    window.addEventListener('blur',
+                            function (e){thus.windowVisible=false;},
+                            true);
     canvas.addEventListener('mousedown',
                             function (e){thus._mouseDown(e);},
                             true);
