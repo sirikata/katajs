@@ -292,8 +292,12 @@ Kata.require([
                 return false;
             }
             
-            if (hasAnimations(clda))
+            if (hasAnimations(clda)) {
                 gfx.mAnimatingObjects[thus.mID]=thus.mNode;
+                setTimeout(function(){gfx.newEvents=true;},8000);
+                setTimeout(function(){gfx.newEvents=true;},4000);
+                
+            }
         };
         clda.addEventListener("loaded",loadedCallback);
         clda.setDocument(this.mMeshURI);
