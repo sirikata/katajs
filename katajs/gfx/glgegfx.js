@@ -493,6 +493,7 @@ Kata.require([
             x: e.clientX,
             y: e.clientY,
             camerapos: null,
+            cameradir: null,
             dir: null,
             spaceid: null,
             clientX: e.clientX,
@@ -523,6 +524,15 @@ Kata.require([
             if (ray) {
                 ev.camerapos = ray.origin;
                 ev.dir = ray.coord;
+            }
+            if (scene.camera && scene.camera.matrix && scene.camera.pMatrix) {
+		        var invViewProj=GLGE.mulMat4(GLGE.inverseMat4(scene.camera.matrix),GLGE.inverseMat4(scene.camera.pMatrix));
+		        var origin =GLGE.mulMat4Vec4(invViewProj,[0,0,-1,1]);
+		        origin=[origin[0]/origin[3],origin[1]/origin[3],origin[2]/origin[3]];
+		        var coord =GLGE.mulMat4Vec4(invViewProj,[0,0,1,1]);
+		        coord=[-(coord[0]/coord[3]-origin[0]),-(coord[1]/coord[3]-origin[1]),-(coord[2]/coord[3]-origin[2])];
+		        coord=GLGE.toUnitVec3(coord);
+		        ev.cameradir=coord;
             }
             ev.spaceid = scene.mSpaceID;
         }
@@ -952,10 +962,10 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Highlight"]=function(msg) {
         var obj = this.mObjects[msg.id];
         if (obj) {
-            if (msg.clear) {
-                obj.setHighlight(false);
-            } else {
+            if (msg.enable) {
                 obj.setHighlight(true);
+            } else {
+                obj.setHighlight(false);
             }
         }
     };
