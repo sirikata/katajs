@@ -140,10 +140,10 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     
     window.addEventListener('focus',
                             function (e){thus.windowVisible=true;},
-                            true);
+                            false);
     window.addEventListener('blur',
                             function (e){thus.windowVisible=false;},
-                            true);
+                            false);
     canvas.addEventListener('mousedown',
                             function (e){thus._mouseDown(e);},
                             true);
