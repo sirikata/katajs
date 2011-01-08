@@ -133,9 +133,10 @@ Kata.require([
       * Also notify the graphics system of all current renderables.
       */
      Kata.GraphicsScript.prototype._enableGraphics = function(presence, canvasId, textureObjectSpace, textureObjectUUID, textureName, attachCamera){
-         var space = presence.space();
-         // presence may have mesh
-        this.renderRemotePresence(presence, presence);
+        var space = presence.space();
+        // presence may have mesh
+        var key = Kata.Script.remotePresenceKey(presence.space(), presence.id());
+        this.mRemotePresences[key] = presence;
         for (var remotePresenceId in this.mRemotePresences) {
             var remotePresence = this.mRemotePresences[remotePresenceId];
             if (remotePresence.space() == space) {
@@ -259,6 +260,8 @@ Kata.require([
          var len = this.mRenderableRemotePresences.length;
          var msg = unrenderRemotePresence(presence,presence);
          this._sendHostedObjectMessage(msg);
+         var key = Kata.Script.remotePresenceKey(presence.space(), presence.id());
+         delete this.mRemotePresences[key];
          for (var i=0;i<len;) {
              var remotePresence=this.mRemotePresences[this.mRenderableRemotePresences[i]];
              if (remotePresence && remotePresence.space()==space) {

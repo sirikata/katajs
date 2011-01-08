@@ -307,6 +307,13 @@ Kata.require([
                  this.dir = dir; // unit vector
                  this.multiple = multiple; // boolean
                  this.infinite = infinite; // boolean
+             },
+             GFXHighlight : function(space, objid, enable) {
+                 this.msg="Highlight";
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.space = space;
+                 this.id = objid;
+                 this.enable = enable;
              }
          },
 
