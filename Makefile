@@ -63,11 +63,12 @@ depends:
 	git submodule update
 
 $(CLOSUREOUT) : $(CLOSURESRCS)
-	before=`mktemp` && \
-	after=`mktemp` && \
+	before=`mktemp -t kata` && \
+	after=`mktemp -t kata` && \
 	echo "if(typeof(Kata)=='undefined')Kata={};Kata.closureIncluded={'katajs/core/Core.js':true $(patsubst %,$(COMMA) '%':true,$(CLOSURESRCS))};" > $$before && \
 	echo "(function(){for(var i in Kata.closureIncluded){Kata.setIncluded(i);}})();" > $$after && \
 	$(CLOSURE) $(CLOSUREARGS) || \
-	rm -f "$@"
+	rm -f "$@" ; \
+	rm -f $$before $$after
 
 .PHONY: test_pbj closure all
