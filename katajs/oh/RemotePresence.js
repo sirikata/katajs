@@ -76,6 +76,12 @@ Kata.require([
          return this.mID;
      };
 
+     /** Another name to for id(), to be compatible with PresenceID.
+      */
+     Kata.RemotePresence.prototype.object = function() {
+         return this.mID;
+     };
+
      /** Get the space this presence resides in.
       *  @returns {Kata.URL} space URL
       */
