@@ -76,6 +76,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 thus.newEvents=true;
             };
             this.renderer=new GLGE.Renderer(canvas);
+            this.renderer.cullFaces=true;
                 //this.keys=new GLGE.KeyInput();
             
             window.addEventListener('resize', resizeHandler, false);
