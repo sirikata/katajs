@@ -222,6 +222,13 @@ Kata.require([
         connect_msg.type = Sirikata.Protocol.Session.Connect.ConnectionType.Fresh;
         connect_msg.object = objid;
 
+        if (auth) {
+            if (typeof(auth) == "string")
+                connect_msg.auth = PROTO.encodeUTF8(auth);
+            else
+                connect_msg.auth = auth;
+        }
+
         var loc_parts = this._generateLocUpdateParts(reqloc, true);
 
         if (loc_parts.loc)
@@ -425,7 +432,11 @@ Kata.require([
             }
             else if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Error) {
                 Kata.warn("Connection Error.");
-                this.mParent.connectionResponse(id, false);
+                var id = this._getLocalID(objid);
+                this.mParent.connectionResponse(
+                    id, false,
+                    {space : this.mSpaceURL, object : objid}
+                );
             }
             else {
                 Kata.warn("Got unknown connection response.");

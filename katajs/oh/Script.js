@@ -127,7 +127,7 @@ Kata.require([
          var cb = this.mConnectRequests[space];
          if (cb) {
              delete this.mConnectRequests[space];
-             cb(space, reason);
+             cb(null, space, reason);
          }
      };
      Kata.Script.prototype.presenceInvalidated = function(presence, reason) {
