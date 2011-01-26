@@ -876,7 +876,7 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg) {
         listeningStreamsCallback(0, stream);
 
         stream.receiveData(received_stream_msg, received_stream_msg.payload,
-                            PROTO.I64.fromNumber(received_stream_msg.bsn));//FIXME i64
+                            received_stream_msg.bsn);
       }
       else {
         Kata.log("Not listening to streams at: " + this.headerToStringDebug(received_stream_msg));
@@ -904,7 +904,7 @@ Kata.SST.Connection.prototype.handleReplyPacket=function(received_stream_msg) {
         if (stream.mStreamReturnCallback){
           stream.mStreamReturnCallback(Kata.SST.SUCCESS, stream);
           stream.receiveData(received_stream_msg, received_stream_msg.payload,
-                              PROTO.I64.fromNumber(received_stream_msg.bsn));//FIXME i64 should be really i64
+                              received_stream_msg.bsn);
         }
       }
       else {
@@ -925,7 +925,7 @@ Kata.SST.Connection.prototype.handleDataPacket=function(received_stream_msg) {
 
 	  stream_ptr.receiveData( received_stream_msg,
 			       received_stream_msg.payload,
-			       PROTO.I64.fromNumber(received_stream_msg.bsn)//FIXME i64
+			       received_stream_msg.bsn
 			       );
     }
 };
@@ -2160,7 +2160,7 @@ Kata.SST.Stream.prototype.sendInitPacket = function(data) {
 
     sstMsg.psid=this.mParentLSID;
 
-    sstMsg.bsn=0;
+    sstMsg.bsn = PROTO.I64.fromNumber(0);
 
     sstMsg.payload=data;
 
@@ -2197,7 +2197,7 @@ Kata.SST.Stream.prototype.sendDataPacket=function( data, offset) {
     sstMsg.window= Math.log(this.mReceiveWindowSize)/Math.log(2.0);
     sstMsg.src_port=this.mLocalPort;
     sstMsg.dest_port=this.mRemotePort;
-    sstMsg.bsn=offset;
+    sstMsg.bsn = PROTO.I64.fromNumber(offset);
 
     sstMsg.payload=data;
 
@@ -2221,7 +2221,7 @@ Kata.SST.Stream.prototype.sendReplyPacket=function(data, remoteLSID) {
     sstMsg.dest_port=this.mRemotePort;
 
     sstMsg.rsid=remoteLSID;
-    sstMsg.bsn=0;
+    sstMsg.bsn = PROTO.I64.fromNumber(0);
 
     sstMsg.payload=data;
 

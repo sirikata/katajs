@@ -131,9 +131,11 @@ Kata.require([
              return;
          }
 
-         // Swap which ID we're tracking the object with
-         delete this.mObjects[id];
-         this.mObjects[presence_id.object] = obj;
+         // If we actually got connected, swap which ID we're tracking the object with
+         if (success) {
+             delete this.mObjects[id];
+             this.mObjects[presence_id.object] = obj;
+         }
 
          obj.connectionResponse(success, presence_id, loc, visual);
      };

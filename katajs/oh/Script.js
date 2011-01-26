@@ -127,7 +127,7 @@ Kata.require([
          var cb = this.mConnectRequests[space];
          if (cb) {
              delete this.mConnectRequests[space];
-             cb(space, reason);
+             cb(null, space, reason);
          }
      };
      Kata.Script.prototype.presenceInvalidated = function(presence, reason) {
@@ -207,7 +207,10 @@ Kata.require([
              // Check if we have one that's in the process of being killed
              remote = this.mRemotePresences[key];
              if (remote) {
-                 remote._doKill = false;
+                 if (remote._killTimeout) {
+                     clearTimeout(remote._killTimeout);
+                     delete remote._killTimeout;
+                 }
              }
              else {
                  // New object, create presence and notify
@@ -230,9 +233,12 @@ Kata.require([
                  Kata.warn("Got removal prox event for unknown object.");
                  return remote;
              }
-             remote._doKill = true;
+             if (remote._killTimeout) {
+                 // Already registered
+                 return remote;
+             }
              var self = this;
-             setTimeout(
+             remote._killTimeout = setTimeout(
                  function() {
                      delete self.mRemotePresences[key];
                      presence.remotePresence(remote, false);
