@@ -85,8 +85,6 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         this.mClientElement=canvas;
     }
     
-    var lasttime = 0;
-    var frameratebuffer = 60;
     this.mCurTime=new Date();
     this.mObjectUpdates = {}; // map id -> function
     this.mSpaceRoots={};
@@ -98,36 +96,10 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this._lastMouseDown = null;
     this._mouseMoveSinceLastRender = false;
     function render(){
-        thus._mouseMoveSinceLastRender = false;
-        thus.mCurTime=new Date();
-        var now = parseInt(thus.mCurTime.getTime());
-        frameratebuffer = Math.round(((frameratebuffer * 9) + 1000 / (now - lasttime)) / 10);
-        //mouselook();
-        //checkkeys();
-        for (var id in thus.mObjectUpdates) {        
-            thus.mObjectUpdates[id].update(thus);
-            thus.newEvents=true;
-            
-        }
-        if (!thus.newEvents)
-            for (animObject in thus.mAnimatingObjects) {
-                thus.newEvents=(thus.newEvents||thus.windowVisible);//only make it draw if the window is visible or there are new events
-                break;
-            }
-        if (thus.doubleBuffer && !thus.newEvents) {
-            thus.doubleBuffer=false;
-            thus.renderer.render();            
-        }else if (thus.newEvents || thus.doubleBuffer) {
-            thus.renderer.render();
-            thus.newEvents=false;
-            thus.doubleBuffer=true;
-        }
-        lasttime = now;
-	    if (Kata.userRenderCallback) {
-		    Kata.userRenderCallback(thus.mCurTime);
+        thus.render();
 	}
         
-    }
+    
     function initialTextureLoadHack(){
         var anyAnim=false;
         for (animObject in thus.mAnimatingObjects) {
@@ -181,13 +153,64 @@ Kata.require([
     'katajs/oh/GraphicsSimulation.js',
     ['katajs/gfx/WebGLCompat.js', 'externals/GLGE/glge_math.js', 'externals/GLGE/glge.js', 'externals/GLGE/glge_collada.js']
 ], function(){
+    GLGEGraphics.prototype.render=function () {
+        var thus=this;
+        thus._mouseMoveSinceLastRender = false;
+        thus.mCurTime=new Date();
+        var now = parseInt(thus.mCurTime.getTime());
+        //mouselook();
+        //checkkeys();
+        for (var id in thus.mObjectUpdates) {        
+            thus.mObjectUpdates[id].update(thus);
+            thus.newEvents=true;
+            
+        }
+        var didRender=false;
+        if (!thus.newEvents)
+            for (animObject in thus.mAnimatingObjects) {
+                thus.newEvents=(thus.newEvents||thus.windowVisible);//only make it draw if the window is visible or there are new events
+                break;
+            }
+        if (thus.doubleBuffer && !thus.newEvents) {
+            thus.doubleBuffer=false;
+            thus.renderer.render();            
+            didRender=true;
+        }else if (thus.newEvents || thus.doubleBuffer) {
+            thus.renderer.render();
+            didRender=true;
+            thus.newEvents=false;
+            thus.doubleBuffer=true;
+        }
+        if (didRender){
+            var scene=this.renderer.getScene();            
+            if (scene) {
+                var filter=scene.getFilter2d();
+                if (filter) {
+	                var lightloc=GLGE.mulMat4Vec4(scene.camera.getProjectionMatrix(),
+                                                  GLGE.mulMat4Vec4(scene.camera.getViewMatrix(),
+                                                                   [-2.5,-3,4,1]));//<--TOTAL HACK
 
+	                lightloc=[(lightloc[0]/lightloc[3]+1)/2,
+                                  (lightloc[1]/lightloc[3]+1)/2,
+                                  (lightloc[2]/lightloc[3]+1)/2];//<--TOTAL HACK
+                    //HARD CODED THE LIGHT LOCATION TO [-2.5,-3,4,1]
+	                filter.setUniform("3fv","lightpos",new Float32Array(lightloc));
+	                var invProjView=GLGE.mulMat4(GLGE.inverseMat4(scene.camera.getViewMatrix()),GLGE.inverseMat4(scene.camera.getProjectionMatrix()));
+	                filter.setUniform("Matrix4fv","invProjView",new Float32Array(GLGE.transposeMat4(invProjView)));
+                }
+            }
+        }
+	    if (Kata.userRenderCallback) {
+		    Kata.userRenderCallback(thus.mCurTime);
+        }
+        
+    };
     /** Static initialization method. */
     GLGEGraphics.initialize = function(scenefile, cb) {
         g_GLGE_doc = new GLGE.Document();
         g_GLGE_doc.onLoad = cb;
         g_GLGE_doc.load(scenefile);
-    }
+    };
 
     function RenderTarget(graphicsSystem, canvas,textureCanvas) {
         this.mGraphicsSystem=graphicsSystem;
@@ -445,12 +468,18 @@ Kata.require([
         label_node.setSize(200);
         label_node.setText(label);
     };
-
+    var mainSpace;
     function SpaceRoot(glgegfx, element, spaceID) {
         this.mElement = element;
         //this.mPack = this.mElement.client.createPack();
 //        this.mScene = new GLGE.Scene(spaceID);
-        this.mScene = g_GLGE_doc.getElement("mainscene");
+        if (!mainSpace) {
+            mainSpace=spaceID;
+        }
+        if (mainSpace==spaceID)
+            this.mScene = g_GLGE_doc.getElement("mainscene");
+        else
+            this.mScene = new GLGE.Scene(spaceID);
         this.mScene.mSpaceID = spaceID;
         this.mDefaultRenderView = new RenderTarget(glgegfx, element, null);
         //this.mDefaultRenderView.createBasicView([0,0,0,0], [0,0,0,0]);
@@ -716,23 +745,25 @@ Kata.require([
         // We need some concept of focus for this to work well methinks.
         //e.preventDefault && e.preventDefault();
     };
-
-    GLGEGraphics.prototype.methodTable["Create"]=function(msg) {//this function creates a scene graph node
-        var s = msg.spaceid;
-        if (!s) {
+    GLGEGraphics.prototype.createOrReturnSpaceRoot=function(s) {
+    
+        if (!s)
             s="";
-        }
         if (!(s in this.mSpaceRoots)) {
             var dl =new SpaceRoot(this, this.mClientElement, s);
             this.mSpaceRoots[s] = dl;
-
+            
             var rootsEmpty=true;
             for (var i in this.mSpaceRoots) {
                 rootsEmpty=false;
                 break;
             }
         }
-        var spaceRoot=this.mSpaceRoots[s];
+        return this.mSpaceRoots[s];
+    };
+
+    GLGEGraphics.prototype.methodTable["Create"]=function(msg) {//this function creates a scene graph node
+        var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
         var newObject;
         this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,spaceRoot);
         this.moveTo(newObject,msg);
@@ -939,6 +970,52 @@ Kata.require([
                 cam.attachRenderTarget(renderTarg,spaceView);
             }
         }
+    };
+    GLGEGraphics.prototype.methodTable["Background"]=function(msg) {
+        var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
+        var filter=spaceRoot.mFilter;
+        var filterTextures=spaceRoot.mFilterTextures;
+        var filterTextureNames=spaceRoot.mFilterTextureNames;
+        if (!filter){
+            filterTextures=(spaceRoot.mFilterTextures=[]);
+            filterTextureNames=(spaceRoot.mFilterTextureNames=[]);
+            filter= new GLGE.Filter2d();
+            spaceRoot.mScene.setFilter2d(filter);
+            filter.addPassFile(Kata.scriptRoot+"katajs/gfx/layer0.glsl",1024,1024);
+            filter.addPassFile(Kata.scriptRoot+"katajs/gfx/layer1.glsl",1024,1024);
+            filter.addPassFile(Kata.scriptRoot+"katajs/gfx/layer2.glsl");
+        }
+        var allSame=(filterTextureNames.length==msg.curtextures.length*2);
+        filterTextureNames.length=msg.curtextures.length*2;
+        for (var i=0;i<msg.curtextures.length*2;++i){
+            var texName=msg.curtextures[(i>>1)];
+            if (msg.prevtextures&&i%2!=0) {
+                texName=msg.prevTextures[(i>>1)];
+            }
+            if (filterTextureNames[i]!=texName){
+                allSame=false;
+                filterTextureNmaes[i]=texName;
+            }
+        }
+
+        if (!allSame) {
+            for (var i=0;i<filterTextures.length;++i) {
+                filter.removeTexture(filterTextures[i]);
+            }
+            var memoizedTextures={};
+            for (var i=0;i<filterTextures.length;++i) {
+                if (filterTextureNames[i] in memoizedTextures){
+                    filterTextures[i]=memoizedTextures[filterTextureNames[i]];
+                }else {
+                    filterTextures[i]=new GLGE.Texture();
+                    filterTextures[i].setSrc(filterTextureNames[i]);
+                    memoizedTextures[filterTextureNames[i]]=filterTextures[i];
+                    filter.addTexture(filterTexutres[i]);
+                }
+            }
+        }
+        
+        
     };
     GLGEGraphics.prototype.methodTable["DetachCamera"]=function(msg) {
         if (msg.id in this.mObjects) {
