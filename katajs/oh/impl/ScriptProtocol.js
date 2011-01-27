@@ -100,7 +100,10 @@ Kata.require([
 
                  GUIMessage : "fgui"
              },
-
+             BackgroundTypes: {
+                 Dome: "skydome",
+                 Box: "skybox"
+             },
              reconstitute : function(data) {
                  data = Kata.ScriptProtocol.commonReconstitute(data);
                  return data;
@@ -268,6 +271,20 @@ Kata.require([
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
                  this.msg="AttachCamera";
                  this.target=canvasId;
+             },
+             GFXBackground : function(space, observer, id, backgroundType, curTextures, prevTextures, curWeight) {
+                 
+                 Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
+                 this.msg="Background";
+                 this.type=backgroundType;
+                 
+                 if (curWeight===undefined)
+                     curWeight=1.0;
+                 this.curweight=curWeight;
+                 if (prevTextures) {
+                     this.prevtextures=prevTextures;
+                 }
+                 this.curtextures=curTextures;
              },
              GFXAttachCameraTexture : function(space, observer, id, textureObjectSpace, textureObjectID, texture) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);

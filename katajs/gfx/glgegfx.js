@@ -151,7 +151,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
 
 Kata.require([
     'katajs/oh/GraphicsSimulation.js',
-    ['katajs/gfx/WebGLCompat.js', 'externals/GLGE/glge_math.js', 'externals/GLGE/glge.js', 'externals/GLGE/glge_collada.js']
+    ['katajs/gfx/WebGLCompat.js', 'externals/GLGE/glge_math.js', 'externals/GLGE/glge.js', 'externals/GLGE/glge_collada.js', 'externals/GLGE/glge_filter2d.js']
 ], function(){
     GLGEGraphics.prototype.render=function () {
         var thus=this;
@@ -1059,23 +1059,25 @@ Kata.require([
             }
             if (filterTextureNames[i]!=texName){
                 allSame=false;
-                filterTextureNmaes[i]=texName;
+                filterTextureNames[i]=texName;
             }
         }
 
         if (!allSame) {
-            for (var i=0;i<filterTextures.length;++i) {
+            var i;
+            for (i=0;i<filterTextures.length;++i) {
                 filter.removeTexture(filterTextures[i]);
             }
+            filterTextures.length=0;
             var memoizedTextures={};
-            for (var i=0;i<filterTextures.length;++i) {
+            for (i=0;i<filterTextureNames.length;++i) {
                 if (filterTextureNames[i] in memoizedTextures){
                     filterTextures[i]=memoizedTextures[filterTextureNames[i]];
                 }else {
                     filterTextures[i]=new GLGE.Texture();
                     filterTextures[i].setSrc(filterTextureNames[i]);
                     memoizedTextures[filterTextureNames[i]]=filterTextures[i];
-                    filter.addTexture(filterTexutres[i]);
+                    filter.addTexture(filterTextures[i]);
                 }
             }
         }
