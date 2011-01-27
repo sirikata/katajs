@@ -242,6 +242,113 @@ Kata.require([
         }
         this.mSpaceRoot=null;
     };
+    function getGroupBoundingVolume (thus, currentMatrix){
+        var localMatrix=thus.getLocalMatrix();
+        if (currentMatrix) {
+            localMatrix=GLGE.mulMat4(currentMatrix,localMatrix);
+        }
+	    var boundingVolume=null;
+	    for(var i=0; i<thus.children.length;i++){
+		    if(thus.children[i].getBoundingVolume){
+			    if(!boundingVolume) {
+				    boundingVolume=computeBoundingVolume(thus.children[i],localMatrix);
+			    }else{
+				    boundingVolume.addBoundingVolume(thus.children[i].getBoundingVolume(true,localMatrix));
+			    }
+		    }
+	    }
+	    if(!boundingVolume) boundingVolume=new GLGE.BoundingVolume(0,0,0,0,0,0);
+	    return boundingVolume;
+    };
+
+    function getObjectBoundingVolume (thus, currentMatrix){
+        var localMatrix=thus.getLocalMatrix();
+        if (currentMatrix) {
+            localMatrix=GLGE.mulMat4(currentMatrix,localMatrix);
+        }	
+	    var matrix=thus.getModelMatrix();
+		var multimaterials=thus.multimaterials;
+		var boundingVolume=null;
+		for(var i=0;i<multimaterials.length;i++){
+			if(multimaterials[i].lods[0].mesh){
+				if(!boundingVolume){
+					boundingVolume=getMeshBoundingVolume(multimaterials[i].lods[0].mesh,localMatrix);
+				}else{
+					boundingVolume.addBoundingVolume(getMeshBoundingVolume(multimaterials[i].lods[0].mesh,localMatrix));
+				}
+			}
+		}
+		if(!boundingVolume) boundingVolume=new GLGE.BoundingVolume(0,0,0,0,0,0);
+        return boundingVolume;
+    };
+
+    function getMeshBoundingVolume(thus, currentMatrix) {
+        function mulMat4Vec3(mat1,vec2){
+	        return GLGE.Vec3(mat1[0]*vec2[0]+mat1[1]*vec2[1]+mat1[2]*vec2[2]+mat1[3],
+			                 mat1[4]*vec2[0]+mat1[5]*vec2[1]+mat1[6]*vec2[2]+mat1[7],
+			                 mat1[8]*vec2[0]+mat1[9]*vec2[1]+mat1[10]*vec2[2]+mat1[11]);
+        };
+
+		var minX,maxX,minY,maxY,minZ,maxZ;
+		for(var i=0;i<thus.buffers.length;i++){
+			if(thus.buffers[i].name=="position") {
+                var positions=thus.buffers[i].data;
+		        
+                if (currentMatrix) {
+                    if (positions.length>=3) {               
+                        var loc=mulMat4Vec3(currentMatrix,positions.slice(0,3));
+			            minX=maxX=loc[0];
+			            minY=maxY=loc[1];
+			            minZ=maxZ=loc[2];
+                    }else {
+                        minX=minY=minZ=maxX=maxY=maxZ=0;
+                    }
+		            for(var j=3;j+2<positions.length;j=j+3){
+                        var loc=mulMat4Vec3(currentMatrix,positions.slice(j,j+3));
+				        minX=Math.min(minX,loc[0]);
+				        maxX=Math.max(maxX,loc[0]);
+				        minY=Math.min(minY,loc[1]);
+				        maxY=Math.max(maxY,loc[1]);
+				        minZ=Math.min(minZ,loc[2]);
+				        maxZ=Math.max(maxZ,loc[2]);
+		            }
+                    
+                }else {            
+                    if (positions.length>=3) {               
+			            minX=maxX=positions[0];
+			            minY=maxY=positions[1];
+			            minZ=maxZ=positions[2];
+                    }else {
+                        minX=minY=minZ=maxX=maxY=maxZ=0;
+                    }
+		            for(var j=3;j+3<positions.length;i=j+3){
+				        minX=Math.min(minX,positions[i]);
+				        maxX=Math.max(maxX,positions[i]);
+				        minY=Math.min(minY,positions[i+1]);
+				        maxY=Math.max(maxY,positions[i+1]);
+				        minZ=Math.min(minZ,positions[i+2]);
+				        maxZ=Math.max(maxZ,positions[i+2]);
+			            
+		            }
+                }
+            }
+        }
+		return new GLGE.BoundingVolume(minX,maxX,minY,maxY,minZ,maxZ);
+	}
+
+
+    function computeBoundingVolume(glge_object, currentMatrix){
+        switch (glge_object.getBoundingVolume){
+        case GLGE.Group.prototype.getBoundingVolume:
+            return getGroupBoundingVolume(glge_object,currentMatrix);
+        case GLGE.Mesh.prototype.getBoundingVolume:
+            return getMeshBoundingVolume(glge_object,currentMatrix);
+        case GLGE.Object.prototype.getBoundingVolume:
+        default:
+            return getObjectBoundingVolume(glge_object,currentMatrix);
+        }
+        
+    }
     function VWObject(id,time,spaceid,spaceroot) {
         //var pack=spaceroot.mElement.client.createPack();
         
@@ -279,7 +386,7 @@ Kata.require([
             delete gfx.mAnimatingObjects[thus.mID];
         var loadedCallback;
         loadedCallback=function(){
-            var bv=clda.getBoundingVolume(true);
+            var bv=computeBoundingVolume(clda);//clda.getBoundingVolume(true);
             var maxv=bv.radius;
             var colladaUnitRescale=1/maxv;
             //console.log("Scaling by "+colladaUnitRescale+" instead of "+scale);
