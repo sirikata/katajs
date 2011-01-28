@@ -188,7 +188,7 @@ Kata.require([
                 if (filter) {
 	                var lightloc=GLGE.mulMat4Vec4(scene.camera.getProjectionMatrix(),
                                                   GLGE.mulMat4Vec4(scene.camera.getViewMatrix(),
-                                                                   [-2.5,-3,4,1]));//<--TOTAL HACK
+                                                                   [-25,40,-30,1]));//<--TOTAL HACK
 
 	                lightloc=[(lightloc[0]/lightloc[3]+1)/2,
                                   (lightloc[1]/lightloc[3]+1)/2,

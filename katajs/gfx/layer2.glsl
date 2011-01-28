@@ -25,6 +25,8 @@ void main(void){
 	vec4 skycoord=invProjView*vec4(vec3((texCoord-0.5)*2.0,0.0),1.0);
 	skycoord=invProjView*vec4(vec3((texCoord-0.5)*2.0,1.0),1.0);
 	skycoord.xyz=normalize(skycoord.xyz/skycoord.w);
+    skycoord.xyz=skycoord.xzy;
+    skycoord.y=-skycoord.y;
 	//result=max(suncolor,0.0)/0.4;
 	result=max(suncolor,0.0)/0.4+texture2D(TEXTURE0,(skycoord.xy/(1.4+skycoord.z)+1.0)/2.0).rgb*intensity+texture2D(GLGE_RENDER,texCoord).rgb*(1.0-intensity);
 	if(intensity<1.0) result=suncolor*intensity*5.5+vec3(pow(col.r,2.0),pow(col.g,2.0),pow(col.b,2.0));	
