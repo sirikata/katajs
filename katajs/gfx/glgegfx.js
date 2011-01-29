@@ -248,15 +248,16 @@ Kata.require([
         }
 	    var boundingVolume=null;
 	    for(var i=0; i<thus.children.length;i++){
-		    if(thus.children[i].getBoundingVolume){
+		    //if(thus.children[i].getBoundingVolume){
 			    if(!boundingVolume) {
 				    boundingVolume=computeBoundingVolume(thus.children[i],localMatrix);
 			    }else{
-				    boundingVolume.addBoundingVolume(thus.children[i].getBoundingVolume(true,localMatrix));
+				    boundingVolume.addBoundingVolume(computeBoundingVolume(thus.children[i],localMatrix));
 			    }
-		    }
+		    //}
 	    }
 	    if(!boundingVolume) boundingVolume=new GLGE.BoundingVolume(0,0,0,0,0,0);
+        console.log("RETURNING "+JSON.stringify(boundingVolume))
 	    return boundingVolume;
     };
 
@@ -278,6 +279,7 @@ Kata.require([
 			}
 		}
 		if(!boundingVolume) boundingVolume=new GLGE.BoundingVolume(0,0,0,0,0,0);
+        console.log("REOURNING "+JSON.stringify(boundingVolume))
         return boundingVolume;
     };
 
@@ -332,6 +334,7 @@ Kata.require([
                 }
             }
         }
+        console.log("REMURNING "+JSON.stringify(new GLGE.BoundingVolume(minX,maxX,minY,maxY,minZ,maxZ)));
 		return new GLGE.BoundingVolume(minX,maxX,minY,maxY,minZ,maxZ);
 	}
 
@@ -387,9 +390,9 @@ Kata.require([
         loadedCallback=function(){
             var bv=computeBoundingVolume(clda);//clda.getBoundingVolume(true);
             var maxv=bv.radius;
-            var colladaUnitRescale=1/maxv;
-            //console.log("Scaling by "+colladaUnitRescale+" instead of "+scale);
-            //console.log("Offsetting by -["+bv.center+"] instead of "+offset);
+            var colladaUnitRescale=1.0/maxv;
+            console.log("Scaling by "+colladaUnitRescale+" instead of "+scale);
+            console.log("Offsetting by -["+bv.center+"] instead of "+offset);
             clda.setScaleX(maxv?scale[0]*colladaUnitRescale:1);
             clda.setScaleY(maxv?scale[1]*colladaUnitRescale:1);
             clda.setScaleZ(maxv?scale[2]*colladaUnitRescale:1);
