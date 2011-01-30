@@ -151,7 +151,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
 
 Kata.require([
     'katajs/oh/GraphicsSimulation.js',
-    ['katajs/gfx/WebGLCompat.js', 'externals/GLGE/src/core/glge.js', 'externals/GLGE/src/core/glge_event.js', 'externals/GLGE/src/core/glge_animatable.js', 'externals/GLGE/src/core/glge_document.js', 'externals/GLGE/src/core/glge_math.js', 'externals/GLGE/src/core/glge_messages.js', 'externals/GLGE/src/core/glge_placeable.js', 'externals/GLGE/src/core/glge_quicknote.js', 'externals/GLGE/src/core/glge_jsonloader.js','externals/GLGE/src/core/glge_group.js','externals/GLGE/src/scene/glge_scene.js', 'externals/GLGE/src/scene/glge_light.js', 'externals/GLGE/src/scene/glge_camera.js', 'externals/GLGE/src/renderable/glge_object.js', 'externals/GLGE/src/renders/glge_renderer.js', 'externals/GLGE/src/extra/glge_input.js', 'externals/GLGE/src/extra/glge_particles.js', 'externals/GLGE/src/extra/glge_filter2d.js', 'externals/GLGE/src/extra/glge_xmlparser.js', 'externals/GLGE/src/extra/glge_wavefront.js', 'externals/GLGE/src/extra/glge_collada.js', 'externals/GLGE/src/geometry/glge_mesh.js', 'externals/GLGE/src/material/glge_texturecube.js', 'externals/GLGE/src/material/glge_texture.js', 'externals/GLGE/src/material/glge_texturevideo.js', 'externals/GLGE/src/material/glge_texturecanvas.js', 'externals/GLGE/src/material/glge_material.js', 'externals/GLGE/src/material/glge_texturecamera.js', 'externals/GLGE/src/material/glge_multimaterial.js', 'externals/GLGE/src/material/glge_materiallayer.js', 'externals/GLGE/src/renderable/glge_text.js', 'externals/GLGE/src/renderable/glge_lod.js', 'externals/GLGE/src/animation/glge_actionchannel.js', 'externals/GLGE/src/animation/glge_animationvector.js', 'externals/GLGE/src/animation/glge_animationcurve.js', 'externals/GLGE/src/animation/glge_animationpoints.js', 'externals/GLGE/src/animation/glge_action.js']], function(){
+    ['katajs/gfx/WebGLCompat.js', 'externals/GLGE/glge_math.js', 'externals/GLGE/glge.js', 'externals/GLGE/glge_collada.js', 'externals/GLGE/glge_filter2d.js', 'externals/GLGE/glge_input.js']], function(){
     GLGEGraphics.prototype.render=function () {
         var thus=this;
         thus._mouseMoveSinceLastRender = false;
@@ -243,9 +243,12 @@ Kata.require([
     };
     function getGroupBoundingVolume (thus, currentMatrix){
         var localMatrix=thus.getLocalMatrix();
+        console.log("glocal matrix "+localMatrix)
         if (currentMatrix) {
+            console.log("gCurrent matrix "+currentMatrix)        
             localMatrix=GLGE.mulMat4(currentMatrix,localMatrix);
         }
+        console.log("glocal mmatrix "+localMatrix)
 	    var boundingVolume=null;
 	    for(var i=0; i<thus.children.length;i++){
 		    //if(thus.children[i].getBoundingVolume){
@@ -263,7 +266,9 @@ Kata.require([
 
     function getObjectBoundingVolume (thus, currentMatrix){
         var localMatrix=thus.getLocalMatrix();
+        console.log("local matrix "+localMatrix)
         if (currentMatrix) {
+            console.log("Current matrix "+currentMatrix)
             localMatrix=GLGE.mulMat4(currentMatrix,localMatrix);
         }	
 	    var matrix=thus.getModelMatrix();
@@ -289,7 +294,7 @@ Kata.require([
 			                 mat1[4]*vec2[0]+mat1[5]*vec2[1]+mat1[6]*vec2[2]+mat1[7],
 			                 mat1[8]*vec2[0]+mat1[9]*vec2[1]+mat1[10]*vec2[2]+mat1[11]);
         };
-
+        console.log("Matrix is "+currentMatrix);
 		var minX,maxX,minY,maxY,minZ,maxZ;
 		for(var i=0;i<thus.buffers.length;i++){
 			if(thus.buffers[i].name=="position") {
@@ -344,6 +349,7 @@ Kata.require([
         case GLGE.Group.prototype.getBoundingVolume:
             return getGroupBoundingVolume(glge_object,currentMatrix);
         case GLGE.Mesh.prototype.getBoundingVolume:
+            console.log("XXX")
             return getMeshBoundingVolume(glge_object,currentMatrix);
         case GLGE.Object.prototype.getBoundingVolume:
         default:
