@@ -185,14 +185,21 @@ Kata.require([
             if (scene) {
                 var filter=scene.getFilter2d();
                 if (filter) {
+                    var lights=scene.getLights();
+                    var pos=[0,0,0,1];
+                    for (var i=0;i<lights.length;++i) {
+                        if (i==0||lights[i].getCastShadows())
+                            pos=GLGE.mulMat4Vec4(lights[i].getModelMatrix(),GLGE.Vec4(0,0,0,1));
+                        
+                    }
+                    console.log("Light "+i+" pos "+pos);
 	                var lightloc=GLGE.mulMat4Vec4(scene.camera.getProjectionMatrix(),
                                                   GLGE.mulMat4Vec4(scene.camera.getViewMatrix(),
-                                                                   [-25,40,-30,1]));//<--TOTAL HACK
+                                                                   pos));
 
 	                lightloc=[(lightloc[0]/lightloc[3]+1)/2,
                                   (lightloc[1]/lightloc[3]+1)/2,
-                                  (lightloc[2]/lightloc[3]+1)/2];//<--TOTAL HACK
-                    //HARD CODED THE LIGHT LOCATION TO [-2.5,-3,4,1]
+                                  (lightloc[2]/lightloc[3]+1)/2];
 	                filter.setUniform("3fv","lightpos",new Float32Array(lightloc));
 	                var invProjView=GLGE.mulMat4(GLGE.inverseMat4(scene.camera.getViewMatrix()),GLGE.inverseMat4(scene.camera.getProjectionMatrix()));
 	                filter.setUniform("Matrix4fv","invProjView",new Float32Array(GLGE.transposeMat4(invProjView)));
