@@ -192,7 +192,6 @@ Kata.require([
                             pos=GLGE.mulMat4Vec4(lights[i].getModelMatrix(),GLGE.Vec4(0,0,0,1));
                         
                     }
-                    console.log("Light "+i+" pos "+pos);
 	                var lightloc=GLGE.mulMat4Vec4(scene.camera.getProjectionMatrix(),
                                                   GLGE.mulMat4Vec4(scene.camera.getViewMatrix(),
                                                                    pos));
@@ -1157,13 +1156,16 @@ Kata.require([
         var filter=spaceRoot.mFilter;
         var filterTextures=spaceRoot.mFilterTextures;
         var filterTextureNames=spaceRoot.mFilterTextureNames;
-        if (!filter){
+        if ((!filter)||spaceRoot.mSunBeams!=msg.sunbeams){
+            spaceRoot.mSunBeams=msg.sunbeams;
             filterTextures=(spaceRoot.mFilterTextures=[]);
             filterTextureNames=(spaceRoot.mFilterTextureNames=[]);
             filter= new GLGE.Filter2d();
             spaceRoot.mScene.setFilter2d(filter);
-            filter.addPass(layer0_glsl,1024,1024);
-            filter.addPass(layer1_glsl,1024,1024);
+            if (msg.sunbeams) {
+                filter.addPass(layer0_glsl,1024,1024);
+                filter.addPass(layer1_glsl,1024,1024);
+            }
             filter.addPass(layer2_glsl);
         }
         var allSame=(filterTextureNames.length==msg.curtextures.length*2);
@@ -1197,7 +1199,13 @@ Kata.require([
                 }
             }
         }
-        
+        if(((!msg.curtextures)||(msg.curtextures&&msg.curtextures.length==0))&&((!msg.prevtextures)||msg.prevtextures.length==0)) {
+            spaceRoot.mFilter=null;
+            spaceRoot.mScene.setFilter2d(null);
+            spaceRoot.mScene.setBackgroundColor("#222");
+        }else {
+            spaceRoot.mScene.setBackgroundColor("#f0f");           
+        }
         
     };
     GLGEGraphics.prototype.methodTable["DetachCamera"]=function(msg) {
@@ -1223,6 +1231,8 @@ Kata.require([
             delete this._enabledEvents[msg.type];
         }
     };
+    
+        
     GLGEGraphics.prototype.methodTable["Highlight"]=function(msg) {
         var obj = this.mObjects[msg.id];
         if (obj) {
@@ -1231,6 +1241,31 @@ Kata.require([
             } else {
                 obj.setHighlight(false);
             }
+        }
+    };
+
+    GLGEGraphics.prototype.methodTable["Shadows"]=function(msg) {
+        var obj = this.mObjects[msg.id];
+        if (obj) {
+            var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
+            var lights=spaceRoot.mScene.getLights();
+            var index=0;
+            if (msg.index!==undefined){                
+                index=msg.index;
+                if (msg.index<0)
+                    index+=lights.length;
+            }
+            if (lights.length) {                
+                if (msg.enable) {
+                    lights[index%lights.length].setCastShadows(true);
+                } else {
+                    if (msg.index!==undefined)
+                        lights[index%lights.length].setCastShadows(false);
+                    else for (var j=0;j<lights.length;++j){
+                        lights[j].setCastShadows(false);
+                    }
+                }
+            }            
         }
     };
 

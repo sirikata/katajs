@@ -272,12 +272,18 @@ Kata.require([
                  this.msg="AttachCamera";
                  this.target=canvasId;
              },
-             GFXBackground : function(space, observer, id, backgroundType, curTextures, prevTextures, curWeight) {
+             GFXShadows : function (space, observer, id, enable, index) {
+                 Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
+                 this.msg="Shadows";
+                 this.enable=enable;
+                 this.index=index;                 
+             },
+             GFXBackground : function(space, observer, id, backgroundType, sunbeams, curTextures, prevTextures, curWeight) {
                  
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
                  this.msg="Background";
                  this.type=backgroundType;
-                 
+                 this.sunbeams=sunbeams;
                  if (curWeight===undefined)
                      curWeight=1.0;
                  this.curweight=curWeight;
