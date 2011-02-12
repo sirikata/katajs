@@ -35,8 +35,7 @@
 var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mCurTime=new Date();
     this.callback=callbackFunction;
-    this.newEvents=true;
-    this.doubleBuffer=false;
+    this.doubleBuffer=3;
     this.mAnimatingObjects={};
     this.windowVisible=true;
     var thus=this;
@@ -73,7 +72,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 if (thus.mCamera) thus.mCamera.setAspect(GLGEGraphics.canvasAspect);
                 canvas.sizeInitialized_ = true;
                 thus.displayInfo = {width: canvas.width, height: canvas.height};
-                thus.newEvents=true;
+                thus.newEvent();
             };
             this.renderer=new GLGE.Renderer(canvas);
             this.renderer.cullFaces=true;
@@ -106,9 +105,11 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
             anyAnim=true;
             break;
         }
-        thus.doubleBuffer=!anyAnim;//only render once, not the double buffer render of an event
+        if (!anyAnim){
+            this.newEvent();
+        }
     }
-    setInterval(initialTextureLoadHack,533);
+    //setInterval(initialTextureLoadHack,533);
     setInterval(render, 16);
     
     window.addEventListener('focus',
@@ -152,6 +153,9 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
 Kata.require([
     'katajs/oh/GraphicsSimulation.js',
     ['katajs/gfx/WebGLCompat.js', 'katajs/gfx/layer0.js','katajs/gfx/layer1.js','katajs/gfx/layer2.js','katajs/gfx/layer2_no_sunbeams.js','externals/GLGE/src/core/glge.js', 'externals/GLGE/src/core/glge_event.js', 'externals/GLGE/src/core/glge_animatable.js', 'externals/GLGE/src/core/glge_document.js', 'externals/GLGE/src/core/glge_math.js', 'externals/GLGE/src/core/glge_messages.js', 'externals/GLGE/src/core/glge_placeable.js', 'externals/GLGE/src/core/glge_quicknote.js', 'externals/GLGE/src/core/glge_jsonloader.js','externals/GLGE/src/core/glge_group.js','externals/GLGE/src/scene/glge_scene.js', 'externals/GLGE/src/scene/glge_light.js', 'externals/GLGE/src/scene/glge_camera.js', 'externals/GLGE/src/renderable/glge_object.js', 'externals/GLGE/src/renders/glge_renderer.js', 'externals/GLGE/src/extra/glge_input.js', 'externals/GLGE/src/extra/glge_particles.js', 'externals/GLGE/src/extra/glge_filter2d.js', 'externals/GLGE/src/extra/glge_xmlparser.js', 'externals/GLGE/src/extra/glge_wavefront.js', 'externals/GLGE/src/extra/glge_collada.js', 'externals/GLGE/src/geometry/glge_mesh.js', 'externals/GLGE/src/material/glge_texturecube.js', 'externals/GLGE/src/material/glge_texture.js', 'externals/GLGE/src/material/glge_texturevideo.js', 'externals/GLGE/src/material/glge_texturecanvas.js', 'externals/GLGE/src/material/glge_material.js', 'externals/GLGE/src/material/glge_texturecamera.js', 'externals/GLGE/src/material/glge_multimaterial.js', 'externals/GLGE/src/material/glge_materiallayer.js', 'externals/GLGE/src/renderable/glge_text.js', 'externals/GLGE/src/renderable/glge_lod.js', 'externals/GLGE/src/animation/glge_actionchannel.js', 'externals/GLGE/src/animation/glge_animationvector.js', 'externals/GLGE/src/animation/glge_animationcurve.js', 'externals/GLGE/src/animation/glge_animationpoints.js', 'externals/GLGE/src/animation/glge_action.js']], function(){
+    GLGEGraphics.prototype.newEvent=function (){
+        this.doubleBuffer=3;
+    };
     GLGEGraphics.prototype.render=function () {
         var thus=this;
         thus._mouseMoveSinceLastRender = false;
@@ -161,24 +165,20 @@ Kata.require([
         //checkkeys();
         for (var id in thus.mObjectUpdates) {        
             thus.mObjectUpdates[id].update(thus);
-            thus.newEvents=true;
-            
+            thus.newEvent();            
         }
         var didRender=false;
-        if (!thus.newEvents)
+        if (!thus.doubleBuffer)
             for (animObject in thus.mAnimatingObjects) {
-                thus.newEvents=(thus.newEvents||thus.windowVisible);//only make it draw if the window is visible or there are new events
+                if (thus.windowVisible){
+                    thus.newEvent();
+                }
                 break;
             }
-        if (thus.doubleBuffer && !thus.newEvents) {
-            thus.doubleBuffer=false;
+        if (thus.doubleBuffer >0) {
+            thus.doubleBuffer-=1;
             thus.renderer.render();            
             didRender=true;
-        }else if (thus.newEvents || thus.doubleBuffer) {
-            thus.renderer.render();
-            didRender=true;
-            thus.newEvents=false;
-            thus.doubleBuffer=true;
         }
         if (didRender){
             var scene=this.renderer.getScene();            
@@ -409,7 +409,7 @@ Kata.require([
             clda.removeEventListener("loaded",loadedCallback);
 
             thus.mLoaded = true;
-            thus.newEvents=true;
+            gfx.newEvent();
             // If somebody set an animation *while* we were loading, honor that request now
             if (thus.mCurAnimation) {
                 // Clear out first to make sure we actually run it
@@ -434,12 +434,17 @@ Kata.require([
             
             if (hasAnimations(clda)) {
                 gfx.mAnimatingObjects[thus.mID]=thus.mNode;
-                setTimeout(function(){gfx.newEvents=true;},8000);
-                setTimeout(function(){gfx.newEvents=true;},4000);
+                setTimeout(function(){gfx.newEvent();},8000);
+                setTimeout(function(){gfx.newEvent();},4000);
                 
             }
         };
+        var downloadedCallback=function(){
+            gfx.newEvent();
+            clda.removeEventListener("downloadComplete",downloadedCallback);
+        };
         clda.addEventListener("loaded",loadedCallback);
+        clda.addEventListener("downloadComplete",downloadedCallback);
         clda.setDocument(this.mMeshURI);
     
         if (!scale) scale = [1.0, 1.0, 1.0];
@@ -670,7 +675,7 @@ Kata.require([
     GLGEGraphics.prototype.send=function(obj) {
         if (obj.msg!="Custom"){
             this.methodTable[obj.msg].call(this, obj);
-            this.newEvents=true;
+            this.newEvent();
         }
     };
     GLGEGraphics.prototype.setInputCallback=function(cb) {
