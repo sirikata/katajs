@@ -170,6 +170,14 @@ Kata.SST.createBaseDatagramLayer = function(endPoint,router,dispatcher) {
     return (sDatagramLayerMap[id]=new Kata.SST.Impl.BaseDatagramLayer(router,dispatcher));
 };
 
+Kata.SST.getBaseDatagramLayer = function(endPoint) {
+    var id=endPoint.objectId();
+    if (id  in sDatagramLayerMap){
+        return sDatagramLayerMap[id];
+    }
+    return undefined;
+}
+
 /**
  * @param {!Kata.SST.EndPoint} listeningEndPoint The end point that wishes to receive messages from the ObjectMessageDispatcher (must have .uid() and .objectId() functions)
  * @returns whether a baseDatagramLayer to register for was available

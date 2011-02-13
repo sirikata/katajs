@@ -98,6 +98,10 @@ Kata.require([
         return new Kata.ODP.Endpoint(this.mSpace, this.mID, port);
     };
 
+    Kata.RemotePresence.prototype.sstEndpoint = function(port) {
+        return new Kata.SST.EndPoint(this.object(), port);
+    };
+
     /** Get the owning Presence for this RemotePresence. */
     Kata.RemotePresence.prototype.owner = function() {
         return this.mParent;

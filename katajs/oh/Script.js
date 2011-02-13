@@ -113,12 +113,14 @@ Kata.require([
      Kata.Script.prototype.newPresence = function(presence) {
          this.mPresences[presence.space()] = presence;
 
+         // Notify normal script
          var cb = this.mConnectRequests[presence.space()];
          if (cb) {
              delete this.mConnectRequests[presence.space()];
              cb(presence);
          }
 
+         // Notify behaviors
          this.mBehaviors.forEach(function(beh) {
              if (beh.newPresence) beh.newPresence(presence);
          });
@@ -268,6 +270,22 @@ Kata.require([
             src.object(), src.port(),
             dst.object(), dst.port(),
             payload
+        );
+        this._sendHostedObjectMessage(msg);
+    };
+
+    /** Internal helper method to construct and send an ODP message
+     * when it is already in the ObjectMessage protocol format. This
+     * is a bit silly, since we're wasting effort doing encode ->
+     * decode -> move to network thread -> encode -> send, but
+     * currently we get already packaged ODP messages from SST.
+     */
+    Kata.Script.prototype._sendPreparedODPMessage = function(space, odp_msg) {
+        var msg = new Kata.ScriptProtocol.FromScript.SendODPMessage(
+            space,
+            odp_msg.source_object, odp_msg.source_port,
+            odp_msg.dest_object, odp_msg.dest_port,
+            odp_msg.payload
         );
         this._sendHostedObjectMessage(msg);
     };
