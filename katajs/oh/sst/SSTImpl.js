@@ -398,6 +398,25 @@ Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
     
 };
 
+  /**
+    Returns the local endpoint to which this connection is bound.
+
+    @return the local endpoint.
+  */
+Kata.SST.Connection.prototype.localEndPoint=function()  {
+    return this.mLocalEndPoint;
+};
+
+  /**
+    Returns the remote endpoint to which this connection is bound.
+
+    @return the remote endpoint.
+  */
+Kata.SST.Connection.prototype.remoteEndPoint=function()  {
+    return this.mRemoteEndPoint;
+};
+
+
 Kata.SST.Connection.prototype.getContext=function() {
     return this.mDatagramLayer.context();
 };
@@ -1855,8 +1874,8 @@ Kata.SST.Stream.prototype.serviceStream=function() {
           if(buffer.mBuffer.length > this.mTransmitWindowSize){
               Kata.log("Failure: buffer length "+buffer.mBuffer.length+"is greater than trasmitwindow size"+this.mTransmitWindowSize);
           }
-          this.mTransmitWindowSize -= buffer.mBufferLength;
-          this.mNumOutstandingBytes += buffer.mBufferLength;
+          this.mTransmitWindowSize -= buffer.mBuffer.length;
+          this.mNumOutstandingBytes += buffer.mBuffer.length;
         }
         if (sentSomething) {
             setTimeout(Kata.bind(this.serviceStream,this),this.mStreamRTOMilliseconds*2);
@@ -1897,7 +1916,10 @@ Kata.SST.Stream.prototype.resendUnackedPackets=function() {
      var channelToBufferMapEmpty=mapEmpty(this.mChannelToBufferMap);
      if (channelToBufferMapEmpty && !KataDequeEmpty(this.mQueuedBuffers)) {
        var buffer = KataDequeFront(this.mQueuedBuffers);
-
+        var bufferLength=buffer.mBuffer.length;
+         if (bufferLength <= 0){
+             Kata.log("Assertion failed: channelbuffer must have size >0");
+         }
        if (this.mTransmitWindowSize < bufferLength) {
          this.mTransmitWindowSize = bufferLength;
        }
@@ -1976,7 +1998,7 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
 //p        this.updateRTO(channelBuffer.mTransmitTime, channelBuffer.mAckTime);
 //p
 //p        if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes >= 0.5 ) {
-//p          this.mTransmitWindowSize = Math.round(pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
+//p          this.mTransmitWindowSize = Math.round(Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
 //p        }
 //p        else {
 //p          this.mTransmitWindowSize = 0;
@@ -2009,6 +2031,8 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
           Kata.log("Assertion failed: 2^"+streamMsg.window+" <= "+this.mNumOutstandingBytes);
       }
       this.mTransmitWindowSize = Math.round(Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
+        if (this.mTransmitWindowSize > 0 && !KataDequeEmpty(this.mQueuedBuffers))
+            setTimeout(Kata.bind(this.serviceStream,this), 0);
 
       //printf("offset=%d,  mLastContiguousByteReceived=%d, mNextByteExpected=%d\n", (int)offset,  (int)mLastContiguousByteReceived, (int)mNextByteExpected);
 
@@ -2076,14 +2100,16 @@ Kata.SST.Stream.prototype.receiveData=function(streamMsg,
     if (offsetHash in this.mChannelToBufferMap) {
       var buf=this.mChannelToBufferMap[offsetHash];
       var dataOffset = buf.mOffset;
-      this.mNumOutstandingBytes -= buf.mBufferLength;
+      this.mNumOutstandingBytes -= buf.mBuffer.length;
 
       buf.mAckTime = new Date();
 
       this.updateRTO(buf.mTransmitTime, buf.mAckTime);
 
       if ( Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes >= 0.5 ) {
-        this.mTransmitWindowSize = Math.round(pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
+        this.mTransmitWindowSize = Math.round(Math.pow(2.0, streamMsg.window) - this.mNumOutstandingBytes);
+        if (this.mTransmitWindowSize > 0 && !KataDequeEmpty(this.mQueuedBuffers))
+            setTimeout(Kata.bind(this.serviceStream,this), 0);
       }
       else {
         this.mTransmitWindowSize = 0;
