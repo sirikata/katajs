@@ -38,6 +38,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.doubleBuffer=3;
     this.mAnimatingObjects={};
     this.windowVisible=true;
+    this.mDoCaptureCanvas=0;//+1 for each request
     var thus=this;
     {
         var canvas, gl;
@@ -163,9 +164,11 @@ Kata.require([
         var now = parseInt(thus.mCurTime.getTime());
         //mouselook();
         //checkkeys();
+        var anyUpdates=false;
         for (var id in thus.mObjectUpdates) {        
             thus.mObjectUpdates[id].update(thus);
-            thus.newEvent();            
+            thus.newEvent(); 
+            anyUpdates=true;
         }
         var didRender=false;
         if (!thus.doubleBuffer)
@@ -208,7 +211,10 @@ Kata.require([
 	    if (Kata.userRenderCallback) {
 		    Kata.userRenderCallback(thus.mCurTime);
         }
-        
+        if (this.mDoCaptureCanvas&&!anyUpdates) {
+            this.methodTable["CaptureCanvas"].call(this,{});
+            this.mDoCaptureCanvas-=1;
+        }
     };
     /** Static initialization method. */
     GLGEGraphics.initialize = function(scenefile, cb) {
@@ -441,6 +447,7 @@ Kata.require([
         };
         var downloadedCallback=function(){
             gfx.newEvent();
+            gfx._inputCb({msg:"downloadComplete",id:thus.mID});
             clda.removeEventListener("downloadComplete",downloadedCallback);
         };
         clda.addEventListener("loaded",loadedCallback);
@@ -1309,19 +1316,24 @@ Kata.require([
         //destroyX(msg,"IFrame");
     };
     GLGEGraphics.prototype.methodTable["CaptureCanvas"]=function(msg) {
-      try {
-        var msg = {
-            msg: "canvasCapture",
-            img: this.mClientElement.toDataURL()
-        };
+      if (msg.still) {
+          this.mDoCaptureCanvas+=1;
+      } else{          
+          try {
+              var msg = {
+                  msg: "canvasCapture",
+                  img: this.mClientElement.toDataURL()
+              };
+          }
+          catch (e) {
+              var msg = {
+                  msg: "canvasCapture",
+                  img: ""
+              };
+          }
+          this._inputCb(msg);
       }
-      catch (e) {
-        var msg = {
-            msg: "canvasCapture",
-            img: ""
-        };
-      }
-      this._inputCb(msg);
+
     };
 
     // Register as a GraphicsSimulation if possible.
