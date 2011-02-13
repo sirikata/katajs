@@ -1267,12 +1267,31 @@ Kata.require([
                 if (msg.enable) {
                     for (var i=0;i<lights.length;++i){
                         var ligh=lights[(i+index)%lights.length];
+                        if (ligh.id.indexOf("shadowlight")!=-1){
+                            console.log("Turn on "+i+index)
+                            ligh.enableLight();
+                        }
+                        if (ligh.id.indexOf("mainlight")!=-1){
+                            console.log("Turn off "+i+index)
+                            ligh.disableLight();
+                        }else 
                         if (ligh.getType()==GLGE.L_SPOT) {
                             ligh.setCastShadows(true);
                             break;                            
                         }
                     }
                 } else {
+                    for (var j=0;j<lights.length;++j){
+                        var ligh=lights[j];
+                        if (ligh.id.indexOf("shadowlight")!=-1){
+                            console.log("Turn off "+j)
+                            ligh.disableLight();
+                        }
+                        if (ligh.id.indexOf("mainlight")!=-1){
+                            console.log("Turn on "+j)
+                            ligh.enableLight();
+                        }
+                    }
                     if (msg.index!==undefined)
                         lights[index%lights.length].setCastShadows(false);
                     else for (var j=0;j<lights.length;++j){
