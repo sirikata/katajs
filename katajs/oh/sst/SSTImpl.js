@@ -340,7 +340,7 @@ Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
     /**
      * @type {number}
      */
-    this.mRTOMilliseconds=60.125;
+    this.mRTOMilliseconds=5000; // Intentionally > 1 second. Do not change.
     /**
      * @type {boolean}
      */
@@ -1442,7 +1442,7 @@ Kata.SST.Stream = function(parentLSID, conn,
     /**
      * @type {number} milliseconds 
      */
-    this.mStreamRTOMilliseconds=60.125;
+    this.mStreamRTOMilliseconds=5000; // Intentionally > 1 second. Do not change.
     /**
      * @type {number}
      */
