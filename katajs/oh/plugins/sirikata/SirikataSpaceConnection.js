@@ -569,7 +569,16 @@ Kata.require([
                 this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
             }
 
-            // FIXME bounds
+            if (update.bounds) {
+                var loc = {};
+                // Note: currently we expect this to be in milliseconds, not a Date
+                //loc.time = this._toLocalTime(update.bounds.t).getTime();
+                loc.scale = [update.bounds[3],update.bounds[3],update.bounds[3]];
+				if (!loc.time) {
+					loc.time = Kata.now(this.mSpaceURL); // OMG HACK HACK HACK: The correct fix is to add time field to the space server.
+				}
+                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+            }
         }
 
     };
