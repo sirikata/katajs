@@ -347,9 +347,10 @@ Kata.require([
                  this.visual = visual;
              },
 
-             ConnectionFailed : function(space, reason) {
+             ConnectionFailed : function(space, object, reason) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.ConnectionFailed;
                  this.space = space;
+                 this.object = object;
                  this.reason = reason;
              },
 

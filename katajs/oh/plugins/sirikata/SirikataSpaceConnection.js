@@ -309,6 +309,17 @@ Kata.require([
         for(var objid in this.mConnectedObjects) {
             this.mParent.disconnected(objid, this.mSpaceURL);
         }
+        // All objects *trying* to connect get rejected
+        for(var objid in this.mOutstandingConnectRequests) {
+            var id = this._getLocalID(objid);
+            this.mParent.connectionResponse(
+                id, false,
+                {space : this.mSpaceURL, object : objid},
+                {
+                    msg: "Couldn't connect to space server."
+                }
+            );
+        }
         this.mParent.spaceConnectionDisconnected(this);
     };
 
@@ -435,7 +446,10 @@ Kata.require([
                 var id = this._getLocalID(objid);
                 this.mParent.connectionResponse(
                     id, false,
-                    {space : this.mSpaceURL, object : objid}
+                    {space : this.mSpaceURL, object : objid},
+                    {
+                        msg: "Authentication failure."
+                    }
                 );
             }
             else {
@@ -469,7 +483,10 @@ Kata.require([
         this.mParent.connectionResponse(
             id, true,
             {space : this.mSpaceURL, object : objid},
-            connect_info.loc_bounds, connect_info.visual
+            {
+                loc : connect_info.loc_bounds, 
+                vis : connect_info.visual
+            }
         );
 
         // And finally, having given the parent a chance to setup
