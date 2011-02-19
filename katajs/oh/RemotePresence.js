@@ -55,6 +55,10 @@ Kata.require([
          this.mSpace = space;
          this.mID = id;
 
+         this.mScaleSeqNo = undefined;
+         this.mPosSeqNo = undefined;
+         this.mOrientSeqNo = undefined;
+
          this.mLocation = location;
 
          if (vis) {
@@ -219,8 +223,34 @@ Kata.require([
       * updates.
       */
      Kata.RemotePresence.prototype._updateLoc = function (loc, visual) {
-         if (loc)
+         if (loc) {
+             if (loc.seqno) {
+                 // FIXME: These are PROTO.INT64 objects which have no operator<
+                 // Currently it always gets in the first branch of these if statements.
+                 if (!(this.mScaleSeqNo < loc.seqno)){
+                     if (loc.seqno != undefined)
+                         this.mScaleSeqNo = loc.seqno;
+                 }else {
+                     delete loc.scale;
+                 }
+                 if (!(this.mPosSeqNo < loc.seqno)){
+                     if (loc.seqno != undefined)
+                         this.mPosSeqNo = loc.seqno;
+                 }else {
+                     delete loc.pos;
+                     delete loc.vel;
+                 }
+                 if (!(this.mOrientSeqNo < loc.seqno)){
+                     if (loc.seqno != undefined)
+                         this.mOrientSeqNo = loc.seqno;
+                 }else {
+                     delete loc.orient;
+                     delete loc.rotvel;
+                     delete loc.rotaxis;
+                 }
+             }
              this.mLocation = Kata.LocationUpdate(loc,this.mLocation,undefined,Kata.now(this.mSpace));
+         }
 
          if (visual) {
              this.mVisual = visual;

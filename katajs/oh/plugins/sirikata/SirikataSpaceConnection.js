@@ -550,6 +550,7 @@ Kata.require([
             if (update.location) {
                 var loc = {};
                 // Note: currently we expect this to be in milliseconds, not a Date
+                loc.seqno = update.seqno;
                 loc.time = this._toLocalTime(update.location.t).getTime();
                 loc.pos = update.location.position;
                 loc.vel = update.location.velocity;
@@ -560,6 +561,7 @@ Kata.require([
             if (update.orientation) {
                 var loc = {};
                 // Note: currently we expect this to be in milliseconds, not a Date
+                loc.seqno = update.seqno;
                 loc.time = this._toLocalTime(update.orientation.t).getTime();
                 loc.orient = update.orientation.position;
                 var orientvel = new Kata.Quaternion(update.orientation.velocity);
@@ -573,6 +575,7 @@ Kata.require([
                 var loc = {};
                 // Note: currently we expect this to be in milliseconds, not a Date
                 //loc.time = this._toLocalTime(update.bounds.t).getTime();
+                loc.seqno = update.seqno;
                 loc.scale = [update.bounds[3],update.bounds[3],update.bounds[3]];
 				if (!loc.time) {
 					loc.time = Kata.now(this.mSpaceURL); // OMG HACK HACK HACK: The correct fix is to add time field to the space server.

@@ -261,7 +261,7 @@ Kata.require([
                      this.anim = anim;
                      this.up_axis = up;
                      this.center = center;
-                     this.scale = scale;
+                     this.scale = [1,1,1];
                  }
              },
              GFXAttachCamera : function(space, observer, id, canvasId) {
