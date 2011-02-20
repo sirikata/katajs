@@ -39,6 +39,9 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     {
         var canvas, gl;
         canvas = document.createElement('canvas');
+        if (!GLGEGraphics.GLOBAL_KEYBOARD_GRAB) {
+            canvas.setAttribute('tabindex', '0');
+        }
         if (canvas) {
             try {
                 gl = canvas.getContext("experimental-webgl", {});
@@ -60,6 +63,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         if (!canvas) {
             this.webGlCanvasError(parentElement, 'HTMLCanvas');
         }else {
+            canvas.focus();
             var resizeHandler = function() {
                 var width = Math.max(1, canvas.clientWidth);
                 var height = Math.max(1, canvas.clientHeight);
@@ -111,6 +115,19 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     }
     
     setInterval(render, 16);
+    if (GLGEGraphics.GLOBAL_KEYBOARD_GRAB) {
+        document.addEventListener('keydown',
+                                  function (e){thus._keyDown(e);},
+                                  true);
+    }
+    // keyup handler is global, so that if you lose focus while the key is
+    // pressed, you still get the event.
+    document.addEventListener('keyup',
+                              function(e){thus._keyUp(e);},
+                              true);
+    canvas.addEventListener('keydown',
+                            function (e){thus._keyDown(e);},
+                            true);
     canvas.addEventListener('mousedown',
                             function (e){thus._mouseDown(e);},
                             true);
@@ -120,17 +137,14 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     canvas.addEventListener('mousemove',
                             function(e){thus._mouseMove(e);},
                             true);
-    document.addEventListener('keydown',
-                            function (e){thus._keyDown(e);},
-                            true);
-    document.addEventListener('keyup',
-                            function(e){thus._keyUp(e);},
-                            true);
     canvas.addEventListener('mousewheel',                           /// Chrome
                             function(e){thus._scrollWheel(e);},
                             true);
     canvas.addEventListener('DOMMouseScroll',                       /// FF
                             function(e){thus._scrollWheel(e);},
+                            true);
+    canvas.addEventListener('click',
+                            function(e){thus.mClientElement.focus();},
                             true);
     canvas.addEventListener('contextmenu', 
     function(e){
@@ -664,6 +678,10 @@ Kata.require([
         };
         this._keyDownMap[e.keyCode]=-1;
         this._inputCb(msg);
+        if (e.keyCode != 9 && !GLGEGraphics.GLOBAL_KEYBOARD_GRAB) {
+            // don't prevent tab -- refocusing
+            e.preventDefault && e.preventDefault();
+        }
     };
 
     GLGEGraphics.prototype._keyUp = function(e) {
