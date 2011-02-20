@@ -79,7 +79,7 @@ Kata.require([
                  message : Kata.bind(this.receiveODPMessage, this),
                  prox : Kata.bind(this.proxEvent, this),
                  presenceLocUpdate : Kata.bind(this.presenceLocUpdate, this),
-                 scale: loc.scale[0], // FIXME
+                 scale: loc.scale, // FIXME
                  visual: vis
              }
          );

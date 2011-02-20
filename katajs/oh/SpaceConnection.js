@@ -54,7 +54,7 @@ Kata.require([
       * authentication information.
       * @param {string} id identifier for this object, only used internally
       * @param {string} auth authentication information for the object
-      * @param {Number} scale the scale of the object
+      * @param {Location} loc the whereabouts of the object
       * @param {string} vis the visual representation for the object
       * 
       */

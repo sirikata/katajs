@@ -185,10 +185,12 @@ Kata.require([
         if (loc.scale) {
             if (loc.scale.length === undefined) { // single number
                 result.bounds = [0, 0, 0, loc.scale];
+                console.log("IMPROPER BOUNDS: number");
             }
             else if (loc.scale.length == 3) {
                 // FIXME how to deal with differing values?
                 result.bounds = [0, 0, 0, loc.scale[0]];
+                console.log("IMPROPER BOUNDS LENGTH");
             }
             else if (loc.scale.length == 4) {
                 result.bounds = loc.scale;
@@ -593,7 +595,7 @@ Kata.require([
                 // Note: currently we expect this to be in milliseconds, not a Date
                 //loc.time = this._toLocalTime(update.bounds.t).getTime();
                 loc.seqno = update.seqno;
-                loc.scale = [update.bounds[3],update.bounds[3],update.bounds[3]];
+                loc.scale = update.bounds;
 				if (!loc.time) {
 					loc.time = Kata.now(this.mSpaceURL); // OMG HACK HACK HACK: The correct fix is to add time field to the space server.
 				}
@@ -644,8 +646,7 @@ Kata.require([
             properties.loc.orientTime = this._toLocalTime(update.addition[add].orientation.t).getTime();
 
             properties.bounds = update.addition[add].bounds;
-            var scale = update.addition[add].bounds[3];
-            properties.loc.scale = [scale, scale, scale];
+            properties.loc.scale = update.addition[add].bounds;
             // FIXME bounds and scale don't get their own time. Why does Location even have this?
             properties.loc.scaleTime = this._toLocalTime(update.addition[add].location.t).getTime();
 

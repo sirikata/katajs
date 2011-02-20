@@ -96,8 +96,6 @@ Kata.require([
          this.mObjects[ho.getID()] = ho;
 
          // And try to connect
-         var scale = 1.0;
-         if (req.scale) scale = req.scale;
          space_conn.connectObject(ho.getID(), auth, req, req.visual);
      };
 
