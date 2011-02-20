@@ -183,7 +183,7 @@ Kata.require([
          */
         Kata.WebWorker = function (jsFile, clsName, args) {
             if (Kata.bootstrapWorker===undefined)
-                this.mWorker = new Worker(Kata.scriptRoot+"katajs/core/GenericWorker.js");
+                this.mWorker = new Worker(Kata.scriptRoot+"katajs/core/GenericWorker.js"+Kata.queryString);
             else
                 this.mWorker = new Worker(Kata.bootstrapWorker);
             this.mWorker.onerror = getErrorCallback(this);
@@ -192,7 +192,8 @@ Kata.require([
                 Kata.bootstrapWorker===undefined?undefined:Kata.bootstrapWorker,
                 jsFile,
                 clsName,
-                args];
+                args,
+                Kata.queryString];
             this.mChannel = new Kata.WebWorker.Channel(this.mWorker);
         };
         /** Runs the WebWorker. At this point, it is possible to receive a
@@ -203,7 +204,7 @@ Kata.require([
             var initMsg = this.mInitialMessage;
             delete this.mInitialMessage;
             if (!(Kata.bootstrapWorker===undefined))
-                this.mWorker.postMessage(Kata.scriptRoot+"katajs/core/GenericWorker.js");            
+                this.mWorker.postMessage(Kata.scriptRoot+"katajs/core/GenericWorker.js"+Kata.queryString);            
             this.mWorker.postMessage(initMsg);
         };
 

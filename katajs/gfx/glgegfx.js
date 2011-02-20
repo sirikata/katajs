@@ -35,6 +35,10 @@
 var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mCurTime=new Date();
     this.callback=callbackFunction;
+    this.newEvents=true;
+    this.doubleBuffer=false;
+    this.mAnimatingObjects={};
+    this.windowVisible=true;
     var thus=this;
     {
         var canvas, gl;
@@ -73,8 +77,10 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 if (thus.mCamera) thus.mCamera.setAspect(GLGEGraphics.canvasAspect);
                 canvas.sizeInitialized_ = true;
                 thus.displayInfo = {width: canvas.width, height: canvas.height};
+                thus.newEvents=true;
             };
             this.renderer=new GLGE.Renderer(canvas);
+            this.renderer.cullFaces=true;
                 //this.keys=new GLGE.KeyInput();
             
             window.addEventListener('resize', resizeHandler, false);
@@ -102,18 +108,39 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         frameratebuffer = Math.round(((frameratebuffer * 9) + 1000 / (now - lasttime)) / 10);
         //mouselook();
         //checkkeys();
-        thus.renderer.render();
-        lasttime = now;
         for (var id in thus.mObjectUpdates) {        
             thus.mObjectUpdates[id].update(thus);
+            thus.newEvents=true;
             
         }
+        if (!thus.newEvents)
+            for (animObject in thus.mAnimatingObjects) {
+                thus.newEvents=(thus.newEvents||thus.windowVisible);//only make it draw if the window is visible or there are new events
+                break;
+            }
+        if (thus.doubleBuffer && !thus.newEvents) {
+            thus.doubleBuffer=false;
+            thus.renderer.render();            
+        }else if (thus.newEvents || thus.doubleBuffer) {
+            thus.renderer.render();
+            thus.newEvents=false;
+            thus.doubleBuffer=true;
+        }
+        lasttime = now;
 	    if (Kata.userRenderCallback) {
 		    Kata.userRenderCallback(thus.mCurTime);
 	}
         
     }
-    
+    function initialTextureLoadHack(){
+        var anyAnim=false;
+        for (animObject in thus.mAnimatingObjects) {
+            anyAnim=true;
+            break;
+        }
+        thus.doubleBuffer=!anyAnim;//only render once, not the double buffer render of an event
+    }
+    setInterval(initialTextureLoadHack,533);
     setInterval(render, 16);
     if (GLGEGraphics.GLOBAL_KEYBOARD_GRAB) {
         document.addEventListener('keydown',
@@ -128,6 +155,13 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     canvas.addEventListener('keydown',
                             function (e){thus._keyDown(e);},
                             true);
+    
+    window.addEventListener('focus',
+                            function (e){thus.windowVisible=true;},
+                            false);
+    window.addEventListener('blur',
+                            function (e){thus.windowVisible=false;},
+                            false);
     canvas.addEventListener('mousedown',
                             function (e){thus._mouseDown(e);},
                             true);
@@ -232,6 +266,8 @@ Kata.require([
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
+        if (this.mID in gfx.mAnimatingObjects)
+            delete gfx.mAnimatingObjects[thus.mID];
         var loadedCallback;
         loadedCallback=function(){
             var bv=clda.getBoundingVolume(true);
@@ -249,13 +285,34 @@ Kata.require([
             clda.removeEventListener("loaded",loadedCallback);
 
             thus.mLoaded = true;
-
+            thus.newEvents=true;
             // If somebody set an animation *while* we were loading, honor that request now
             if (thus.mCurAnimation) {
                 // Clear out first to make sure we actually run it
                 var anim = thus.mCurAnimation;
                 thus.mCurAnimation = "";
                 thus.animate(anim);
+            }
+            function hasAnimations(node) {
+                if (node.getAnimation()){
+                    return true;
+                }
+                var child;
+                var i;
+                if (node.children)
+                    for (i=0;i<node.children.length;++i){
+                        child=node.children[i];
+                        if (hasAnimations(child))
+                            return true;
+                    }
+                return false;
+            }
+            
+            if (hasAnimations(clda)) {
+                gfx.mAnimatingObjects[thus.mID]=thus.mNode;
+                setTimeout(function(){gfx.newEvents=true;},8000);
+                setTimeout(function(){gfx.newEvents=true;},4000);
+                
             }
         };
         clda.addEventListener("loaded",loadedCallback);
@@ -480,8 +537,10 @@ Kata.require([
     
     
     GLGEGraphics.prototype.send=function(obj) {
-        if (obj.msg!="Custom")
+        if (obj.msg!="Custom"){
             this.methodTable[obj.msg].call(this, obj);
+            this.newEvents=true;
+        }
     };
     GLGEGraphics.prototype.setInputCallback=function(cb) {
         this._inputCb = cb;
@@ -601,6 +660,8 @@ Kata.require([
             this._inputCb(ev);
         }
         // Prevent selecting.
+        window.focus();
+        e.target.focus();
         e.preventDefault && e.preventDefault();
     };
     
@@ -864,6 +925,9 @@ Kata.require([
             vwObject.label(msg.label, msg.offset);
     };
     GLGEGraphics.prototype.methodTable["Destroy"]=function(msg) {
+        if (msg.id in this.mAnimatingObjects)
+            delete this.mAnimatingObjects[msg.id];
+
         if (msg.id in this.mObjects) {
             var vwObject=this.mObjects[msg.id];
             var children=vwObject.mNode.getChildren();
@@ -900,12 +964,13 @@ Kata.require([
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
             vwObject.createMesh(this, msg.mesh, msg.anim, msg.center?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale, msg.bounds);
-            if (msg.up_axis == "Z_UP") {
-                this.moveTo(vwObject, {
-                    // FIXME: needs to be permanent, so future setOrientations will be relative to this
-                    orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
-                });
-            }
+            /// old cruft code, disabling
+            //if (msg.up_axis == "Z_UP") {
+            //    this.moveTo(vwObject, {
+            //        // FIXME: needs to be permanent, so future setOrientations will be relative to this
+            //        orient: [-0.7071067805519557, 0, 0, 0.7071067818211394]
+            //    });
+            //}
             vwObject.update(this);
         }
     };
@@ -998,11 +1063,19 @@ Kata.require([
         //destroyX(msg,"IFrame");
     };
     GLGEGraphics.prototype.methodTable["CaptureCanvas"]=function(msg) {
+      try {
         var msg = {
             msg: "canvasCapture",
             img: this.mClientElement.toDataURL()
         };
-        this._inputCb(msg);
+      }
+      catch (e) {
+        var msg = {
+            msg: "canvasCapture",
+            img: ""
+        };
+      }
+      this._inputCb(msg);
     };
 
     // Register as a GraphicsSimulation if possible.

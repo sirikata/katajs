@@ -40,8 +40,9 @@ self.onmessage = function (ev) {
     // Bootstrapping root of source tree.
     // This may not be necessary if importscripts uses relative paths.
     var scriptroot = data[0];
+    var queryString = data[5] || "";
     try {
-        importScripts(scriptroot+"katajs.compiled.js");
+        importScripts(scriptroot+"katajs.compiled.js"+queryString);
     } catch (e) {
         try {
             console.log("Exception loading katajs.compiled.js", e);
@@ -49,12 +50,13 @@ self.onmessage = function (ev) {
     }
     if (typeof(Kata)==="undefined") {
         try {
-            importScripts(scriptroot+"katajs/core/Core.js");
+            importScripts(scriptroot+"katajs/core/Core.js"+queryString);
         } catch (e) {
             throw "Failed to import katajs/core/Core.js at scriptroot "+scriptroot+": "+e;
         }
     }
     Kata.scriptRoot = scriptroot;
+    Kata.queryString = queryString;
     Kata.bootstrapWorker=data[1];
     Kata.evalInclude("katajs/core/WebWorker.js");
     // Fetch classname to instanciate and arguments.

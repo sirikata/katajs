@@ -49,7 +49,8 @@ if (typeof(JSON) == "undefined") {JSON = {};}
 
 /** @define {string} Root directory of scripts. Inferred by any "script"
   tags pointing to Core.js. */
-Kata.scriptRoot="";
+if (!Kata.scriptRoot) { Kata.scriptRoot=""; }
+if (!Kata.queryString) { Kata.queryString=""; }
 (function() {
     var includedscripts = Kata.closureIncluded || {"katajs/core/Core.js":true};
     var loadedDeps = {"katajs/core/Core.js":true};
@@ -196,7 +197,7 @@ Kata.scriptRoot="";
             runNewCurrentScript(scriptfile, 
                 function() {
                     try {
-                        importScripts(Kata.scriptRoot+scriptfile);
+                        importScripts(Kata.scriptRoot+scriptfile+Kata.queryString);
                     } catch (e) {
                         Kata.log("Error in importScripts("+Kata.scriptRoot+scriptfile+")");
                         throw e;
@@ -234,7 +235,7 @@ Kata.scriptRoot="";
             var scriptTag, textNode;
 
             scriptTag = document.createElement("script");
-            scriptTag.src = Kata.scriptRoot+scriptfile;
+            scriptTag.src = Kata.scriptRoot+scriptfile+Kata.queryString;
             scriptTag.type = "text/javascript";
 
             var scriptContent = function(){
