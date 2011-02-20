@@ -98,7 +98,7 @@ Kata._helperQuatFromAxisAngle=function(aaxis,aangle) {
  * @param {number} deltaTime the number of seconds since the starting quaternion was measured
  * @return {Array} The quaternion extrapolated deltaTime seconds from a
  */
-Kata._helperLocationExtrapolateQuaternion=function(a,avel,aaxis,deltaTime){
+Kata.extrapolateQuaternion=function(a,avel,aaxis,deltaTime){
     var aangle=avel*deltaTime;
     var b=Kata._helperQuatFromAxisAngle(aaxis,aangle);
     var aX = a[0];
@@ -168,18 +168,18 @@ Kata._helperLocationInterpolate3vec=function(a,adel,atime,b,bdel,btime,curtime) 
 Kata._helperLocationInterpolateQuaternion=function(a,avel,aaxis,atime,b,bvel,baxis,btime,curtime) {
     var secondsPassed=Kata.deltaTime(curtime,atime);
     if (secondsPassed>0) {
-        return Kata._helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
+        return Kata.extrapolateQuaternion(a,avel,aaxis,secondsPassed);
     }
     var sampleDelta=Kata.deltaTime(atime,btime);
     if (sampleDelta==0) {
-        return Kata._helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
+        return Kata.extrapolateQuaternion(a,avel,aaxis,secondsPassed);
     }
     secondsPassed+=sampleDelta;
     if (secondsPassed<0) {
         return b;
     }
 
-    b=Kata._helperLocationExtrapolateQuaternion(b,bvel,baxis,secondsPassed);
+    b=Kata.extrapolateQuaternion(b,bvel,baxis,secondsPassed);
     var interp=secondsPassed/sampleDelta;
     var ointerp=1.0-interp;
     var x=interp*a[0]+ointerp*b[0];
@@ -260,7 +260,7 @@ Kata.LocationExtrapolate=function(location,time) {
         scaleTime:time,
         pos:Kata._helperLocationExtrapolate3vec(location.pos,location.vel,Kata.deltaTime(time,location.posTime)),
         posTime:time,
-        orient:Kata._helperLocationExtrapolateQuaternion(location.orient,location.rotvel,location.rotaxis,Kata.deltaTime(time,location.orientTime)),
+        orient:Kata.extrapolateQuaternion(location.orient,location.rotvel,location.rotaxis,Kata.deltaTime(time,location.orientTime)),
         orientTime:time,
         rotvel:location.rotvel,
         rotaxis:location.rotaxis,
@@ -330,7 +330,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         if (msg.orient!==undefined){
             if (msg.rotvel !== undefined && msg.rotaxis !== undefined && msg.orientTime !== undefined) {
                 destination.orient
-                    =Kata._helperLocationExtrapolateQuaternion(msg.orient,
+                    =Kata.extrapolateQuaternion(msg.orient,
                                                                msg.rotvel,
                                                                msg.rotaxis,
                                                                Kata.deltaTime(t,
@@ -440,10 +440,10 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
         //curLocation.orient=prevLocation.orient;
         //curLocation.orientTime=prevLocation.orientTime;
         if (msg.rotvel !== undefined && msg.rotaxis !== undefined) {
-            //curLocation.orient=Kata._helperLocationExtrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
+            //curLocation.orient=Kata.extrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
             //curLocation.orientTime=curDate;
 
-            retval.orient=Kata._helperLocationExtrapolateQuaternion(curLocation.orient,curLocation.rotvel,curLocation.rotaxis,Kata.deltaTime(msg.time,curLocation.orientTime));
+            retval.orient=Kata.extrapolateQuaternion(curLocation.orient,curLocation.rotvel,curLocation.rotaxis,Kata.deltaTime(msg.time,curLocation.orientTime));
             retval.orientTime=msg.time;
         }
     }
