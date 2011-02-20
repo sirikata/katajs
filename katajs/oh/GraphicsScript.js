@@ -215,14 +215,14 @@ Kata.require([
          }
          function similarPos(a,b){
              for (var i=0;i<3;++i){
-                 if (!(a[i]-b[i]<.001))
+                 if (!(Math.abs(a[i]-b[i])<.001))
                      return false;
              }
              return true;
          }
          function similarOrient(a,b){
              for (var i=0;i<4;++i){
-                 if (!(a[i]-b[i]<.0001))
+                 if (!(Math.abs(a[i]-b[i])<.0001))
                      return false;
              }
              return true;
