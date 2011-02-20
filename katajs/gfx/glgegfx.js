@@ -118,6 +118,8 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 thus.newEvents=(thus.newEvents||thus.windowVisible);//only make it draw if the window is visible or there are new events
                 break;
             }
+        if (!thus.windowVisible)
+            thus.newEvents=false;//HACK: force no updates when not focused
         if (thus.doubleBuffer && !thus.newEvents) {
             thus.doubleBuffer=false;
             thus.renderer.render();            
