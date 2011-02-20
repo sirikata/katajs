@@ -278,9 +278,9 @@ Kata.require([
             clda.setScaleX(maxv?thus.mBounds[3]*colladaUnitRescale:1);
             clda.setScaleY(maxv?thus.mBounds[3]*colladaUnitRescale:1);
             clda.setScaleZ(maxv?thus.mBounds[3]*colladaUnitRescale:1);
-            clda.setLocX(thus.mBounds[0]-(thus.bv.center[0])*colladaUnitRescale);
-            clda.setLocY(thus.mBounds[1]-(thus.bv.center[1])*colladaUnitRescale);
-            clda.setLocZ(thus.mBounds[2]-(thus.bv.center[2])*colladaUnitRescale);            
+            clda.setLocX(thus.mBounds[0]-(thus.bv.center[0]*colladaUnitRescale)*thus.mBounds[3]);
+            clda.setLocY(thus.mBounds[1]-(thus.bv.center[1]*colladaUnitRescale)*thus.mBounds[3]);
+            clda.setLocZ(thus.mBounds[2]-(thus.bv.center[2]*colladaUnitRescale)*thus.mBounds[3]);
             gfx._inputCb({msg:"loaded",id:thus.mID});
             clda.removeEventListener("loaded",loadedCallback);
 
@@ -393,9 +393,12 @@ Kata.require([
         if (this.mMesh) {
             this.mMesh.setScale(l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale);
             if (this.bv) {
-                this.mMesh.setLocX(l.scale[0]-(this.bv.center[0])*colladaUnitRescale);
-                this.mMesh.setLocY(l.scale[1]-(this.bv.center[1])*colladaUnitRescale);
-                this.mMesh.setLocZ(l.scale[2]-(this.bv.center[2])*colladaUnitRescale);
+                var locx=(l.scale[0]-(this.bv.center[0]*colladaUnitRescale)*l.scale[3]);
+                var locy=(l.scale[1]-(this.bv.center[1]*colladaUnitRescale)*l.scale[3]);
+                var locz=(l.scale[2]-(this.bv.center[2]*colladaUnitRescale)*l.scale[3]);
+                this.mMesh.setLocX(locx);
+                this.mMesh.setLocY(locy);
+                this.mMesh.setLocZ(locz);
             }else {
                 this.mMesh.setLocX(l.scale[0]);
                 this.mMesh.setLocY(l.scale[1]);
