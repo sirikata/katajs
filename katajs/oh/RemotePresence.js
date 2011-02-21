@@ -65,7 +65,6 @@ Kata.require([
              this.rMesh = vis.mesh;
              this.rAnim = vis.anim;
              this.rUpAxis = vis.up_axis;
-             this.rCenter = vis.center;
          }
 
          // Indicates whether we're tracking this object, i.e. if a subscription was submitted.
@@ -156,7 +155,7 @@ Kata.require([
      };
      /** Get the current estimate of this object's rotational axis. */
      Kata.RemotePresence.prototype.rotationalAxis = function() {
-         return this.mLocation.rotaxis.concat();//FIXME drh do interpolation?
+         return this.mLocation.rotaxis.concat();
      };
      /** Get the current estimate of this object's rotational velocity. */
      Kata.RemotePresence.prototype.rotationalVelocity = function() {
@@ -164,7 +163,7 @@ Kata.require([
      };
      /** Get the current estimate of this object's scale. */
      Kata.RemotePresence.prototype.scale = function() {
-         return this.mLocation.scale.concat();//FIXME drh do interpolation?
+         return this.mLocation.scale.concat();
      };
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.location = function() {

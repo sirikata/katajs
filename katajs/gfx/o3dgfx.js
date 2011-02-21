@@ -295,7 +295,9 @@ VWObject.prototype.updateTransformation = function(graphics) {
 //    this.mNode.translate(l.pos[0],l.pos[1],l.pos[2]);
 	var pos = this.mCurLocation.pos;
     this.mNode.translate(l.pos[0],l.pos[1],l.pos[2]);
-    this.mNode.scale(l.scale[0],l.scale[1],l.scale[2]);
+    this.mNode.scale(l.scale[3],l.scale[3],l.scale[3]);
+    if (l.scale[0]!=0||l.scale[1]!=0||l.scale[2]!=0)
+        console.log("O3D does not handle offset on scale node");
     this.mNode.quaternionRotate(l.orient);
     if (this.stationary(graphics.mCurTime)) {
         //console.log("Stationary ",this.mID,l,l.pos[0],l.pos[1],l.pos[2]);

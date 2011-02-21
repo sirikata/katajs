@@ -241,6 +241,7 @@ Kata.require([
         //this.mPack = pack;
         this.mNode = new GLGE.Group(id);
         this.mMesh = null;
+        this.mBounds=[0,0,0,1];
         this.mLabel = null;
         this.mCurLocation=Kata.LocationIdentity(new Date(0));
         this.mPrevLocation=Kata.LocationIdentity(new Date(0));
@@ -251,21 +252,32 @@ Kata.require([
 
         this.mLoaded = false;
     };
-
+    VWObject.prototype.getMeshAspectRatio = function () {
+        if (!this.bv) return [0,0,0];
+        var retval=[this.bv.limits[1]-this.bv.limits[0],
+                    this.bv.limits[3]-this.bv.limits[2],
+                    this.bv.limits[5]-this.bv.limits[4]];
+        retval[0]/=this.bv.radius*2;
+        retval[1]/=this.bv.radius*2;
+        retval[2]/=this.bv.radius*2;
+        return retval;
+    };
+    VWObject.prototype.queryMeshAspectRatio = function (gfx) {
+        gfx._inputCb({msg:"MeshAspectRatio",id:this.mID,aspect:this.getMeshAspectRatio()});
+    };
     /// note: animation ignored
-    VWObject.prototype.createMesh = function(gfx, path, animation, offset, scale) {
+    VWObject.prototype.createMesh = function(gfx, path, animation, bounds) {
         if (path == null) {
             throw "loadScene with null path";
         }
         if (path.lastIndexOf(".dae")==-1) {
             path += ".dae";            
         }
-        if (offset === undefined || offset === null)
-            offset = [0, 0, 0];
         console.log("Loading: " + path);
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
+        this.mLoading=true;
         if (this.mID in gfx.mAnimatingObjects)
             delete gfx.mAnimatingObjects[thus.mID];
         var loadedCallback;
@@ -273,14 +285,15 @@ Kata.require([
             var bv=clda.getBoundingVolume(true);
             var maxv=bv.radius;
             var colladaUnitRescale=1/maxv;
+            
             //console.log("Scaling by "+colladaUnitRescale+" instead of "+scale);
-            //console.log("Offsetting by -["+bv.center+"] instead of "+offset);
-            clda.setScaleX(maxv?scale[0]*colladaUnitRescale:1);
-            clda.setScaleY(maxv?scale[1]*colladaUnitRescale:1);
-            clda.setScaleZ(maxv?scale[2]*colladaUnitRescale:1);
-            clda.setLocX(offset[0]-(bv.center[0])*colladaUnitRescale);
-            clda.setLocY(offset[1]-(bv.center[1])*colladaUnitRescale);
-            clda.setLocZ(offset[2]-(bv.center[2])*colladaUnitRescale);            
+            //console.log("Offsetting by -["+thus.bv.center+"] instead of "+offset);
+            clda.setScaleX(maxv?thus.mBounds[3]*colladaUnitRescale:1);
+            clda.setScaleY(maxv?thus.mBounds[3]*colladaUnitRescale:1);
+            clda.setScaleZ(maxv?thus.mBounds[3]*colladaUnitRescale:1);
+            clda.setLocX(thus.mBounds[0]-(bv.center[0]*colladaUnitRescale)*thus.mBounds[3]);
+            clda.setLocY(thus.mBounds[1]-(bv.center[1]*colladaUnitRescale)*thus.mBounds[3]);
+            clda.setLocZ(thus.mBounds[2]-(bv.center[2]*colladaUnitRescale)*thus.mBounds[3]);
             gfx._inputCb({msg:"loaded",id:thus.mID});
             clda.removeEventListener("loaded",loadedCallback);
 
@@ -307,21 +320,34 @@ Kata.require([
                     }
                 return false;
             }
-            
-            if (hasAnimations(clda)) {
-                gfx.mAnimatingObjects[thus.mID]=thus.mNode;
-                setTimeout(function(){gfx.newEvents=true;},8000);
-                setTimeout(function(){gfx.newEvents=true;},4000);
-                
+            if (thus.mMesh==clda) {
+                thus.bv=bv;
+                delete thus.mLoading;
+                           
+                if (hasAnimations(clda)) {
+                    gfx.mAnimatingObjects[thus.mID]=thus.mNode;
+                    setTimeout(function(){gfx.newEvents=true;},8000);
+                    setTimeout(function(){gfx.newEvents=true;},4000);
+                    
+                }
+                if (thus.mQueryAspectCount){
+                    for (var i=0;i<thus.mQueryAspectCount;++i) {
+                        thus.queryMeshAspectRatio(gfx);
+                    }
+                    delete thus.mQueryAspectCount;                    
+                }
+            }else if (thus.mQueryAspectCount && thus.mQueryAspectCount > 1){
+                thus.queryMeshAspectRatio(gfx);
+                thus.mQueryAspectCount--;//update it once before the load so that we at least get some updates through if the mesh constantly changes
             }
         };
         clda.addEventListener("loaded",loadedCallback);
         clda.setDocument(this.mMeshURI);
     
-        if (!scale) scale = [1.0, 1.0, 1.0];
-        clda.setScaleX(scale[0]);
-        clda.setScaleY(scale[1]);
-        clda.setScaleZ(scale[2]);
+        
+        clda.setScaleX(bounds[3]);
+        clda.setScaleY(bounds[3]);
+        clda.setScaleZ(bounds[3]);
         /// danx0r: removing this hack, it's now dealt with in glge etc
         /*
         clda.setRotMatrix(GLGE.Mat4([1, 0 , 0,  0,
@@ -329,11 +355,10 @@ Kata.require([
 					                 0, -1, 0, 0,
 					                 0, 0, 0, 1]));
         */
-        if (offset) {
-            clda.setLocX(offset[0]);
-            clda.setLocY(offset[1]);
-            clda.setLocZ(offset[2]);            
-        }
+        clda.setLocX(bounds[0]);
+        clda.setLocY(bounds[1]);
+        clda.setLocZ(bounds[2]);
+        this.mBounds=bounds;
         this.mNode.addCollada(clda);
         this.mMesh = clda;
         return clda;
@@ -389,9 +414,25 @@ Kata.require([
         var l=Kata.LocationExtrapolate(this.mCurLocation, graphics.mCurTime);
         this.mNode.setLoc(l.pos[0],l.pos[1],l.pos[2]);
         // Setting scale on cameras does wonky things to lighting
-        if (!this.mCamera) {
-            this.mNode.setScale(l.scale[0],l.scale[1],l.scale[2]);
+        //if (!this.mCamera) {
+        var colladaUnitRescale=this.bv?1/this.bv.radius:1.0;
+        if (this.mMesh) {
+            this.mMesh.setScale(l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale);
+            if (this.bv) {
+                var locx=(l.scale[0]-(this.bv.center[0]*colladaUnitRescale)*l.scale[3]);
+                var locy=(l.scale[1]-(this.bv.center[1]*colladaUnitRescale)*l.scale[3]);
+                var locz=(l.scale[2]-(this.bv.center[2]*colladaUnitRescale)*l.scale[3]);
+                this.mMesh.setLocX(locx);
+                this.mMesh.setLocY(locy);
+                this.mMesh.setLocZ(locz);
+            }else {
+                this.mMesh.setLocX(l.scale[0]);
+                this.mMesh.setLocY(l.scale[1]);
+                this.mMesh.setLocZ(l.scale[2]);
+            }
         }
+        this.mBounds=l.scale;        
+        //}
         this.mNode.setQuat(l.orient[0],l.orient[1],l.orient[2],l.orient[3]);
         if (this.stationary(graphics.mCurTime)) {
             graphics.removeObjectUpdate(this);        
@@ -415,8 +456,10 @@ Kata.require([
     };
     VWObject.prototype.animate = function(anim_name) {
         var mesh = this.mMesh;
-        if (!mesh)
+        if (!mesh) {
             Kata.warn("Couldn't handle animate request.");
+            return;            
+        }
 
         if (anim_name == this.mCurAnimation) return;
 
@@ -963,7 +1006,7 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Mesh"]=function(msg) {
         if (msg.mesh && msg.id in this.mObjects) {
             var vwObject = this.mObjects[msg.id];
-            vwObject.createMesh(this, msg.mesh, msg.anim, msg.center?[-msg.center[0],-msg.center[1],-msg.center[2]]:null, msg.scale, msg.bounds);
+            vwObject.createMesh(this, msg.mesh, msg.anim, msg.scale);
             /// old cruft code, disabling
             //if (msg.up_axis == "Z_UP") {
             //    this.moveTo(vwObject, {
@@ -974,6 +1017,17 @@ Kata.require([
             vwObject.update(this);
         }
     };
+    GLGEGraphics.prototype.methodTable["QueryMeshAspectRatio"]=function(msg){
+        var vwObject=this.mObjects[msg.id];
+        if (vwObject.mLoading){
+            if (vwObject.mQueryAspectCount){
+                vwObject.mQueryAspectCount++;
+            }else vwObject.mQueryAspectCount=1;
+        }else {
+            vwObject.queryMeshAspectRatio(this);
+        }
+    };
+
     GLGEGraphics.prototype.methodTable["DestroyMesh"]=function(msg) {
         if (msg.id in this.mObjects) {
             var vwObject=this.mObjects[msg.id];

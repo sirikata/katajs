@@ -73,11 +73,15 @@ Kata.require([
      };
      Kata.extend(Kata.GraphicsScript, SUPER);
 
-      Kata.GraphicsScript.prototype._handleGUIMessage = function (channel, data) {
-          if (data.msg=="loaded")
-              this.cameraPeriodicUpdate(true);
-      };
-
+     Kata.GraphicsScript.prototype._handleGUIMessage = function (channel, data) {
+         if (data.msg=="loaded")
+             this.cameraPeriodicUpdate(true);
+     };
+     
+     Kata.GraphicsScript.prototype.queryMeshAspectRatio = function(presence, remotePresence) {
+         var msg = new Kata.ScriptProtocol.FromScript.GFXQueryMeshAspectRatio(presence.space(),presence.id(),remotePresence);
+         this._sendHostedObjectMessage(msg);
+     };
      /**
       * Enables graphics on the main canvas viewport. 
       * @param {Kata.Presence} presence The presence that graphics should be enabled for
