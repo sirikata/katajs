@@ -336,7 +336,13 @@ Kata.require([
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setScale = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {scale:val.concat(), time:Kata.now(this.mSpace)});
+         var time=Kata.now(this.mSpace);
+         var update = {
+             scale:val.concat(),
+             time:time
+         };
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {scale:val.concat(), time:time});
+         this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, time);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {
