@@ -227,20 +227,32 @@ Kata.require([
              if (loc.seqno) {
                  // FIXME: These are PROTO.INT64 objects which have no operator<
                  // Currently it always gets in the first branch of these if statements.
-                 if (!(this.mScaleSeqNo < loc.seqno)){
+                 if (this.mScaleSeqNo==undefined
+                     || loc.seqno==undefined
+                     || !PROTO.I64.prototype.unsigned_less.call(this.mScaleSeqNo,
+                                                          loc.seqno)) {
+
                      if (loc.seqno != undefined)
                          this.mScaleSeqNo = loc.seqno;
                  }else {
                      delete loc.scale;
                  }
-                 if (!(this.mPosSeqNo < loc.seqno)){
+                 if (this.mPosSeqNo==undefined
+                     || loc.seqno==undefined
+                     || !PROTO.I64.prototype.unsigned_less.call(this.mPosSeqNo,
+                                                          loc.seqno)) {
+
                      if (loc.seqno != undefined)
                          this.mPosSeqNo = loc.seqno;
                  }else {
                      delete loc.pos;
                      delete loc.vel;
                  }
-                 if (!(this.mOrientSeqNo < loc.seqno)){
+                 if (this.mOrientSeqNo==undefined
+                     || loc.seqno==undefined
+                     || !PROTO.I64.prototype.unsigned_less.call(this.mOrientSeqNo,
+                                                          loc.seqno)) {
+
                      if (loc.seqno != undefined)
                          this.mOrientSeqNo = loc.seqno;
                  }else {
