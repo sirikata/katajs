@@ -193,6 +193,13 @@ Kata.require([
 				 this.spaceid = this.space;
                  Kata.LocationCopyUnifyTime(remotePresence.mLocation,this);
              },
+             GFXQueryMeshAspectRatio : function (space, observer, remotePresence ){
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="QueryMeshAspectRatio";
+                 this.space = space+observer;
+				 this.spaceid = this.space;                 
+                 this.id = remotePresence.id();
+             },
              GFXCustom : function(space, observer, data) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
                  this.msg="Custom";
