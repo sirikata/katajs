@@ -32,6 +32,7 @@
 
 
 Kata.require([
+    'externals/protojs/protobuf.js',
     'katajs/core/Time.js',
     'katajs/oh/odp/Endpoint.js'
 ], function() {
