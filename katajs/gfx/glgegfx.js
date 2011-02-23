@@ -283,7 +283,6 @@ Kata.require([
 		    //}
 	    }
 	    if(!boundingVolume) boundingVolume=new GLGE.BoundingVolume(0,0,0,0,0,0);
-        console.log("RETURNING "+JSON.stringify(boundingVolume))
 	    return boundingVolume;
     };
 
@@ -305,7 +304,6 @@ Kata.require([
 			}
 		}
 		if(!boundingVolume) boundingVolume=new GLGE.BoundingVolume(0,0,0,0,0,0);
-        console.log("REOURNING "+JSON.stringify(boundingVolume))
         return boundingVolume;
     };
 
@@ -360,7 +358,6 @@ Kata.require([
                 }
             }
         }
-        console.log("REMURNING "+JSON.stringify(new GLGE.BoundingVolume(minX,maxX,minY,maxY,minZ,maxZ)));
 		return new GLGE.BoundingVolume(minX,maxX,minY,maxY,minZ,maxZ);
 	}
 

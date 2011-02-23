@@ -292,12 +292,20 @@ Kata.require([
 
     /** Handle an received ODP message. */
     Kata.Script.prototype._handleReceiveODPMessage = function(channel, msg) {
-        // Reconstruct and then delegate to ODP.Service.
-        this._deliverODPMessage(
-            new Kata.ODP.Endpoint(msg.space, msg.source_object, msg.source_port),
-            new Kata.ODP.Endpoint(msg.space, msg.dest_object, msg.dest_port),
-            msg.payload
-        );
+        var presence = this.mPresences[msg.space];
+        var delivered_sst=false;
+        if (presence&&presence.ODPDispatcher.dispatchMessage(msg)) {
+            delivered_sst=true;
+            //Kata.warn("Delivered SST worker-wise"); 
+        }
+        if (!delivered_sst) {
+            // Reconstruct and then delegate to ODP.Service.
+            this._deliverODPMessage(
+                new Kata.ODP.Endpoint(msg.space, msg.source_object, msg.source_port),
+                new Kata.ODP.Endpoint(msg.space, msg.dest_object, msg.dest_port),
+                msg.payload
+            );
+        }
     };
 
      Kata.Script.prototype._handlePresenceLocUpdate = function(channel, msg) {
