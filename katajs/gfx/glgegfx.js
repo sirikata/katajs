@@ -74,6 +74,12 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                 canvas.sizeInitialized_ = true;
                 thus.displayInfo = {width: canvas.width, height: canvas.height};
                 thus.newEvent();
+
+                for (var spaceRoot in thus.mSpaceRoots) {
+                    var msg={};
+                    msg.spaceid=spaceRoot;
+                    thus.reloadBackground(thus.mSpaceRoots[spaceRoot]);
+                }
             };
             this.renderer=new GLGE.Renderer(canvas);
             this.renderer.cullFaces=true;
@@ -1163,6 +1169,37 @@ Kata.require([
             }
         }
     };
+    GLGEGraphics.prototype.reloadBackground=function(spaceRoot) {
+        var filter=spaceRoot.mFilter;
+        var filterTextures=spaceRoot.mFilterTextures;
+        var filterTextureNames=spaceRoot.mFilterTextureNames;
+        filterTextures=(spaceRoot.mFilterTextures);
+        filterTextureNames=(spaceRoot.mFilterTextureNames);
+        filter= new GLGE.Filter2d();
+        spaceRoot.mScene.setFilter2d(filter);
+        if (spaceRoot.mSunBeams) {
+            filter.addPass(layer0_glsl,1024,1024);
+            filter.addPass(layer1_glsl,1024,1024);
+            filter.addPass(layer2_glsl);
+        }else {
+            filter.addPass(layer0_glsl,1024,1024);
+            filter.addPass(layer2_no_sunbeams_glsl);                
+        }
+        var i;
+        var memoizedTextures={};
+        for (i=0;i<filterTextureNames.length;++i) {
+            filter.addTexture(filterTextures[i]);
+        }
+        if(!spaceRoot.mFilter) {
+            spaceRoot.mFilter=null;
+            spaceRoot.mScene.setFilter2d(null);
+            spaceRoot.mScene.setBackgroundColor("#222");
+        }else {
+            spaceRoot.mFilter=filter;
+            spaceRoot.mScene.setBackgroundColor("#f0f");           
+        }
+        
+    };
     GLGEGraphics.prototype.methodTable["Background"]=function(msg) {
         var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
         var filter=spaceRoot.mFilter;
@@ -1220,6 +1257,7 @@ Kata.require([
             spaceRoot.mScene.setBackgroundColor("#222");
         }else {
             spaceRoot.mScene.setBackgroundColor("#f0f");           
+            spaceRoot.mFilter=filter;
         }
         
     };
