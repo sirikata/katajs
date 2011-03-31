@@ -32,7 +32,8 @@
 
 
 Kata.require([
-    'katajs/oh/RemotePresence.js'
+    'katajs/oh/RemotePresence.js',
+    'katajs/oh/sst/SSTImpl.js'
 ], function() {
 
      var SUPER=Kata.RemotePresence.prototype;
@@ -95,12 +96,45 @@ Kata.require([
          // update. This can happen since loc subscriptions and prox
          // updates are on different streams.
          this.mOrphanLocUpdates = {};
+
+         // Set up SST
+         // FIXME SST requiring a full endpoint here is unnecessary, it only uses the objid for indexing
+         var sst_ep = this.sstEndpoint(0);
+         var bdl = Kata.SST.getBaseDatagramLayer(sst_ep);
+         if (!bdl) {
+             // FIXME we're not doing anything with the dispatcher to
+             // use it, so this path isn't working. We need to trap
+             // received ODP messages and try to dispatch them for SST
+             this.ODPRouter = new this.ObjectMessageRouter(this);
+             this.ODPDispatcher = new Kata.SST.ObjectMessageDispatcher();
+             // And the BaseDatagramLayer...
+             this.ODPBaseDatagramLayer = Kata.SST.createBaseDatagramLayer(
+                 sst_ep, this.ODPRouter, this.ODPDispatcher
+             );
+         }
+         else {
+             this.ODPBaseDatagramLayer = bdl;
+         }
      };
      Kata.extend(Kata.Presence, SUPER);
 
     Kata.Presence.prototype.bindODPPort = function(port) {
         return this.mScript.bindODPPort(this.mSpace, this.mID, port);
     };
+
+    // ObjectMessageRouter for SST support
+    Kata.Presence.prototype.ObjectMessageRouter = function(parent) {
+        this.mParent = parent;
+    };
+    Kata.Presence.prototype.ObjectMessageRouter.prototype.route = function(msg) {
+        this.mParent._sendPreparedODPMessage(msg);
+    };
+
+    Kata.Presence.prototype._sendPreparedODPMessage = function(msg) {
+        return this.mScript._sendPreparedODPMessage(this.mSpace, msg);
+    };
+
+
 
      /** Short hand for sending a message to the owning HostedObject.
       *  Note that the channel this is sent via is shared by all
@@ -302,7 +336,13 @@ Kata.require([
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setScale = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {scale:val.concat(), time:Kata.now(this.mSpace)});
+         var time=Kata.now(this.mSpace);
+         var update = {
+             scale:val.concat(),
+             time:time
+         };
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, {scale:val.concat(), time:time});
+         this.mRequestedLocation = Kata.LocationUpdate(update, this.mRequestedLocation, null, time);
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {

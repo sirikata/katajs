@@ -185,10 +185,12 @@ Kata.require([
         if (loc.scale) {
             if (loc.scale.length === undefined) { // single number
                 result.bounds = [0, 0, 0, loc.scale];
+                console.log("IMPROPER BOUNDS: number");
             }
             else if (loc.scale.length == 3) {
                 // FIXME how to deal with differing values?
                 result.bounds = [0, 0, 0, loc.scale[0]];
+                console.log("IMPROPER BOUNDS LENGTH");
             }
             else if (loc.scale.length == 4) {
                 result.bounds = loc.scale;
@@ -308,6 +310,17 @@ Kata.require([
         // All objects connected through us get disconnected
         for(var objid in this.mConnectedObjects) {
             this.mParent.disconnected(objid, this.mSpaceURL);
+        }
+        // All objects *trying* to connect get rejected
+        for(var objid in this.mOutstandingConnectRequests) {
+            var id = this._getLocalID(objid);
+            this.mParent.connectionResponse(
+                id, false,
+                {space : this.mSpaceURL, object : objid},
+                {
+                    msg: "Couldn't connect to space server."
+                }
+            );
         }
         this.mParent.spaceConnectionDisconnected(this);
     };
@@ -435,7 +448,10 @@ Kata.require([
                 var id = this._getLocalID(objid);
                 this.mParent.connectionResponse(
                     id, false,
-                    {space : this.mSpaceURL, object : objid}
+                    {space : this.mSpaceURL, object : objid},
+                    {
+                        msg: "Authentication failure."
+                    }
                 );
             }
             else {
@@ -469,7 +485,10 @@ Kata.require([
         this.mParent.connectionResponse(
             id, true,
             {space : this.mSpaceURL, object : objid},
-            connect_info.loc_bounds, connect_info.visual
+            {
+                loc : connect_info.loc_bounds, 
+                vis : connect_info.visual
+            }
         );
 
         // And finally, having given the parent a chance to setup
@@ -550,6 +569,7 @@ Kata.require([
             if (update.location) {
                 var loc = {};
                 // Note: currently we expect this to be in milliseconds, not a Date
+                loc.seqno = update.seqno;
                 loc.time = this._toLocalTime(update.location.t).getTime();
                 loc.pos = update.location.position;
                 loc.vel = update.location.velocity;
@@ -560,6 +580,7 @@ Kata.require([
             if (update.orientation) {
                 var loc = {};
                 // Note: currently we expect this to be in milliseconds, not a Date
+                loc.seqno = update.seqno;
                 loc.time = this._toLocalTime(update.orientation.t).getTime();
                 loc.orient = update.orientation.position;
                 var orientvel = new Kata.Quaternion(update.orientation.velocity);
@@ -569,7 +590,17 @@ Kata.require([
                 this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
             }
 
-            // FIXME bounds
+            if (update.bounds) {
+                var loc = {};
+                // Note: currently we expect this to be in milliseconds, not a Date
+                //loc.time = this._toLocalTime(update.bounds.t).getTime();
+                loc.seqno = update.seqno;
+                loc.scale = update.bounds;
+				if (!loc.time) {
+					loc.time = Kata.now(this.mSpaceURL); // OMG HACK HACK HACK: The correct fix is to add time field to the space server.
+				}
+                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+            }
         }
 
     };
@@ -615,8 +646,7 @@ Kata.require([
             properties.loc.orientTime = this._toLocalTime(update.addition[add].orientation.t).getTime();
 
             properties.bounds = update.addition[add].bounds;
-            var scale = update.addition[add].bounds[3];
-            properties.loc.scale = [scale, scale, scale];
+            properties.loc.scale = update.addition[add].bounds;
             // FIXME bounds and scale don't get their own time. Why does Location even have this?
             properties.loc.scaleTime = this._toLocalTime(update.addition[add].location.t).getTime();
 

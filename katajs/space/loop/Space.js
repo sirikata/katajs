@@ -72,18 +72,18 @@ Kata.require([
       * fields are callbacks for particular events: connect, prox,
       * etc.
       */
-     Kata.LoopbackSpace.prototype.connectObject = function(id, cb) {
+     Kata.LoopbackSpace.prototype.connectObject = function(id, cb, loc) {
 //FIXME drh this function should take initial position
          var spaceself = this;
          setTimeout(
              function() {
-                 spaceself._connectObject(id, cb);
+                 spaceself._connectObject(id, cb, loc);
              },
              this.netdelay
          );
      };
      Kata.LoopbackSpace._fakeUUIDs=100;
-     Kata.LoopbackSpace.prototype._connectObject = function(id, cb) {
+     Kata.LoopbackSpace.prototype._connectObject = function(id, cb, loc) {
          var uuid;
          if (Kata.DEBUG_FAKE_UUID) {
              uuid = "fake-uuid-" + Kata.LoopbackSpace._fakeUUIDs++;
@@ -95,8 +95,7 @@ Kata.require([
              {
                  uuid : uuid
              };
-         var obj_loc =Kata.LocationIdentity(Kata.now(this.mID));
-         obj_loc.scale = [ cb.scale, cb.scale, cb.scale ];
+         var obj_loc = loc;//Kata.LocationIdentity(Kata.now(this.mID));
          //FIXME: update with initial position
          this.mLoc.add(uuid, obj_loc, cb.visual);
          this.mProx.addObject(uuid);

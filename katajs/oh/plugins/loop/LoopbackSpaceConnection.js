@@ -71,6 +71,10 @@ Kata.require([
      Kata.extend(Kata.LoopbackSpaceConnection, Kata.SpaceConnection.prototype);
 
      Kata.LoopbackSpaceConnection.prototype.connectObject = function(id, auth, loc, vis) {
+         var location=Kata.LocationIdentity(new Date());
+         for (var key in loc) {
+             location[key]=loc[key];
+         }
          // FIXME use full loc information
          this.mSpace.connectObject(
              id,
@@ -79,9 +83,10 @@ Kata.require([
                  message : Kata.bind(this.receiveODPMessage, this),
                  prox : Kata.bind(this.proxEvent, this),
                  presenceLocUpdate : Kata.bind(this.presenceLocUpdate, this),
-                 scale: loc.scale[0], // FIXME
+                 scale: loc.scale, // FIXME
                  visual: vis
-             }
+             },
+             location
          );
      };
 
@@ -89,7 +94,7 @@ Kata.require([
          this.mObjectID[id] = object;
          this.mLocalID[object] = id;
          if (object) // FIXME real presence_id below
-             this.mParent.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, loc, visual);
+             this.mParent.connectionResponse(id, true, {space : this.mSpaceURL, object : object}, {loc:loc, visual:visual});
          else
              this.mParent.connectionResponse(id, false);
      };

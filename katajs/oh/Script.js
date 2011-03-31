@@ -113,12 +113,14 @@ Kata.require([
      Kata.Script.prototype.newPresence = function(presence) {
          this.mPresences[presence.space()] = presence;
 
+         // Notify normal script
          var cb = this.mConnectRequests[presence.space()];
          if (cb) {
              delete this.mConnectRequests[presence.space()];
              cb(presence);
          }
 
+         // Notify behaviors
          this.mBehaviors.forEach(function(beh) {
              if (beh.newPresence) beh.newPresence(presence);
          });
@@ -272,14 +274,38 @@ Kata.require([
         this._sendHostedObjectMessage(msg);
     };
 
+    /** Internal helper method to construct and send an ODP message
+     * when it is already in the ObjectMessage protocol format. This
+     * is a bit silly, since we're wasting effort doing encode ->
+     * decode -> move to network thread -> encode -> send, but
+     * currently we get already packaged ODP messages from SST.
+     */
+    Kata.Script.prototype._sendPreparedODPMessage = function(space, odp_msg) {
+        var msg = new Kata.ScriptProtocol.FromScript.SendODPMessage(
+            space,
+            odp_msg.source_object, odp_msg.source_port,
+            odp_msg.dest_object, odp_msg.dest_port,
+            odp_msg.payload
+        );
+        this._sendHostedObjectMessage(msg);
+    };
+
     /** Handle an received ODP message. */
     Kata.Script.prototype._handleReceiveODPMessage = function(channel, msg) {
-        // Reconstruct and then delegate to ODP.Service.
-        this._deliverODPMessage(
-            new Kata.ODP.Endpoint(msg.space, msg.source_object, msg.source_port),
-            new Kata.ODP.Endpoint(msg.space, msg.dest_object, msg.dest_port),
-            msg.payload
-        );
+        var presence = this.mPresences[msg.space];
+        var delivered_sst=false;
+        if (presence&&presence.ODPDispatcher.dispatchMessage(msg)) {
+            delivered_sst=true;
+            //Kata.warn("Delivered SST worker-wise"); 
+        }
+        if (!delivered_sst) {
+            // Reconstruct and then delegate to ODP.Service.
+            this._deliverODPMessage(
+                new Kata.ODP.Endpoint(msg.space, msg.source_object, msg.source_port),
+                new Kata.ODP.Endpoint(msg.space, msg.dest_object, msg.dest_port),
+                msg.payload
+            );
+        }
     };
 
      Kata.Script.prototype._handlePresenceLocUpdate = function(channel, msg) {

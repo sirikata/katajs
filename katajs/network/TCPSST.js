@@ -54,6 +54,12 @@ Kata.require([
         };
     }
 
+    function getErrorCallback(thus, which) {
+        return function(ev) {
+            thus._onError(which);
+        };
+    }
+
     if (typeof(WebSocket)!="undefined") {
         /**
          * TCPSST is a protocol which has several substreams over a single
@@ -93,6 +99,8 @@ Kata.require([
             sock.onopen = getOpenCallback(this, which);
             sock.onclose = getCloseCallback(this, which);
             sock.onmessage = getMessageCallback(this, which);
+            sock.onerror = getErrorCallback(this, which);
+            sock._timeout = setTimeout(Kata.bind(this._onError, this, which), 10000);
             this.mSockets[which] = sock;
         };
         /**
@@ -122,6 +130,10 @@ Kata.require([
          */
         Kata.TCPSST.prototype._onOpen = function (which) {
             if (network_debug) console.log("Opened socket "+which);
+
+            clearTimeout(this.mSockets[which]._timeout);
+            delete this.mSockets[which]._timeout;
+
             this.mConnected.push(which);
             for (var i = 0; i < this.mMessageQueue.length; i++) {
                 this.mSockets[which].send(this.mMessageQueue[i]);
@@ -129,6 +141,15 @@ Kata.require([
             this.mMessageQueue = new Array;
             // Set this.mConnected = true; send anything waiting in queue.
         };
+
+        Kata.TCPSST.prototype._onError = function (which) {
+            delete this.mSockets[which];
+
+            for (var i in this.mSubstreams) {
+                this.mSubstreams[i].callListeners(null);
+            }
+        };
+
         /**
          * Received data on one of our sokets.
          * @param {number} which  Which socket got some data.

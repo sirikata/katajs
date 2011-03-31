@@ -96,8 +96,6 @@ Kata.require([
          this.mObjects[ho.getID()] = ho;
 
          // And try to connect
-         var scale = 1.0;
-         if (req.scale) scale = req.scale;
          space_conn.connectObject(ho.getID(), auth, req, req.visual);
      };
 
@@ -124,7 +122,7 @@ Kata.require([
       *  @param {string} visual a reference to the visual description of the
       *  object
       */
-     Kata.SessionManager.prototype.connectionResponse = function(id, success, presence_id, loc, visual) {
+     Kata.SessionManager.prototype.connectionResponse = function(id, success, presence_id, data) {
          var obj = this.mObjects[id];
          if (!obj) {
              Kata.warn("Got connection response for unknown object: " + id);
@@ -137,7 +135,7 @@ Kata.require([
              this.mObjects[presence_id.object] = obj;
          }
 
-         obj.connectionResponse(success, presence_id, loc, visual);
+         obj.connectionResponse(success, presence_id, data);
      };
 
     /** Diconnect the given object from the space. */

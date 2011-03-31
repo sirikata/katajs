@@ -103,14 +103,14 @@ Kata.require([
          this.mObjectHost.connect(this, request, request.auth);
      };
 
-     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, loc, visual) {
+     Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, data) {
          var msg = null;
          if (success) {
              var bounds = undefined;
-             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, loc, bounds, visual);
+             msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, data.loc, bounds, data.vis);
          }
          else
-             msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object);
+             msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object, data.msg);
          this.sendScriptMessage(msg);
      };
 

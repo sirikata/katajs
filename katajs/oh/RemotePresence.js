@@ -32,6 +32,7 @@
 
 
 Kata.require([
+    'externals/protojs/protobuf.js',
     'katajs/core/Time.js',
     'katajs/oh/odp/Endpoint.js'
 ], function() {
@@ -55,13 +56,16 @@ Kata.require([
          this.mSpace = space;
          this.mID = id;
 
+         this.mScaleSeqNo = undefined;
+         this.mPosSeqNo = undefined;
+         this.mOrientSeqNo = undefined;
+
          this.mLocation = location;
 
          if (vis) {
              this.rMesh = vis.mesh;
              this.rAnim = vis.anim;
              this.rUpAxis = vis.up_axis;
-             this.rCenter = vis.center;
          }
 
          // Indicates whether we're tracking this object, i.e. if a subscription was submitted.
@@ -96,6 +100,10 @@ Kata.require([
     /** Get an ODP endpoint for this object on the specified port. */
     Kata.RemotePresence.prototype.endpoint = function(port) {
         return new Kata.ODP.Endpoint(this.mSpace, this.mID, port);
+    };
+
+    Kata.RemotePresence.prototype.sstEndpoint = function(port) {
+        return new Kata.SST.EndPoint(this.object(), port);
     };
 
     /** Get the owning Presence for this RemotePresence. */
@@ -148,7 +156,7 @@ Kata.require([
      };
      /** Get the current estimate of this object's rotational axis. */
      Kata.RemotePresence.prototype.rotationalAxis = function() {
-         return this.mLocation.rotaxis.concat();//FIXME drh do interpolation?
+         return this.mLocation.rotaxis.concat();
      };
      /** Get the current estimate of this object's rotational velocity. */
      Kata.RemotePresence.prototype.rotationalVelocity = function() {
@@ -156,7 +164,7 @@ Kata.require([
      };
      /** Get the current estimate of this object's scale. */
      Kata.RemotePresence.prototype.scale = function() {
-         return this.mLocation.scale.concat();//FIXME drh do interpolation?
+         return this.mLocation.scale.concat();
      };
      /** Get the current estimate of this object's position. */
      Kata.RemotePresence.prototype.location = function() {
@@ -215,8 +223,46 @@ Kata.require([
       * updates.
       */
      Kata.RemotePresence.prototype._updateLoc = function (loc, visual) {
-         if (loc)
+         if (loc) {
+             if (loc.seqno) {
+                 // FIXME: These are PROTO.INT64 objects which have no operator<
+                 // Currently it always gets in the first branch of these if statements.
+                 if (this.mScaleSeqNo==undefined
+                     || loc.seqno==undefined
+                     || !PROTO.I64.prototype.unsigned_less.call(this.mScaleSeqNo,
+                                                          loc.seqno)) {
+
+                     if (loc.seqno != undefined)
+                         this.mScaleSeqNo = loc.seqno;
+                 }else {
+                     delete loc.scale;
+                 }
+                 if (this.mPosSeqNo==undefined
+                     || loc.seqno==undefined
+                     || !PROTO.I64.prototype.unsigned_less.call(this.mPosSeqNo,
+                                                          loc.seqno)) {
+
+                     if (loc.seqno != undefined)
+                         this.mPosSeqNo = loc.seqno;
+                 }else {
+                     delete loc.pos;
+                     delete loc.vel;
+                 }
+                 if (this.mOrientSeqNo==undefined
+                     || loc.seqno==undefined
+                     || !PROTO.I64.prototype.unsigned_less.call(this.mOrientSeqNo,
+                                                          loc.seqno)) {
+
+                     if (loc.seqno != undefined)
+                         this.mOrientSeqNo = loc.seqno;
+                 }else {
+                     delete loc.orient;
+                     delete loc.rotvel;
+                     delete loc.rotaxis;
+                 }
+             }
              this.mLocation = Kata.LocationUpdate(loc,this.mLocation,undefined,Kata.now(this.mSpace));
+         }
 
          if (visual) {
              this.mVisual = visual;

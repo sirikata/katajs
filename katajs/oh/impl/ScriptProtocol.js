@@ -196,6 +196,13 @@ Kata.require([
 				 this.spaceid = this.space;
                  Kata.LocationCopyUnifyTime(remotePresence.mLocation,this);
              },
+             GFXQueryMeshAspectRatio : function (space, observer, remotePresence ){
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="QueryMeshAspectRatio";
+                 this.space = space+observer;
+				 this.spaceid = this.space;                 
+                 this.id = remotePresence.id();
+             },
              GFXCustom : function(space, observer, data) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
                  this.msg="Custom";
@@ -241,7 +248,7 @@ Kata.require([
                  if (remotePresence.rMesh) {
                      messageList.push(new Kata.ScriptProtocol.FromScript.GFXUpdateVisualMesh(space, 
                         observer, remotePresence.id(), remotePresence.rMesh, remotePresence.rAnim, remotePresence.rUpAxis,
-                        remotePresence.rCenter, remotePresence.scale()));
+                        remotePresence.scale()));
                  }else {
                     //MIGHT be a light or somesuch
                  }
@@ -254,7 +261,7 @@ Kata.require([
                  this.id = id;
              },
              // Generates either a Mesh, Light, WebView, or Camera message, or the Destroy variants.
-             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim, up, center, scale) {
+             GFXUpdateVisualMesh : function(space, observer, id, mesh, anim, up, scale) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
                  if (mesh == null) {
                      this.msg = "DestroyMesh";
@@ -263,8 +270,7 @@ Kata.require([
                      this.mesh = mesh;
                      this.anim = anim;
                      this.up_axis = up;
-                     this.center = center;
-                     this.scale = scale;
+                     this.scale=scale;
                  }
              },
              GFXAttachCamera : function(space, observer, id, canvasId) {
@@ -370,9 +376,10 @@ Kata.require([
                  this.visual = visual;
              },
 
-             ConnectionFailed : function(space, reason) {
+             ConnectionFailed : function(space, object, reason) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.ConnectionFailed;
                  this.space = space;
+                 this.object = object;
                  this.reason = reason;
              },
 

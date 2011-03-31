@@ -46,7 +46,7 @@ Kata.LocationIdentityNow=function() {
  */
 Kata.LocationIdentity=function(time){
     return {
-      scale:[1,1,1],
+      scale:[0,0,0,1],
       scaleTime:time,
       pos:[0,0,0],
       posTime:time,
@@ -98,7 +98,7 @@ Kata._helperQuatFromAxisAngle=function(aaxis,aangle) {
  * @param {number} deltaTime the number of seconds since the starting quaternion was measured
  * @return {Array} The quaternion extrapolated deltaTime seconds from a
  */
-Kata._helperLocationExtrapolateQuaternion=function(a,avel,aaxis,deltaTime){
+Kata.extrapolateQuaternion=function(a,avel,aaxis,deltaTime){
     var aangle=avel*deltaTime;
     var b=Kata._helperQuatFromAxisAngle(aaxis,aangle);
     var aX = a[0];
@@ -150,6 +150,42 @@ Kata._helperLocationInterpolate3vec=function(a,adel,atime,b,bdel,btime,curtime) 
             interp*a[1]+ointerp*b[1],
             interp*a[2]+ointerp*b[2]];
 };
+
+/**
+ * If the time is after the first, newer 3vec (a), it extrapolates the 3vec 
+ * If the time is before the second, older 3vec (b) it uses the second, older 3vec
+ * otherwise it does a weighted interpolation of the 3vecs
+ * @param {Array} a the ending quaternion to interpolate 
+ * @param {number} avel the velocity a will move
+ * @param {Date} atime the sample time at which the final 3vec was measured to be at a
+ * @param {Array} b starting, older 3vec to interpolate
+ * @param {number} bvel the velocity b moved at
+ * @param {Date} btime the sample time at which the 3vec was measured to be at b
+ * @param {Date} curTime the current date to interpolate at
+ * @return {Array} The quaternion interpolated between a and b at curtime
+ */
+Kata._helperLocationInterpolateNoVel4vec=function(a,atime,b,btime,curtime) {
+    var secondsPassed=Kata.deltaTime(curtime,atime);
+    if (secondsPassed>0) {
+        return a;
+    }
+    var sampleDelta=Kata.deltaTime(atime,btime);
+    if (sampleDelta==0) {
+        return a;
+    }
+    secondsPassed+=sampleDelta;
+    if (secondsPassed<0) {
+        return b;
+    }
+    
+    var interp=secondsPassed/sampleDelta;
+    var ointerp=1.0-interp;
+    return [interp*a[0]+ointerp*b[0],
+            interp*a[1]+ointerp*b[1],
+            interp*a[2]+ointerp*b[2],
+            interp*a[3]+ointerp*b[3]];
+};
+
 /**
  * If the time is after the first, newer quaternion (a), it extrapolates the quaternion 
  * If the time is before the second, older quaternion (b) it uses the second quaternion
@@ -168,18 +204,18 @@ Kata._helperLocationInterpolate3vec=function(a,adel,atime,b,bdel,btime,curtime) 
 Kata._helperLocationInterpolateQuaternion=function(a,avel,aaxis,atime,b,bvel,baxis,btime,curtime) {
     var secondsPassed=Kata.deltaTime(curtime,atime);
     if (secondsPassed>0) {
-        return Kata._helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
+        return Kata.extrapolateQuaternion(a,avel,aaxis,secondsPassed);
     }
     var sampleDelta=Kata.deltaTime(atime,btime);
     if (sampleDelta==0) {
-        return Kata._helperLocationExtrapolateQuaternion(a,avel,aaxis,secondsPassed);
+        return Kata.extrapolateQuaternion(a,avel,aaxis,secondsPassed);
     }
     secondsPassed+=sampleDelta;
     if (secondsPassed<0) {
         return b;
     }
 
-    b=Kata._helperLocationExtrapolateQuaternion(b,bvel,baxis,secondsPassed);
+    b=Kata.extrapolateQuaternion(b,bvel,baxis,secondsPassed);
     var interp=secondsPassed/sampleDelta;
     var ointerp=1.0-interp;
     var x=interp*a[0]+ointerp*b[0];
@@ -201,8 +237,8 @@ Kata._helperLocationInterpolateQuaternion=function(a,avel,aaxis,atime,b,bvel,bax
  */
 Kata.LocationInterpolate=function(location,prevLocation,time) {
     return {
-        scale:Kata._helperLocationInterpolate3vec(location.scale,[0,0,0],location.scaleTime,
-                                              prevLocation.scale,[0,0,0],prevLocation.scaleTime,
+        scale:Kata._helperLocationInterpolateNoVel4vec(location.scale,location.scaleTime,
+                                              prevLocation.scale,prevLocation.scaleTime,
                                               time),
         scaleTime:time,
         pos:Kata._helperLocationInterpolate3vec(location.pos,location.vel,location.posTime,
@@ -230,8 +266,8 @@ Kata.LocationInterpolate=function(location,prevLocation,time) {
  */
 Kata.LocationTriTimeInterpolate=function(location,prevLocation,posTime,orientTime,scaleTime) {
     return {
-        scale:Kata._helperLocationInterpolate3vec(location.scale,[0,0,0],location.scaleTime,
-                                              prevLocation.scale,[0,0,0],prevLocation.scaleTime,
+        scale:Kata._helperLocationInterpolateNoVel4vec(location.scale,location.scaleTime,
+                                              prevLocation.scale,prevLocation.scaleTime,
                                               scaleTime),
         scaleTime:scaleTime,
         pos:Kata._helperLocationInterpolate3vec(location.pos,location.vel,location.posTime,
@@ -260,7 +296,7 @@ Kata.LocationExtrapolate=function(location,time) {
         scaleTime:time,
         pos:Kata._helperLocationExtrapolate3vec(location.pos,location.vel,Kata.deltaTime(time,location.posTime)),
         posTime:time,
-        orient:Kata._helperLocationExtrapolateQuaternion(location.orient,location.rotvel,location.rotaxis,Kata.deltaTime(time,location.orientTime)),
+        orient:Kata.extrapolateQuaternion(location.orient,location.rotvel,location.rotaxis,Kata.deltaTime(time,location.orientTime)),
         orientTime:time,
         rotvel:location.rotvel,
         rotaxis:location.rotaxis,
@@ -270,11 +306,11 @@ Kata.LocationExtrapolate=function(location,time) {
 Kata.LocationCopy = function(destination, source) {
     if (source.scale!==undefined){
         destination.scaleTime=source.scaleTime!==undefined?source.scaleTime:source.time;
-        destination.scale=source.scale;
+        destination.scale=source.scale.slice(0);
     }
     if (source.pos!==undefined){
         destination.posTime=source.posTime!==undefined?source.posTime:source.time;
-        destination.pos=source.pos;
+        destination.pos=source.pos.slice(0);
     }
     if (destination.orient!==undefined) {            
         destination.orientTime=source.orientTime!==undefined?source.orientTime:source.time;
@@ -293,20 +329,20 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
     if (msg.time!==undefined) {
         destination.time=msg.time;
         if (msg.scale!==undefined){
-            destination.scale=msg.scale;
+            destination.scale=msg.scale.slice();
         }
         if (msg.pos!==undefined){
-                destination.pos=msg.pos;
+                destination.pos=msg.pos.slice();
         }
         if (msg.orient!==undefined) {            
-            destination.orient=msg.orient;
+            destination.orient=msg.orient.slice();
         }
         if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
             destination.rotvel=msg.rotvel;
-            destination.rotaxis=msg.rotaxis;
+            destination.rotaxis=msg.rotaxis.slice();
         }
         if (msg.vel!==undefined){
-            destination.vel=msg.vel;
+            destination.vel=msg.vel.slice();
         }        
     }else{
         var t=msg.scaleTime;
@@ -315,7 +351,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         if (t===undefined||msg.orientTime>=t)
             t=msg.orientTime;
         if (msg.scale!==undefined){
-            destination.scale=msg.scale;
+            destination.scale=msg.scale.slice(0);
         }
         if (msg.pos!==undefined){
             if (msg.vel&&msg.posTime) {
@@ -324,27 +360,27 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
                                                                     Kata.deltaTime(t,
                                                                               msg.posTime));                
             }else {
-                destination.pos=msg.pos;
+                destination.pos=msg.pos.slice();
             }
         }
         if (msg.orient!==undefined){
             if (msg.rotvel !== undefined && msg.rotaxis !== undefined && msg.orientTime !== undefined) {
                 destination.orient
-                    =Kata._helperLocationExtrapolateQuaternion(msg.orient,
+                    =Kata.extrapolateQuaternion(msg.orient,
                                                                msg.rotvel,
                                                                msg.rotaxis,
                                                                Kata.deltaTime(t,
                                                                          msg.orientTime));
             }else {
-                destination.orient=msg.orient;
+                destination.orient=msg.orient.slice();
             }
         }
         if (msg.rotvel !== undefined && msg.rotaxis !== undefined) {
             destination.rotvel=msg.rotvel;
-            destination.rotaxis=msg.rotaxis;
+            destination.rotaxis=msg.rotaxis.slice();
         }
         if (msg.vel!==undefined){
-            destination.vel=msg.vel;
+            destination.vel=msg.vel.slice();
         }
         destination.time=t;
     }
@@ -360,7 +396,7 @@ Kata.LocationSet=function(msg) {
     if (msg.time==undefined)
         msg.time=new Date();
     if (msg.scale==undefined)
-        msg.scale=[1,1,1];
+        msg.scale=[0,0,0,1];
     if (msg.vel==undefined)
         msg.vel=[0,0,0];
     if (msg.rotaxis==undefined)
@@ -440,10 +476,10 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
         //curLocation.orient=prevLocation.orient;
         //curLocation.orientTime=prevLocation.orientTime;
         if (msg.rotvel !== undefined && msg.rotaxis !== undefined) {
-            //curLocation.orient=Kata._helperLocationExtrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
+            //curLocation.orient=Kata.extrapolateQuaternion(prevLocation.orient,prevLocation.rotvel,prevLocation.rotaxis,Kata.deltaTime(curDate,prevLocation.orientTime));
             //curLocation.orientTime=curDate;
 
-            retval.orient=Kata._helperLocationExtrapolateQuaternion(curLocation.orient,curLocation.rotvel,curLocation.rotaxis,Kata.deltaTime(msg.time,curLocation.orientTime));
+            retval.orient=Kata.extrapolateQuaternion(curLocation.orient,curLocation.rotvel,curLocation.rotaxis,Kata.deltaTime(msg.time,curLocation.orientTime));
             retval.orientTime=msg.time;
         }
     }
@@ -594,7 +630,7 @@ Kata.LocationCompose=function(loc, prevParentLoc, curParentLoc) {
     var rotation=Kata.QuaternionToRotation(parentLoc.orient);
     //First lets get velocity right--we're acting like a lever with a vector of loc.pos
     var topLevelVelocity=Kata.Vec3Add(Kata.Vec3Add(Kata.Vec3Scale(Kata.Vec3Cross(parentLoc.rotaxis,
-                                                             loc.pos),
+                                                             Kata.Vec3Add(Kata.Vec3Scale(loc.pos,parentLoc.scale[3]),parentLoc.scale)),
                                                    parentLoc.rotvel),
                                          parentLoc.vel),
                                  Kata.Vec3Rotate(loc.vel,rotation[0],rotation[1],rotation[2]));
@@ -603,7 +639,7 @@ Kata.LocationCompose=function(loc, prevParentLoc, curParentLoc) {
                             parentLoc.pos);
     
     var topLevelOrient=Kata.QuaternionMulQuaternion(parentLoc.orient,loc.orient);
-    var topLevelScale=loc.scale;//FIXME what's right to do here--is it a rigid body or not!
+    var topLevelScale=[loc.scale[0],loc.scale[1],loc.scale[2],loc.scale[3]*parentloc.scale[3]];
     return {pos:topLevelPos,
             orient:topLevelOrient,
             scale:topLevelScale,
@@ -647,9 +683,12 @@ Kata.LocationInverseCompose=function(loc, prevParentLoc, curParentLoc) {
                                          loc.vel),rotation[0],rotation[1],rotation[2]);
     var innerAxis=Kata.Vec3Rotate(loc.rotaxis,rotation[0],rotation[1],rotation[2]);
     var innerPos=Kata.Vec3Rotate(Kata.Vec3Sub(loc.pos,parentLoc.pos),rotation[0],rotation[1],rotation[2]);
+    //now adjust by offset and scale
+    innerVelocity=Kata.Vec3Scale(innerVelocity,parentLoc.scale[3]);
+    innerPos=Kata.Vec3Scale(Kata.Vec3Sub(innerPos,parentLoc.scale),1./parentLoc.scale[3]);
     
     var innerOrient=Kata.QuaternionMulQuaternion(loc.orient,inverseRotation);
-    var innerScale=loc.scale;//FIXME what's right to do here--is it a rigid body or not!
+    var innerScale=Kata.Vec4Scale(loc.scale,1./parentLoc.scale[3]);
     return {pos:innerPos,
             orient:innerOrient,
             scale:innerScale,

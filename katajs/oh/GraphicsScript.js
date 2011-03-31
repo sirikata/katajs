@@ -62,7 +62,7 @@ Kata.require([
          this.mGraphicsTimer=null;
          this.mNumGraphicsSystems=0;
          this._camPos = [0,0,0];
-         this._camPosTarget = [0,0,0]
+         this._camPosTarget = [0,0,0];
          this._camOrient = [0,0,0,1];
          this._camOrientTarget = [0,0,0,1];
          this._camLag = 0.9;
@@ -73,9 +73,15 @@ Kata.require([
      };
      Kata.extend(Kata.GraphicsScript, SUPER);
 
-      Kata.GraphicsScript.prototype._handleGUIMessage = function (channel, data) {
-      };
-
+     Kata.GraphicsScript.prototype._handleGUIMessage = function (channel, data) {
+         if (data.msg=="loaded")
+             this.cameraPeriodicUpdate(true);
+     };
+     
+     Kata.GraphicsScript.prototype.queryMeshAspectRatio = function(presence, remotePresence) {
+         var msg = new Kata.ScriptProtocol.FromScript.GFXQueryMeshAspectRatio(presence.space(),presence.id(),remotePresence);
+         this._sendHostedObjectMessage(msg);
+     };
      /**
       * Enables graphics on the main canvas viewport. 
       * @param {Kata.Presence} presence The presence that graphics should be enabled for
@@ -197,26 +203,47 @@ Kata.require([
              if (lag==0) this._camOrient = orient;
              this._camOrientTarget = orient;
          }
-     }
+     };
 
-     Kata.GraphicsScript.prototype.cameraPeriodicUpdate = function(){
-         for (i in this._camPos) {
+     Kata.GraphicsScript.prototype.cameraPeriodicUpdate = function(forceUpdate){
+         var i;
+         var originalCamPos=[];
+         for (i=0;i<3;++i) {
+             originalCamPos[i]=this._camPos[i];
              this._camPos[i] = this._camPos[i] * this._camLag + this._camPosTarget[i] * (1.0-this._camLag);
          }
-         for (i in this._camOrient) {
+         var originalCamOrient=[];
+         for (i=0;i<4;++i) {
+             originalCamOrient[i]=this._camOrient[i];
              this._camOrient[i] = this._camOrient[i] * this._camLag + this._camOrientTarget[i] * (1.0-this._camLag);
          }
-         msg = {}
-         msg.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
-         msg.msg = "Move";
-         msg.space = Kata.BlessedCameraSpace;
-         msg.id = Kata.BlessedCameraID;
-         msg.spaceid = Kata.BlessedCameraSpaceid;
-         msg.pos = this._camPos;
-         msg.orient = new Kata.Quaternion(this._camOrient);
-         msg.orient = msg.orient.normal();
-         this._sendHostedObjectMessage(msg);
-     }
+         function similarPos(a,b){
+             for (var i=0;i<3;++i){
+                 if (!(Math.abs(a[i]-b[i])<.001))
+                     return false;
+             }
+             return true;
+         }
+         function similarOrient(a,b){
+             for (var i=0;i<4;++i){
+                 if (!(Math.abs(a[i]-b[i])<.0001))
+                     return false;
+             }
+             return true;
+         }
+         if (forceUpdate||((!similarPos(originalCamPos,this._camPosTarget)||!similarOrient(originalCamOrient,this._camOrientTarget)))) {
+             var msg = {};
+             msg.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+             msg.msg = "Move";
+             msg.space = Kata.BlessedCameraSpace;
+             msg.id = Kata.BlessedCameraID;
+             msg.spaceid = Kata.BlessedCameraSpaceid;
+             msg.pos = this._camPos;
+             msg.orient = new Kata.Quaternion(this._camOrient);
+             msg.orient = msg.orient.normal();
+             this._sendHostedObjectMessage(msg);             
+         }
+     };
 
      /**
       * Goes through one remotePresence per timer call and checks whether it is renderable
