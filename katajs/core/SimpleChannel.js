@@ -71,7 +71,23 @@ Kata.require([
     /// dbm: this is what's being used presently for local message passing (as of 7/27/10)
     Kata.SimpleChannel.prototype.sendMessage = function (data) {
         if (Kata.FAKE_WEB_WORKERS_DEBUG) {
-            data = JSON.parse(JSON.stringify(data));
+            data = JSON.parse(JSON.stringify(data/*), 
+                                             function (key, value) {
+                                                 return this[key] instanceof Date ?
+                                                     'Date(' + this[key] + ')' : value;
+                                             }*/),
+                              function (key, value) {
+                                  var a;
+                                  if (typeof value === 'string') {
+                                      a =
+                                          /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
+                                      if (a) {
+                                          return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4],
+                                                                   +a[5], +a[6]));
+                                      }
+                }
+                                  return value;
+                              });
         }
         this.mPartner.callListeners(data);
     };
