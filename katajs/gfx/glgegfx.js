@@ -38,6 +38,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.doubleBuffer=3;
     this.mAnimatingObjects={};
     this.windowVisible=true;
+    this.canvasVisible=true;
     this.mDoCaptureCanvas=0;//+1 for each request
     var thus=this;
     {
@@ -141,6 +142,12 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                             false);
     window.addEventListener('blur',
                             function (e){thus.windowVisible=false;},
+                            false);
+    canvas.addEventListener('focus',
+                            function (e){console.log("visible true ");thus.canvasVisible=true;},
+                            false);
+    canvas.addEventListener('blur',
+                            function (e){console.log("visible false ");thus.canvasVisible=false;},
                             false);
     canvas.addEventListener('mousedown',
                             function (e){thus._mouseDown(e);},
@@ -1005,35 +1012,35 @@ Kata.require([
     };
 
     GLGEGraphics.prototype._scrollWheel = function(e){
-        var msg = {
-            msg: "wheel",
-            event: cloneEvent(e),
-            shiftKey: e.shiftKey,
-            altKey: e.altKey,
-            ctrlKey: e.ctrlKey,
-            dy: 0,
-            dx: 0
-        };
-        if (e.wheelDeltaX || e.wheelDeltaY) {         /// Chrome
-            msg.dy = e.wheelDeltaY || 0;
-            msg.dx = -e.wheelDeltaX || 0;
-        }
-        else if (e.wheelDelta) {
-            msg.dy = e.wheelDelta;
-        }
-        else if (e.detail){                              /// Firefox
-            if (e.axis == 1) {
-                msg.dx = e.detail * 40;         /// -3 for Firefox == 120 for Chrome
-            } else {
-                msg.dy = e.detail * -40;
-            }
-        }
-        this._inputCb(msg);
+        if (this.canvasVisible) {//only feed the scroll wheel if focused
 
+            var msg = {
+                msg: "wheel",
+                event: cloneEvent(e),
+                shiftKey: e.shiftKey,
+                altKey: e.altKey,
+                ctrlKey: e.ctrlKey,
+                dy: 0,
+                dx: 0
+            };
+            if (e.wheelDeltaX || e.wheelDeltaY) {         /// Chrome
+                msg.dy = e.wheelDeltaY || 0;
+                msg.dx = -e.wheelDeltaX || 0;
+            }
+            else if (e.wheelDelta) {
+                msg.dy = e.wheelDelta;
+            }
+            else if (e.detail){                              /// Firefox
+                if (e.axis == 1) {
+                    msg.dx = e.detail * 40;         /// -3 for Firefox == 120 for Chrome
+                } else {
+                    msg.dy = e.detail * -40;
+                }
+            }
+            this._inputCb(msg);
+            e.preventDefault();
         // Prevent scrolling containing page as well.
-        // FIXME: This is kinda annoying because the page gets stuck (just like with Flash).
-        // We need some concept of focus for this to work well methinks.
-        //e.preventDefault && e.preventDefault();
+        }
     };
     GLGEGraphics.prototype.createOrReturnSpaceRoot=function(s) {
     
