@@ -461,7 +461,6 @@ Kata.require([
         if (path.lastIndexOf(".dae")==-1) {
             path += ".dae";            
         }
-        console.log("Loading: " + path);
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
@@ -470,6 +469,9 @@ Kata.require([
             delete gfx.mAnimatingObjects[thus.mID];
         var loadedCallback;
         loadedCallback=function(){
+	    clda.setScaleX(1);
+	    clda.setScaleY(1);
+	    clda.setScaleZ(1);
             var bv=computeBoundingVolume(clda);//clda.getBoundingVolume(true);
             var maxv=bv.radius;
             var colladaUnitRescale=1/maxv;
@@ -509,10 +511,10 @@ Kata.require([
                     }
                 return false;
             }
-            
             if (thus.mMesh==clda) {
                 thus.bv=bv;
                 delete thus.mLoading;
+		thus.updateTransformation(gfx);
                 if (hasAnimations(clda)) {
                     gfx.mAnimatingObjects[thus.mID]=thus.mNode;
                     setTimeout(function(){gfx.newEvent();},8000);
@@ -555,6 +557,7 @@ Kata.require([
         this.mBounds=bounds;
         this.mNode.addCollada(clda);
         this.mMesh = clda;
+	this.updateTransformation(gfx);
         return clda;
     };
 
@@ -611,8 +614,8 @@ Kata.require([
         //if (!this.mCamera) {
         var colladaUnitRescale=this.bv?1/this.bv.radius:1.0;
         if (this.mMesh) {
-            this.mMesh.setScale(l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale);
             if (this.bv) {
+		this.mMesh.setScale(l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale);
                 var locx=(l.scale[0]-(this.bv.center[0]*colladaUnitRescale)*l.scale[3]);
                 var locy=(l.scale[1]-(this.bv.center[1]*colladaUnitRescale)*l.scale[3]);
                 var locz=(l.scale[2]-(this.bv.center[2]*colladaUnitRescale)*l.scale[3]);
@@ -620,6 +623,8 @@ Kata.require([
                 this.mMesh.setLocY(locy);
                 this.mMesh.setLocZ(locz);
             }else {
+
+		this.mMesh.setScale(l.scale[3],l.scale[3],l.scale[3]);
                 this.mMesh.setLocX(l.scale[0]);
                 this.mMesh.setLocY(l.scale[1]);
                 this.mMesh.setLocZ(l.scale[2]);
@@ -630,23 +635,11 @@ Kata.require([
         this.mNode.setQuat(l.orient[0],l.orient[1],l.orient[2],l.orient[3]);
         if (this.stationary(graphics.mCurTime)) {
             graphics.removeObjectUpdate(this);        
-            //console.log("Stationary ",this.mID,l,l.pos[0],l.pos[1],l.pos[2]);
         }
         return l;
     };
     VWObject.prototype.updateCamera = function(graphics) {
         var location=this.updateTransformation(graphics, true);
-        /*
-        var mat = o3djs.quaternions.quaternionToRotation(location.orient);
-        //console.log(mat);
-        o3djs.math.matrix4.setTranslation(mat, location.pos);
-        this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.inverse(mat);
-         */
-        /*
-         this.mRenderTarg.mViewInfo.drawContext.view = o3djs.math.matrix4.lookAt([0, 1, 5],  // eye
-         [0, 0, 0],  // target
-         [0, 1, 0]); // up
-         */
     };
     VWObject.prototype.animate = function(anim_name) {
         var mesh = this.mMesh;
@@ -1264,7 +1257,6 @@ Kata.require([
         if (msg.id in this.mObjects && msg.target !== undefined) {
             var cam = this.mObjects[msg.id];
             var spaceView;
-//            console.log("cam.mSpaceID:", cam.mSpaceID);
             if (cam.mSpaceID in this.mSpaceRoots) {
                 spaceView = this.mSpaceRoots[cam.mSpaceID];
             } else {
@@ -1429,11 +1421,9 @@ Kata.require([
                     for (var i=0;i<lights.length;++i){
                         var ligh=lights[(i+index)%lights.length];
                         if (ligh.id.indexOf("shadowlight")!=-1){
-                            console.log("Turn on "+i+index)
                             ligh.enableLight();
                         }
                         if (ligh.id.indexOf("mainlight")!=-1){
-                            console.log("Turn off "+i+index)
                             ligh.disableLight();
                         }else 
                         if (ligh.getType()==GLGE.L_SPOT) {
@@ -1445,11 +1435,9 @@ Kata.require([
                     for (var j=0;j<lights.length;++j){
                         var ligh=lights[j];
                         if (ligh.id.indexOf("shadowlight")!=-1){
-                            console.log("Turn off "+j)
                             ligh.disableLight();
                         }
                         if (ligh.id.indexOf("mainlight")!=-1){
-                            console.log("Turn on "+j)
                             ligh.enableLight();
                         }
                     }
