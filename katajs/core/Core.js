@@ -316,7 +316,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
         return datastr;
     };
 
-    if (console.log && debug_console) {
+    if (console.log && console.log.apply && debug_console) {
         /** Logs msg to the console, in addition to some json object.
          * @param {...(object|string)} var_args  Some optional JSON data to log.
          */
