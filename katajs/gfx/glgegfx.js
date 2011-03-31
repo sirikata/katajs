@@ -1062,7 +1062,9 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Create"]=function(msg) {//this function creates a scene graph node
         var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
         var newObject;
-        this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,spaceRoot);
+        if (!(msg.id in this.mObjects)) {
+            this.mObjects[msg.id]=newObject=new VWObject(msg.id,msg.time,msg.spaceid,spaceRoot);            
+        }else newObject = this.mObjects[msg.id];
         this.moveTo(newObject,msg);
         newObject.updateTransformation(this);
         
@@ -1158,8 +1160,12 @@ Kata.require([
     };
     GLGEGraphics.prototype.methodTable["Move"]=function(msg) {
         var vwObject=this.mObjects[msg.id];
-        this.moveTo(vwObject,msg);
-        vwObject.update(this);
+        if (vwObject) {
+            this.moveTo(vwObject,msg);
+            vwObject.update(this);            
+        }else {
+            this.methodTable["Create"].call(this,msg);
+        }
     };
     GLGEGraphics.prototype.methodTable["Animate"]=function(msg) {
         var vwObject = this.mObjects[msg.id];
