@@ -144,10 +144,10 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
                             function (e){thus.windowVisible=false;},
                             false);
     canvas.addEventListener('focus',
-                            function (e){console.log("visible true ");thus.canvasVisible=true;},
+                            function (e){thus.canvasVisible=true;},
                             false);
     canvas.addEventListener('blur',
-                            function (e){console.log("visible false ");thus.canvasVisible=false;},
+                            function (e){thus.canvasVisible=false;},
                             false);
     canvas.addEventListener('mousedown',
                             function (e){thus._mouseDown(e);},
