@@ -902,6 +902,7 @@ Kata.require([
             ev = this._extractMouseEventInfo(e, "pick");
             this._rayTrace(ev.camerapos, ev.dir, ev);
             this._inputCb(ev);
+            this.doubleBuffer=2;
         }
         // Prevent selecting.
         window.focus();
