@@ -42,7 +42,7 @@ self.onmessage = function (ev) {
     var scriptroot = data[0];
     var queryString = data[5] || "";
     try {
-        importScripts(scriptroot+"katajs.compiled.js"+queryString);
+        //importScripts(scriptroot+"katajs.compiled.js"+queryString);
     } catch (e) {
         try {
             console.log("Exception loading katajs.compiled.js", e);

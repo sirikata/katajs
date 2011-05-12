@@ -6,3 +6,6 @@ tests/pbj/*.pbj.js
 
 # Closure compiled output
 katajs.compiled.js
+
+compiler-latest.zip
+compiler.jar

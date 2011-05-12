@@ -11,19 +11,18 @@ THESE_PBJJS=$(patsubst $(INPUTDIR)/%,$(OUTPUTDIR)/%.js,$(THESE_PBJ))
 ALL_PBJJS += $(THESE_PBJJS)
 
 ### Closure Vars
-CLOSURESRCS=externals/GLGE/src/core/glge.js externals/GLGE/src/core/glge_math.js externals/GLGE/src/core/glge_document.js externals/GLGE/src/core/glge_event.js externals/GLGE/src/core/glge_animatable.js externals/GLGE/src/core/glge_placeable.js  externals/GLGE/src/core/glge_jsonloader.js externals/GLGE/src/core/glge_quicknote.js externals/GLGE/src/core/glge_messages.js  externals/GLGE/src/core/glge_group.js externals/GLGE/src/renderable/glge_object.js $(shell find externals/GLGE/src  -name '*.js' -and -not -path "*externals/GLGE/src/core/*" -and -not -path "*externals/GLGE/src/extra/*" -and -not -name glge_object.js)
+CLOSURESRCS=katajs/core/Core.js externals/GLGE/src/core/glge.js externals/GLGE/src/core/glge_math.js externals/GLGE/src/core/glge_document.js externals/GLGE/src/core/glge_event.js externals/GLGE/src/core/glge_animatable.js externals/GLGE/src/core/glge_placeable.js  externals/GLGE/src/core/glge_jsonloader.js externals/GLGE/src/core/glge_quicknote.js externals/GLGE/src/core/glge_messages.js  externals/GLGE/src/core/glge_group.js externals/GLGE/src/renderable/glge_object.js $(shell find externals/GLGE/src  -name '*.js' -and -not -path "*externals/GLGE/src/core/*" -and -not -path "*externals/GLGE/src/extra/*" -and -not -name glge_object.js|sort -r)
 
-CLOSURESRCS+=$(shell find externals/GLGE/src/extra -name "*.js" )
+CLOSURESRCS+=$(shell find externals/GLGE/src/extra -name "*.js"|sort -r)
 
-CLOSURESRCS+= katajs/core/Core.js \
-	externals/protojs/protobuf.js externals/protojs/pbj.js \
+CLOSURESRCS+= externals/protojs/protobuf.js externals/protojs/pbj.js \
 	katajs/gfx/WebGLCompat.js katajs/gfx/glgegfx.js katajs/gfx/TextGraphics.js
 
-CLOSURESRCS+=$(shell find katajs/core katajs/oh katajs/network katajs/space -name '*.js' -and -not -name 'Core.js' -and -not -name 'GenericWorker.js' )
+CLOSURESRCS+=$(shell find katajs/core katajs/oh katajs/network katajs/space -name '*.js' -and -not -name 'Core.js' -and -not -name 'GenericWorker.js' |sort)
 
 CLOSUREOUT=katajs.compiled.js
 
-CLOSURE=java -jar externals/GLGE/closure/compiler.jar
+CLOSURE=java -jar compiler.jar
 CLOSUREARGS=--js $$before
 CLOSUREARGS+=$(patsubst %,--js %,$(CLOSURESRCS))
 CLOSUREARGS+=--js $$after
@@ -60,8 +59,15 @@ $(OUTPUTDIR)/%.pbj.js: $(INPUTDIR)/%.pbj
 	$(PBJBIN) $< $@
 
 ### Closure Rules
+compiler-latest.zip:
+	curl -o compiler-latest.zip http://closure-compiler.googlecode.com/files/compiler-20110405.zip
 
-closure : $(CLOSUREOUT)
+compiler.jar : compiler-latest.zip
+	unzip compiler-latest.zip compiler.jar
+	touch compiler.jar
+
+closure : compiler.jar $(CLOSUREOUT)
+
 depends:
 	git submodule init
 	git submodule update
