@@ -11,10 +11,14 @@ THESE_PBJJS=$(patsubst $(INPUTDIR)/%,$(OUTPUTDIR)/%.js,$(THESE_PBJ))
 ALL_PBJJS += $(THESE_PBJJS)
 
 ### Closure Vars
-CLOSURESRCS=katajs/core/Core.js \
+CLOSURESRCS=externals/GLGE/src/core/glge.js externals/GLGE/src/core/glge_math.js externals/GLGE/src/core/glge_document.js externals/GLGE/src/core/glge_event.js externals/GLGE/src/core/glge_animatable.js externals/GLGE/src/core/glge_placeable.js  externals/GLGE/src/core/glge_jsonloader.js externals/GLGE/src/core/glge_quicknote.js externals/GLGE/src/core/glge_messages.js  externals/GLGE/src/core/glge_group.js externals/GLGE/src/renderable/glge_object.js $(shell find externals/GLGE/src  -name '*.js' -and -not -path "*externals/GLGE/src/core/*" -and -not -path "*externals/GLGE/src/extra/*" -and -not -name glge_object.js)
+
+CLOSURESRCS+=$(shell find externals/GLGE/src/extra -name "*.js" )
+
+CLOSURESRCS+= katajs/core/Core.js \
 	externals/protojs/protobuf.js externals/protojs/pbj.js \
-	externals/GLGE/src/core/glge_math.js externals/GLGE/src/core/glge.js externals/GLGE/src/extra/glge_collada.js \
 	katajs/gfx/WebGLCompat.js katajs/gfx/glgegfx.js katajs/gfx/TextGraphics.js
+
 CLOSURESRCS+=$(shell find katajs/core katajs/oh katajs/network katajs/space -name '*.js' -and -not -name 'Core.js' -and -not -name 'GenericWorker.js' )
 
 CLOSUREOUT=katajs.compiled.js
