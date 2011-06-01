@@ -202,7 +202,7 @@ Kata.require([
     };
 
 
-    Kata.SirikataSpaceConnection.prototype.connectObject = function(id, auth, loc, vis) {
+    Kata.SirikataSpaceConnection.prototype.connectObject = function(id, auth, loc, vis, query) {
         var objid = this._getObjectID(id);
 
         //Kata.warn("Connecting " + id + " == " + objid);
@@ -240,8 +240,9 @@ Kata.require([
         if (loc_parts.visual)
             connect_msg.mesh = loc_parts.visual;
 
-        // FIXME don't always register queries, allow specifying angle
-        connect_msg.query_angle = 0.00000000000000000000000001;
+        if (query)
+            // FIXME: allow specifying angle
+            connect_msg.query_angle = 0.00000000000000000000000001;
 
         var session_msg = new Sirikata.Protocol.Session.Container();
         session_msg.connect = connect_msg;
@@ -549,13 +550,12 @@ Kata.require([
         var str = new PROTO.ByteArrayStream(data);
         if (!framed_msg.ParseFromStream(str)) {
             this.mIncompleteLocationData[stream.mUSID] = data;
-            console.log("+ "+stream.mUSID+" len "+this.mIncompleteLocationData[stream.mUSID].length);
             return;
         }
         if (this.mIncompleteLocationData[stream.mUSID]) {
-            console.log("- "+stream.mUSID+" len "+data.length);
             delete this.mIncompleteLocationData[stream.mUSID];
         }
+        console.log("bulk loc update for "+this.mSpaceURL+"/"+objid+" stream "+stream.mUSID);
 
         // Parse the internal loc update
         var loc_update_msg = new Sirikata.Protocol.Loc.BulkLocationUpdate();

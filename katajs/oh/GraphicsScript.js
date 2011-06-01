@@ -73,6 +73,16 @@ Kata.require([
      };
      Kata.extend(Kata.GraphicsScript, SUPER);
 
+     /** Request a presence in the given space.
+      *  @param {Kata.SpaceID} space ID of the space to connect to
+      *  @param {string} auth authentication information to pass to the space
+      *  @param {function(Kata.Presence)} cb callback to invoke upon completion
+      */
+     Kata.GraphicsScript.prototype.connect = function(args, auth, cb) {
+         // query for all objects, since we need to display them.
+         SUPER.connect.call(this, args, auth, cb, true);
+     };
+
       Kata.GraphicsScript.prototype._handleGUIMessage = function (channel, data) {
           if (data.msg=="loaded")
               this.cameraPeriodicUpdate(true);
