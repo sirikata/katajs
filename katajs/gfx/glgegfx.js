@@ -468,40 +468,43 @@ Kata.require([
         gfx._inputCb({msg:"MeshAspectRatio",id:this.mID,aspect:this.getMeshAspectRatio()});
     };
     /// note: animation ignored
-    VWObject.prototype.createMesh = function(gfx, path, animation, bounds) {
+    VWObject.prototype.createMesh = function(gfx, path, animation, bounds){
         if (path == null) {
             throw "loadScene with null path";
         }
-        if (path.lastIndexOf(".dae")==-1) {
-            path += ".dae";            
+        if (path.lastIndexOf(".dae") == -1) {
+            path += ".dae";
         }
         this.mMeshURI = path;
         var thus = this;
         var clda = new GLGE.Collada();
-        this.mLoading=true;
-        if (this.mID in gfx.mAnimatingObjects)
+        this.mLoading = true;
+        if (this.mID in gfx.mAnimatingObjects) 
             delete gfx.mAnimatingObjects[thus.mID];
         var loadedCallback;
-        loadedCallback=function(){
-	    clda.setScaleX(1);
-	    clda.setScaleY(1);
-	    clda.setScaleZ(1);
-            var bv=computeBoundingVolume(clda);//clda.getBoundingVolume(true);
-            var maxv=bv.radius;
-            var colladaUnitRescale=1/maxv;
+        loadedCallback = function(){
+            clda.setScaleX(1);
+            clda.setScaleY(1);
+            clda.setScaleZ(1);
+            var bv = computeBoundingVolume(clda);//clda.getBoundingVolume(true);
+            var maxv = bv.radius;
+            var colladaUnitRescale = 1 / maxv;
             
             //console.log("Scaling by "+colladaUnitRescale+" instead of "+scale);
             //console.log("Offsetting by -["+thus.bv.center+"] instead of "+offset);
-            clda.setScaleX(maxv?thus.mBounds[3]*colladaUnitRescale:1);
-            clda.setScaleY(maxv?thus.mBounds[3]*colladaUnitRescale:1);
-            clda.setScaleZ(maxv?thus.mBounds[3]*colladaUnitRescale:1);
-            clda.setLocX(thus.mBounds[0]-(bv.center[0]*colladaUnitRescale)*thus.mBounds[3]);
-            clda.setLocY(thus.mBounds[1]-(bv.center[1]*colladaUnitRescale)*thus.mBounds[3]);
-            clda.setLocZ(thus.mBounds[2]-(bv.center[2]*colladaUnitRescale)*thus.mBounds[3]);
-
-            gfx._inputCb({msg:"loaded",id:thus.mID});
-            clda.removeEventListener("loaded",loadedCallback);
-
+            clda.setScaleX(maxv ? thus.mBounds[3] * colladaUnitRescale : 1);
+            clda.setScaleY(maxv ? thus.mBounds[3] * colladaUnitRescale : 1);
+            clda.setScaleZ(maxv ? thus.mBounds[3] * colladaUnitRescale : 1);
+            clda.setLocX(thus.mBounds[0] - (bv.center[0] * colladaUnitRescale) * thus.mBounds[3]);
+            clda.setLocY(thus.mBounds[1] - (bv.center[1] * colladaUnitRescale) * thus.mBounds[3]);
+            clda.setLocZ(thus.mBounds[2] - (bv.center[2] * colladaUnitRescale) * thus.mBounds[3]);
+            
+            gfx._inputCb({
+                msg: "loaded",
+                id: thus.mID
+            });
+            clda.removeEventListener("loaded", loadedCallback);
+            
             thus.mLoaded = true;
             gfx.newEvent();
             // If somebody set an animation *while* we were loading, honor that request now
@@ -511,67 +514,76 @@ Kata.require([
                 thus.mCurAnimation = "";
                 thus.animate(anim);
             }
-            function hasAnimations(node) {
-                if (node.getAnimation()){
+            function hasAnimations(node){
+                if (node.getAnimation()) {
                     return true;
                 }
                 var child;
                 var i;
-                if (node.children)
-                    for (i=0;i<node.children.length;++i){
-                        child=node.children[i];
-                        if (hasAnimations(child))
+                if (node.children) 
+                    for (i = 0; i < node.children.length; ++i) {
+                        child = node.children[i];
+                        if (hasAnimations(child)) 
                             return true;
                     }
                 return false;
             }
-            if (thus.mMesh==clda) {
-                thus.bv=bv;
+            if (thus.mMesh == clda) {
+                thus.bv = bv;
                 delete thus.mLoading;
-		thus.updateTransformation(gfx);
+                thus.updateTransformation(gfx);
                 if (hasAnimations(clda)) {
-                    gfx.mAnimatingObjects[thus.mID]=thus.mNode;
-                    setTimeout(function(){gfx.newEvent();},8000);
-                    setTimeout(function(){gfx.newEvent();},4000);
+                    gfx.mAnimatingObjects[thus.mID] = thus.mNode;
+                    setTimeout(function(){
+                        gfx.newEvent();
+                    }, 8000);
+                    setTimeout(function(){
+                        gfx.newEvent();
+                    }, 4000);
                 }
-                if (thus.mQueryAspectCount){
-                    for (var i=0;i<thus.mQueryAspectCount;++i) {
+                if (thus.mQueryAspectCount) {
+                    for (var i = 0; i < thus.mQueryAspectCount; ++i) {
                         thus.queryMeshAspectRatio(gfx);
                     }
-                    delete thus.mQueryAspectCount;                    
+                    delete thus.mQueryAspectCount;
                 }
-            }else if (thus.mQueryAspectCount && thus.mQueryAspectCount > 1){
-                thus.queryMeshAspectRatio(gfx);
-                thus.mQueryAspectCount--;//update it once before the load so tha
             }
+            else 
+                if (thus.mQueryAspectCount && thus.mQueryAspectCount > 1) {
+                    thus.queryMeshAspectRatio(gfx);
+                    thus.mQueryAspectCount--;//update it once before the load so tha
+                }
         };
-        var downloadedCallback=function(){
+        var downloadedCallback = function(){
             gfx.newEvent();
-            gfx._inputCb({msg:"downloadComplete",id:thus.mID});
-            clda.removeEventListener("downloadComplete",downloadedCallback);
+            gfx._inputCb({
+                msg: "downloadComplete",
+                id: thus.mID
+            });
+            clda.removeEventListener("downloadComplete", downloadedCallback);
         };
-        clda.addEventListener("loaded",loadedCallback);
-        clda.addEventListener("downloadComplete",downloadedCallback);
+        clda.addEventListener("loaded", loadedCallback);
+        clda.addEventListener("downloadComplete", downloadedCallback);
         clda.setDocument(this.mMeshURI);
-    
+        
         
         clda.setScaleX(bounds[3]);
         clda.setScaleY(bounds[3]);
         clda.setScaleZ(bounds[3]);
         /// danx0r: removing this hack, it's now dealt with in glge etc
         /*
-        clda.setRotMatrix(GLGE.Mat4([1, 0 , 0,  0,
-					                 0, 0, 1, 0,
-					                 0, -1, 0, 0,
-					                 0, 0, 0, 1]));
-        */
+     clda.setRotMatrix(GLGE.Mat4([1, 0 , 0,  0,
+     0, 0, 1, 0,
+     0, -1, 0, 0,
+     0, 0, 0, 1]));
+     */
         clda.setLocX(bounds[0]);
         clda.setLocY(bounds[1]);
         clda.setLocZ(bounds[2]);
-        this.mBounds=bounds;
+        this.mBounds = bounds;
         this.mNode.addCollada(clda);
         this.mMesh = clda;
-	this.updateTransformation(gfx);
+        this.updateTransformation(gfx);
         console.log("DEBUG:", GLGE.PhysicsMesh)
         return clda;
     };
