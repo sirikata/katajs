@@ -401,7 +401,7 @@ Kata.require([
 
             if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Success) {
                 var id = this._getLocalID(objid);
-                Kata.warn("Successfully connected " + id);
+                Kata.log("Successfully connected " + id);
 
                 // Send ack
                 var connect_ack_msg = new Sirikata.Protocol.Session.ConnectAck();
@@ -470,7 +470,7 @@ Kata.require([
             return;
         }
 
-        Kata.warn("Successful SST space connection for " + objid + ". Setting up loc and prox listeners.");
+        Kata.log("Successful SST space connection for " + objid + ". Setting up loc and prox listeners.");
         // Store the stream for later use
         this.mConnectedObjects[objid].spaceStream = stream;
 

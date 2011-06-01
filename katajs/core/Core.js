@@ -472,7 +472,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
      *         with the rest of the information.
      */
     Kata.notImplemented = function(note) {
-        Kata.warn(note, "notImplemented");
+        Kata.log(note, "notImplemented");
     };
 
     var nextDebugId = 1001;
