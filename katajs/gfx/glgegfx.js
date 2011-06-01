@@ -932,10 +932,12 @@ Kata.require([
         /// new physics-based picking code:
         var result = this.renderer.getScene().physicsPick(ev.clientX, ev.clientY);
         if (result) {
-           console.log("DEBUG pick:", result, result.position[0], result.position[1], result.position[2], "dist:", result.distance);
+            var ball = g_GLGE_doc.getElement("ball");
+            ball.setLoc(result.position[0], result.position[1], result.position[2]);
+            console.log("DEBUG pick:", ball, result, result.position[0], result.position[1], result.position[2], "dist:", result.distance);
         }
         else {
-           console.log("DEBUG pick false");
+            console.log("DEBUG pick false");
         }
          
         // Prevent selecting.
