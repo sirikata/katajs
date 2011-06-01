@@ -460,8 +460,13 @@ Kata.require([
     VWObject.prototype.queryMeshAspectRatio = function (gfx) {
         gfx._inputCb({msg:"MeshAspectRatio",id:this.mID,aspect:this.getMeshAspectRatio()});
     };
+    VWObject.prototype.destroyMesh = function() {
+        this.mNode.removeChild(this.mMesh);
+        this.mMesh = null;
+    };
     /// note: animation ignored
     VWObject.prototype.createMesh = function(gfx, path, animation, bounds) {
+        this.destroyMesh();
         if (path == null) {
             throw "loadScene with null path";
         }

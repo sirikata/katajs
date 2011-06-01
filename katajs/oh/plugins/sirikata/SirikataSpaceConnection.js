@@ -511,8 +511,8 @@ Kata.require([
             update_request.orientation = loc_parts.orient;
         if (loc_parts.bounds)
             update_request.bounds = loc_parts.bounds;
-        if (loc_parts.visual)
-            update_request.mesh = loc_parts.visual;
+        if (typeof(visual)=="string")
+            update_request.mesh = visual;
 
         var container = new Sirikata.Protocol.Loc.Container();
         container.update_request = update_request;
@@ -574,9 +574,7 @@ Kata.require([
             // received.  The visual parameter is handled seperately,
             // so we just fill it in before any calls to
             // presenceLocUpdate.
-            var visual;
-            if (update.mesh)
-                visual = update.mesh;
+            var visual = update.mesh;
 
             if (update.location) {
                 var loc = {};
