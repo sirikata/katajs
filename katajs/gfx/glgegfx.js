@@ -222,6 +222,7 @@ Kata.require([
      'externals/GLGE/src/animation/glge_animationcurve.js',
      'externals/GLGE/src/animation/glge_animationpoints.js',
      'externals/GLGE/src/animation/glge_action.js',
+     'externals/GLGE/examples/physicspicking/jiglib.js',                           /// ok for now; should eventually get jiglibjs as an external module
      'externals/GLGE/src/physics/glge_physicsabstract.js',
      'externals/GLGE/src/physics/glge_physicssphere.js',
      'externals/GLGE/src/physics/glge_physicsplane.js',
@@ -581,10 +582,12 @@ Kata.require([
         clda.setLocY(bounds[1]);
         clda.setLocZ(bounds[2]);
         this.mBounds = bounds;
-        this.mNode.addCollada(clda);
+        var pmesh = new GLGE.PhysicsMesh();
+        pmesh.addChild(clda);
+        console.log("DEBUG pmesh:", pmesh)
+        this.mNode.addChild(pmesh);
         this.mMesh = clda;
         this.updateTransformation(gfx);
-        console.log("DEBUG:", GLGE.PhysicsMesh)
         return clda;
     };
 
