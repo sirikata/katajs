@@ -221,7 +221,14 @@ Kata.require([
      'externals/GLGE/src/animation/glge_animationvector.js',
      'externals/GLGE/src/animation/glge_animationcurve.js',
      'externals/GLGE/src/animation/glge_animationpoints.js',
-     'externals/GLGE/src/animation/glge_action.js']], function(){
+     'externals/GLGE/src/animation/glge_action.js',
+     'externals/GLGE/src/physics/glge_physicsabstract.js',
+     'externals/GLGE/src/physics/glge_physicssphere.js',
+     'externals/GLGE/src/physics/glge_physicsplane.js',
+     'externals/GLGE/src/physics/glge_physicsmesh.js',
+     'externals/GLGE/src/physics/glge_physicsconstraintpoint.js',
+     'externals/GLGE/src/physics/glge_physicsbox.js',
+     ]], function(){
     GLGEGraphics.prototype.newEvent=function (){
         this.doubleBuffer=3;
     };
@@ -565,6 +572,7 @@ Kata.require([
         this.mNode.addCollada(clda);
         this.mMesh = clda;
 	this.updateTransformation(gfx);
+        console.log("DEBUG:", GLGE.PhysicsMesh)
         return clda;
     };
 
