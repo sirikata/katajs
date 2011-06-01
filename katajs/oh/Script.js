@@ -95,9 +95,10 @@ Kata.require([
       *  @param {Kata.SpaceID} space ID of the space to connect to
       *  @param {string} auth authentication information to pass to the space
       *  @param {function(Kata.Presence)} cb callback to invoke upon completion
+      *  @param {boolean=} query Enable querying for all RemotePresences (false)
       */
-     Kata.Script.prototype.connect = function(args, auth, cb) {
-         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth, args.loc, args.visual);
+     Kata.Script.prototype.connect = function(args, auth, cb, query) {
+         var msg = new Kata.ScriptProtocol.FromScript.Connect(args.space, auth, args.loc, args.visual, query);
          this.mConnectRequests[args.space] = cb;
          this._sendHostedObjectMessage(msg);
      };

@@ -109,7 +109,7 @@ Kata.require([
                  return data;
              },
 
-             Connect : function(space, auth, loc, vis) {
+             Connect : function(space, auth, loc, vis, query) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Connect;
                  this.space = space;
                  this.auth = auth;
@@ -117,6 +117,8 @@ Kata.require([
                      Kata.LocationCopyUnifyTime(loc,this);
                  if (vis)
                      this.visual = vis;
+                 if (query)
+                     this.query = query;
              },
              RegisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.EnableGUIMessage;

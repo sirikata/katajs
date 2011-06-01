@@ -82,6 +82,17 @@ Kata.require([
          var msg = new Kata.ScriptProtocol.FromScript.GFXQueryMeshAspectRatio(presence.space(),presence.id(),remotePresence);
          this._sendHostedObjectMessage(msg);
      };
+
+     /** Request a presence in the given space.
+      *  @param {Kata.SpaceID} space ID of the space to connect to
+      *  @param {string} auth authentication information to pass to the space
+      *  @param {function(Kata.Presence)} cb callback to invoke upon completion
+      */
+     Kata.GraphicsScript.prototype.connect = function(args, auth, cb) {
+         // query for all objects, since we need to display them.
+         SUPER.connect.call(this, args, auth, cb, true);
+     };
+
      /**
       * Enables graphics on the main canvas viewport. 
       * @param {Kata.Presence} presence The presence that graphics should be enabled for

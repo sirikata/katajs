@@ -96,7 +96,7 @@ Kata.require([
          this.mObjects[ho.getID()] = ho;
 
          // And try to connect
-         space_conn.connectObject(ho.getID(), auth, req, req.visual);
+         space_conn.connectObject(ho.getID(), auth, req, req.visual, req.query);
      };
 
      /** Callback from SpaceConnection which allows us to alias an ID
