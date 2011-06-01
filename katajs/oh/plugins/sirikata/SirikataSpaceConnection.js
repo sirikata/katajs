@@ -542,18 +542,19 @@ Kata.require([
         // Currently we just assume each update is a standalone Frame
 
         // Parse the surrounding frame
-        if (this.mIncompleteLocationData[stream.mLSID]) {
-            data = this.mIncompleteLocationData[stream.mLSID].concat(data);
+        if (this.mIncompleteLocationData[stream.mUSID]) {
+            data = this.mIncompleteLocationData[stream.mUSID].concat(data);
         }
         var framed_msg = new Sirikata.Protocol.Frame();
-        if (!framed_msg.ParseFromStream(new PROTO.ByteArrayStream(data))) {
-            this.mIncompleteLocationData[stream.mLSID] = data;
-            console.log("+ "+stream.mLSID+" len "+this.mIncompleteLocationData[stream.mLSID].length);
+        var str = new PROTO.ByteArrayStream(data);
+        if (!framed_msg.ParseFromStream(str)) {
+            this.mIncompleteLocationData[stream.mUSID] = data;
+            console.log("+ "+stream.mUSID+" len "+this.mIncompleteLocationData[stream.mUSID].length);
             return;
         }
-        if (this.mIncompleteLocationData[stream.mLSID]) {
-            console.log("- "+stream.mLSID+" len "+data.length);
-            delete this.mIncompleteLocationData[stream.mLSID];
+        if (this.mIncompleteLocationData[stream.mUSID]) {
+            console.log("- "+stream.mUSID+" len "+data.length);
+            delete this.mIncompleteLocationData[stream.mUSID];
         }
 
         // Parse the internal loc update
