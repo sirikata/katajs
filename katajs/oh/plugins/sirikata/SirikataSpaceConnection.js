@@ -84,7 +84,7 @@ Kata.require([
         );
 
         this.mODPHandlers = {};
-
+        this.mIncompleteLocationData = {};
         // Time sync -- this needs to be updated to use the Sirikata sync protocol.
         this.mSync = new Kata.Sirikata.SyncClient(
             this,
@@ -542,8 +542,19 @@ Kata.require([
         // Currently we just assume each update is a standalone Frame
 
         // Parse the surrounding frame
+        if (this.mIncompleteLocationData[stream.mLSID]) {
+            data = this.mIncompleteLocationData[stream.mLSID].concat(data);
+        }
         var framed_msg = new Sirikata.Protocol.Frame();
-        framed_msg.ParseFromStream(new PROTO.ByteArrayStream(data));
+        if (!framed_msg.ParseFromStream(new PROTO.ByteArrayStream(data))) {
+            this.mIncompleteLocationData[stream.mLSID] = data;
+            console.log("+ "+stream.mLSID+" len "+this.mIncompleteLocationData[stream.mLSID].length);
+            return;
+        }
+        if (this.mIncompleteLocationData[stream.mLSID]) {
+            console.log("- "+stream.mLSID+" len "+data.length);
+            delete this.mIncompleteLocationData[stream.mLSID];
+        }
 
         // Parse the internal loc update
         var loc_update_msg = new Sirikata.Protocol.Loc.BulkLocationUpdate();
