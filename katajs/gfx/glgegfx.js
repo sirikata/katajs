@@ -229,6 +229,7 @@ Kata.require([
      'externals/GLGE/src/physics/glge_physicsmesh.js',
      'externals/GLGE/src/physics/glge_physicsconstraintpoint.js',
      'externals/GLGE/src/physics/glge_physicsbox.js',
+     'externals/GLGE/src/physics/glge_physicsext.js',
      ]], function(){
     GLGEGraphics.prototype.newEvent=function (){
         this.doubleBuffer=3;
@@ -1127,6 +1128,9 @@ Kata.require([
         var curParentNode=null;
         if (prevParent==null){
             prevParentNode=this.mSpaceRoots[vwObject.mSpaceID].mScene;
+//            var result=prevParentNode.pick(400,400);            /// paul's old routine
+            var result=prevParentNode.physicsPick(400,400);
+            console.log("DEBUG pick:", result);
         }else {
             prevParentNode=prevParent.mNode;
         }
