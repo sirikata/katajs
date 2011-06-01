@@ -928,6 +928,16 @@ Kata.require([
             this._inputCb(ev);
             this.doubleBuffer=2;
         }
+        
+        /// new physics-based picking code:
+        var result = this.renderer.getScene().physicsPick(ev.clientX, ev.clientY);
+        if (result) {
+           console.log("DEBUG pick:", result, result.position[0], result.position[1], result.position[2], "dist:", result.distance);
+        }
+        else {
+           console.log("DEBUG pick false");
+        }
+         
         // Prevent selecting.
         window.focus();
         e.target.focus();
@@ -1128,9 +1138,6 @@ Kata.require([
         var curParentNode=null;
         if (prevParent==null){
             prevParentNode=this.mSpaceRoots[vwObject.mSpaceID].mScene;
-//            var result=prevParentNode.pick(400,400);            /// paul's old routine
-            var result=prevParentNode.physicsPick(400,400);
-            console.log("DEBUG pick:", result);
         }else {
             prevParentNode=prevParent.mNode;
         }
@@ -1187,7 +1194,7 @@ Kata.require([
         }
     };
     GLGEGraphics.prototype.methodTable["Move"]=function(msg) {
-        var vwObject=this.mObjects[msg.id];
+        var vwObject = this.mObjects[msg.id];
         if (vwObject) {
             this.moveTo(vwObject,msg);
             vwObject.update(this);            
