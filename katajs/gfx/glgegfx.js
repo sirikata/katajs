@@ -253,7 +253,12 @@ Kata.require([
     };
 
     /// note: animation ignored
+    VWObject.prototype.destroyMesh = function() {
+        this.mNode.removeChild(this.mMesh);
+        this.mMesh = null;
+    };
     VWObject.prototype.createMesh = function(gfx, path, animation, offset, scale) {
+        this.destroyMesh();
         if (path == null) {
             throw "loadScene with null path";
         }

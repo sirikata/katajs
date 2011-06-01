@@ -235,13 +235,16 @@ Kata.require([
                  this.msg="Destroy";
                  this.id = remotePresence.id();
              },
-             generateGFXUpdateVisualMessages : function(space, observer, remotePresence) {
+             generateGFXUpdateVisualMessages : function(space, observer, remotePresence, prevMesh) {
                  var messageList=[];
                  if (remotePresence.rMesh) {
                      messageList.push(new Kata.ScriptProtocol.FromScript.GFXUpdateVisualMesh(space, 
                         observer, remotePresence.id(), remotePresence.rMesh, remotePresence.rAnim, remotePresence.rUpAxis,
                         remotePresence.rCenter, remotePresence.scale()));
-                 }else {
+                 }else if (prevMesh) {
+                     messageList.push(new Kata.ScriptProtocol.FromScript.GFXUpdateVisualMesh(space,
+                        observer, remotePresence.id(), null));
+                 } else {
                     //MIGHT be a light or somesuch
                  }
                  return messageList;

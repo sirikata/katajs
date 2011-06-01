@@ -118,13 +118,9 @@ Kata.require([
          Kata.LocationCopyUnifyTime(msg,remotePresence.mLocation);
          this._sendHostedObjectMessage(msg);
          //in our space, add Mesh to the new graphics subsystem;
-		 if (!noMesh) {
-		 	var messages = Kata.ScriptProtocol.FromScript.generateGFXUpdateVisualMessages(presence.space(), presence.id(), remotePresence);
-		 	var len = messages.length;
-		 	for (var i = 0; i < len; ++i) {
-		 		this._sendHostedObjectMessage(messages[i]);
-		 	}
-		 }
+         if (noMesh) {
+             remotePresence.noMesh = true;
+         }
          remotePresence.inGFXSceneGraph = true;
          // Give everything a chance to run an initial update pass
          this.updateGFX(remotePresence);
@@ -351,6 +347,16 @@ Kata.require([
              { loc : remotePresence.predictedLocation() }
          );
          this._sendHostedObjectMessage(msg);
+         if (remotePresence.lastGFXVisual != remotePresence.visual()) {
+             if (!remotePresence.noMesh) {
+                 var messages = Kata.ScriptProtocol.FromScript.generateGFXUpdateVisualMessages(presence.space(), presence.id(), remotePresence, remotePresence.lastGFXVisual);
+                 var len = messages.length;
+                 for (var i = 0; i < len; ++i) {
+                     this._sendHostedObjectMessage(messages[i]);
+                 }
+             }
+             remotePresence.lastGFXVisual = remotePresence.visual();
+		 }
          if (this.mUpdateHook)
              this.mUpdateHook(presence, remotePresence);
      };

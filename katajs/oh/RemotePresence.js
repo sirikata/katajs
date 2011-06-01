@@ -214,7 +214,7 @@ Kata.require([
      };
      /** Get the current estimate of this object's visual representation (e.g. mesh). */
      Kata.RemotePresence.prototype.visual = function() {
-         return this.mVisual;
+         return this.rMesh;
      };
 
      /** Method that should only be used by the Script base class to
@@ -264,8 +264,8 @@ Kata.require([
              this.mLocation = Kata.LocationUpdate(loc,this.mLocation,undefined,Kata.now(this.mSpace));
          }
 
-         if (visual) {
-             this.mVisual = visual;
+         if (visual != undefined) {
+             this.rMesh = visual;
          }
      };
 }, 'katajs/oh/RemotePresence.js');

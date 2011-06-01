@@ -340,7 +340,8 @@ Kata.require([
          this._sendHostedObjectMessage(msg);
      };
      Kata.Presence.prototype.setVisual = function(val) {
-         var msg = new Kata.ScriptProtocol.FromScript.Visual(this.mSpace, this.mID, val);
+         var msg = new Kata.ScriptProtocol.FromScript.Location(this.mSpace, this.mID, val);
+         msg.visual = val;
          this._sendHostedObjectMessage(msg);
      };
 
