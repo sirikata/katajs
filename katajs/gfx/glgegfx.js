@@ -812,6 +812,12 @@ Kata.require([
     };
     GLGEGraphics.prototype.setInputCallback=function(cb) {
         this._inputCb = cb;
+        /*// debug:
+        this._inputCb = function () {
+            console.log("DEBUG cb:", arguments[0].msg, arguments[0].x, arguments[0].y)
+            cb.apply(this, arguments)
+        };
+        */
     };
     
     function cloneEvent(e) {
@@ -897,7 +903,6 @@ Kata.require([
         result.id = objid;
         result.pos = pickresult && pickresult.coord;
         result.normal = pickresult && pickresult.normal;
-        return result.id && true || false;
     };
 
     GLGEGraphics.prototype._mouseDown = function(e){
@@ -925,21 +930,29 @@ Kata.require([
         if (this._enabledEvents["pick"]) {
             ev = this._extractMouseEventInfo(e, "pick");
             this._rayTrace(ev.camerapos, ev.dir, ev);
+//            console.log("DEBUG Pick event:", ev) 
             this._inputCb(ev);
             this.doubleBuffer=2;
+            // debug by showing where the pick is occurring
+            if (ev.pos) {
+                var ball = g_GLGE_doc.getElement("ball");
+                ball.setLoc(ev.pos[0], ev.pos[1], ev.pos[2]);
+            }
         }
         
+        /*
         /// new physics-based picking code:
-        var result = this.renderer.getScene().physicsPick(ev.clientX, ev.clientY);
+        var result = this.renderer.getScene().pick(ev.clientX, ev.clientY);
+        if(result.coord) result.position=result.coord;
         if (result) {
             var ball = g_GLGE_doc.getElement("ball");
+            console.log("DEBUG pick:", ball, result)//, result.position[0], result.position[1], result.position[2], "dist:", result.distance);
             ball.setLoc(result.position[0], result.position[1], result.position[2]);
-            console.log("DEBUG pick:", ball, result, result.position[0], result.position[1], result.position[2], "dist:", result.distance);
         }
         else {
             console.log("DEBUG pick false");
         }
-         
+        */
         // Prevent selecting.
         window.focus();
         e.target.focus();
