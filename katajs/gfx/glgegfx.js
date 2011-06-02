@@ -929,8 +929,24 @@ Kata.require([
 
         if (this._enabledEvents["pick"]) {
             ev = this._extractMouseEventInfo(e, "pick");
-            this._rayTrace(ev.camerapos, ev.dir, ev);
-//            console.log("DEBUG Pick event:", ev) 
+            if (this._enabledEvents['physicsPick']) {
+                var r = this.renderer.getScene().physicsPick(ev.x, ev.y);
+                console.log("DEBUG physicsPick:", r)
+                //ev.id = r.object;
+                ev.pos = r.position;
+                ev.normal = r.normal;
+                var obj = r && r.object;
+                while (obj && !obj.mKataObject) {
+                    obj = obj.parent;
+                }
+                ev.id = obj && obj.mKataObject && obj.mKataObject.mID;
+                if (!ev.id) 
+                    ev.id = null;
+            }
+            else {
+                this._rayTrace(ev.camerapos, ev.dir, ev);
+            }
+            console.log("DEBUG Pick event:", ev) 
             this._inputCb(ev);
             this.doubleBuffer=2;
             // debug by showing where the pick is occurring
