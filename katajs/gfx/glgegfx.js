@@ -425,7 +425,10 @@ Kata.require([
 
         if (anim_name == this.mCurAnimation) return;
 
-        var actions = mesh.getColladaActions();
+        var actions = {};
+        if (mesh) {
+            actions = mesh.getColladaActions();
+        }
         var new_anim = actions[anim_name];
         if (!new_anim) {
             // When loading, still record current animation so we can start it when loading finishes
