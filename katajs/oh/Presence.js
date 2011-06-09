@@ -113,6 +113,8 @@ Kata.require([
              );
          }
          else {
+             this.ODPRouter = bdl.mRouter;
+             this.ODPDispatcher = bdl.mDispatcher;
              this.ODPBaseDatagramLayer = bdl;
          }
      };

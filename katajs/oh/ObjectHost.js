@@ -144,6 +144,10 @@ Kata.require([
       * @param {string} auth authentication information for the space
       */
      Kata.ObjectHost.prototype.connect = function(ho, req, auth) {
+         if (req.scale.length==3) {
+             Kata.warn("outdated bounds: "+req.scale);
+             req.scale=[0,0,0,req.scale[0]];
+         }
          this.mSessionManager.connect(ho, req, auth);
      };
 
@@ -161,6 +165,14 @@ Kata.require([
 
      Kata.ObjectHost.prototype.locUpdateRequest = function(space, id, loc, visual) {
          this.mSessionManager.locUpdateRequest(space, id, loc, visual);
+     };
+
+     Kata.ObjectHost.prototype.requestQueryRemoval = function(space, id) {
+         this.mSessionManager.requestQueryRemoval(space, id);
+     };
+
+     Kata.ObjectHost.prototype.requestQueryUpdate = function(space, id, newSolidAngle) {
+         this.mSessionManager.requestQueryRemoval(space, id, newSolidAngle);
      };
 
      Kata.ObjectHost.prototype.subscribe = function(space, id, observe) {

@@ -178,6 +178,14 @@ Kata.require([
      };
 
      // Handle location (and visual) updates
+     Kata.LoopbackSpace.prototype.requestQueryRemoval = function(id) {
+         Kata.notImplemented("Loopback space does not handle query angles");
+     };
+     // Handle location (and visual) updates
+     Kata.LoopbackSpace.prototype.requestQueryUpdate = function(id, newAngle) {
+         Kata.notImplemented("Loopback space does not handle query angles");
+     };
+     // Handle location (and visual) updates
      Kata.LoopbackSpace.prototype.locUpdateRequest = function(id, loc, visual) {
          var spaceself = this;
 

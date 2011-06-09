@@ -190,7 +190,7 @@ Kata.require([
             else if (loc.scale.length == 3) {
                 // FIXME how to deal with differing values?
                 result.bounds = [0, 0, 0, loc.scale[0]];
-                console.log("IMPROPER BOUNDS LENGTH");
+                Kata.warn("IMPROPER BOUNDS LENGTH");
             }
             else if (loc.scale.length == 4) {
                 result.bounds = loc.scale;
@@ -241,10 +241,11 @@ Kata.require([
             connect_msg.bounds = loc_parts.bounds;
         if (loc_parts.visual)
             connect_msg.mesh = loc_parts.visual;
-
-        if (query)
-            // FIXME: allow specifying angle
+        if (query>0.0&&query!=true&&query) {
+            connect_msg.query_angle = query;
+        }else if (query) {
             connect_msg.query_angle = 0.00000000000000000000000001;
+        }
 
         var session_msg = new Sirikata.Protocol.Session.Container();
         session_msg.connect = connect_msg;
@@ -390,6 +391,7 @@ Kata.require([
         );
     };
 
+
     /* Handle session messages from the space server. */
     Kata.SirikataSpaceConnection.prototype._handleSessionMessage = function(odp_msg) {
         var session_msg = new Sirikata.Protocol.Session.Container();
@@ -526,6 +528,27 @@ Kata.require([
         spacestream.datagram(
             this._serializeMessage(container).getArray(),
             this.Ports.Location, this.Ports.Location
+        );
+    };
+
+    Kata.SirikataSpaceConnection.prototype.requestQueryRemoval = function(objid) {
+        this.requestQueryUpdate(objid,4*Math.PI);
+    };
+
+    Kata.SirikataSpaceConnection.prototype.requestQueryUpdate = function(objid, newAngle) {
+        // Generate and send an update to PINTO
+        var update_request = new Sirikata.Protocol.Prox.QueryRequest();
+        update_request.query_angle = newAngle;
+
+        var spacestream = this.mConnectedObjects[objid].spaceStream;
+        if (!spacestream) {
+            Kata.warn("Tried to send prox update before stream to server was ready.");
+            return;
+        }
+
+        spacestream.datagram(
+            this._serializeMessage(update_request).getArray(),
+            this.Ports.Proximity, this.Ports.Proximity
         );
     };
 

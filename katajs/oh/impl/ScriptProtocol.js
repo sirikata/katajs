@@ -91,6 +91,8 @@ Kata.require([
                  Location : "floc",
                  Visual : "fvis",
                  Query : "fque",
+                 QueryUpdate : "fqup",
+                 QueryRemoval : "fqrm",
                  Subscription : "fsub",
 
                  CreateObject : "fcre",

@@ -123,6 +123,14 @@ Kata.require([
          this.mSpace.locUpdateRequest(id, loc, visual);
      };
 
+     Kata.LoopbackSpaceConnection.prototype.requestQueryRemoval = function(id) {
+         this.mSpace.requestQueryRemoval(id);
+     };
+
+     Kata.LoopbackSpaceConnection.prototype.requestQueryUpdate = function(id,newAngle) {
+         this.mSpace.requestQueryUpdate(id,newAngle);
+     };
+
      Kata.LoopbackSpaceConnection.prototype.subscribe = function(id, observed) {
          this.mSpace.subscriptionRequest(id, observed, true);
      };

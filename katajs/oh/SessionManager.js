@@ -197,6 +197,20 @@ Kata.require([
              space_conn.locUpdateRequest(id, loc, visual);
      };
 
+     /** Send an update request to the space. */
+     Kata.SessionManager.prototype.requestQueryRemoval = function(space, id) {
+         var space_conn = this.mSpaceConnections[space];
+         if (space_conn !== undefined)
+             space_conn.locUpdateRequest(id, loc, visual);
+     };
+
+     /** Send an update request to the space. */
+     Kata.SessionManager.prototype.requestQueryUpdate = function(space, id, newSolidAngle) {
+         var space_conn = this.mSpaceConnections[space];
+         if (space_conn !== undefined)
+             space_conn.locUpdateRequest(id, newSolidAngle);
+     };
+
      /** Should be invoked by SpaceConnection classes when a location
       *  update for a presence is available.
       *  @param from

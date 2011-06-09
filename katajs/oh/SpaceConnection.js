@@ -80,6 +80,14 @@ Kata.require([
          Kata.notImplemented("SpaceConnection.locUpdateRequest");
      };
 
+     Kata.SpaceConnection.prototype.requestQueryRemoval = function(id) {
+         Kata.notImplemented("SpaceConnection.requestQueryRemoval");
+     };
+
+     Kata.SpaceConnection.prototype.requestQueryUpdate = function(id, newSolidAngle) {
+         Kata.notImplemented("SpaceConnection.requestQueryUpdate");
+     };
+
      /** Send a subscription request to the space.
       * @param id the identifier of the subscriber
       * @param observed the identifier of the object to listen for
