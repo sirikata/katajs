@@ -552,6 +552,26 @@ Kata.require([
         );
     };
 
+    Kata.SirikataSpaceConnection.prototype.setPhysics = function(objid, data) {
+        // Generate and send an update to Loc
+        var update_request = new Sirikata.Protocol.Loc.LocationUpdateRequest;
+        update_request.physics = data;
+
+        var container = new Sirikata.Protocol.Loc.Container;
+        container.update_request = update_request;
+
+        var spacestream = this.mConnectedObjects[objid].spaceStream;
+        if (!spacestream) {
+            Kata.warn("Tried to send loc update before stream to server was ready.");
+            return;
+        }
+
+        spacestream.datagram(
+            this._serializeMessage(container).getArray(),
+            this.Ports.Location, this.Ports.Location
+        );
+    };
+
     Kata.SirikataSpaceConnection.prototype._handleLocationSubstream = function(objid, error, stream) {
         if (error != 0)
             Kata.warn("Location substream (error " + error + ")");

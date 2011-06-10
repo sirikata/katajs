@@ -352,6 +352,10 @@ Kata.require([
          msg.visual = val;
          this._sendHostedObjectMessage(msg);
      };
+     Kata.Presence.prototype.setPhysics = function(val) {
+         var msg = new Kata.ScriptProtocol.FromScript.Physics(this.mSpace, this.mID, val);
+         this._sendHostedObjectMessage(msg);
+     };
 
      /** Notify the presence of an event on a remote presence, either
       * added or removed from a result set.  The Presence remains

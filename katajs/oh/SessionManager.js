@@ -211,6 +211,12 @@ Kata.require([
              space_conn.locUpdateRequest(id, newSolidAngle);
      };
 
+     Kata.SessionManager.prototype.setPhysics = function(space, id, data) {
+         var space_conn = this.mSpaceConnections[space];
+         if (space_conn !== undefined)
+             space_conn.setPhysics(id, data);
+     };
+
      /** Should be invoked by SpaceConnection classes when a location
       *  update for a presence is available.
       *  @param from

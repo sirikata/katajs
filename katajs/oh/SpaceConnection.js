@@ -88,6 +88,10 @@ Kata.require([
          Kata.notImplemented("SpaceConnection.requestQueryUpdate");
      };
 
+     Kata.SpaceConnection.prototype.setPhysics = function(id, data) {
+         Kata.notImplemented("SpaceConnection.setPhysics");
+     };
+
      /** Send a subscription request to the space.
       * @param id the identifier of the subscriber
       * @param observed the identifier of the object to listen for

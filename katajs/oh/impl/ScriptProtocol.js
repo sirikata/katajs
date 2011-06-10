@@ -93,6 +93,7 @@ Kata.require([
                  Query : "fque",
                  QueryUpdate : "fqup",
                  QueryRemoval : "fqrm",
+                 Physics : "fphys",
                  Subscription : "fsub",
 
                  CreateObject : "fcre",
@@ -185,6 +186,15 @@ Kata.require([
                  this.id = id;
                  this.observed = observed;
                  this.enable = enable;
+             },
+             Physics : function(space, id, data) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Physics;
+                 this.space = space;
+                 this.id = id;
+                 if (!(data instanceof Array)) {
+                     throw "ScriptProtocol.Physics: data must be serialized array of bytes";
+                 }
+                 this.data = data;
              },
              CreateObject : function(script, cons, args) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.CreateObject;

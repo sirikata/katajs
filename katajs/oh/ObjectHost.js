@@ -175,6 +175,10 @@ Kata.require([
          this.mSessionManager.requestQueryRemoval(space, id, newSolidAngle);
      };
 
+     Kata.ObjectHost.prototype.setPhysics = function(space, id, data) {
+         this.mSessionManager.setPhysics(space, id, data);
+     };
+
      Kata.ObjectHost.prototype.subscribe = function(space, id, observe) {
          this.mSessionManager.subscribe(space, id, observe);
      };
