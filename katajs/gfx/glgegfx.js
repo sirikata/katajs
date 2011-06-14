@@ -740,9 +740,9 @@ Kata.require([
                 } else {
                     newMaterial = obj.getMaterial();
                 }
-                newMaterial.setEmit(1.0);
-                newMaterial.setColor("#ff0000");
-                newMaterial.setAmbient(1.0);
+                newMaterial.setEmit(.5);
+                //newMaterial.setColor("#ff0000");
+                //newMaterial.setAmbient(1.0);
                 obj.setMaterial(newMaterial);
             });
         } else {
