@@ -71,6 +71,17 @@ Kata.require([
     
     Kata.extend(Kata.GraphicsSimulation, SUPER);
 
+    Kata.GraphicsSimulation.requestAnimFrame = Kata.bind((function(){
+      return  window.requestAnimationFrame       ||
+              window.webkitRequestAnimationFrame ||
+              window.mozRequestAnimationFrame    ||
+              window.oRequestAnimationFrame      ||
+              window.msRequestAnimationFrame     ||
+              function(/* function */ callback, /* DOMElement */ element){
+                window.setTimeout(callback, 1000 / 60);
+              };
+    })(), window);
+
     /** Handle receiving a cross-thread message
      * @param {Kata.Channel} channel Channel to the object host (in order to
      *     talk to controlling camera objects)
