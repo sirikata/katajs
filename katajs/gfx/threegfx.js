@@ -54,6 +54,7 @@ Kata.require([
         if (!canvas) {
             this.webGlCanvasError(parentElement, 'HTMLCanvas');
         }
+        canvas.setAttribute('tabindex', '0');
         canvas.style.width="100%";
         canvas.style.height="100%";
         container.appendChild(canvas);
@@ -74,15 +75,13 @@ Kata.require([
         this._bindEvents();
 
         this.mEnableRendering = false;
+
+        this.mLoader = new THREE.JSONLoader(  );
+
     };
 
     Kata.ThreeGraphics.prototype._bindEvents = function() {
         var thus = this;
-        if (Kata.ThreeGraphics.GLOBAL_KEYBOARD_GRAB) {
-            document.addEventListener('keydown',
-                                      function (e){thus._keyDown(e);},
-                                      true);
-        }
         // keyup handler is global, so that if you lose focus while the key is
         // pressed, you still get the event.
         document.addEventListener('keyup',
@@ -343,6 +342,7 @@ Kata.require([
         this.mSpaceID = spaceid;
         //this.mPack = pack;
         this.mNode = new THREE.Object3D(id);
+        this.mNode.matrixAutoUpdate = false;
         this.mMesh = null;
         this.mBounds=[0,0,0,1];
         this.mLabel = null;
@@ -375,117 +375,30 @@ Kata.require([
     /// note: animation ignored
     VWObject.prototype.createMesh = function(gfx, path, animation, bounds) {
         this.destroyMesh();
-/*
-        if (path == null) {
-            throw "loadScene with null path";
-        }
-        if (path.lastIndexOf(".dae")==-1) {
-            path += ".dae";            
-        }
-        this.mMeshURI = path;
         var thus = this;
-        var clda = new GLGE.Collada();
-        this.mLoading=true;
-        if (this.mID in gfx.mAnimatingObjects)
-            delete gfx.mAnimatingObjects[thus.mID];
-        var loadedCallback;
-        loadedCallback=function(){
-            clda.setScaleX(1);
-            clda.setScaleY(1);
-            clda.setScaleZ(1);
-            var bv=computeBoundingVolume(clda);//clda.getBoundingVolume(true);
-            var maxv=bv.radius;
-            var colladaUnitRescale=1/maxv;
-            
-            //console.log("Scaling by "+colladaUnitRescale+" instead of "+scale);
-            //console.log("Offsetting by -["+thus.bv.center+"] instead of "+offset);
-            clda.setScaleX(maxv?thus.mBounds[3]*colladaUnitRescale:1);
-            clda.setScaleY(maxv?thus.mBounds[3]*colladaUnitRescale:1);
-            clda.setScaleZ(maxv?thus.mBounds[3]*colladaUnitRescale:1);
-            clda.setLocX(thus.mBounds[0]-(bv.center[0]*colladaUnitRescale)*thus.mBounds[3]);
-            clda.setLocY(thus.mBounds[1]-(bv.center[1]*colladaUnitRescale)*thus.mBounds[3]);
-            clda.setLocZ(thus.mBounds[2]-(bv.center[2]*colladaUnitRescale)*thus.mBounds[3]);
-
-            gfx._inputCb({msg:"loaded",id:thus.mID});
-            clda.removeEventListener("loaded",loadedCallback);
-
+        function loadedCallback(geometry) {
+            var mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial( { color: 0x003300 } ));
+            thus.mNode.addChild(mesh);
+            thus.mMesh = mesh;
+            thus.mMesh.matrixAutoUpdate = false;
+            thus.updateTransformation(gfx);
+            /* // FIXME(prh): raytracing
+	         var mc = THREE.CollisionUtils.MeshColliderWBox(mesh);
+	         THREE.Collisions.colliders.push( mc );
+             */
             thus.mLoaded = true;
-            gfx.newEvent();
-            // If somebody set an animation *while* we were loading, honor that request now
-            if (thus.mCurAnimation) {
-                // Clear out first to make sure we actually run it
-                var anim = thus.mCurAnimation;
-                thus.mCurAnimation = "";
-                thus.animate(anim);
-            }
-            function hasAnimations(node) {
-                if (node.getAnimation()){
-                    return true;
-                }
-                var child;
-                var i;
-                if (node.children)
-                    for (i=0;i<node.children.length;++i){
-                        child=node.children[i];
-                        if (hasAnimations(child))
-                            return true;
-                    }
-                return false;
-            }
-            if (thus.mMesh==clda) {
-                thus.bv=bv;
-                delete thus.mLoading;
-                thus.updateTransformation(gfx);
-                if (hasAnimations(clda)) {
-                    gfx.mAnimatingObjects[thus.mID]=thus.mNode;
-                    setTimeout(function(){gfx.newEvent();},8000);
-                    setTimeout(function(){gfx.newEvent();},4000);
-                }
-                if (thus.mQueryAspectCount){
-                    for (var i=0;i<thus.mQueryAspectCount;++i) {
-                        thus.queryMeshAspectRatio(gfx);
-                    }
-                    delete thus.mQueryAspectCount;                    
-                }
-            }else if (thus.mQueryAspectCount && thus.mQueryAspectCount > 1){
-                thus.queryMeshAspectRatio(gfx);
-                thus.mQueryAspectCount--;//update it once before the load so tha
-            }
-        };
-        var downloadedCallback=function(){
-            gfx.newEvent();
-            gfx._inputCb({msg:"downloadComplete",id:thus.mID});
-            clda.removeEventListener("downloadComplete",downloadedCallback);
-        };
-        clda.addEventListener("loaded",loadedCallback);
-        clda.addEventListener("downloadComplete",downloadedCallback);
-        clda.setDocument(this.mMeshURI);
-        
-        
-        clda.setScaleX(bounds[3]);
-        clda.setScaleY(bounds[3]);
-        clda.setScaleZ(bounds[3]);
-        clda.setLocX(bounds[0]);
-        clda.setLocY(bounds[1]);
-        clda.setLocZ(bounds[2]);
-        this.mBounds=bounds;
-        this.mNode.addCollada(clda);
-        this.mMesh = clda;
-        this.updateTransformation(gfx);
-        return clda;
-        */
-        var sphereMaterial = new THREE.MeshLambertMaterial(
+        }
+        /*
+        gfx.mLoader.load(
             {
-                color: 0xCC0000
+                model: "externals/katajs/externals/three.js/examples/obj/suzanne/suzanneHi.js",
+                callback: loadedCallback
             });
-        var sphere = new THREE.Mesh(
-            new THREE.Sphere(1.0, 16, 16),
-            sphereMaterial);
-        this.mNode.addChild(sphere);
-        this.mMesh = sphere;
-        this.updateTransformation(gfx);
-        this.mLoaded = true;
-        return sphere;
+         */
+        //loadedCallback(new THREE.CubeGeometry(2*0.577, 2*0.577, 2*0.577));
+        loadedCallback(new (THREE.TorusGeometry||THREE.Torus)(0.7, 0.3, 8, 40));
+        this.mLoading = true;
+        return null;
     };
 
     VWObject.prototype.createCamera = function(fov,near,far) {
@@ -536,35 +449,35 @@ Kata.require([
     
     VWObject.prototype.updateTransformation = function(graphics) {
         var l=Kata.LocationExtrapolate(this.mCurLocation, graphics.mCurTime);
-/*
-        this.mNode.setLoc(l.pos[0],l.pos[1],l.pos[2]);
         // Setting scale on cameras does wonky things to lighting
         //if (!this.mCamera) {
-        var colladaUnitRescale=this.bv?1/this.bv.radius:1.0;
+        var colladaUnitRescale=1.0; // FIXME(prh): this.bv?1/this.bv.radius:1.0;
         if (this.mMesh) {
+            var mat = this.mMesh.matrix;
             if (this.bv) {
-                this.mMesh.setScale(l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale);
+                mat.setScale(l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale);
                 var locx=(l.scale[0]-(this.bv.center[0]*colladaUnitRescale)*l.scale[3]);
                 var locy=(l.scale[1]-(this.bv.center[1]*colladaUnitRescale)*l.scale[3]);
                 var locz=(l.scale[2]-(this.bv.center[2]*colladaUnitRescale)*l.scale[3]);
-                this.mMesh.setLocX(locx);
-                this.mMesh.setLocY(locy);
-                this.mMesh.setLocZ(locz);
+                mat.setPosition(new THREE.Vector3(locx, locy, locz));
             }else {
-
-                this.mMesh.setScale(l.scale[3],l.scale[3],l.scale[3]);
-                this.mMesh.setLocX(l.scale[0]);
-                this.mMesh.setLocY(l.scale[1]);
-                this.mMesh.setLocZ(l.scale[2]);
+                mat.setPosition(new THREE.Vector3(l.scale[0], l.scale[1], l.scale[2]));
+                mat.setScale(l.scale[3],l.scale[3],l.scale[3]);
             }
+            this.mMesh.matrix = mat;
+            this.mMesh.matrixWorldNeedsUpdate = true;
         }
         this.mBounds=l.scale;        
         //}
-        this.mNode.setQuat(l.orient[0],l.orient[1],l.orient[2],l.orient[3]);
+        var mat = this.mNode.matrix;
+        mat.setRotationFromQuaternion(new THREE.Quaternion(l.orient[0],l.orient[1],l.orient[2],l.orient[3])); // FIXME(prh): xyzw or wxyz
+        mat.setPosition(new THREE.Vector3(l.pos[0], l.pos[1], l.pos[2]));
+        this.mNode.matrix = mat;
+        this.mNode.matrixWorldNeedsUpdate = true;
+
         if (this.stationary(graphics.mCurTime)) {
             graphics.removeObjectUpdate(this);        
         }
-*/
         return l;
     };
     VWObject.prototype.updateCamera = function(graphics) {
@@ -683,6 +596,8 @@ Kata.require([
         this.mElement = element;
         this.mScene = new THREE.Scene;
         this.mScene.mSpaceID = spaceID;
+        this.mScene.matrixAutoUpdate = true;
+        this.mScene.matrixWorldNeedsUpdate = true;
         this.mSpaceID = spaceID;
     }
     
@@ -900,7 +815,7 @@ Kata.require([
         };
         this._keyDownMap[e.keyCode]=-1;
         this._inputCb(msg);
-        if (e.keyCode != 9 && !Kata.ThreeGraphics.GLOBAL_KEYBOARD_GRAB) {
+        if (e.keyCode != 9) {
             // don't prevent tab -- refocusing
             e.preventDefault && e.preventDefault();
         }
