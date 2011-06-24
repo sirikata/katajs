@@ -78,6 +78,10 @@ Kata.require([
 
         this.mLoader = new THREE.JSONLoader(  );
 
+        this.mRay = new THREE.Ray();
+        this.mRayMatrix = new THREE.Matrix4();
+        this.mRayMatrix2 = new THREE.Matrix4();
+
     };
 
     Kata.ThreeGraphics.prototype._bindEvents = function() {
@@ -382,10 +386,24 @@ Kata.require([
             thus.mMesh = mesh;
             thus.mMesh.matrixAutoUpdate = false;
             thus.updateTransformation(gfx);
-            /* // FIXME(prh): raytracing
-	         var mc = THREE.CollisionUtils.MeshColliderWBox(mesh);
-	         THREE.Collisions.colliders.push( mc );
-             */
+            var spaceroot = gfx.mSpaceRoots[thus.mSpaceID];
+            function visitAllMesh(obj, func) {
+                if (obj && obj.geometry) {
+                    func(obj);
+                }
+                var children = obj.children;
+                if (children) {
+                    for (var i = 0; i < children.length; i++) {
+                        visitAllMesh(children[i], func);
+                    }
+                }
+            }
+            visitAllMesh(thus.mMesh, function (obj) {
+	                         var mc = THREE.CollisionUtils.MeshColliderWBox(obj);
+                             mc.mKataObject = thus;
+                             spaceroot.mCollisions.colliders.push(mc);
+                         });
+
             thus.mLoaded = true;
         }
         /*
@@ -455,14 +473,19 @@ Kata.require([
         if (this.mMesh) {
             var mat = this.mMesh.matrix;
             if (this.bv) {
-                mat.setScale(l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale,l.scale[3]*colladaUnitRescale);
-                var locx=(l.scale[0]-(this.bv.center[0]*colladaUnitRescale)*l.scale[3]);
-                var locy=(l.scale[1]-(this.bv.center[1]*colladaUnitRescale)*l.scale[3]);
-                var locz=(l.scale[2]-(this.bv.center[2]*colladaUnitRescale)*l.scale[3]);
-                mat.setPosition(new THREE.Vector3(locx, locy, locz));
+                this.mMesh.position.x = (l.scale[0]-(this.bv.center[0]*colladaUnitRescale)*l.scale[3]);
+                this.mMesh.position.y = (l.scale[1]-(this.bv.center[1]*colladaUnitRescale)*l.scale[3]);
+                this.mMesh.position.z = (l.scale[2]-(this.bv.center[2]*colladaUnitRescale)*l.scale[3]);
+                mat.setPosition(this.mMesh.position);
+                this.mMesh.scale.x = this.mMesh.scale.y = this.mMesh.scale.z = l.scale[3]*colladaUnitRescale;
+                mat.setScale(this.mMesh.scale.x, this.mMesh.scale.y, this.mMesh.scale.z);
             }else {
-                mat.setPosition(new THREE.Vector3(l.scale[0], l.scale[1], l.scale[2]));
-                mat.setScale(l.scale[3],l.scale[3],l.scale[3]);
+                this.mMesh.position.x = l.scale[0];
+                this.mMesh.position.y = l.scale[1];
+                this.mMesh.position.z = l.scale[2];
+                mat.setPosition(this.mMesh.position);
+                this.mMesh.scale.x = this.mMesh.scale.y = this.mMesh.scale.z = l.scale[3];
+                mat.setScale(l.scale[3], l.scale[3], l.scale[3]);
             }
             this.mMesh.matrix = mat;
             this.mMesh.matrixWorldNeedsUpdate = true;
@@ -471,7 +494,10 @@ Kata.require([
         //}
         var mat = this.mNode.matrix;
         mat.setRotationFromQuaternion(new THREE.Quaternion(l.orient[0],l.orient[1],l.orient[2],l.orient[3])); // FIXME(prh): xyzw or wxyz
-        mat.setPosition(new THREE.Vector3(l.pos[0], l.pos[1], l.pos[2]));
+        this.mNode.position.x = l.pos[0];
+        this.mNode.position.y = l.pos[1];
+        this.mNode.position.z = l.pos[2];
+        mat.setPosition(this.mNode.position);
         this.mNode.matrix = mat;
         this.mNode.matrixWorldNeedsUpdate = true;
 
@@ -510,6 +536,7 @@ Kata.require([
 */
     };
     VWObject.prototype.label = function(label, offset) {
+        /*
         var label_node = this.mLabel;
         if (label_node === null) {
             // create
@@ -539,10 +566,11 @@ Kata.require([
         label_node.setColor({r:0.0,g:0.0,b:0.0});
         label_node.setSize(200);
         label_node.setText(label);
+        */
     };
     VWObject.prototype.setHighlight = function(enable) {
         function visitAllMaterials(obj, func) {
-            var multimat = obj.multimaterials;
+            var multimat = obj.materials;
             if (multimat) {
                 for (var i = 0; i < multimat.length; i++) {
                     func(multimat[i]);
@@ -556,38 +584,16 @@ Kata.require([
             }
         }
         if (enable) {
-            var copyMaterial = false;
-            if (!this.mOriginalMaterials) {
-                copyMaterial = true;
-                this.mOriginalMaterials = true;
-            }
-            visitAllMaterials(this.mMesh, function(obj)
+            visitAllMaterials(this.mMesh, function(mat)
                               {
-                                  var newMaterial;
-                                  if (copyMaterial) {
-                                      var materialHighlight = function(){};
-                                      materialHighlight.prototype = obj.getMaterial();
-                                      newMaterial = new materialHighlight();
-                                      newMaterial.mOriginalMaterial = obj.getMaterial();
-                                  } else {
-                                      newMaterial = obj.getMaterial();
-                                  }
-                                  newMaterial.setEmit(1.0);
-                                  newMaterial.setColor("#ff0000");
-                                  newMaterial.setAmbient(1.0);
-                                  obj.setMaterial(newMaterial);
+                                  mat.wireframe = true;
+                                  mat.wireframeLinewidth = 2;
                               });
         } else {
-            if (this.mOriginalMaterials) {
-                this.mOriginalMaterials = false;
-                visitAllMaterials(this.mMesh, function(obj)
-                                  {
-                                      var oldMaterial = obj.getMaterial().mOriginalMaterial;
-                                      if (oldMaterial) {
-                                          obj.setMaterial(oldMaterial);
-                                      }
-                                  });
-            }
+            visitAllMaterials(this.mMesh, function(mat)
+                              {
+                                  mat.wireframe = false;
+                              });
         }
     };
 
@@ -599,6 +605,7 @@ Kata.require([
         this.mScene.matrixAutoUpdate = true;
         this.mScene.matrixWorldNeedsUpdate = true;
         this.mSpaceID = spaceID;
+        this.mCollisions = new THREE.CollisionSystem;
     }
     
     Kata.ThreeGraphics.prototype.methodTable={};
@@ -669,41 +676,78 @@ Kata.require([
         }
         // offsetX only works in Chrome.
         // Also doesn't work for mouseup events outside the canvas.
-        var scene = this.renderer && this.renderer.getScene();
-        if (scene) {
-            var ray = scene.makeRay(ev.x, ev.y);
-            if (ray) {
-                ev.camerapos = ray.origin;
-                ev.dir = ray.coord;
+        var scene = null;
+        var camera = null;
+        for (var rtid in this.mRenderTargets) {
+            var rt = this.mRenderTargets[rtid];
+            if (rt.mTarget == null && rt.mSpaceRoot) {
+                // Not rendered to canvas
+                // Perform check on coordinates.
+                scene = rt.mSpaceRoot.mScene;
+                camera = rt.mCamera;
+                break;
+                // This may need to be done recursively to allow picking through textures with render target
             }
-            if (scene.camera && scene.camera.matrix && scene.camera.pMatrix) {
-                var invViewProj=GLGE.mulMat4(GLGE.inverseMat4(scene.camera.matrix),GLGE.inverseMat4(scene.camera.pMatrix));
-                var origin =GLGE.mulMat4Vec4(invViewProj,[0,0,-1,1]);
-                origin=[origin[0]/origin[3],origin[1]/origin[3],origin[2]/origin[3]];
-                var coord =GLGE.mulMat4Vec4(invViewProj,[0,0,1,1]);
-                coord=[-(coord[0]/coord[3]-origin[0]),-(coord[1]/coord[3]-origin[1]),-(coord[2]/coord[3]-origin[2])];
-                coord=GLGE.toUnitVec3(coord);
-                ev.cameradir=coord;
+        }
+        if (scene && camera) {
+            if (camera.matrix && camera.projectionMatrix) {
+                var matrix = this.mRayMatrix;
+                var matrix2 = this.mRayMatrix2;
+	            matrix.copy( camera.matrixWorld );
+	            matrix.multiplySelf( THREE.Matrix4.makeInvert( camera.projectionMatrix, matrix2 ) );
+
+                var camPosition = camera.matrixWorld.getPosition();
+
+                var origin = this.mRay.origin;
+                var direction = this.mRay.direction;
+                origin.x = 0;
+                origin.y = 0;
+                origin.z = 1;
+	            matrix.multiplyVector3( origin );
+	            direction.copy( origin );
+	            direction.subSelf( camPosition );
+                ev.camerapos = [camPosition.x, camPosition.y, camPosition.z];
+                ev.cameradir = [direction.x, direction.y, direction.z];
+
+                origin.x = (ev.x / this.mClientElement.width) * 2 - 1;
+                origin.y = - (ev.y / this.mClientElement.height) * 2 + 1;
+                origin.z = 1;
+	            matrix.multiplyVector3( origin );
+	            direction.copy( origin );
+	            direction.subSelf( camPosition );
+                ev.dir = [direction.x, direction.y, direction.z];
             }
             ev.spaceid = scene.mSpaceID;
         }
         return ev;
     };
 
-    Kata.ThreeGraphics.prototype._rayTrace = function(pos, dir, result) {
-        var scene = this.renderer.getScene();
-        var pickresult = scene.ray(pos, dir);
-        var obj = pickresult && pickresult.object;
+    Kata.ThreeGraphics.prototype._rayTrace = function(spaceroot, pos, dir, result) {
+        this.mRay.origin.x = pos[0] + dir[0]; // why add dir?
+        this.mRay.origin.y = pos[1] + dir[1];
+        this.mRay.origin.z = pos[2] + dir[2];
+        this.mRay.direction.x = dir[0];
+        this.mRay.direction.y = dir[1];
+        this.mRay.direction.z = dir[2];
+        var pickresult = spaceroot.mCollisions.rayCastNearest( this.mRay );
+        // less efficient than THREE.CollisionSystem? No documentation....
+        //var pickresult = this.mRay.intersectScene( scene );
+
+        var obj = pickresult && pickresult.mesh;
         while (obj && !obj.mKataObject) {
             obj = obj.parent;
         }
         var objid = obj && obj.mKataObject && obj.mKataObject.mID;
         if (!objid) objid = null;
         // object,distance,coord,normal,texture;
-        result.spaceid = scene.mSpaceID;
+        result.spaceid = spaceroot.mSpaceID;
         result.id = objid;
-        result.pos = pickresult && pickresult.coord;
-        result.normal = pickresult && pickresult.normal;
+        if (pickresult) {
+            var dist = pickresult.distance;
+            result.pos = [pos[0] + dir[0]*dist, pos[1] + dir[1]*dist, pos[2] + dir[2]*dist];
+            face = pickresult.faceIndex >= 0 && pickresult.mesh.geometry.faces[pickresult.faceIndex];
+            result.normal = face && [face.normal.x, face.normal.y, face.normal.z];
+        }
         return result.id && true || false;
     };
 
@@ -731,9 +775,12 @@ Kata.require([
 
         if (this._enabledEvents["pick"]) {
             ev = this._extractMouseEventInfo(e, "pick");
-            this._rayTrace(ev.camerapos, ev.dir, ev);
-            this._inputCb(ev);
-            this.doubleBuffer=2;
+            var scene = null;
+            var spaceroot = this.mSpaceRoots[ev.spaceid];
+            if (spaceroot) {
+                this._rayTrace(spaceroot, ev.camerapos, ev.dir, ev);
+                this._inputCb(ev);
+            }
         }
         // Prevent selecting.
         window.focus();
@@ -1014,7 +1061,7 @@ Kata.require([
 
         if (msg.id in this.mObjects) {
             var vwObject=this.mObjects[msg.id];
-            var children=vwObject.mNode.getChildren();
+            var children=vwObject.mNode.children;
             for (var i=0;i<children.length;++i) {
                 if (!(msg.id in this.mUnsetParents)) {
                     this.mUnsetParents[msg.id]={};
