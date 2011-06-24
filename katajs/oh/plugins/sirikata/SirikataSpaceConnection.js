@@ -600,7 +600,7 @@ Kata.require([
         if (this.mIncompleteLocationData[stream.mUSID]) {
             delete this.mIncompleteLocationData[stream.mUSID];
         }
-        console.log("bulk loc update for "+this.mSpaceURL+"/"+objid+" stream "+stream.mUSID);
+        //console.log("bulk loc update for "+this.mSpaceURL+"/"+objid+" stream "+stream.mUSID);
 
         // Parse the internal loc update
         var loc_update_msg = new Sirikata.Protocol.Loc.BulkLocationUpdate();

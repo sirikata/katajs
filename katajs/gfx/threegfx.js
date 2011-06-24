@@ -162,9 +162,9 @@ Kata.require([
         for (var id in this.mObjectUpdates) {        
             this.mObjectUpdates[id].update(this);
         }
-	if (Kata.userRenderCallback) {
-	    Kata.userRenderCallback(this.mCurTime);
-	}
+        if (Kata.userRenderCallback) {
+            Kata.userRenderCallback(this.mCurTime);
+        }
         for (var targ in this.mRenderTargets) {
             this.mRenderTargets[targ].render();
         }
@@ -232,113 +232,96 @@ Kata.require([
             this.mCamera,
             this.mTarget); // mTarget null -> render to canvas
     };
-    function getGroupBoundingVolume (thus, currentMatrix){
-        var localMatrix=thus.getLocalMatrix();
+
+    function expandBoundingVolume (vol1, vol2) {
+        if (vol2) {
+            vol1.minx = Math.min(vol1.minx, vol2.minx);
+            vol1.maxx = Math.max(vol1.maxx, vol2.maxx);
+            vol1.miny = Math.min(vol1.miny, vol2.miny);
+            vol1.maxy = Math.max(vol1.maxy, vol2.maxy);
+            vol1.minz = Math.min(vol1.minz, vol2.minz);
+            vol1.maxz = Math.max(vol1.maxz, vol2.maxz);
+        }
+        return vol1;
+    }
+
+    function computeBoundingVolume (thus, currentMatrix){
+        var localMatrix;
         if (currentMatrix) {
-            localMatrix=GLGE.mulMat4(currentMatrix,localMatrix);
+            localMatrix = new THREE.Matrix4();
+            localMatrix.multiply(currentMatrix, thus.matrix);
+        } else {
+            localMatrix = thus.matrix;
         }
+        var matrix=thus.matrix;
         var boundingVolume=null;
-        for(var i=0; i<thus.children.length;i++){
-            //if(thus.children[i].getBoundingVolume){
-            if(!boundingVolume) {
-                boundingVolume=computeBoundingVolume(thus.children[i],localMatrix);
+        if (thus.geometry) {
+            var newVolume=getMeshBoundingVolume(thus,localMatrix);
+            if(!boundingVolume){
+                boundingVolume = newVolume;
             }else{
-                boundingVolume.addBoundingVolume(computeBoundingVolume(thus.children[i],localMatrix));
+                expandBoundingVolume(boundingVolume, newVolume);
             }
-            //}
         }
-        if(!boundingVolume) boundingVolume=new GLGE.BoundingVolume(0,0,0,0,0,0);
+        for(var i=0; i<thus.children.length;i++){
+            var newVolume=computeBoundingVolume(thus.children[i],localMatrix);
+            if(!boundingVolume) {
+                boundingVolume = newVolume;
+            }else{
+                expandBoundingVolume(boundingVolume, newVolume);
+            }
+        }
         return boundingVolume;
     };
 
-    function getObjectBoundingVolume (thus, currentMatrix){
-        var localMatrix=thus.getLocalMatrix();
-        if (currentMatrix) {
-            localMatrix=GLGE.mulMat4(currentMatrix,localMatrix);
-        }    
-        var matrix=thus.getModelMatrix();
-        var multimaterials=thus.multimaterials;
-        var boundingVolume=null;
-        for(var i=0;i<multimaterials.length;i++){
-            if(multimaterials[i].lods[0].mesh){
-                if(!boundingVolume){
-                    boundingVolume=getMeshBoundingVolume(multimaterials[i].lods[0].mesh,localMatrix);
-                }else{
-                    boundingVolume.addBoundingVolume(getMeshBoundingVolume(multimaterials[i].lods[0].mesh,localMatrix));
-                }
-            }
-        }
-        if(!boundingVolume) boundingVolume=new GLGE.BoundingVolume(0,0,0,0,0,0);
-        return boundingVolume;
-    };
+    function mulMat4Vec3Into (m, vin, vout)  {
+		var vx = vin.x, vy = vin.y, vz = vin.z,
+		d = 1 / ( m.n41 * vx + m.n42 * vy + m.n43 * vz + m.n44 );
+
+		vout.x = ( m.n11 * vx + m.n12 * vy + m.n13 * vz + m.n14 ) * d;
+		vout.y = ( m.n21 * vx + m.n22 * vy + m.n23 * vz + m.n24 ) * d;
+		vout.z = ( m.n31 * vx + m.n32 * vy + m.n33 * vz + m.n34 ) * d;
+
+		return vout;
+    }
 
     function getMeshBoundingVolume(thus, currentMatrix) {
-        function mulMat4Vec3(mat1,vec2){
-            return GLGE.Vec3(mat1[0]*vec2[0]+mat1[1]*vec2[1]+mat1[2]*vec2[2]+mat1[3],
-                             mat1[4]*vec2[0]+mat1[5]*vec2[1]+mat1[6]*vec2[2]+mat1[7],
-                             mat1[8]*vec2[0]+mat1[9]*vec2[1]+mat1[10]*vec2[2]+mat1[11]);
-        };
+        var position = new THREE.Vector3();
+        var geomVertices = thus.geometry.vertices;
+        if ( geomVertices.length > 0 ) {
+            mulMat4Vec3Into(currentMatrix, geomVertices[ 0 ].position, position);
 
-        var minX,maxX,minY,maxY,minZ,maxZ;
-        for(var i=0;i<thus.buffers.length;i++){
-            if(thus.buffers[i].name=="position") {
-                var positions=thus.buffers[i].data;
-                
-                if (currentMatrix) {
-                    if (positions.length>=3) {               
-                        var loc=mulMat4Vec3(currentMatrix,positions.slice(0,3));
-                        minX=maxX=loc[0];
-                        minY=maxY=loc[1];
-                        minZ=maxZ=loc[2];
-                    }else {
-                        minX=minY=minZ=maxX=maxY=maxZ=0;
-                    }
-                    for(var j=3;j+2<positions.length;j=j+3){
-                        var loc=mulMat4Vec3(currentMatrix,positions.slice(j,j+3));
-                        minX=Math.min(minX,loc[0]);
-                        maxX=Math.max(maxX,loc[0]);
-                        minY=Math.min(minY,loc[1]);
-                        maxY=Math.max(maxY,loc[1]);
-                        minZ=Math.min(minZ,loc[2]);
-                        maxZ=Math.max(maxZ,loc[2]);
-                    }
-                    
-                }else {            
-                    if (positions.length>=3) {               
-                        minX=maxX=positions[0];
-                        minY=maxY=positions[1];
-                        minZ=maxZ=positions[2];
-                    }else {
-                        minX=minY=minZ=maxX=maxY=maxZ=0;
-                    }
-                    for(var j=3;j+3<positions.length;i=j+3){
-                        minX=Math.min(minX,positions[i]);
-                        maxX=Math.max(maxX,positions[i]);
-                        minY=Math.min(minY,positions[i+1]);
-                        maxY=Math.max(maxY,positions[i+1]);
-                        minZ=Math.min(minZ,positions[i+2]);
-                        maxZ=Math.max(maxZ,positions[i+2]);
-                        
-                    }
+            var boundingBox = { 'minx': position.x,
+                                 'maxx': position.x,
+                                 'miny': position.y,
+                                 'maxy': position.y,
+                                 'minz': position.z,
+                                 'maxz': position.z };
+
+            for ( var v = 1, vl = geomVertices.length; v < vl; v ++ ) {
+                mulMat4Vec3Into(currentMatrix, geomVertices[ v ].position, position);
+
+                if ( position.x < boundingBox.minx ) {
+                    boundingBox.minx = position.x;
+                } else if ( position.x > boundingBox.maxx ) {
+                    boundingBox.maxx = position.x;
+                }
+                if ( position.y < boundingBox.miny ) {
+                    boundingBox.miny = position.y;
+                } else if ( position.y > boundingBox.maxy ) {
+                    boundingBox.maxy = position.y;
+                }
+                if ( position.z < boundingBox.minz ) {
+                    boundingBox.minz = position.z;
+                } else if ( position.z > boundingBox.maxz ) {
+                    boundingBox.maxz = position.z;
                 }
             }
+            return boundingBox;
         }
-        return new GLGE.BoundingVolume(minX,maxX,minY,maxY,minZ,maxZ);
-    }
+        return null;
+    };
 
-
-    function computeBoundingVolume(glge_object, currentMatrix){
-        switch (glge_object.getBoundingVolume){
-        case GLGE.Group.prototype.getBoundingVolume:
-            return getGroupBoundingVolume(glge_object,currentMatrix);
-        case GLGE.Mesh.prototype.getBoundingVolume:
-            return getMeshBoundingVolume(glge_object,currentMatrix);
-        case GLGE.Object.prototype.getBoundingVolume:
-        default:
-            return getObjectBoundingVolume(glge_object,currentMatrix);
-        }
-        
-    }
     function VWObject(id,time,spaceid,spaceroot) {
         //var pack=spaceroot.mElement.client.createPack();
         
@@ -360,10 +343,10 @@ Kata.require([
         this.mLoaded = false;
     };
     VWObject.prototype.getMeshAspectRatio = function () {
-        if (!this.bv) return [0,0,0];
-        var retval=[this.bv.limits[1]-this.bv.limits[0],
-                    this.bv.limits[3]-this.bv.limits[2],
-                    this.bv.limits[5]-this.bv.limits[4]];
+        if (!this.bv || !this.bv.radius) return [0,0,0];
+        var retval=[this.bv.maxx-this.bv.minx,
+                    this.bv.maxy-this.bv.miny,
+                    this.bv.maxz-this.bv.minz];
         retval[0]/=this.bv.radius*2;
         retval[1]/=this.bv.radius*2;
         retval[2]/=this.bv.radius*2;
@@ -381,10 +364,41 @@ Kata.require([
         this.destroyMesh();
         var thus = this;
         function loadedCallback(geometry) {
+
+            // FIXME: handle case where the mesh changed while loading (discard the mesh)!
+
             var mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial( { color: 0x003300 } ));
+            mesh.matrix = new THREE.Matrix4();
+            mesh.scale.x = mesh.scale.y = mesh.scale.z = 1; // copied from glge code. necessary?
+
+            var bv = computeBoundingVolume(mesh);
+            if (!bv) {
+                bv = {minx:0,maxx:0,miny:0,maxy:0,minz:0,maxz:0};
+            }
+	        bv.center=[(bv.maxx+bv.minx)/2,(bv.maxy+bv.miny)/2,(bv.minz+bv.maxz)/2];
+	        var dx=bv.minx-bv.center[0];
+	        var dy=bv.miny-bv.center[1];
+	        var dz=bv.minz-bv.center[2];
+	        bv.radius = Math.sqrt(dx*dx+dy*dy+dz*dz);
+            //console.log("radius "+bv.radius+" center "+bv.center);
+            var colladaUnitRescale=1/bv.radius;
+
+            gfx._inputCb({msg:"loaded",id:thus.mID});
+            thus.mLoaded = true;
+
             thus.mNode.addChild(mesh);
             thus.mMesh = mesh;
+            thus.bv = bv;
             thus.mMesh.matrixAutoUpdate = false;
+
+            // If somebody set an animation *while* we were loading, honor that request now
+            if (thus.mCurAnimation) {
+                // Clear out first to make sure we actually run it
+                var anim = thus.mCurAnimation;
+                thus.mCurAnimation = "";
+                //FIXME: Handle animations //thus.animate(anim);
+            }
+
             thus.updateTransformation(gfx);
             var spaceroot = gfx.mSpaceRoots[thus.mSpaceID];
             function visitAllMesh(obj, func) {
@@ -399,12 +413,10 @@ Kata.require([
                 }
             }
             visitAllMesh(thus.mMesh, function (obj) {
-	                         var mc = THREE.CollisionUtils.MeshColliderWBox(obj);
+                             var mc = THREE.CollisionUtils.MeshColliderWBox(obj);
                              mc.mKataObject = thus;
                              spaceroot.mCollisions.colliders.push(mc);
                          });
-
-            thus.mLoaded = true;
         }
         /*
         gfx.mLoader.load(
@@ -414,7 +426,8 @@ Kata.require([
             });
          */
         //loadedCallback(new THREE.CubeGeometry(2*0.577, 2*0.577, 2*0.577));
-        loadedCallback(new (THREE.TorusGeometry||THREE.Torus)(0.7, 0.3, 8, 40));
+        var rand = Math.random()* 1000;
+        loadedCallback(new (THREE.TorusGeometry||THREE.Torus)(rand*7, rand*3, 8, 40));
         this.mLoading = true;
         return null;
     };
@@ -469,7 +482,7 @@ Kata.require([
         var l=Kata.LocationExtrapolate(this.mCurLocation, graphics.mCurTime);
         // Setting scale on cameras does wonky things to lighting
         //if (!this.mCamera) {
-        var colladaUnitRescale=1.0; // FIXME(prh): this.bv?1/this.bv.radius:1.0;
+        var colladaUnitRescale=this.bv?1/this.bv.radius:1.0;
         if (this.mMesh) {
             var mat = this.mMesh.matrix;
             if (this.bv) {
@@ -693,8 +706,8 @@ Kata.require([
             if (camera.matrix && camera.projectionMatrix) {
                 var matrix = this.mRayMatrix;
                 var matrix2 = this.mRayMatrix2;
-	            matrix.copy( camera.matrixWorld );
-	            matrix.multiplySelf( THREE.Matrix4.makeInvert( camera.projectionMatrix, matrix2 ) );
+                matrix.copy( camera.matrixWorld );
+                matrix.multiplySelf( THREE.Matrix4.makeInvert( camera.projectionMatrix, matrix2 ) );
 
                 var camPosition = camera.matrixWorld.getPosition();
 
@@ -703,18 +716,18 @@ Kata.require([
                 origin.x = 0;
                 origin.y = 0;
                 origin.z = 1;
-	            matrix.multiplyVector3( origin );
-	            direction.copy( origin );
-	            direction.subSelf( camPosition );
+                matrix.multiplyVector3( origin );
+                direction.copy( origin );
+                direction.subSelf( camPosition );
                 ev.camerapos = [camPosition.x, camPosition.y, camPosition.z];
                 ev.cameradir = [direction.x, direction.y, direction.z];
 
                 origin.x = (ev.x / this.mClientElement.width) * 2 - 1;
                 origin.y = - (ev.y / this.mClientElement.height) * 2 + 1;
                 origin.z = 1;
-	            matrix.multiplyVector3( origin );
-	            direction.copy( origin );
-	            direction.subSelf( camPosition );
+                matrix.multiplyVector3( origin );
+                direction.copy( origin );
+                direction.subSelf( camPosition );
                 ev.dir = [direction.x, direction.y, direction.z];
             }
             ev.spaceid = scene.mSpaceID;
