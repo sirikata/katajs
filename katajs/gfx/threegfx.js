@@ -489,16 +489,16 @@ Kata.require([
                 this.mMesh.position.x = (l.scale[0]-(this.bv.center[0]*colladaUnitRescale)*l.scale[3]);
                 this.mMesh.position.y = (l.scale[1]-(this.bv.center[1]*colladaUnitRescale)*l.scale[3]);
                 this.mMesh.position.z = (l.scale[2]-(this.bv.center[2]*colladaUnitRescale)*l.scale[3]);
-                mat.setPosition(this.mMesh.position);
                 this.mMesh.scale.x = this.mMesh.scale.y = this.mMesh.scale.z = l.scale[3]*colladaUnitRescale;
                 mat.setScale(this.mMesh.scale.x, this.mMesh.scale.y, this.mMesh.scale.z);
+                mat.setPosition(this.mMesh.position);
             }else {
                 this.mMesh.position.x = l.scale[0];
                 this.mMesh.position.y = l.scale[1];
                 this.mMesh.position.z = l.scale[2];
-                mat.setPosition(this.mMesh.position);
                 this.mMesh.scale.x = this.mMesh.scale.y = this.mMesh.scale.z = l.scale[3];
                 mat.setScale(l.scale[3], l.scale[3], l.scale[3]);
+                mat.setPosition(this.mMesh.position);
             }
             this.mMesh.matrix = mat;
             this.mMesh.matrixWorldNeedsUpdate = true;
@@ -549,37 +549,27 @@ Kata.require([
 */
     };
     VWObject.prototype.label = function(label, offset) {
-        /*
         var label_node = this.mLabel;
+        if (!THREE.TextGeometry) {
+            return;
+        }
+        var geometry = new THREE.TextGeometry(label, {size: 200});
         if (label_node === null) {
-            // create
-            label_node = new GLGE.Text();
+            label_node = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial( { color: 0xff0000 } ));
             this.mLabel = label_node;
 
-            // FIXME text seems broken in glge, breaking on a
-            // sort. Adding a bogus material is sufficient to get it
-            // working.
-            label_node.multimaterials = [ new GLGE.MultiMaterial() ];
-            var material=new GLGE.Material();
-            label_node.multimaterials[0].setMaterial(material);
-
             this.mNode.addChild(label_node);
+        } else {
+            label_node.geometry = geometry; // FIXME: need to clean up geometry?
         }
-        if (offset === undefined) offset = [0, 0, 0];
-        label_node.setScaleX(.1);
-        label_node.setScaleY(.1);
-        label_node.setScaleZ(.1);
-        label_node.setQuatX(0.0);
-        label_node.setQuatY(0.0);
-        label_node.setQuatZ(0.0);
-        label_node.setQuatW(1.0);
-        label_node.setLocX(offset[0]);
-        label_node.setLocY(offset[1]);
-        label_node.setLocZ(offset[2]);
-        label_node.setColor({r:0.0,g:0.0,b:0.0});
-        label_node.setSize(200);
-        label_node.setText(label);
-        */
+        label_node.scale.x = label_node.scale.y = label_node.scale.z = 0.1;
+        label_node.matrix.setScale(.1, .1, .1);
+        if (offset != undefined) {
+            label_node.position.x = offset[0];
+            label_node.position.y = offset[1];
+            label_node.position.z = offset[2];
+            label_node.matrix.setPosition(label_node.position);
+        }
     };
     VWObject.prototype.setHighlight = function(enable) {
         function visitAllMaterials(obj, func) {
@@ -611,7 +601,7 @@ Kata.require([
     };
 
     var mainSpace;
-    function SpaceRoot(glgegfx, element, spaceID) {
+    function SpaceRoot(gfx, element, spaceID) {
         this.mElement = element;
         this.mScene = new THREE.Scene;
         this.mScene.mSpaceID = spaceID;
@@ -736,9 +726,9 @@ Kata.require([
     };
 
     Kata.ThreeGraphics.prototype._rayTrace = function(spaceroot, pos, dir, result) {
-        this.mRay.origin.x = pos[0] + dir[0]; // why add dir?
-        this.mRay.origin.y = pos[1] + dir[1];
-        this.mRay.origin.z = pos[2] + dir[2];
+        this.mRay.origin.x = pos[0];
+        this.mRay.origin.y = pos[1];
+        this.mRay.origin.z = pos[2];
         this.mRay.direction.x = dir[0];
         this.mRay.direction.y = dir[1];
         this.mRay.direction.z = dir[2];
@@ -756,10 +746,18 @@ Kata.require([
         result.spaceid = spaceroot.mSpaceID;
         result.id = objid;
         if (pickresult) {
-            var dist = pickresult.distance;
+            // Multiply by scale to avoid picking bug
+            var mat = pickresult.mesh.matrixWorld;
+            var scale = Math.sqrt(mat.n11*mat.n11+mat.n12*mat.n12+mat.n13*mat.n13);
+            var dist = pickresult.distance * scale;
+
             result.pos = [pos[0] + dir[0]*dist, pos[1] + dir[1]*dist, pos[2] + dir[2]*dist];
-            face = pickresult.faceIndex >= 0 && pickresult.mesh.geometry.faces[pickresult.faceIndex];
-            result.normal = face && [face.normal.x, face.normal.y, face.normal.z];
+            var face = pickresult.faceIndex >= 0 && pickresult.mesh.geometry.faces[pickresult.faceIndex];
+            if (face) {
+                var normal4 = new THREE.Vector4(face.normal.x, face.normal.y, face.normal.z, 0);
+                pickresult.mesh.matrixWorld.multiplyVector4(normal4);
+                result.normal = [normal4.x, normal4.y, normal4.z];
+            }
         }
         return result.id && true || false;
     };
