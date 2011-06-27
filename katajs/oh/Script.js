@@ -167,8 +167,14 @@ Kata.require([
          var msg = new Kata.ScriptProtocol.FromScript.CreateObject(script, cons, args);
          this._sendHostedObjectMessage(msg);
      };
-
-
+     Kata.Script.prototype.queryUpdate = function (space,id,solidAngle){
+         var msg = new Kata.ScriptProtocol.FromScript.QueryUpdate(space,id,solidAngle);;
+         this._sendHostedObjectMessage(msg);
+     };
+     Kata.Script.prototype.queryRemoval = function (space,id){
+         var msg = new Kata.ScriptProtocol.FromScript.QueryRemoval(space,id);
+         this._sendHostedObjectMessage(msg);
+     };
      Kata.Script.prototype.Persistence = {};
      /** Request the given data be read.
       * @param readset set of keys to be read

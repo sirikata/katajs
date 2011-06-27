@@ -201,14 +201,14 @@ Kata.require([
      Kata.SessionManager.prototype.requestQueryRemoval = function(space, id) {
          var space_conn = this.mSpaceConnections[space];
          if (space_conn !== undefined)
-             space_conn.locUpdateRequest(id, loc, visual);
+             space_conn.requestQueryRemoval(id);
      };
 
      /** Send an update request to the space. */
      Kata.SessionManager.prototype.requestQueryUpdate = function(space, id, newSolidAngle) {
          var space_conn = this.mSpaceConnections[space];
          if (space_conn !== undefined)
-             space_conn.locUpdateRequest(id, newSolidAngle);
+             space_conn.requestQueryUpdate(id, newSolidAngle);
      };
 
      Kata.SessionManager.prototype.setPhysics = function(space, id, data) {

@@ -137,7 +137,17 @@ Kata.require([
                  this.msg = msg;
                  this.event = event;
              },
-
+             QueryUpdate: function (space,id,solidAngle){
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.QueryUpdate;
+                 this.space = space;
+                 this.id = id;                 
+                 this.solidAngle=solidAngle;
+             },
+             QueryRemoval: function (space,id){
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.QueryRemoval;
+                 this.space = space;
+                 this.id = id;                 
+             },
              Disconnect : function(space, id) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.Disconnect;
                  this.space = space;
