@@ -222,6 +222,21 @@ Kata.require([
      'externals/GLGE/src/animation/glge_animationcurve.js',
      'externals/GLGE/src/animation/glge_animationpoints.js',
      'externals/GLGE/src/animation/glge_action.js']], function(){
+
+    GLGE.XMLHttpRequest = function() {
+        var xhr = new XMLHttpRequest();
+        xhr.Kata_open = xhr.open;
+        xhr.Kata_send = xhr.send;
+        xhr.open = function() {
+...
+        };
+        xhr.send = function() {
+            
+        };
+
+        return xhr;
+    };
+
     GLGEGraphics.prototype.newEvent=function (){
         this.doubleBuffer=3;
     };

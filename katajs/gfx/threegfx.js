@@ -967,15 +967,6 @@ Kata.require([
             }
         }
     };
-    function LocationFromGLGETransformation(transformation,time) {
-        return Kata.LocationSet({time:time,
-                                 pos:[transformation.locX,transformation.locY,transformation.locZ],
-                                 orient:[transformation.quatX,
-                                         transformation.quatY,
-                                         transformation.quatZ,
-                                         transformation.quatW]});
-    };
-
     function glgeTransformationToLocationList(gfx,vwObject){
         var retval=[];
         while(vwObject!=null) {
