@@ -83,6 +83,16 @@ Kata.require([
          this._sendHostedObjectMessage(msg);
      };
 
+     Kata.GraphicsScript.prototype.queryMeshAspectRatio = function(presence, remotePresence) {
+         var msg = new Kata.ScriptProtocol.FromScript.GFXQueryMeshAspectRatio(presence.space(),presence.id(),remotePresence);
+         this._sendHostedObjectMessage(msg);
+     };
+
+     Kata.GraphicsScript.prototype.projectPoint = function(presence,point,data) {
+         var msg = new Kata.ScriptProtocol.FromScript.GFXProjectPoint(presence.space(),presence.id(),point,data);
+         this._sendHostedObjectMessage(msg);
+     };
+
      /** Request a presence in the given space.
       *  @param {Kata.SpaceID} space ID of the space to connect to
       *  @param {string} auth authentication information to pass to the space

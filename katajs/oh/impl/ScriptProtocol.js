@@ -227,6 +227,20 @@ Kata.require([
 				 this.spaceid = this.space;                 
                  this.id = remotePresence.id();
              },
+             /**
+              * Space is the space holding the object, observer is the camera
+              * pos is the list of positions
+              * data contains metadata to parse the response
+              */
+             GFXProjectPoint : function (space, observer, pos, data){
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
+                 this.msg="ProjectPoint";
+                 this.space = space+observer;
+                 this.spaceid = this.space;
+                 this.id = observer;
+                 this.pos = pos;
+                 this.data = data;
+             },
              GFXCustom : function(space, observer, data) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
                  this.msg="Custom";

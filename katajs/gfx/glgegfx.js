@@ -809,7 +809,16 @@ Kata.require([
         }
         return ret;
     }
-
+    GLGEGraphics.prototype.methodTable["ProjectPoint"]=function(msg){
+        var scene = this.renderer && this.renderer.getScene();
+        var pos = msg.pos;
+        var projection_matrix = GLGE.mulMat4(scene.camera.pMatrix,scene.camera.matrix);
+        var projected=GLGE.mulMat4Vec4(projection_matrix,[pos[0],pos[1],pos[2],1]);
+        msg.x=projected[0]/projected[3];
+        msg.y=projected[1]/projected[3];
+        msg.msg="Projected";
+        this._inputCb(msg);
+    };
     GLGEGraphics.prototype._extractMouseEventInfo = function(e, msgname){
         var ev = {
             msg: msgname || e.type,
