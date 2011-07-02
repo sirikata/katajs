@@ -812,10 +812,19 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["ProjectPoint"]=function(msg){
         var scene = this.renderer && this.renderer.getScene();
         var pos = msg.pos;
+        var poslen=msg.pos.length;
+        if (!poslen) {
+            pos=[pos];
+            poslen=1;
+        }
         var projection_matrix = GLGE.mulMat4(scene.camera.pMatrix,scene.camera.matrix);
-        var projected=GLGE.mulMat4Vec4(projection_matrix,[pos[0],pos[1],pos[2],1]);
-        msg.x=projected[0]/projected[3];
-        msg.y=projected[1]/projected[3];
+        msg.projected=[];
+        for (var i=0;i<poslen;i++) {
+            var projected=GLGE.mulMat4Vec4(projection_matrix,[pos[i][0],pos[i][1],pos[i][2],1]);
+            msg.projected[i]=[projected[0]/projected[3],
+                              projected[1]/projected[3],
+                              projected[2]/projected[3]];
+        }
         msg.msg="Projected";
         this._inputCb(msg);
     };
