@@ -265,7 +265,7 @@ Kata.require([
                  this.spaceid = this.space;
                  this.animation = animation;
              },
-             GFXLabel : function(space, observer, remoteID, label, offset) {
+             GFXLabel : function(space, observer, remoteID, label, offset, color) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;
                  this.msg="Label";
                  this.space = space+observer;
@@ -273,6 +273,7 @@ Kata.require([
                  this.spaceid = this.space;
                  this.label = label;
                  this.offset = offset;
+                 this.color = color;
              },
              GFXDestroyNode : function(space, observer, remotePresence) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.GraphicsMessage;

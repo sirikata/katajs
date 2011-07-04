@@ -402,13 +402,14 @@ Kata.require([
         this._sendHostedObjectMessage(msg);
     };
 
-    Kata.GraphicsScript.prototype.setLabel = function(presence, remoteID, label, offset) {
+    Kata.GraphicsScript.prototype.setLabel = function(presence, remoteID, label, offset, color) {
         var msg = new Kata.ScriptProtocol.FromScript.GFXLabel(
             presence.space(),
             presence.id(),
             remoteID.object(),
             label,
-            offset
+            offset,
+            color
         );
         this._sendHostedObjectMessage(msg);
     };

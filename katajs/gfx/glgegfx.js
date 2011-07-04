@@ -677,7 +677,7 @@ Kata.require([
         this.mCurAnimation = anim_name;
         mesh.setAction(new_anim, 400, true);
     };
-    VWObject.prototype.label = function(label, offset) {
+    VWObject.prototype.label = function(label, offset, color) {
         var label_node = this.mLabel;
         if (label_node === null) {
             // create
@@ -704,7 +704,13 @@ Kata.require([
         label_node.setLocX(offset[0]);
         label_node.setLocY(offset[1]);
         label_node.setLocZ(offset[2]);
-        label_node.setColor({r:0.0,g:0.0,b:0.0});
+        if (color===undefined)
+            label_node.setColor("black");
+        else {
+            label_node.setColorR(color[0]);
+            label_node.setColorG(color[1]);
+            label_node.setColorB(color[2]);
+        }
         label_node.setSize(200);
         label_node.setText(label);
     };
@@ -1201,7 +1207,7 @@ Kata.require([
     GLGEGraphics.prototype.methodTable["Label"]=function(msg) {
         var vwObject = this.mObjects[msg.id];
         if (vwObject)
-            vwObject.label(msg.label, msg.offset);
+            vwObject.label(msg.label, msg.offset,msg.color);
     };
     GLGEGraphics.prototype.methodTable["Destroy"]=function(msg) {
         if (msg.id in this.mAnimatingObjects)
