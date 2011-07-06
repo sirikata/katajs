@@ -930,16 +930,17 @@ Kata.require([
         document.addEventListener('mouseup', mouseup, true);
         document.addEventListener('mousemove', mousemove, true);
 
+        // Prevent selecting.
+        window.focus();
+        e.target.focus();
+        e.preventDefault && e.preventDefault();
+
         if (this._enabledEvents["pick"]) {
             ev = this._extractMouseEventInfo(e, "pick");
             this._rayTrace(ev.camerapos, ev.dir, ev);
             this._inputCb(ev);
             this.doubleBuffer=2;
         }
-        // Prevent selecting.
-        window.focus();
-        e.target.focus();
-        e.preventDefault && e.preventDefault();
     };
     
     var DRAG_THRESHOLD = Kata.GraphicsSimulation.DRAG_THRESHOLD;
