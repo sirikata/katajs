@@ -1239,7 +1239,7 @@ Kata.require([
                 }
             }
             //vwObject.mPack.destroy();
-            this.mSpaceRoots[msg.space].mScene.removeChild(vwObject.mNode);
+            vwObject.mNode.parent.removeChild(vwObject.mNode);
             delete this.mObjects[msg.id];
         }
     };
