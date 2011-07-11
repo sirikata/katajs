@@ -1104,12 +1104,12 @@ Kata.require([
         
         if (msg.id in this.mUnsetParents) {
             var unset=this.mUnsetParents[msg.id];
-            var unsetl=unset.length;
-            for (var i=0;i<unsetl;++i) {
+            for (i in unset) {
                 newObject.mNode.addChild(unset[i].mNode);//.parent=newObject.mNode;
                 delete unset[i].mUnsetParent;
             }
-        }
+            delete this.mUnsetParents[msg.id];
+        };
     };
     function LocationFromGLGETransformation(transformation,time) {
         return Kata.LocationSet({time:time,
