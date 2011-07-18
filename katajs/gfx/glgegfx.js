@@ -223,18 +223,95 @@ Kata.require([
      'externals/GLGE/src/animation/glge_animationpoints.js',
      'externals/GLGE/src/animation/glge_action.js']], function(){
 
+    CDN_SERVICES = {
+        //"meerkat": "http://localhost"
+        "meerkat": "http://open3dhub.com"
+    };
+    function getUrlProtocol(url) {
+        var colon = url.indexOf(":");
+        if (colon != -1) {
+            return url.substr(0, colon);
+        }
+        return "";
+    }
+    function getUrlPath(url) {
+        var hostslash = url.indexOf("//");
+        if (hostslash == -1) {
+            return url;
+        }
+        var pathslash = url.indexOf("/", hostslash+2);
+        if (pathslash == -1) {
+            return "/";
+        }
+        return url.substr(pathslash);
+    }
+    function getFinalUrl(url, callback) {
+        var meta_xhr = new XMLHttpRequest();
+        var proto = getUrlProtocol(url);
+        var host = CDN_SERVICES[proto];
+        var path = getUrlPath(url);
+        meta_xhr.open("HEAD", host + "/dns" + path, true);
+        meta_xhr.onreadystatechange = function() {
+            if (meta_xhr.readyState == 4) {
+                if (meta_xhr.status == 200) {
+                    var hash = meta_xhr.getResponseHeader("Hash");
+                    var final_url = host + "/download/" + hash;
+                    Kata.log("CDN: "+url+" => "+final_url);
+                    callback(final_url, null);
+                } else {
+                    callback(null, meta_xhr.status);
+                }
+            }
+        };
+        meta_xhr.send(null);
+    }
     GLGE.XMLHttpRequest = function() {
         var xhr = new XMLHttpRequest();
         xhr.Kata_open = xhr.open;
         xhr.Kata_send = xhr.send;
-        xhr.open = function() {
-...
+        xhr.open = function(method, url, async) {
+            this.Kata_openurl = null;
+            if (getUrlProtocol(url) != "meerkat") {
+                return xhr.Kata_open(method, url, async);
+            }
+            if (async !== true || method != "GET") {
+                throw "Kata XHR must be asynchronous GET!";
+            }
+            this.Kata_openurl = url;
         };
-        xhr.send = function() {
-            
+        xhr.send = function(post) {
+            if (!this.Kata_openurl) {
+                this.Kata_send(post);
+            } else {
+                getFinalUrl(this.Kata_openurl, function(final_url, errorcode) {
+                    if (final_url) {
+                        xhr.Kata_open("GET", final_url, true);
+                        xhr.Kata_send(null);
+                    } else {
+                        xhr.status = errorcode;
+                        xhr.readyState = 4;
+                        xhr.onreadystatechange();
+                    }
+                });
+            }
         };
 
         return xhr;
+    };
+    GLGE.loadImage = function(image, url) {
+        if (getUrlProtocol(url) != "meerkat") {
+            image.src = url;
+        } else {
+            getFinalUrl(url, function(final_url, errorcode) {
+                if (final_url) {
+                    image.src = final_url;
+                } else {
+                    var evt = document.createEvent("UIEvents");
+                    evt.initEvent("error", false, true, image, url);
+                    image.dispatchEvent(evt);
+                }
+            });
+        }
     };
 
     GLGEGraphics.prototype.newEvent=function (){
