@@ -250,11 +250,15 @@ Kata.require([
         var proto = getUrlProtocol(url);
         var host = CDN_SERVICES[proto];
         var path = getUrlPath(url);
-        meta_xhr.open("HEAD", host + "/dns" + path, true);
+        // Until browsers support Access-Control-Expose-Headers in CORS,
+        // we need to use a GET request.
+        meta_xhr.open("GET", host + "/dns" + path, true);
         meta_xhr.onreadystatechange = function() {
             if (meta_xhr.readyState == 4) {
                 if (meta_xhr.status == 200) {
-                    var hash = meta_xhr.getResponseHeader("Hash");
+                    var response = JSON.parse(meta_xhr.response);
+                    //var hash = meta_xhr.getResponseHeader("Hash");
+                    var hash = response["Hash"];
                     var final_url = host + "/download/" + hash;
                     Kata.log("CDN: "+url+" => "+final_url);
                     callback(final_url, null);
@@ -299,6 +303,7 @@ Kata.require([
         return xhr;
     };
     GLGE.loadImage = function(image, url) {
+        image.crossOrigin = 'anonymous';
         if (getUrlProtocol(url) != "meerkat") {
             image.src = url;
         } else {
