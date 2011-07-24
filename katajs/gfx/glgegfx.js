@@ -49,7 +49,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
         }
         if (canvas) {
             try {
-                gl = canvas.getContext("experimental-webgl", {});
+                gl = canvas.getContext("experimental-webgl", {preserveDrawingBuffer:true});
             } 
             catch (e) {
                 if (typeof(globalNoWebGLError) != "undefined") {
