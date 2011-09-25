@@ -298,6 +298,18 @@ Kata.require([
                  }
                  this.curtextures=curTextures;
              },
+             GFXBackgroundColor : function(space, observer, id, backgroundColor) {
+                 
+                 Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
+                 this.msg="BackgroundColor";
+                 this.color = backgroundColor;
+             },
+             GFXLightColor : function(space, observer, id, light_id, color) {
+                 Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
+                 this.msg="LightColor";
+                 this.light = light_id;
+                 this.color = color;
+             },
              GFXAttachCameraTexture : function(space, observer, id, textureObjectSpace, textureObjectID, texture) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);
 

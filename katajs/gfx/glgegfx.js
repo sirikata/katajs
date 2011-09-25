@@ -1309,7 +1309,7 @@ Kata.require([
         if(!spaceRoot.mFilter) {
             spaceRoot.mFilter=null;
             spaceRoot.mScene.setFilter2d(null);
-            spaceRoot.mScene.setBackgroundColor("#222");
+            spaceRoot.mScene.setBackgroundColor("#22f");
         }else {
             spaceRoot.mFilter=filter;
             spaceRoot.mScene.setBackgroundColor("#f0f");           
@@ -1317,6 +1317,7 @@ Kata.require([
         
     };
     GLGEGraphics.prototype.methodTable["Background"]=function(msg) {
+        console.log("DEBUG GFX Background:", msg)
         var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
         var filter=spaceRoot.mFilter;
         var filterTextures=spaceRoot.mFilterTextures;
@@ -1376,6 +1377,15 @@ Kata.require([
             spaceRoot.mFilter=filter;
         }
         
+    };
+    GLGEGraphics.prototype.methodTable["BackgroundColor"]=function(msg) {
+        console.log("DEBUG GLGE BackgroundColor:", msg)
+        var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
+        spaceRoot.mScene.setBackgroundColor(msg.color);
+    };
+    GLGEGraphics.prototype.methodTable["LightColor"]=function(msg) {
+        console.log("DEBUG GLGE LightColor:", msg.light, msg.color)
+        g_GLGE_doc.getElement(msg.light).setColor(msg.color);
     };
     GLGEGraphics.prototype.methodTable["DetachCamera"]=function(msg) {
         if (msg.id in this.mObjects) {
