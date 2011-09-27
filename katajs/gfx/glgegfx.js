@@ -40,6 +40,7 @@ var GLGEGraphics=function(callbackFunction,parentElement) {
     this.windowVisible=true;
     this.canvasVisible=true;
     this.mDoCaptureCanvas=0;//+1 for each request
+    this.bgColor = "#222"
     var thus=this;
     {
         var canvas, gl;
@@ -1309,15 +1310,15 @@ Kata.require([
         if(!spaceRoot.mFilter) {
             spaceRoot.mFilter=null;
             spaceRoot.mScene.setFilter2d(null);
-            spaceRoot.mScene.setBackgroundColor("#22f");
+            spaceRoot.mScene.setBackgroundColor(this.bgColor);
         }else {
             spaceRoot.mFilter=filter;
-            spaceRoot.mScene.setBackgroundColor("#f0f");           
+            spaceRoot.mScene.setBackgroundColor(this.bgColor);           
         }
         
     };
     GLGEGraphics.prototype.methodTable["Background"]=function(msg) {
-        console.log("DEBUG GFX Background:", msg)
+        //console.log("DEBUG GFX Background:", msg)
         var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
         var filter=spaceRoot.mFilter;
         var filterTextures=spaceRoot.mFilterTextures;
@@ -1371,20 +1372,21 @@ Kata.require([
         if(((!msg.curtextures)||(msg.curtextures&&msg.curtextures.length==0))&&((!msg.prevtextures)||msg.prevtextures.length==0)) {
             spaceRoot.mFilter=null;
             spaceRoot.mScene.setFilter2d(null);
-            spaceRoot.mScene.setBackgroundColor("#222");
+            spaceRoot.mScene.setBackgroundColor(this.bgColor);
         }else {
-            spaceRoot.mScene.setBackgroundColor("#f0f");           
+            spaceRoot.mScene.setBackgroundColor(this.bgColor);           
             spaceRoot.mFilter=filter;
         }
         
     };
     GLGEGraphics.prototype.methodTable["BackgroundColor"]=function(msg) {
-        console.log("DEBUG GLGE BackgroundColor:", msg)
+        //console.log("DEBUG GLGE BackgroundColor:", msg)
         var spaceRoot=this.createOrReturnSpaceRoot(msg.spaceid);
+        this.bgColor = msg.color;
         spaceRoot.mScene.setBackgroundColor(msg.color);
     };
     GLGEGraphics.prototype.methodTable["LightColor"]=function(msg) {
-        console.log("DEBUG GLGE LightColor:", msg.light, msg.color)
+        //console.log("DEBUG GLGE LightColor:", msg.light, msg.color)
         g_GLGE_doc.getElement(msg.light).setColor(msg.color);
     };
     GLGEGraphics.prototype.methodTable["DetachCamera"]=function(msg) {
