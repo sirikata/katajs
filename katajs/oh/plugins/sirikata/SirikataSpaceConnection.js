@@ -395,7 +395,7 @@ Kata.require([
     /* Handle session messages from the space server. */
     Kata.SirikataSpaceConnection.prototype._handleSessionMessage = function(odp_msg) {
         var session_msg = new Sirikata.Protocol.Session.Container();
-        session_msg.ParseFromStream(new PROTO.ByteArrayStream(odp_msg.payload));
+        session_msg.ParseFromStream(PROTO.CreateArrayStream(odp_msg.payload));
 
         var objid = odp_msg.dest_object;
 
@@ -592,7 +592,7 @@ Kata.require([
             data = this.mIncompleteLocationData[stream.mUSID].concat(data);
         }
         var framed_msg = new Sirikata.Protocol.Frame();
-        var str = new PROTO.ByteArrayStream(data);
+        var str = PROTO.CreateArrayStream(data);
         if (!framed_msg.ParseFromStream(str)) {
             this.mIncompleteLocationData[stream.mUSID] = data;
             return;
@@ -603,7 +603,7 @@ Kata.require([
 
         // Parse the internal loc update
         var loc_update_msg = new Sirikata.Protocol.Loc.BulkLocationUpdate();
-        loc_update_msg.ParseFromStream(new PROTO.ByteArrayStream(framed_msg.payload));
+        loc_update_msg.ParseFromStream(PROTO.CreateArrayStream(framed_msg.payload));
 
         for(var idx = 0; idx < loc_update_msg.update.length; idx++) {
             var update = loc_update_msg.update[idx];
@@ -667,7 +667,7 @@ Kata.require([
 
             // Handle the message
             var prox_msg = new Sirikata.Protocol.Prox.ProximityResults();
-            prox_msg.ParseFromStream(new PROTO.ByteArrayStream(next_prox_msg));
+            prox_msg.ParseFromStream(PROTO.CreateArrayStream(next_prox_msg));
             // FIXME add actual use of proximity events
             for(var i = 0; i < prox_msg.update.length; i++)
                 this._handleProximityUpdate(objid, prox_msg.t, prox_msg.update[i]);

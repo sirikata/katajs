@@ -222,7 +222,7 @@ Kata.require([
 	    u8arrayBuf.set(array, sidLen);
 
             if (this.mConnected.length == 0) {
-                this.mMessageQueue.push(finalString);
+                this.mMessageQueue.push(arrayBuf);
                 return;
             }
             var randsock = this.mSockets[this.mConnected[Math.floor(

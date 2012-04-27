@@ -96,7 +96,7 @@ Kata.require([
 
     Kata.Sirikata.SyncClient.prototype.handleMessage = function(space, src, src_port, dest, dest_port, payload) {
         var sync_msg = new Sirikata.Protocol.TimeSync();
-        sync_msg.ParseFromStream(new PROTO.ByteArrayStream(payload));
+        sync_msg.ParseFromStream(PROTO.CreateArrayStream(payload));
 
         var local_start_t = this.mRequestTimes[sync_msg.seqno];
         var server_t = sync_msg.t;
