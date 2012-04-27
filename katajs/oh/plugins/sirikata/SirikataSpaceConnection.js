@@ -299,10 +299,10 @@ Kata.require([
     };
 
     Kata.SirikataSpaceConnection.prototype._sendPreparedODPMessage = function(odp_msg) {
-        var serialized = new PROTO.Base64Stream();
+        var serialized = new PROTO.ArrayBufferStream();
         odp_msg.SerializeToStream(serialized);
 
-        this.mPrimarySubstream.sendMessage( serialized.getString() );
+        this.mPrimarySubstream.sendMessage( serialized.getUint8Array() );
     };
 
     Kata.SirikataSpaceConnection.prototype._handleDisconnected = function(substream) {
@@ -334,7 +334,7 @@ Kata.require([
         }
 
         var odp_msg = new Sirikata.Protocol.Object.ObjectMessage();
-        odp_msg.ParseFromStream(new PROTO.Base64Stream(data));
+        odp_msg.ParseFromStream(new PROTO.Uint8ArrayStream(data));
 
         // Special case: Session messages
         if (odp_msg.source_object == Kata.ObjectID.nil() && odp_msg.dest_port == this.Ports.Session) {

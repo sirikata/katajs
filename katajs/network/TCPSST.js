@@ -60,6 +60,34 @@ Kata.require([
         };
     }
 
+    function serializeVarInt(val, uint8array, offset) {
+	var tmp;
+	var first = 0;
+	var len = 0;
+	do {
+	    tmp = val & 0x7f;
+	    val >>>= 7;
+	    if (val != 0) {
+		tmp += 128;
+	    }
+	    uint8array[len++] = tmp;
+	} while (val != 0);
+	return len;
+    }
+
+    function parseVarInt(uint8array, offset, len) {
+	var i = 0;
+	var val = 0;
+	var tmp;
+	for (var i = 0; i < len; i++) {
+	    tmp = uint8array[i];
+	    val |= ((tmp & 127) << (7 * i));
+	    if (!(tmp & 128)) {
+		return [i + 1, val];
+	    }
+	}
+    }
+
     if (typeof(WebSocket)!="undefined") {
         /**
          * TCPSST is a protocol which has several substreams over a single
@@ -96,6 +124,7 @@ Kata.require([
                 this.mConnected--;
             }
             var sock = new WebSocket(this.mURI);
+	    sock.binaryType = "arraybuffer";
             sock.onopen = getOpenCallback(this, which);
             sock.onclose = getCloseCallback(this, which);
             sock.onmessage = getMessageCallback(this, which);
@@ -156,28 +185,41 @@ Kata.require([
          * @param {string} b64data  Received some ASCII data (usually base64).
          * @private
          */
-        Kata.TCPSST.prototype._onMessage = function (which, b64data) {
-            var percent = b64data.indexOf('%');
-            var streamnumber = parseInt(b64data.substr(0,percent), 16);
-            b64data = b64data.substr(percent+1);
-            //console.log("Receive from socket "+which+" stream "+streamnumber+":",b64data);
-
-            // FIXME: How do we detect a "close" message?
+        Kata.TCPSST.prototype._onMessage = function (which, buffer) {
+	    var u8arr = new Uint8Array(buffer, 0, (buffer.length < 5 ? buffer.length : 5));
+            var parsed = parseVarInt(u8arr, 0, u8arr.length);
+	    if (!parsed) {
+		Kata.log("Error: Failed to parse stream ID!");
+		return;
+	    }
+	    var offset = parsed[0];
+	    var streamnumber = parsed[1];
 
             if (!this.mSubstreams[streamnumber]) {
                 var substream = new Kata.TCPSST.Substream(this, streamnumber);
                 this.mSubstreams[streamnumber] = substream;
             }
-            this.mSubstreams[streamnumber].callListeners(b64data);
+	    this.mSubstreams[streamnumber].callListeners(new Uint8Array(buffer, offset));
         };
+
+	var sidArray = new Uint8Array(5);
+
         /**
          * Sends a message over the WebSocket connection
          * @param streamid  Which stream number (allocated by Substream)
          * @param base64data  Any ASCII data (binary data not yet supported).
          */
-        Kata.TCPSST.prototype.send = function (streamid, base64data) {
+        Kata.TCPSST.prototype.send = function (streamid, array) {
             //console.log("Send to socket stream "+streamid+":",base64data);
-            var finalString = streamid.toString(16)+"%"+base64data;
+
+	    var sidLen = serializeVarInt(streamid, sidArray, 0);
+
+	    var arrayBuf = new ArrayBuffer(sidLen + array.length);
+	    var u8arrayBuf = new Uint8Array(arrayBuf);
+	    for (var i = 0; i < sidLen; i++) {
+		u8arrayBuf[i] = sidArray[i];
+	    }
+	    u8arrayBuf.set(array, sidLen);
 
             if (this.mConnected.length == 0) {
                 this.mMessageQueue.push(finalString);
@@ -185,7 +227,7 @@ Kata.require([
             }
             var randsock = this.mSockets[this.mConnected[Math.floor(
                 Math.random()*this.mConnected.length)]];
-            randsock.send(finalString);
+            randsock.send(arrayBuf);
         };
         /**
          * Picks a new substream ID. Does not yet clean up old substreams.

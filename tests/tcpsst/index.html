@@ -54,7 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       // This is a simple ping-pong test to verify that a simple
       // TCPSST connection between JS on a WebSocket and a C++
       // stream_echo server works.
-
+    Kata.queryString = "?2";
+    var TEST_ARRAY = [0,1,2,3,4,5,6,7,8,255];
     var start_test = function() {
       Kata.require(["katajs/network/TCPSST.js"
       ], function() {
@@ -62,15 +63,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         tcpsst_substream = tcpsst_sock.clone();
         tcpsst_substream.registerListener(
           function(substream, data) {
-            Kata.warn("Received: " + data);
-            if (data != "U2lyaWthdGE=")
-              Kata.warn("Got mismatched response.");
+	    var dbg = '';
+            if (data.length != TEST_ARRAY.length) {
+              Kata.warn("Got mismatched length " + data.length);
+            }
+            for (var i = 0; i < TEST_ARRAY.length; i++) {
+              if (data[i] != TEST_ARRAY[i]) {
+                Kata.warn("Got mismatched response arr[" + i + "]");
+              }
+	      dbg += data[i] + ",";
+            }
+            Kata.warn("Received: " + dbg);
           }
         );
         setInterval(
           function() {
             // Message must be base 64 encode - "Sirikata"
-            tcpsst_substream.sendMessage("U2lyaWthdGE=");
+            tcpsst_substream.sendMessage(TEST_ARRAY);
           },
           1000
         );

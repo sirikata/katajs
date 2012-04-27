@@ -84,10 +84,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               mymsg.field_message.field_string = "Hello SubMessage";
               mymsg.field_enum = Kata.Test.TestMessage.TestEnum.Value2;
 
-              var serialized = new PROTO.Base64Stream;
+              var serialized = new PROTO.ArrayBufferStream;
               mymsg.SerializeToStream(serialized);
 
-              tcpsst_substream.last_data_shipped = serialized.getString();
+              tcpsst_substream.last_data_shipped = serialized.getUint8Array();
               tcpsst_substream.sendMessage( tcpsst_substream.last_data_shipped );
             },
             1000
@@ -96,14 +96,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         tcpsst_substream.registerListener(
           function(substream, data) {
             Kata.warn("Received: " + data);
-            if (data != substream.last_data_shipped) {
+            var mismatched = (data.length != substream.last_data_shipped.length);
+            for (var i = 0; i < data.length; i++) {
+              if (data[i] != substream.last_data_shipped[i])
+                mismatched = mismatched || true;
+            }
+            if (mismatched) {
               Kata.warn("Got mismatched response.");
               substream.close();
               return;
             }
 
             var mymsg = new Kata.Test.TestMessage();
-            mymsg.ParseFromStream( new PROTO.Base64Stream(data) )
+            mymsg.ParseFromStream( new PROTO.Uint8ArrayStream(data) )
             Kata.warn("Parsed: " +
                       "integral: " + mymsg.field_integral +
                       ", float: " + mymsg.field_float +
