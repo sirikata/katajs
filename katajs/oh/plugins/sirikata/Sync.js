@@ -80,7 +80,7 @@ Kata.require([
         var seqno = this.mSeqNo;
         this.mSeqNo = (this.mSeqNo+1) % 256;
         sync_msg.seqno = seqno;
-        this.mRequestTimes[seqno] = (new Date()).getTime();
+        this.mRequestTimes[seqno] = Date.now();
 
         var serialized = new PROTO.ByteArrayStream();
         sync_msg.SerializeToStream(serialized);
@@ -100,7 +100,7 @@ Kata.require([
 
         var local_start_t = this.mRequestTimes[sync_msg.seqno];
         var server_t = sync_msg.t;
-        var local_finish_t = (new Date()).getTime();
+        var local_finish_t = Date.now();
 
         // Sanity check the round trip time to avoid using outdated packets
         var rtt = local_finish_t - local_start_t;

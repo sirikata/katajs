@@ -88,7 +88,7 @@ Kata.require([
         // Time sync -- this needs to be updated to use the Sirikata sync protocol.
         this.mSync = new Kata.Sirikata.SyncClient(
             this,
-            new Kata.ODP.Endpoint(this.mSpaceURL, Kata.ObjectID.random(), this.Ports.TimeSync),
+            new Kata.ODP.Endpoint(this.mSpaceURL, Kata.ObjectID.nil(), this.Ports.TimeSync),
             new Kata.ODP.Endpoint(this.mSpaceURL, Kata.ObjectID.nil(), this.Ports.TimeSync)
         );
     };
