@@ -615,6 +615,8 @@ var createConnectionSST = function(localEndPoint,remoteEndPoint,cb){
 
     var channelid=getDatagramLayerSST(localEndPoint).getAvailableChannel();
     var payload=[
+        ((channelid>>24)&255),
+        ((channelid>>16)&255),
         ((channelid>>8)&255),
         channelid&255
     ];
@@ -1045,9 +1047,9 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
         this.mState = CONNECTION_CONNECTED_SST;
         var originalListeningEndPoint=new Kata.SST.EndPoint(this.mRemoteEndPoint.endPoint, this.mRemoteEndPoint.port);
         
-        this.setRemoteChannelID(received_msg.payload[0]*256+received_msg.payload[1]);
+        this.setRemoteChannelID(received_msg.payload[0]*(256*65536)+received_msg.payload[1]*65536+received_msg.payload[2]*256+received_msg.payload[3]);
         
-        this.mRemoteEndPoint.port = received_msg.payload[2]*256+received_msg.payload[3];
+        this.mRemoteEndPoint.port = (received_msg.payload[4]*(256*65536)+received_msg.payload[5]*65536+received_msg.payload[6]*256+received_msg.payload[7]);
         
         this.sendData( [], false );//false means not an ack
         var localEndPointId=this.mLocalEndPoint.uid();
@@ -1339,12 +1341,16 @@ var connectionHandleReceiveSST = function(datagramLayer, remoteEndPoint,localEnd
             sConnectionMapSST[newLocalEndPoint.uid()] = conn;
 
             conn.setLocalChannelID(availableChannel);
-            conn.setRemoteChannelID(received_payload[0]*256+received_payload[1]);
+            conn.setRemoteChannelID(received_payload[0]*(65536*256)+65536*received_payload[1]+256*received_payload[2]+received_payload[3]);
             conn.setState(CONNECTION_PENDING_RECEIVE_CONNECT_SST);
             
             conn.sendData([
+                              (availableChannel>>24)&255,
+                              (availableChannel>>16)&255,
                               (availableChannel>>8)&255,
                               availableChannel&255,
+                              (availablePort>>24)&255,
+                              (availablePort>>16)&255,
                               (availablePort>>8)&255,
                               availablePort&255
                           ],
