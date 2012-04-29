@@ -46,6 +46,9 @@ Kata.require([
     'katajs/oh/plugins/sirikata/Frame.js',
     'katajs/oh/plugins/sirikata/Sync.js'
 ], function() {
+    function discardChildStream(success,sptr) {
+        sptr.close(false);
+    }
 
     var SUPER = Kata.SpaceConnection.prototype;
     /** Kata.SirikataSpaceConnection is an implementation of
@@ -524,11 +527,15 @@ Kata.require([
             Kata.warn("Tried to send loc update before stream to server was ready.");
             return;
         }
-
+        spacestream.createChildStream(
+            discardChildStream,
+            this._serializeMessage(container).getArray(),
+            this.Ports.Location, this.Ports.Location);
+/*old protocol
         spacestream.datagram(
             this._serializeMessage(container).getArray(),
             this.Ports.Location, this.Ports.Location
-        );
+        );*/
     };
 
     Kata.SirikataSpaceConnection.prototype.requestQueryRemoval = function(objid) {

@@ -1729,7 +1729,7 @@ Kata.SST.Stream.prototype.connection=function() {
   */
 Kata.SST.Stream.prototype.createChildStream=function (cb, data,local_port,remote_port)
   {
-    this.mConnection.stream(cb, data, length, local_port, remote_port, this.mParentLSID);
+    this.mConnection.stream(cb, data, local_port, remote_port, this.mParentLSID);
   };
 
   /**
