@@ -40,17 +40,22 @@ Kata.require([
     /** Kata.ObjectHost is the main interface to access HostedObject's. It also
      * manages the list of open space connections, and communication between
      * other simulations (graphics and physics).
+     * certain users of katajs may wish the blessed script to run on the main thread to have DOM access
+     * if main_thread_script is true then so it shall be done
      * @constructor
      */
-    Kata.ObjectHost = function (blessed_script, blessed_class, blessed_args) {
+    Kata.ObjectHost = function (blessed_script, blessed_class, blessed_args, main_thread_script) {
         this.mSimulations = [];
         this.mSimulationsByName = {};
         this.mSimulationCallbacksByName={};
         this.mObjects = {};
 
         this.mSessionManager = new Kata.SessionManager();
-
-        this.createObject(blessed_script, blessed_class, blessed_args);
+        if (main_thread_script) {
+            this.createMainThreadObject(blessed_script, blessed_class, blessed_args);
+        }else {
+            this.createObject(blessed_script, blessed_class, blessed_args);
+        }
         if (network_debug) console.log("ObjectHosted!");
     };
 
@@ -123,6 +128,13 @@ Kata.require([
          var createdObject = this.generateObject(privid);
          if (script && cons && args)
              createdObject.createScript(script, cons, args);
+    };
+
+     Kata.ObjectHost.prototype.createMainThreadObject = function(script, cons, args) {
+         var privid = this.privateIdGenerator();
+         var createdObject = this.generateObject(privid);
+         if (script && cons && args)
+             createdObject.createMainThreadScript(script, cons, args);
     };
 
     /** Creates a new instance of a Kata.HostedObject for a specific protocol.

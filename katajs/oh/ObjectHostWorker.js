@@ -32,7 +32,10 @@
 
 
 Kata.require([
-    'katajs/oh/ObjectHost.js'
+                    'katajs/space/loop/Space.js',
+                    'katajs/oh/ObjectHost.js',
+                    'katajs/oh/plugins/sirikata/SirikataSpaceConnection.js',
+                    'katajs/oh/plugins/loop/LoopbackSpaceConnection.js'
 ], function() {
 
     /** A worker thread to instantiate an ObjectHost and manage the channel to

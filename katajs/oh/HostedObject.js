@@ -233,4 +233,21 @@ Kata.require([
              Kata.bind(this.messageFromScript,this));
          script_worker.go();
      };
+
+    Kata.HostedObject.prototype.createMainThreadScript = function(script, method, args) {
+         var script_worker = new Kata.FakeWebWorker(
+             "katajs/oh/impl/BootstrapScript.js",
+             "Kata.BootstrapScript",
+             {
+                 realScript: script,
+                 realClass: method,
+                 realArgs: args
+             }
+         );
+         this.mScriptChannel = script_worker.getChannel();
+         this.mScriptChannel.registerListener(
+             Kata.bind(this.messageFromScript,this));
+         script_worker.go();
+    };
+
 }, 'katajs/oh/HostedObject.js');

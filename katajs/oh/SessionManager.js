@@ -44,6 +44,9 @@ Kata.require([
      *  @constructor
      */
     Kata.SessionManager = function () {
+        //Kata.include(Kata.scriptRoot+'katajs/oh/plugins/loop/LoopbackSpaceConnection.js');
+        //Kata.include(Kata.scriptRoot+'katajs/oh/plugins/sirikata/SirikataSpaceConnection.js');
+
         this.mSpaceConnections = {};
         this.mObjects = {};
     };
@@ -88,7 +91,7 @@ Kata.require([
          if (!space_conn) {
              var protoClass = Kata.SessionManager._getProtocolHandler(spaceURLProtocol);
              if (!protoClass)
-                 Kata.error("Unknown space protocol: " + spaceURL.protocol);
+                 Kata.error("Unknown space protocol: " + spaceURLProtocol);
              space_conn = new protoClass(this, spaceURL);
              this.mSpaceConnections[spaceURL] = space_conn;
          }
