@@ -52,7 +52,7 @@ Kata.require([
 
         this.mSessionManager = new Kata.SessionManager();
         if (main_thread_script) {
-            this.createMainThreadObject(blessed_script, blessed_class, blessed_args);
+            this.createMainThreadObject(blessed_script, blessed_class, blessed_args, main_thread_script);
         }else {
             this.createObject(blessed_script, blessed_class, blessed_args);
         }
@@ -130,11 +130,11 @@ Kata.require([
              createdObject.createScript(script, cons, args);
     };
 
-     Kata.ObjectHost.prototype.createMainThreadObject = function(script, cons, args) {
+     Kata.ObjectHost.prototype.createMainThreadObject = function(script, cons, args, mainThreadChannel) {
          var privid = this.privateIdGenerator();
          var createdObject = this.generateObject(privid);
          if (script && cons && args)
-             createdObject.createMainThreadScript(script, cons, args);
+             createdObject.createMainThreadScript(script, cons, args, mainThreadChannel);
     };
 
     /** Creates a new instance of a Kata.HostedObject for a specific protocol.

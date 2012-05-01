@@ -44,7 +44,12 @@ Kata.require([
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Frame.pbj.js'],
     'katajs/oh/sst/SSTImpl.js',
     'katajs/oh/plugins/sirikata/Frame.js',
-    'katajs/oh/plugins/sirikata/Sync.js'
+    'katajs/oh/plugins/sirikata/Sync.js',
+    'katajs/core/FilterChannel.js',
+    'katajs/core/MessageDispatcher.js',
+    'katajs/oh/Presence.js',
+    'katajs/core/URL.js',
+    'katajs/oh/impl/ScriptProtocol.js'
 ], function() {
     function discardChildStream(success,sptr) {
         sptr.close(false);

@@ -97,6 +97,7 @@ Kata.require([
                  Subscription : "fsub",
 
                  CreateObject : "fcre",
+                 InstantiateObjectScript : "fscr",
                  GraphicsMessage : "fgfm",
                  EnableGUIMessage : "feui",
                  DisableGUIMessage : "fdui",
@@ -126,6 +127,12 @@ Kata.require([
              RegisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.EnableGUIMessage;
                  this.event = event;
+             },            
+             InstantiateObjectScript : function (script,method,args) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.InstantiateObjectScript;
+                 this.script=script;
+                 this.method=method;
+                 this.args=args;
              },            
              UnregisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.DisableGUIMessage;

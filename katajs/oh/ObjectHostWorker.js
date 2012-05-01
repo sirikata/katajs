@@ -45,9 +45,9 @@ Kata.require([
      * @param {Kata.Channel=} graphicsChannel A channel to Kata.MainThread.
      */
     Kata.ObjectHostWorker = function (graphicsChannel, blessed_args) {
-        this.mObjectHost = new Kata.ObjectHost(blessed_args.script, blessed_args.method, blessed_args.args);
-
-        this.mObjectHost.registerSimulation(graphicsChannel, "graphics");
+        this.mObjectHost = new Kata.ObjectHost(blessed_args.script, blessed_args.method, blessed_args.args, blessed_args.args.main_thread?graphicsChannel:false);
+        if (!blessed_args.args.disable_simulation) 
+            this.mObjectHost.registerSimulation(graphicsChannel, "graphics");
 
         // Physics not implemented yet...
         //this.mPhysicsWorker = new WebWorker("PhysicsSimulation.js", "PhysicsSimulation");

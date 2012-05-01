@@ -892,7 +892,7 @@ Kata.require([
     
     
     GLGEGraphics.prototype.send=function(obj) {
-        if (obj.msg!="Custom"){
+        if (obj.msg!="Custom"&&obj.__type==Kata.ScriptProtocol.FromScript.Types.GraphicsMessage) {
             this.methodTable[obj.msg].call(this, obj);
             this.newEvent();
         }

@@ -234,7 +234,8 @@ Kata.require([
          script_worker.go();
      };
 
-    Kata.HostedObject.prototype.createMainThreadScript = function(script, method, args) {
+    Kata.HostedObject.prototype.createMainThreadScript = function(script, method, args, mainThreadChannel) {
+/*
          var script_worker = new Kata.FakeWebWorker(
              "katajs/oh/impl/BootstrapScript.js",
              "Kata.BootstrapScript",
@@ -244,10 +245,19 @@ Kata.require([
                  realArgs: args
              }
          );
-         this.mScriptChannel = script_worker.getChannel();
+*/
+         this.mScriptChannel = mainThreadChannel;
          this.mScriptChannel.registerListener(
-             Kata.bind(this.messageFromScript,this));
-         script_worker.go();
+         Kata.bind(this.messageFromScript,this));
+        this.mScriptChannel.sendMessage(new Kata.ScriptProtocol.FromScript.InstantiateObjectScript(
+             "katajs/oh/impl/BootstrapScript.js",
+             "Kata.BootstrapScript",
+             {
+                 realScript: script,
+                 realClass: method,
+                 realArgs: args
+             }));
+//         script_worker.go();
     };
 
 }, 'katajs/oh/HostedObject.js');
