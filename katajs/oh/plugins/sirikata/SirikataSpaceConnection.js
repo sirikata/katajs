@@ -206,7 +206,7 @@ Kata.require([
         }
 
         if (loc.visual)
-            result.visual = loc.visual.mesh;
+            result.visual = loc.visual;
 
         return result;
     };
@@ -628,7 +628,10 @@ Kata.require([
             // received.  The visual parameter is handled seperately,
             // so we just fill it in before any calls to
             // presenceLocUpdate.
-            var visual = update.mesh;
+            //FIXME: bug un protojs: does not properly determine if mesh field is missing versus an empty string
+            var visual = update.HasField("mesh")?update.mesh:undefined;
+
+            var physics = update.HasField("physics")?update.physics:undefined;
 
             if (update.location) {
                 var loc = {};
@@ -638,7 +641,7 @@ Kata.require([
                 loc.pos = update.location.position;
                 loc.vel = update.location.velocity;
 
-                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual, physics);
             }
             // FIXME differing time values? Maybe use Location class to handle?
             if (update.orientation) {
@@ -651,7 +654,7 @@ Kata.require([
                 var ovel_aa = orientvel.toAngleAxis();
                 loc.rotaxis = ovel_aa.axis;
                 loc.rotvel = ovel_aa.angle;
-                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual, physics);
             }
 
             if (update.bounds) {
@@ -663,7 +666,7 @@ Kata.require([
 				if (!loc.time) {
 					loc.time = Kata.now(this.mSpaceURL); // OMG HACK HACK HACK: The correct fix is to add time field to the space server.
 				}
-                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual);
+                this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual, physics);
             }
         }
 
@@ -719,11 +722,7 @@ Kata.require([
                 // properties (instead of just the mesh URL) because
                 // curretnly GraphicsScript relies on it being this
                 // way.
-                properties.visual = {
-                    anim : "",
-                    mesh : update.addition[add].mesh,
-                    up_axis : [1, 0, 0]
-                };
+                properties.visual = update.addition[add].mesh;
             }
             this.mParent.proxEvent(this.mSpaceURL, objid, observed, true, properties);
         }

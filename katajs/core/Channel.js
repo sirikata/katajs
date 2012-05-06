@@ -58,6 +58,30 @@ Kata.require([
             this.mListener = [this.mListener, listener];
         }
     };
+
+
+    /**
+     * Registers a function to be called when a message is sent.
+     * @param {function(Kata.Channel, (string|object))} listener  A callback func
+     */
+    Kata.Channel.prototype.unregisterListener = function (listener) {
+        if (listener==this.mListener) {
+            delete this.mListener;
+            return true;
+        }
+        if (this.mListener instanceof Array) {
+            for (var i=0;i<this.mListener.length;++i) {
+                if (this.mListener[i]==listener) {
+                    for (var j=i;j+1<this.mListener.length;++j) {
+                        this.mListener[j]=this.mListener[j+1];
+                    }
+                    this.mListener.pop();
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
     /**
      * Protected function to be called by subclasses when a message has been
      * received and is to be delivered to listeners.

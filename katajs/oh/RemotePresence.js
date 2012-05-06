@@ -48,9 +48,10 @@ Kata.require([
       * @param {Location} location
       * @param bounds <-- unknown representaiton
       * @param {Kata.URL} vis
+      * @param {String} physics json
       * @constructor
       */
-     Kata.RemotePresence = function (parent, space, id, location, vis) {
+      Kata.RemotePresence = function (parent, space, id, location, vis, physics) {
          this.mParent = parent; // Parent Presence
 
          this.mSpace = space;
@@ -61,13 +62,13 @@ Kata.require([
          this.mOrientSeqNo = undefined;
 
          this.mLocation = location;
-
          if (vis) {
-             this.rMesh = vis.mesh;
-             this.rAnim = vis.anim;
-             this.rUpAxis = vis.up_axis;
+             this.rMesh = vis;
+             //this.rAnim = vis.anim;
+             //this.rUpAxis = vis.up_axis;
          }
-
+         if (physics)
+            this.mPhysics = physics;
          // Indicates whether we're tracking this object, i.e. if a subscription was submitted.
          this.mTracking = false;
      };
@@ -216,13 +217,17 @@ Kata.require([
      Kata.RemotePresence.prototype.visual = function() {
          return this.rMesh;
      };
+     /** Get the current object's physics JSON data. */
+     Kata.RemotePresence.prototype.physics = function() {
+         return this.mPhysics;
+     };
 
      /** Method that should only be used by the Script base class to
       * update internal state.  Presence should override this to deal
       * with conflicts between outstanding requests and old loc
       * updates.
       */
-     Kata.RemotePresence.prototype._updateLoc = function (loc, visual) {
+    Kata.RemotePresence.prototype._updateLoc = function (loc, visual, physics) {
          if (loc) {
              if (loc.seqno) {
                  // FIXME: These are PROTO.INT64 objects which have no operator<
@@ -267,5 +272,7 @@ Kata.require([
          if (visual != undefined) {
              this.rMesh = visual;
          }
+         if (physics != undefined) 
+             this.mPhysics=physics;
      };
 }, 'katajs/oh/RemotePresence.js');

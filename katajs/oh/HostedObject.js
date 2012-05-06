@@ -179,9 +179,9 @@ Kata.require([
          );
      };
 
-     Kata.HostedObject.prototype.presenceLocUpdate = function(space, from, loc, visual) {
+     Kata.HostedObject.prototype.presenceLocUpdate = function(space, from, loc, visual, physics) {
          var msg = new Kata.ScriptProtocol.ToScript.PresenceLocUpdate(
-             space, from, loc, visual
+             space, from, loc, visual, physics
          );
          this.sendScriptMessage(msg);
      };

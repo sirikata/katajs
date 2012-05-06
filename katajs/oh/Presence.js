@@ -78,10 +78,10 @@ Kata.require([
       * @param {Kata.PresenceID} id Unique identifier of this object in
       * the space.
       */
-     Kata.Presence = function (script, space, id, location, vis) {
+      Kata.Presence = function (script, space, id, location, vis, physics) {
          // Note the second parameter is the RemotePresence's parent,
          // which in this special case is just the Presence itself
-         SUPER.constructor.call(this, this, space, id, location, vis);
+         SUPER.constructor.call(this, this, space, id, location, vis, physics);
 
          this.mScript = script;
 
@@ -354,6 +354,7 @@ Kata.require([
      };
      Kata.Presence.prototype.setPhysics = function(val) {
          var msg = new Kata.ScriptProtocol.FromScript.Physics(this.mSpace, this.mID, val);
+         
          this._sendHostedObjectMessage(msg);
      };
 
@@ -426,7 +427,7 @@ Kata.require([
 
          if (this.id() === msg.observed) {
 //             Kata.warn("Self loc update: " + this.id());
-             this._updateLoc(msg.loc, msg.visual);
+             this._updateLoc(msg.loc, msg.visual, msg.physics);
              return this;
          }
          else {
@@ -434,7 +435,7 @@ Kata.require([
              var remote = remotePresences[key];
 //             Kata.warn("Remote presence loc update: " + key);
              if (remote) {
-                 remote._updateLoc(msg.loc, msg.visual);
+                 remote._updateLoc(msg.loc, msg.visual, msg.physics);
              }
              else {
                  // Stash changes to pick up with later prox

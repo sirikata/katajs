@@ -70,6 +70,9 @@ Kata.require([
          this.mConnectRequests = {};
          var handlers = {};
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
+         handlers[msgTypes.Connected] = Kata.bind(this._handleConnected, this);
+         handlers[msgTypes.ConnectionFailed] = Kata.bind(this._handleConnectFailed, this);
+         handlers[msgTypes.Disconnected] = Kata.bind(this._handleDisconnect, this);
          handlers[msgTypes.ReceiveODPMessage] = Kata.bind(this._handleReceiveODPMessage, this);
          handlers[msgTypes.QueryEvent] = Kata.bind(this._handleQueryEvent, this);
          handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);
@@ -110,8 +113,8 @@ Kata.require([
          this._sendHostedObjectMessage(msg);
      };
 
-     Kata.Script.prototype.newPresence = function(msg) {
-         var presence = new Kata.Presence(this, Kata.URL(msg.space), msg.id, msg.loc, msg.visual);
+     Kata.Script.prototype._handleConnected = function(channel, msg) {
+         var presence = new Kata.Presence(this, Kata.URL(msg.space), msg.id, msg.loc, msg.visual, msg.physics);
 
          this.mPresences[msg.space] = presence;
 
@@ -127,14 +130,14 @@ Kata.require([
              if (beh.newPresence) beh.newPresence(presence);
          });
      };
-     Kata.Script.prototype.connectFailure = function(space, reason) {
-         var cb = this.mConnectRequests[space];
+     Kata.Script.prototype._handleConnectFailed = function(channel,msg) {
+         var cb = this.mConnectRequests[msg.space];
          if (cb) {
-             delete this.mConnectRequests[space];
-             cb(null, space, reason);
+             delete this.mConnectRequests[msg.space];
+             cb(null, msg.space, msg.reason?msg.reason:"Disconnected");
          }
      };
-     Kata.Script.prototype.presenceInvalidated = function(msg, reason) {
+     Kata.Script.prototype._handleDisconnect = function(channel, msg) {
          var invalidated = this.mPresences[msg.space];
          if (!invalidated) return;
 
