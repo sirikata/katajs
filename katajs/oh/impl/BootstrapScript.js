@@ -34,7 +34,6 @@
 Kata.require([
     'katajs/core/FilterChannel.js',
     'katajs/core/MessageDispatcher.js',
-    'katajs/oh/Presence.js',
     'katajs/core/URL.js',
     'katajs/oh/impl/ScriptProtocol.js'
 ], function() {
@@ -64,7 +63,6 @@ Kata.require([
          handlers[msgTypes.Disconnected] = Kata.bind(this._handleDisconnect, this);
          this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
 
-         this.mPresences = {};
 
          // Create a filtered channel, so we get first crack at any messages
          var filtered_channel = new Kata.FilterChannel(channel, Kata.bind(this.receiveMessage, this));
@@ -111,10 +109,7 @@ Kata.require([
      };
 
      Kata.BootstrapScript.prototype._handleConnected = function(channel, msg) {
-         var presence = new Kata.Presence(this.mScript, Kata.URL(msg.space), msg.id, msg.loc, msg.visual);
-
-         this.mPresences[msg.space] = presence;
-         this.mScript.newPresence(presence);
+         this.mScript.newPresence(msg);
      };
 
      Kata.BootstrapScript.prototype._handleConnectFailed = function(channel, msg) {
@@ -122,11 +117,7 @@ Kata.require([
      };
 
      Kata.BootstrapScript.prototype._handleDisconnect = function(channel, msg) {
-         var invalidated = this.mPresences[msg.space];
-         if (!invalidated) return;
-
-         delete this.mPresences[msg.space];
-         this.mScript.presenceInvalidated(invalidated, "Disconnected.");
+         this.mScript.presenceInvalidated(msg, "Disconnected.");
      };
 
 }, "katajs/oh/impl/BootstrapScript.js");

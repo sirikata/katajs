@@ -68,7 +68,6 @@ Kata.require([
          this.mRemotePresences = {};
 
          this.mConnectRequests = {};
-
          var handlers = {};
          var msgTypes = Kata.ScriptProtocol.ToScript.Types;
          handlers[msgTypes.ReceiveODPMessage] = Kata.bind(this._handleReceiveODPMessage, this);
@@ -111,8 +110,10 @@ Kata.require([
          this._sendHostedObjectMessage(msg);
      };
 
-     Kata.Script.prototype.newPresence = function(presence) {
-         this.mPresences[presence.space()] = presence;
+     Kata.Script.prototype.newPresence = function(msg) {
+         var presence = new Kata.Presence(this, Kata.URL(msg.space), msg.id, msg.loc, msg.visual);
+
+         this.mPresences[msg.space] = presence;
 
          // Notify normal script
          var cb = this.mConnectRequests[presence.space()];
@@ -133,13 +134,14 @@ Kata.require([
              cb(null, space, reason);
          }
      };
-     Kata.Script.prototype.presenceInvalidated = function(presence, reason) {
-         if (this.mPresences[presence.space()]) {
-             delete this.mPresences[presence.space()];
-         }
+     Kata.Script.prototype.presenceInvalidated = function(msg, reason) {
+         var invalidated = this.mPresences[msg.space];
+         if (!invalidated) return;
+
+         delete this.mPresences[msg.space];
 
          this.mBehaviors.forEach(function(beh) {
-             if (beh.presenceInvalidated) beh.presenceInvalidated(presence);
+             if (beh.presenceInvalidated) beh.presenceInvalidated(invalidated);
          });
      };
      /** Request a callback after the specified amount of time.  If
