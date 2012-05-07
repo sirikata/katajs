@@ -372,6 +372,8 @@ Kata.require([
          if (added && loc_msgs !== undefined) {
              for(var li = 0; li < loc_msgs.length; li++)
                  remote._updateLoc(loc_msgs[li].loc, loc_msgs[li].visual);
+             if (this.mOrphanLocUpdates[presid].timeout)
+                 clearTimeout(this.mOrphanLocUpdates[presid].timeout);
              delete this.mOrphanLocUpdates[presid];
          }
      };
@@ -449,7 +451,9 @@ Kata.require([
                  this.mOrphanLocUpdates[presid].push(msg);
                  // Extra long timeout should be safe but not keep too
                  // much data around
-                 setTimeout(Kata.bind(this._clearOrphanLocUpdates, this, presid), 60000);
+                 if (!this.mOrphanLocUpdates[presid].timeout) {
+                     this.mOrphanLocUpdates[presid].timeout=setTimeout(Kata.bind(this._clearOrphanLocUpdates, this, presid), 60000);
+                 }
              }
 
              return remote;
