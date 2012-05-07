@@ -78,6 +78,27 @@ Kata.require([
                                              }*/),
                               function (key, value) {
                                   var a;
+                                  if (typeof value === 'object') {
+                                      if (value && value.length !==undefined) {
+                                          if (value.byteLength !== undefined 
+                                              && value.byteOffset !== undefined) {
+                                              if (value.buffer 
+                                                  && value.buffer.byteLength !== undefined) {
+                                                  var retval = [];
+                                                  var len=value.length;
+                                                  for (var i=0;i<len;++i) {
+                                                      retval.push(value[i]);
+                                                  }
+                                                  /*
+                                                  var retval = new Uint8Array(value.length);
+                                                  for (var i=0;i<value.length;++i) {
+                                                      retval[i]=value[i];
+                                                  }*/
+                                                  return retval;
+                                              }
+                                          }
+                                      }
+                                  }
                                   if (typeof value === 'string') {
                                       a =
                                           /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
