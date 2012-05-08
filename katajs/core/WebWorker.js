@@ -29,7 +29,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+"use strict";
 
 Kata.require([
     'katajs/core/SimpleChannel.js'
@@ -98,7 +98,7 @@ Kata.require([
                     Kata.error(clsName+" is undefined:" + this.mJSFile);
                 }
                 if (network_debug) console.log("going!");
-                this.mChild = new cls (
+                new cls (
                     opposingChannel,
                     args);
             });

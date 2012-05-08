@@ -6,6 +6,7 @@ mailto:robert@broofa.com
 Copyright (c) 2009 Robert Kieffer
 Dual licensed under the MIT and GPL licenses.
 */
+"use strict";
 
 /*
  * Generate a random uuid.

@@ -29,6 +29,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+"use strict";
 
 Kata.require([
     'katajs/core/Deque.js',
@@ -1781,6 +1782,13 @@ var connectionCreatedStreamSST = function( errCode, c) {
  *  the underlying connection.
  */
 Kata.SST.Stream.prototype.serviceStream=function() {
+    function mapEmpty(m) {
+        for (var i in m) {
+            return false;
+        }
+        return true;
+    }
+
     this.conn = this.mConnection;
     var curTime= new Date();
     //console.log(curTime+" Servicing Stream"+this.mConnection.mLocalEndPoint.uid());
@@ -1839,12 +1847,6 @@ Kata.SST.Stream.prototype.serviceStream=function() {
         {
           this.resendUnackedPackets();
           this.mLastSendTime = curTime;
-        }
-        function mapEmpty(m) {
-            for (var i in m) {
-                return false;
-            }
-            return true;
         }
         if (this.mState == PENDING_DISCONNECT_STREAM_SST &&
             KataDequeEmpty(this.mQueuedBuffers)  &&

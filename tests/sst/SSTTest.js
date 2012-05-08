@@ -1,3 +1,4 @@
+"use strict";
 function SSTTest() {
     this.dispatcher = new Kata.SST.ObjectMessageDispatcher;
 };

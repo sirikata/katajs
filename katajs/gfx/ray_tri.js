@@ -10,7 +10,7 @@
 
 // modifications (c) 2010 Katalabs, inc.
 */
-
+"use strict";
 // R = ray T = triangle N = (optional) array to fill with normal
 function ray_tri_intersect(R, T, N) {
 //	console.log("ray_tri_i_..",R,T,N)

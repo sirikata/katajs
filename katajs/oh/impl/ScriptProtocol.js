@@ -29,7 +29,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+"use strict";
 
 Kata.require([
     'katajs/core/URL.js',
@@ -439,7 +439,7 @@ Kata.require([
              },
              
              GUIMessage : function (msg) {
-                 for (field in msg) {
+                 for (var field in msg) {
                      this[field]=msg[field];
                  }
                  this.__type = Kata.ScriptProtocol.ToScript.Types.GUIMessage;

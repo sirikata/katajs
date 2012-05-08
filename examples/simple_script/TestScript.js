@@ -1,4 +1,4 @@
-
+"use strict";
 
 Kata.require([
     'katajs/oh/GraphicsScript.js',

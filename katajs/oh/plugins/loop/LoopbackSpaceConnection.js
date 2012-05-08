@@ -29,12 +29,11 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+"use strict";
 
 // See note about how connections work. Generally connection classes
 // shouldn't include anything from a space implementation (and
 // generally can't since the space implementation is not available.
-
 Kata.require([
     'katajs/oh/SpaceConnection.js',
     'katajs/oh/SessionManager.js',
@@ -146,6 +145,6 @@ Kata.require([
 
      Kata.SessionManager.registerProtocolHandler("loop", Kata.LoopbackSpaceConnection);
      // Simulated local space
-     loopspace = new Kata.LoopbackSpace( Kata.URL("loop://localhost") );
+     var loopspace = new Kata.LoopbackSpace( Kata.URL("loop://localhost") );
 
 }, 'katajs/oh/plugins/loop/LoopbackSpaceConnection.js');

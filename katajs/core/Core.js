@@ -29,8 +29,9 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+var Kata;
 
-network_debug = false;
+var network_debug = false;
 if (0) {
     // JSDoc hack
     /** Top-level namespace for KataJS.
@@ -64,12 +65,16 @@ if (!Kata.queryString) { Kata.queryString=""; }
     };
 
     function runNewCurrentScript (scriptfile, body) {
+        'use strict';
         Kata._currentScript.push(scriptfile);
         try {
             if (body) {
                 body();
             }
-        } finally {
+        } catch (e) {
+            console.log(e.message);
+            throw e;
+        }finally {
             if (Kata.getCurrentScript() != scriptfile) Kata.log('Error11: ' +scriptfile+ ' != '+Kata.getCurrentScript(), Kata._currentScript);
             Kata._currentScript.pop();
             if (scriptfile) {
@@ -79,7 +84,9 @@ if (!Kata.queryString) { Kata.queryString=""; }
     }
 
     function orderedRequire(depList) {
+        'use strict';
         function runRequire(i) {
+            'use strict';
             return function() {
                 delete depsPending[depList[i]];
                 Kata.include(depList[i]);
@@ -102,6 +109,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
     }
 
     Kata.require = function(deps, body, provide) {
+        'use strict';
         // FIXME: What to do if provide argument is typo'ed?
         if (provide && provide in loadedDeps) {
             Kata.warn("JS file "+provide+" included twice.");
@@ -130,6 +138,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
             }
         }
         function runDep(finished) {
+            'use strict';
             if (unfinishedDeps[finished]) {
                 delete unfinishedDeps[finished];
                 remainingDeps--;
@@ -164,9 +173,14 @@ if (!Kata.queryString) { Kata.queryString=""; }
         }
     };
 
-    Kata.defer = function (f){if (f) Kata.require([], f, null);};
+    Kata.defer = function (f){
+        'use strict';
+        if (f) 
+            Kata.require([], f, null);
+    };
 
     Kata.setIncluded = function(provide) {
+        'use strict';
         if (!provide) {
             return;
         }
@@ -190,6 +204,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
          * This version uses "importscripts" as defined in the Web Worker API.
          */
         Kata.include = function(scriptfile) {
+            'use strict';
             if (includedscripts[scriptfile]) {
                 return;
             }
@@ -228,6 +243,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
          * This version inserts a "script" tag into the DOM.
          */
         Kata.include = function(scriptfile) {
+            'use strict';
             if (includedscripts[scriptfile]) {
                 return;
             }
@@ -259,6 +275,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
      *     prototype is often stored in a "SUPER" variable in the local scope.
     */
     Kata.extend = function(childcons, parent) {
+        'use strict';
         /* Doesn't allow instanceof to work. If we want this, we would make
            use "new parent.constructor" as our object. */
         for (var prop in parent) {
@@ -270,6 +287,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
     /** Returns a function that binds the passed function to an object.
      *  Useful for all cases where you need to pass a function argument, but
      *  you expect 'this' to be correctly set.
+     *  FIXME: make compliant with strict mode <-- delete arguments fails
      *
      *  @param {function(this:Object,...[*])} func  A function object to bind.
      *  @param {Object} object  Instance of some class to become 'this'.
@@ -299,6 +317,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
     };
 
     Kata.stringify = function(msg, level) {
+        'use strict';
         if (!level) {
             level = "";
         }
@@ -387,6 +406,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
      *  original thread instead of a Web Worker.
      */
     Kata.setStatus = function(msg) {
+        'use strict';
         if (typeof(window) == "undefined")
             return;
         window.status = msg;
@@ -407,6 +427,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
      *     This string is thrown.
      */
     Kata.error = function(error) {
+        'use strict';
         // Worker thread
         if (typeof(window) == "undefined") {
             // Worker thread
@@ -434,6 +455,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
      *  @param {string} type If supplied, is used as a prefix to .
      */
     Kata.warn = function(note, type) {
+        'use strict';
         if (typeof(type) == "undefined" || !type)
             type = "";
 
@@ -472,6 +494,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
      *         with the rest of the information.
      */
     Kata.notImplemented = function(note) {
+        'use strict';
         Kata.log(note, "notImplemented");
     };
 
@@ -482,6 +505,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
      *  to the main thread.
      */
     Kata.debugMessage = function(channel, data) {
+        'use strict';
         if (data === undefined || data === null || data.msg != __magic_debug_msg_string)
             return false;
         var debugId = 0;

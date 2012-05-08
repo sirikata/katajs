@@ -29,6 +29,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+"use strict";
 
 Kata.require([
     'katajs/oh/Simulation.js'
@@ -56,7 +57,7 @@ Kata.require([
             Kata.error("No graphics drivers available.");
         }
 
-        drv = cons._drivers[driver];
+        var drv = cons._drivers[driver];
         if (drv == undefined) {
             Kata.error('No graphics driver called "' + driver + '" available.');
         }

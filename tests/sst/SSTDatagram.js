@@ -1,3 +1,5 @@
+"use strict";
+
 function SSTDatagram() {
     this.dispatcher = new Kata.SST.ObjectMessageDispatcher;
 };
