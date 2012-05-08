@@ -29,6 +29,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 var Kata;
 
 var network_debug = false;
@@ -38,11 +39,11 @@ if (network_debug) {
     /** Top-level namespace for KataJS.
      * @namespace
      */
-    Kata = function(){};
+    Kata = function(){'use strict';};
 }
 if (typeof(Kata) == "undefined") {Kata = {};}
 if (typeof(console) == "undefined") {
-	console = {};
+	self.console = {};
 	debug_console = false;
 } else {
 	debug_console = true;
@@ -53,6 +54,7 @@ if (typeof(JSON) == "undefined") {JSON = {};}
 if (!Kata.scriptRoot) { Kata.scriptRoot=""; }
 if (!Kata.queryString) { Kata.queryString=""; }
 (function() {
+    'use strict';
     var includedscripts = Kata.closureIncluded || {"katajs/core/Core.js":true};
     var loadedDeps = {"katajs/core/Core.js":true};
 
@@ -61,6 +63,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
     Kata._currentScript = [];
 
     Kata.getCurrentScript = function() {
+        'use strict';
         return Kata._currentScript[Kata._currentScript.length - 1];
     };
 
@@ -72,7 +75,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
                 body();
             }
         } catch (e) {
-            console.log(e.message);
+            Kata.log(e.message);
             throw e;
         }finally {
             if (Kata.getCurrentScript() != scriptfile) Kata.log('Error11: ' +scriptfile+ ' != '+Kata.getCurrentScript(), Kata._currentScript);
@@ -211,6 +214,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
             includedscripts[scriptfile] = true;
             runNewCurrentScript(scriptfile, 
                 function() {
+                    'use strict';
                     try {
                         importScripts(Kata.scriptRoot+scriptfile+Kata.queryString);
                     } catch (e) {
@@ -255,6 +259,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
             scriptTag.type = "text/javascript";
 
             var scriptContent = function(){
+                'use strict';
                 if (Kata.getCurrentScript()) Kata.log('Error: '+scriptfile+' != '+Kata.getCurrentScript(), Kata._currentScript);
                 //Kata.log('===END LOAD+++ '+scriptfile);
                 Kata.setIncluded(scriptfile);
@@ -294,8 +299,8 @@ if (!Kata.queryString) { Kata.queryString=""; }
      *  @return {function(...[*])}  A new function that wraps func.apply()
      */
     Kata.bind = function(func, object) {
+        'use strict';
         if (arguments.length==2) {
-            delete arguments;
             return function() {
                 return func.apply(object, arguments);
             };            
@@ -304,7 +309,6 @@ if (!Kata.queryString) { Kata.queryString=""; }
             for (var i=2;i<arguments.length;++i) {
                 args[i-2]=arguments[i];
             }
-            delete arguments;
             return function () {
                 var argLen=arguments.length;
                 var newarglist=new Array(argLen);
@@ -340,6 +344,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
          * @param {...(object|string)} var_args  Some optional JSON data to log.
          */
         Kata.log = function(var_args) {
+            'use strict';
             console.log.apply(console, arguments);
         };
     } else if (typeof(document)=="undefined" || typeof(window)=="undefined") {
@@ -347,6 +352,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
          * @param {...(object|string)} var_args  Logs some optional JSON data.
          */
         Kata.log = console.log = function(var_args) {
+            'use strict';
             var args = [];
             for (var i = 0; i < arguments.length; i++) {
                 args[i] = arguments[i];
@@ -367,6 +373,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
          * @param {...(object|string)} var_args  Logs some optional JSON data.
          */
         Kata.log = console.log = function(var_args) {
+            'use strict';
             window.status = ""+arguments[0];
             var p = document.createElement("p");
             p.style.border="1px solid black";
@@ -399,6 +406,7 @@ if (!Kata.queryString) { Kata.queryString=""; }
         };
     } else {
         Kata.log = console.log = function() {
+            'use strict';
         }
     }
 
