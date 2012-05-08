@@ -31,7 +31,9 @@
  */
 "use strict";
 
-
+/**
+ * @constructor
+ */
 var GLGEGraphics=function(callbackFunction,parentElement) {
     this.mCurTime=new Date();
     this.callback=callbackFunction;

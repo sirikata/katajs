@@ -32,7 +32,8 @@
 var Kata;
 
 var network_debug = false;
-if (0) {
+var debug_console;
+if (network_debug) {
     // JSDoc hack
     /** Top-level namespace for KataJS.
      * @namespace
@@ -48,8 +49,7 @@ if (typeof(console) == "undefined") {
 }
 if (typeof(JSON) == "undefined") {JSON = {};}
 
-/** @define {string} Root directory of scripts. Inferred by any "script"
-  tags pointing to Core.js. */
+/** Root directory of scripts. Inferred by any "script" tags pointing to Core.js. */
 if (!Kata.scriptRoot) { Kata.scriptRoot=""; }
 if (!Kata.queryString) { Kata.queryString=""; }
 (function() {

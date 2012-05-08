@@ -11,14 +11,14 @@ THESE_PBJJS=$(patsubst $(INPUTDIR)/%,$(OUTPUTDIR)/%.js,$(THESE_PBJ))
 ALL_PBJJS += $(THESE_PBJJS)
 
 ### Closure Vars
-CLOSURESRCS=katajs/core/Core.js externals/GLGE/src/core/glge.js externals/GLGE/src/core/glge_math.js externals/GLGE/src/core/glge_document.js externals/GLGE/src/core/glge_event.js externals/GLGE/src/core/glge_animatable.js externals/GLGE/src/core/glge_placeable.js  externals/GLGE/src/core/glge_jsonloader.js externals/GLGE/src/core/glge_quicknote.js externals/GLGE/src/core/glge_messages.js  externals/GLGE/src/core/glge_group.js externals/GLGE/src/renderable/glge_object.js $(shell find externals/GLGE/src  -name '*.js' -and -not -path "*externals/GLGE/src/core/*" -and -not -path "*externals/GLGE/src/extra/*" -and -not -name glge_object.js|sort -r)
+CLOSURESRCS=katajs/core/Core.js externals/GLGE/src/core/glge.js externals/GLGE/src/core/glge_math.js externals/GLGE/src/core/glge_document.js externals/GLGE/src/core/glge_event.js externals/GLGE/src/core/glge_animatable.js externals/GLGE/src/core/glge_placeable.js  externals/GLGE/src/core/glge_jsonloader.js externals/GLGE/src/core/glge_quicknote.js externals/GLGE/src/core/glge_messages.js  externals/GLGE/src/core/glge_group.js externals/GLGE/src/renderable/glge_object.js externals/GLGE/src/physics/glge_physicsabstract.js $(shell find externals/GLGE/src  -name '*.js' -and -not -path "*externals/GLGE/src/core/*" -and -not -path "*externals/GLGE/src/extra/*" -and -not -name glge_object.js -and -not -name glge_physicsabstract.js |sort -r)
 
 CLOSURESRCS+=$(shell find externals/GLGE/src/extra -name "*.js"|sort -r)
 
 CLOSURESRCS+= externals/protojs/protobuf.js externals/protojs/pbj.js \
-	katajs/gfx/WebGLCompat.js katajs/gfx/glgegfx.js katajs/gfx/TextGraphics.js
+	katajs/gfx/WebGLCompat.js katajs/gfx/glgegfx.js katajs/gfx/TextGraphics.js katajs/gfx/layer0.js katajs/gfx/layer1.js katajs/gfx/layer2.js katajs/gfx/layer2_no_sunbeams.js
 
-CLOSURESRCS+=$(shell find katajs/core katajs/oh katajs/network katajs/space -name '*.js' -and -not -name 'Core.js' -and -not -name 'GenericWorker.js' |sort)
+CLOSURESRCS+=$(shell find katajs/core katajs/oh katajs/network katajs/space -name '*.js' -and -not -name 'Core.js' -and -not -name 'GenericWorker.js' -and -not -name "layer*.js"|sort)
 
 CLOSUREOUT=katajs.compiled.js
 
@@ -28,6 +28,7 @@ CLOSUREARGS+=$(patsubst %,--js %,$(CLOSURESRCS))
 CLOSUREARGS+=--js $$after
 CLOSUREARGS+=--externs contrib/closure_preinclude.js
 CLOSUREARGS+=--formatting pretty_print
+#CLOSUREARGS+=--warning_level VERBOSE
 CLOSUREARGS+=--compilation_level SIMPLE_OPTIMIZATIONS
 CLOSUREARGS+= --js_output_file $(CLOSUREOUT)
 

@@ -47,7 +47,7 @@ Kata.require([
      };
 
      Kata.Loopback.Loc.prototype._notify = function() {
-         for(listener in this.mListeners) {
+         for(var listener in this.mListeners) {
              listener.apply(undefined, arguments);
          }
      };

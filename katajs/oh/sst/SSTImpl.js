@@ -483,14 +483,14 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
     }
     else {
         
-      if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
+      //if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
           // FIXME connection retries. Also, this is getting triggered
           // *really* quickly when the initial sendData, which
           // *probably means it will only ever work for local host or
           // *maybe a LAN
           //setTimeout(Kata.bind(this.cleanup,this),0);
 	  //    return false; //the connection was unable to contact the other endpoint.
-      }
+      //}
 
 //p      var all_sent_packets_acked = true;
 //p      var no_packets_acked = true;
@@ -594,8 +594,7 @@ var getConnectionSST = function(endPoint) {
  *             is NULL, the connection setup failed.
  * @param {!Kata.SST.EndPoint} localEndPoint
  * @param {!Kata.SST.EndPoint} remoteEndPoint
- * @param {!function} cb the connection return callback if a connection is successful
- * @param {!function} scb the stream return callback function if a new stream appears
+ * @param {!function(status, connection)} cb the connection return callback if a connection is successful
  * @returns false if it's not possible to create this connection, e.g. if another connection
  *     is already using the same local endpoint; true otherwise.
  */
@@ -655,7 +654,7 @@ Kata.SST.Connection.prototype.releaseLSID=function(lsid){
 
 /**
  * @param {!number} port 16 bit port on which to listen
- * @param {function} scb StreamReturnCallbackFunction == void(int, boost::shared_ptr< Stream<UUID> >)
+ * @param {function(status,Kata.SST.Stream)} scb StreamReturnCallbackFunction == void(int, boost::shared_ptr< Stream<UUID> >)
  */
 Kata.SST.Connection.prototype.listenStream=function(port,scb){
   this.mListeningStreamsCallbackMap[port]=scb;
@@ -681,7 +680,7 @@ Kata.SST.Connection.prototype.listenStream=function(port,scb){
                                  reference counted, shared pointer to the
                                  connection. StreamReturnCallbackFunction
                                  should have the signature void (int,boost::shared_ptr<Stream>).
-  * @param {function} cb StreamReturnCallbackFunction == void(int, boost::shared_ptr< Stream<UUID> >) 
+  * @param {function(status,Kata.SST.Stream)} cb StreamReturnCallbackFunction == void(int, boost::shared_ptr< Stream<UUID> >) 
   * @param {Array} initial_data array of uint8 values of initial data
   * @param {number} local_port uint16 local port 
   * @param {number} remote_port uint16 local port 
@@ -984,7 +983,7 @@ Kata.SST.Connection.prototype.handleAckPacket=function(received_channel_msg,
 Kata.SST.Connection.prototype.handleDatagram=function(received_stream_msg) {
     var msg_flags = received_stream_msg.flags;
     if (msg_flags & Sirikata.Protocol.SST.SSTStreamHeader.CONTINUES) {
-        if (not (received_stream_msg.lsid in this.mPartialReadDatagrams)) {
+        if (!(received_stream_msg.lsid in this.mPartialReadDatagrams)) {
             this.mPartialReadDatagrams[received_stream_msg.lsid]=[];
         }
         this.mPartialReadDatagrams[received_stream_msg.lsid].push(received_stream_msg.payload);
@@ -1142,7 +1141,7 @@ Kata.SST.Connection.prototype.cleanup= function() {
    *  @param {Array} data the buffer to send
    *  @param {number} local_port the source port
    *  @param {number} remote_port the destination port
-   *  @param {function} DatagramSendDoneCallback a callback of type
+   *  @param {function(errCode,buffer)} DatagramSendDoneCallback a callback of type
                                      void (int errCode, void*)
                                      which is called when queuing
                                      the datagram failed or succeeded.
@@ -1233,7 +1232,7 @@ Kata.SST.Connection.prototype.datagram=function(data, local_port, remote_port,cb
     available to be read.
 
   *  @param {number} port the local port on which to listen for datagrams.
-  *  @param {function} ReadDatagramCallback a function of type "void (uint8*, int)"
+  *  @param {function(datagramBuffer)} ReadDatagramCallback a function of type "void (uint8*, int)"
            which will be called when a datagram is available. The
            "uint8*" field will be filled up with the received datagram,
            while the 'int' field will contain its size.
@@ -1262,7 +1261,7 @@ Kata.SST.Connection.prototype.registerReadDatagramCallback=function(port, cb) {
   */
 Kata.SST.Connection.prototype.registerReadOrderedDatagramCallback=function( cb )  {
     throw "UNIMPLEMENTED"
-    return false;
+    //return false;
 };
 
   /**  Closes the connection.
@@ -1400,7 +1399,7 @@ var sStreamReturnCallbackMapSST={};
 /**
  * @param {!Kata.SST.EndPoint} localEndPoint
  * @param {!Kata.SST.EndPoint} remoteEndPoint
- * @param {function} cb StreamReturnCallbackFunction ==  void(int, boost::shared_ptr< Stream<UUID> >)
+ * @param {function(status,Kata.SST.Stream)} cb StreamReturnCallbackFunction ==  void(int, boost::shared_ptr< Stream<UUID> >)
  * @returns bool whether the stream can connect
  */
 Kata.SST.connectStream = function(localEndPoint,remoteEndPoint,cb) {
@@ -1439,7 +1438,7 @@ Kata.SST.listenStream = function(cb, listeningEndPoint) {
  * @param {Array} initial_data
  * @param {boolean} remotelyInitiated
  * @param {number} remoteLSID
- * @param {function} cb StreamReturnCallbackFunction ==  void(int, boost::shared_ptr< Stream<UUID> >)
+ * @param {function(number,Kata.SST.Stream)} cb StreamReturnCallbackFunction ==  void(int, boost::shared_ptr< Stream<UUID> >)
  */
 Kata.SST.Stream = function(parentLSID, conn,
 		 local_port, remote_port,
@@ -1502,7 +1501,7 @@ Kata.SST.Stream = function(parentLSID, conn,
      */
     this.mLastSendTime=null;
     /**
-     * @type {function} for new streams arriving at this port
+     * @type {function(status,Kata.SST.Stream)} for new streams arriving at this port
      */
     this.mStreamReturnCallback=cb;
     /**
@@ -1575,7 +1574,7 @@ Kata.SST.Stream.prototype.datagram = function(data, local_port, remote_port,cb) 
     Start listening for child streams on the specified port. A remote stream
     can only create child streams under this stream if this stream is listening
     on the port specified for the child stream.
-    @param {function} scb the callback function invoked when a new stream is created
+    @param {function(status,Kata.SST.Stream)} scb the callback function invoked when a new stream is created
     @param {number} port the endpoint where SST will accept new incoming
            streams.
   */
@@ -1636,8 +1635,6 @@ Kata.SST.Stream.prototype.write=function(data) {
 
       return currOffset;
     }
-
-    return -1;
 };
 
 

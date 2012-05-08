@@ -178,11 +178,12 @@ Kata.require([
     };
 
     Kata.Quaternion.prototype.inverse = function() {
-        var len = lengthSquared();
-        if (len > 1e-8) {
-            return new Quaternion(-x/len,-y/len,-z/len,w/len);
-        }
-        return Kata.Quaternion.zero();
+        var q0 = this[0], q1 = this[1], q2 = this[2], q3 = this[3],
+        dot = q0*q0 + q1*q1 + q2*q2 + q3*q3,
+        invDot = dot ? 1.0/dot : 0;
+        
+        // TODO: Would be faster to return [0,0,0,0] immediately if dot == 0
+        return new Kata.Quaternion(q0*invDot,-q1*invDot,-q2*invDot,q3*invDot);
     };
 
     /** Raise the quaternion to a power (i.e. apply the rotation n times).

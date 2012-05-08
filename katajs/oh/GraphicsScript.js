@@ -302,7 +302,7 @@ Kata.require([
          }
          var space=presence.space();
          var len = this.mRenderableRemotePresences.length;
-         var msg = unrenderRemotePresence(presence,presence);
+         var msg = this.unrenderRemotePresence(presence,presence);
          this._sendHostedObjectMessage(msg);
          var key = Kata.Script.remotePresenceKey(presence.space(), presence.id());
          delete this.mRemotePresences[key];

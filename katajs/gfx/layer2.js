@@ -1,4 +1,4 @@
-layer2_glsl='#version 100\n'+
+var layer2_glsl='#version 100\n'+
 '\n'+
 'precision highp float;\n'+
 '\n'+

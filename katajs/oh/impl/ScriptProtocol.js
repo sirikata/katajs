@@ -353,9 +353,9 @@ Kata.require([
                  this.msg="AttachCameraTexture";
                  this.space = space+observer;
                  this.id = id;
-                 this.texobjid=textureObjectId;
+                 this.texobjid=textureObjectID;
                  this.texobjspace=textureObjectSpace;
-                 this.texname=textureName;
+                 this.texname=texture;
              },
              GFXDetachCamera : function(space, observer, id) {
                  Kata.ScriptProtocol.FromScript.GraphicsMessage.call(this, space, observer, id);

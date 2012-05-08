@@ -30,11 +30,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 var GLGE = {};
-var Kata = {};
+//var Kata = {};
 var Sirikata = {};
+var JSON;
 
-/** @constructor */
-var Worker = function(jsfile) {}
+//var Worker = function(jsfile) {}
 
 function importScripts() {}
 

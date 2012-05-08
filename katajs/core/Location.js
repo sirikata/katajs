@@ -459,9 +459,10 @@ Kata.LocationUpdate=function(msg,curLocation,prevLocation, curDate) {
 
             retval.pos=Kata._helperLocationExtrapolate3vec(curLocation.pos,curLocation.vel,Kata.deltaTime(msg.time,curLocation.posTime));
             retval.posTime=msg.time;
-        }else if (msg.pos && msg.time) {
+        }/*else if (msg.pos && msg.time) {
+            
             //Kata.error("DROPPING UPDATE "+JSON.stringify(msg)+ " because "+msg.time+" is not greater than "+curLocation.posTime.getTime());
-        }
+        }*/
     }
     if (msg.vel && msg.time && msg.time >= curLocation.posTime) {
         retval.vel=msg.vel;
@@ -636,11 +637,11 @@ Kata.LocationCompose=function(loc, prevParentLoc, curParentLoc) {
                                          parentLoc.vel),
                                  Kata.Vec3Rotate(loc.vel,rotation[0],rotation[1],rotation[2]));
     var topLevelAxis=Kata.Vec3Rotate(loc.rotaxis,rotation[0],rotation[1],rotation[2]);
-    var topLevelPos=Kata.Vec3Add(Vec3Rotate(loc.pos,rotation[0],rotation[1],rotation[2]),
+    var topLevelPos=Kata.Vec3Add(Kata.Vec3Rotate(loc.pos,rotation[0],rotation[1],rotation[2]),
                             parentLoc.pos);
     
     var topLevelOrient=Kata.QuaternionMulQuaternion(parentLoc.orient,loc.orient);
-    var topLevelScale=[loc.scale[0],loc.scale[1],loc.scale[2],loc.scale[3]*parentloc.scale[3]];
+    var topLevelScale=[loc.scale[0],loc.scale[1],loc.scale[2],loc.scale[3]*parentLoc.scale[3]];
     return {pos:topLevelPos,
             orient:topLevelOrient,
             scale:topLevelScale,

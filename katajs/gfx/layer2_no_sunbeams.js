@@ -1,4 +1,4 @@
-layer2_no_sunbeams_glsl='#version 100\n'+
+var layer2_no_sunbeams_glsl='#version 100\n'+
 '\n'+
 'precision highp float;\n'+
 '\n'+

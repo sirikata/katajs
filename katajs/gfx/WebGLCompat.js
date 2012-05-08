@@ -35,37 +35,32 @@
  *  new versions of them to provide the old version.
  */
 
-// Typed arrays
-try {
 // -- Bytes
 if (typeof(WebGLUnsignedByteArray) === "undefined" && typeof(Uint8Array) !== "undefined") {
-    var WebGLUnsignedByteArray = Uint8Array;
+    window["WebGLUnsignedByteArray"] = Uint8Array;
 }
 if (typeof(WebGLByteArray) === "undefined" && typeof(Int8Array) !== "undefined") {
-    var WebGLByteArray = Int8Array;
+    window["WebGLByteArray"] = Int8Array;
 }
 // -- Shorts
 if (typeof(WebGLUnsignedShortArray) === "undefined" && typeof(Uint16Array) !== "undefined") {
-    var WebGLUnsignedShortArray = Uint16Array;
+    window["WebGLUnsignedShortArray"] = Uint16Array;
 }
 if (typeof(WebGLShortArray) === "undefined" && typeof(Int16Array) !== "undefined") {
-    var WebGLShortArray = Int16Array;
+    window["WebGLShortArray"] = Int16Array;
 }
 // -- Ints
 if (typeof(WebGLUnsignedIntArray) === "undefined" && typeof(Uint32Array) !== "undefined") {
-    var WebGLUnsignedIntArray = Uint32Array;
+    window["WebGLUnsignedIntArray"] = Uint32Array;
 }
 if (typeof(WebGLIntArray) === "undefined" && typeof(Int32Array) !== "undefined") {
-    var WebGLIntArray = Int32Array;
+    window["WebGLIntArray"] = Int32Array;
 }
 
 // -- Floats
 if (typeof(WebGLFloatArray) === "undefined" && typeof(Float32Array) !== "undefined") {
-    var WebGLFloatArray = Float32Array;
+    window["WebGLFloatArray"] = Float32Array;
 }
-if (typeof(WebGLDoubleArray) === "undefined" && typeof(Float64Array) !== "undefined") {
-    var WebGLDoubleArray = Float64Array;
-}
-} catch (x) {
-// Ignore, in this case just don't even have the necessary types
+if ((!"WebGLDoubleArray" in window) && typeof(Float64Array) !== "undefined") {
+    window["WebGLDoubleArray"] = Float64Array;
 }

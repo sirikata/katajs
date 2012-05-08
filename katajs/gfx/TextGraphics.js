@@ -2,7 +2,7 @@
 /**
  *@constructor
  */
-TextGraphics=function(callbackFunction,parentElement) {
+var TextGraphics=function(callbackFunction,parentElement) {
     var thus = this;
     this.callback=callbackFunction;
     this.parent=parentElement;
@@ -31,7 +31,7 @@ TextGraphics=function(callbackFunction,parentElement) {
         div.style.zIndex="1";
         div.id=msg.id;
         if (msg.parent) {
-            element=returnObjById(msg.parent);
+            var element=returnObjById(msg.parent);
             if (element) {
                 element.appendChild(div);
             }else {
@@ -44,7 +44,7 @@ TextGraphics=function(callbackFunction,parentElement) {
         thus.methodTable["Move"](msg);
     }
     this.methodTable["Move"]=function(msg) {
-        element=returnObjById(msg.id);
+        var element=returnObjById(msg.id);
         if (msg.pos && msg.pos.length == 3) {
             element.style.left=msg.pos[0]*10+"px";
             element.style.top=msg.pos[1]*10+"px";
