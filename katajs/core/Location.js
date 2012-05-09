@@ -338,7 +338,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
             destination.pos=Kata.Vec3Dup(msg.pos);
         }
         if (msg.orient!==undefined) {            
-            destination.orient=new Quaternion(msg.orient);
+            destination.orient=new Kata.Quaternion(msg.orient);
         }
         if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
             destination.rotvel=msg.rotvel;
@@ -354,7 +354,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
         if (t===undefined||msg.orientTime>=t)
             t=msg.orientTime;
         if (msg.scale!==undefined){
-            destination.scale=msg.scale.slice(0);
+            destination.scale=Kata.Vec4Dup(msg.scale);
         }
         if (msg.pos!==undefined){
             if (msg.vel&&msg.posTime) {
@@ -363,7 +363,7 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
                                                                     Kata.deltaTime(t,
                                                                               msg.posTime));                
             }else {
-                destination.pos=msg.pos.slice();
+                destination.pos=Kata.Vec3Dup(msg.pos);
             }
         }
         if (msg.orient!==undefined){
@@ -375,15 +375,15 @@ Kata.LocationCopyUnifyTime= function(msg, destination) {
                                                                Kata.deltaTime(t,
                                                                          msg.orientTime));
             }else {
-                destination.orient=msg.orient.slice();
+                destination.orient=new Kata.Quaternion(msg.orient);
             }
         }
         if (msg.rotvel !== undefined && msg.rotaxis !== undefined) {
             destination.rotvel=msg.rotvel;
-            destination.rotaxis=msg.rotaxis.slice();
+            destination.rotaxis=Kata.Vec3Dup(msg.rotaxis);
         }
         if (msg.vel!==undefined){
-            destination.vel=msg.vel.slice();
+            destination.vel=Kata.Vec3Dup(msg.vel);
         }
         destination.time=t;
     }
