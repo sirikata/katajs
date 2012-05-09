@@ -185,7 +185,7 @@ Kata.require([
             var orient = new Sirikata.Protocol.TimedMotionQuaternion();
             orient.t = this._toSpaceTime(loc.time);
             if (loc.orient)
-                orient.position = loc.orient;
+                loc.orient = loc.orient;
             if (loc.rotvel != undefined && loc.rotaxis != undefined)
                 orient.velocity = Kata.Quaternion.fromAxisAngle(loc.rotaxis, loc.rotvel).array(); // FIXME angular velocity
             result.orient = orient;
