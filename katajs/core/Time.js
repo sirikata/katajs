@@ -9,8 +9,7 @@ if (typeof(console) == "undefined") {
 Kata.require([
 ], function() {
     'use strict';
-
-    var currentTime = (new Date()).getTime();
+    var currentTime = Date.now();
     var scheduled=false;
     Kata.scheduleNowUpdates=function(time){
         'use strict';
@@ -33,7 +32,7 @@ Kata.require([
     Kata.updateNow = function (newTime) {
         'use strict';
         if (newTime===undefined)
-            currentTime=(new Date()).getTime();
+            currentTime=Date.now();
         else
             currentTime = newTime;
         return currentTime;

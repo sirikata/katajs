@@ -74,9 +74,9 @@ if (!Kata.queryString) { Kata.queryString=""; }
             if (body) {
                 body();
             }
-        } catch (e) {
-            Kata.log(e.message);
-            throw e;
+        //}catch (e) {
+            //Kata.log(e.message);
+            //throw e;
         }finally {
             if (Kata.getCurrentScript() != scriptfile) Kata.log('Error11: ' +scriptfile+ ' != '+Kata.getCurrentScript(), Kata._currentScript);
             Kata._currentScript.pop();

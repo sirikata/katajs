@@ -219,12 +219,22 @@ Kata.require([
         //Kata.warn("Connecting " + id + " == " + objid);
 
         var reqloc = Kata.LocationIdentity(0);
+        var resetTime=false;
+        if (loc.posTime===undefined&&loc.time === undefined) {
+            loc.time=Date.now();
+            resetTime=true;
+        }
         Kata.LocationCopyUnifyTime(loc, reqloc);
+
+        if (resetTime) {
+            delete loc.time;
+        }
         reqloc.visual = loc.visual;
         this.mOutstandingConnectRequests[objid] =
             {
                 loc_bounds : reqloc,
                 visual : vis,
+                reset_time : resetTime,
                 deferred_odp : []
             };
 
@@ -492,6 +502,9 @@ Kata.require([
 
         // With the successful connection + sst straem, we can indicate success to the parent SessionManager
         var connect_info = this.mOutstandingConnectRequests[objid];
+        if (connect_info.reset_time) {
+            connect_info.loc_bounds.time = Kata.now(this.mSpaceURL);
+        }
         delete this.mOutstandingConnectRequests[objid];
         var id = this._getLocalID(objid);
         this.mParent.connectionResponse(

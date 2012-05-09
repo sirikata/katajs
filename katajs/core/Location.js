@@ -304,7 +304,9 @@ Kata.LocationExtrapolate=function(location,time) {
         vel:location.vel
     };
 };
-Kata.LocationCopy = function(destination, source) {
+/*
+COMMENTED: shouldn't have the opposite convention as the function below it: if we use this function we should fix the sources
+Kata.LocationCopy = function(source, destination) {
     if (source.scale!==undefined){
         destination.scaleTime=source.scaleTime!==undefined?source.scaleTime:source.time;
         destination.scale=source.scale.slice(0);
@@ -325,25 +327,25 @@ Kata.LocationCopy = function(destination, source) {
         destination.vel=source.vel.slice(0);
     }        
 };
-
+*/
 Kata.LocationCopyUnifyTime= function(msg, destination) {
     if (msg.time!==undefined) {
         destination.time=msg.time;
         if (msg.scale!==undefined){
-            destination.scale=msg.scale.slice();
+            destination.scale=Kata.Vec4Dup(msg.scale);
         }
         if (msg.pos!==undefined){
-                destination.pos=msg.pos.slice();
+            destination.pos=Kata.Vec3Dup(msg.pos);
         }
         if (msg.orient!==undefined) {            
-            destination.orient=msg.orient.slice();
+            destination.orient=new Quaternion(msg.orient);
         }
         if (msg.rotvel!==undefined && msg.rotaxis!==undefined) {
             destination.rotvel=msg.rotvel;
-            destination.rotaxis=msg.rotaxis.slice();
+            destination.rotaxis=Kata.Vec3Dup(msg.rotaxis);
         }
         if (msg.vel!==undefined){
-            destination.vel=msg.vel.slice();
+            destination.vel=Kata.Vec3Dup(msg.vel);
         }        
     }else{
         var t=msg.scaleTime;
@@ -599,6 +601,12 @@ Kata.QuaternionToRotation=function (q) {
      (qWqW - qXqX - qYqY + qZqZ) / d, 0],
     [0, 0, 0, 1]];
 };
+Kata.Vec3Dup=function(a) {
+    return [a[0],a[1],a[2]];
+}
+Kata.Vec4Dup=function(a) {
+    return [a[0],a[1],a[2],a[3]];
+}
 Kata.Vec3Cross=function(a,b) {
     return [a[1]*b[2]-a[2]*b[1],
             a[2]*b[0]-a[0]*b[2],
