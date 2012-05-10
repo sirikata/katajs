@@ -36,6 +36,20 @@ Kata.require([
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js']
 ], function() {
+function nopArrayClass(){}
+nopArrayClass.prototype.push=function(a){}
+var AAaconnectedACount=new nopArrayClass();
+var AAdisconnectedACount=new nopArrayClass();
+var AAconnectedACount=new nopArrayClass();
+var AAconnectedBCount=new nopArrayClass();
+var AAconnectedDCount=new nopArrayClass();
+var AApendingDisconnectedDCount=new nopArrayClass();
+var AAdisconnectedDCount=new nopArrayClass();
+var AAdisconnectedBCount=new nopArrayClass();
+var AAdisconnectedCCount=new nopArrayClass();
+var AApendingDisconnectedACount=new nopArrayClass();
+var AApendingDisconnectedBCount=new nopArrayClass();
+var AApendingDisconnectedCCount=new nopArrayClass();
 
 var KataDequePushBack = function(x,y){x.push_back(y);};
 var KataDequePushFront = function(x,y){return x.push_front(y);};
@@ -932,7 +946,7 @@ Kata.SST.Connection.prototype.handleReplyPacket=function(received_stream_msg) {
       var outgoingSubstream=this.mOutgoingSubstreamMap[initiatingLSID];
       if (outgoingSubstream) {
           var stream = outgoingSubstream;
-          this.mIncomingSubstreamMap[incomingLsid] = stream;
+          this.mIncomingSubstreamMap[stream.mRemoteLSID = incomingLsid] = stream;
 
         if (stream.mStreamReturnCallback){
           stream.mStreamReturnCallback(Kata.SST.SUCCESS, stream);
@@ -1081,13 +1095,16 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
  */
 Kata.SST.Connection.prototype.eraseDisconnectedStream=function(stream) {
     if (!(stream.mLSID in this.mOutgoingSubstreamMap)) {
-        Kata.warn("Unable to remove stream from outgoing map "+stream.mLSID);
+        Kata.warn("Unable to remove stream from outgoing map "+stream.mRemoteLSID+"/"+stream.mLSID);
+    }else {
+        delete this.mOutgoingSubstreamMap[stream.mLSID];
     }
-    delete this.mOutgoingSubstreamMap[stream.mLSID];
-    if (!(stream.mLSID in this.mIncomingSubstreamMap)) {
-        Kata.warn("Unable to remove stream from incoming map "+stream.mLSID);
+    if (!(stream.mRemoteLSID in this.mIncomingSubstreamMap)) {
+        Kata.warn("Unable to remove stream from incoming map "+stream.mRemoteLSID+"/"+stream.mLSID);
+    }else {
+        delete this.mIncomingSubstreamMap[stream.mRemoteLSID];
     }
-    delete this.mIncomingSubstreamMap[stream.mLSID];
+
 };
 
 //DRH Port stop
@@ -1484,6 +1501,10 @@ Kata.SST.Stream = function(parentLSID, conn,
      */
     this.mLSID=lsid;
     /**
+     * @type {number} uint16 
+     */
+    this.mRemoteLSID=remoteLSID;
+    /**
      * @type {number} milliseconds 
      */
     this.mStreamRTOMilliseconds=5000; // Intentionally > 1 second. Do not change.
@@ -1522,6 +1543,7 @@ Kata.SST.Stream = function(parentLSID, conn,
     if (remotelyInitiated) {
         this.mConnected=true;
         this.mState=CONNECTED_STREAM_SST;
+        AAconnectedBCount.push(this);
     }
 
     
@@ -1683,9 +1705,11 @@ Kata.SST.Stream.prototype.close=function(force) {
       if (this.mConnection)
           this.mConnection.eraseDisconnectedStream(this);
       this.mState = DISCONNECTED_STREAM_SST;
+        AAdisconnectedBCount.push(this);
       return true;
     }
     else if (this.mState!=DISCONNECTED_STREAM_SST) {
+        AApendingDisconnectedBCount.push(this);
       this.mState = PENDING_DISCONNECT_STREAM_SST;
       setTimeout(Kata.bind(this.serviceStream,this),0);
       return true;
@@ -1837,12 +1861,14 @@ Kata.SST.Stream.prototype.serviceStream=function() {
         }
         this.mStreamReturnCallback=null;
         this.mState=DISCONNECTED_STREAM_SST;
+          AAdisconnectedCCount.push(this);
         if (!retVal) {
             setTimeout(Kata.bind(this.mConnection.cleanup,this.mConnection),0);
         }
         return false;
       }
       else {
+          AAconnectedACount.push(this);
         this.mState = CONNECTED_STREAM_SST;
       }
     }
@@ -1862,6 +1888,7 @@ Kata.SST.Stream.prototype.serviceStream=function() {
             mapEmpty(this.mChannelToBufferMap) )
         {
             this.mState = DISCONNECTED_STREAM_SST;
+            AAdisconnectedACount.push(this);
             this.mConnection.eraseDisconnectedStream(this);
             return true;
         }

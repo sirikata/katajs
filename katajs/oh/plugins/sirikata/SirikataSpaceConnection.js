@@ -53,6 +53,9 @@ Kata.require([
     'katajs/oh/impl/ScriptProtocol.js'
 ], function() {
     function discardChildStream(success,sptr) {
+        if (success!=Kata.SST.SUCCESS) {
+            Kata.warn("location packet lost due to unsuccessful packet send");
+        }
         sptr.close(false);
     }
 
@@ -689,7 +692,7 @@ Kata.require([
                 this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual, physics);
             }
         }
-
+        stream.close(false);
     };
 
     Kata.SirikataSpaceConnection.prototype._handleProximitySubstreamRead = function(objid, stream, data) {
