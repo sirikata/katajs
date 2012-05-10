@@ -450,6 +450,10 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
             setTimeout(Kata.bind(this.cleanup,this),0);
             this.mState = CONNECTION_DISCONNECTED_SST;
             return false;
+        }else {
+            if (!this.inSendingMode) {
+                Kata.warn("Empty deque but not in sending mode for disconnected stream");
+            }
         }
     }
     if (this.inSendingMode) {
@@ -1076,7 +1080,14 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
  * @param {Kata.SST.Stream} stream the stream which to erase from the outgoing substream map
  */
 Kata.SST.Connection.prototype.eraseDisconnectedStream=function(stream) {
+    if (!(stream.mLSID in this.mOutgoingSubstreamMap)) {
+        Kata.warn("Unable to remove stream from outgoing map "+stream.mLSID);
+    }
     delete this.mOutgoingSubstreamMap[stream.mLSID];
+    if (!(stream.mLSID in this.mIncomingSubstreamMap)) {
+        Kata.warn("Unable to remove stream from incoming map "+stream.mLSID);
+    }
+    delete this.mIncomingSubstreamMap[stream.mLSID];
 };
 
 //DRH Port stop
@@ -1676,6 +1687,7 @@ Kata.SST.Stream.prototype.close=function(force) {
     }
     else if (this.mState!=DISCONNECTED_STREAM_SST) {
       this.mState = PENDING_DISCONNECT_STREAM_SST;
+      setTimeout(Kata.bind(this.serviceStream,this),0);
       return true;
     }else return false;
 };
@@ -1789,7 +1801,7 @@ Kata.SST.Stream.prototype.serviceStream=function() {
     this.conn = this.mConnection;
     var curTime= new Date();
     //console.log(curTime+" Servicing Stream"+this.mConnection.mLocalEndPoint.uid());
-    if (this.mState != CONNECTED_STREAM_SST && this.mState != DISCONNECTED_STREAM_SST) {
+    if (this.mState != CONNECTED_STREAM_SST && this.mState != PENDING_DISCONNECT_STREAM_SST && this.mState != DISCONNECTED_STREAM_SST) {
 
       if (!this.mConnected && this.mNumInitRetransmissions < MAX_INIT_RETRANSMISSIONS_STREAM_SST ) {
 /*
