@@ -185,7 +185,7 @@ Kata.require([
             var orient = new Sirikata.Protocol.TimedMotionQuaternion();
             orient.t = this._toSpaceTime(loc.time);
             if (loc.orient)
-                loc.orient = loc.orient;
+                orient.position = loc.orient;
             if (loc.rotvel != undefined && loc.rotaxis != undefined)
                 orient.velocity = Kata.Quaternion.fromAxisAngle(loc.rotaxis, loc.rotvel).array(); // FIXME angular velocity
             result.orient = orient;
@@ -227,7 +227,13 @@ Kata.require([
         Kata.LocationCopyUnifyTime(loc, reqloc);
 
         if (resetTime) {
-            delete loc.time;
+            delete reqloc.time;
+            if (reqloc.posTime!==undefined)
+                delete reqloc.posTime;                
+            if (reqloc.orientTime!==undefined)
+                delete reqloc.orientTime;                
+            if (reqloc.scaleTime!==undefined)
+                delete reqloc.scaleTime;                
         }
         reqloc.visual = loc.visual;
         this.mOutstandingConnectRequests[objid] =
