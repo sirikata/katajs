@@ -234,8 +234,8 @@ Kata.require([
                  // Currently it always gets in the first branch of these if statements.
                  if (this.mScaleSeqNo==undefined
                      || loc.seqno==undefined
-                     || !PROTO.I64.prototype.unsigned_less.call(this.mScaleSeqNo,
-                                                          loc.seqno)) {
+                     || !PROTO.I64.prototype.unsigned_less.call(loc.seqno,
+                                                                this.mScaleSeqNo)) {
 
                      if (loc.seqno != undefined)
                          this.mScaleSeqNo = loc.seqno;
@@ -244,8 +244,8 @@ Kata.require([
                  }
                  if (this.mPosSeqNo==undefined
                      || loc.seqno==undefined
-                     || !PROTO.I64.prototype.unsigned_less.call(this.mPosSeqNo,
-                                                          loc.seqno)) {
+                     || !PROTO.I64.prototype.unsigned_less.call(loc.seqno,
+                                                                this.mPosSeqNo)) {
 
                      if (loc.seqno != undefined)
                          this.mPosSeqNo = loc.seqno;
@@ -255,8 +255,8 @@ Kata.require([
                  }
                  if (this.mOrientSeqNo==undefined
                      || loc.seqno==undefined
-                     || !PROTO.I64.prototype.unsigned_less.call(this.mOrientSeqNo,
-                                                          loc.seqno)) {
+                     || !PROTO.I64.prototype.unsigned_less.call(loc.seqno,
+                                                                this.mOrientSeqNo)) {
 
                      if (loc.seqno != undefined)
                          this.mOrientSeqNo = loc.seqno;
