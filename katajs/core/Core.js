@@ -39,7 +39,7 @@ if (network_debug) {
     /** Top-level namespace for KataJS.
      * @namespace
      */
-    Kata = function(){'use strict';};
+    Kata = function(){};
 }
 if (typeof(Kata) == "undefined") {Kata = {};}
 if (typeof(console) == "undefined") {
@@ -50,9 +50,38 @@ if (typeof(console) == "undefined") {
 }
 if (typeof(JSON) == "undefined") {JSON = {};}
 
+Kata.urlGetVars = new (function (sSearch) {  
+  'use strict';
+  var rNull = /^\s*$/, rBool = /^(true|false)$/i;  
+  function buildValue(sValue) {  
+    'use strict';
+    if (rNull.test(sValue)) { return null; }  
+    if (rBool.test(sValue)) { return sValue.toLowerCase() === "true"; }  
+    if (isFinite(sValue)) { return parseFloat(sValue); }  
+      var a =
+          /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(sValue);
+      if (a) {
+          return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4],
+                                   +a[5], +a[6]));
+      }      
+      return sValue;  
+  }  
+  if (sSearch.length > 1) {  
+    for (var aItKey, nKeyId = 0, aCouples = sSearch.substr(1).split("&"); nKeyId < aCouples.length; nKeyId++) {  
+      aItKey = aCouples[nKeyId].split("=");  
+      this[unescape(aItKey[0])] = aItKey.length > 1 ? buildValue(unescape(aItKey[1])) : null;  
+    }  
+  }  
+})(self.location.search);  
+
 /** Root directory of scripts. Inferred by any "script" tags pointing to Core.js. */
 if (!Kata.scriptRoot) { Kata.scriptRoot=""; }
-if (!Kata.queryString) { Kata.queryString=""; }
+if (!Kata.queryString) { 
+    if (Kata.urlGetVars["v"])
+        Kata.queryString="?"+Kata.urlGetVars["v"]; 
+    else
+        Kata.queryString=""; 
+}
 (function() {
     'use strict';
     var includedscripts = Kata.closureIncluded || {"katajs/core/Core.js":true};
@@ -255,7 +284,11 @@ if (!Kata.queryString) { Kata.queryString=""; }
             var scriptTag, textNode;
 
             scriptTag = document.createElement("script");
-            scriptTag.src = Kata.scriptRoot+scriptfile+Kata.queryString;
+            if (scriptfile.search("http")==0) {
+                scriptTag.src = scriptfile;//some external
+            }else {
+                scriptTag.src = Kata.scriptRoot+scriptfile+Kata.queryString;                
+            }
             scriptTag.type = "text/javascript";
 
             var scriptContent = function(){
