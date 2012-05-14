@@ -38,17 +38,30 @@ Kata.require([
      * engines. If false, never uses workers, and runs code synchronously.
      */
     // In WebKit, debugging webworkers breaks nested workers.
-    if (Kata.WEB_WORKERS_ENABLED === undefined) {
-        Kata.WEB_WORKERS_ENABLED = true; //typeof(importScripts)==='undefined';        
+    if (self.Kata_WEB_WORKERS_ENABLED === undefined) {
+        if (Kata.WEB_WORKERS_ENABLED === undefined) {
+            Kata.WEB_WORKERS_ENABLED = true; //typeof(importScripts)==='undefined';        
+        }
+    }else {
+        Kata.WEB_WORKERS_ENABLED = self.Kata_WEB_WORKERS_ENABLED;
     }
-    
-    if (Kata.FAKE_WEB_WORKERS_DEBUG === undefined) {//turns on if serialization happens for the fake workers. Set to true for now, so we test things adequately, but we want to turn it off for deployment if fake workers are used
-        Kata.FAKE_WEB_WORKERS_DEBUG = Kata.WEB_WORKERS_ENABLED; //typeof(importScripts)==='undefined';        
+    if (self.Kata_FAKE_WEB_WORKERS_DEBUG === undefined) {    
+        if (Kata.FAKE_WEB_WORKERS_DEBUG === undefined) {//turns on if serialization happens for the fake workers. Set to true for now, so we test things adequately, but we want to turn it off for deployment if fake workers are used
+            Kata.FAKE_WEB_WORKERS_DEBUG = Kata.WEB_WORKERS_ENABLED; //typeof(importScripts)==='undefined';        
+        }
+    }else {
+        Kata.FAKE_WEB_WORKERS_DEBUG = self.Kata_FAKE_WEB_WORKERS_DEBUG;
     }
-    if (Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT === undefined) {
-        Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT = false; //typeof(importScripts)==='undefined';        
+    if (self.Kata_WEB_WORKERS_BOOTSTRAP_SCRIPT === undefined) {
+        if (Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT === undefined) {
+            Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT = false; //typeof(importScripts)==='undefined';        
+        }
+    }else {
+            Kata.WEB_WORKERS_BOOTSTRAP_SCRIPT = self.Kata_WEB_WORKERS_BOOTSTRAP_SCRIPT; //typeof(importScripts)==='undefined';            
     }
-
+    if (self.Kata_bootstrapWorker !== undefined) {
+       Kata.bootstrapWorker=self.Kata_bootstrapWorker;   
+    }
     // Always provide Kata.FakeWebWorker so we'll have a uniform interface in
     // case we need to use not use real WebWorkers, e.g. if a browser does not
     // provide WebSocket access to WebWorkers.

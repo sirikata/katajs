@@ -82,7 +82,9 @@ Kata.urlGetVars = new (
 })(self.location.search);  
 
 /** Root directory of scripts. Inferred by any "script" tags pointing to Core.js. */
-if (!Kata.scriptRoot) { Kata.scriptRoot=""; }
+if (self.Kata_scriptRoot!==undefined) {
+    Kata.scriptRoot=self.Kata_scriptRoot;
+}else if (!Kata.scriptRoot) { Kata.scriptRoot=""; }
 if (!Kata.queryString) { 
     if (Kata.urlGetVars["v"])
         Kata.queryString="?"+Kata.urlGetVars["v"]; 
