@@ -42,12 +42,12 @@ self.onmessage = function (ev) {
     // This may not be necessary if importscripts uses relative paths.
     var scriptroot = data[0];
     var queryString = data[5] || "";
-    try {
-        //importScripts(scriptroot+"katajs.compiled.js"+queryString);
+    try {//FIXME: should we do this
+        importScripts(scriptroot+"katajs.compiled.js"+queryString);
     } catch (e) {
         try {
-            console.log("Exception loading katajs.compiled.js", e);
-        } catch (e) {}
+            Kata.log("Exception loading katajs.compiled.js", e);
+        } catch (ex) {}
     }
     if (typeof(Kata)==="undefined") {
         try {

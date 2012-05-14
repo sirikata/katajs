@@ -55,7 +55,7 @@
         }
         var destIndex=this.mHead+this.mSize;
         if (destIndex>=this.mArray.length) {
-            this.destIndex-=this.mArray.length;
+            destIndex-=this.mArray.length;
         }
         this.mSize++;
         this.mArray[destIndex]=e;
@@ -78,7 +78,7 @@
     Kata.Deque.prototype.index=function(y) {
         var destIndex=this.mHead+y;
         if (destIndex>=this.mArray.length) {
-            this.destIndex-=this.mArray.length;
+            destIndex-=this.mArray.length;
         }
         return this.mArray[destIndex];
     };
@@ -86,7 +86,7 @@
     Kata.Deque.prototype.back=function() {
         var destIndex=this.mHead+this.mSize-1;
         if (destIndex>=this.mArray.length) {
-            this.destIndex-=this.mArray.length;
+            destIndex-=this.mArray.length;
         }
         return this.mArray[destIndex];
     };
@@ -95,7 +95,7 @@
         if (this.mSize==0) return undefined;
         var destIndex=this.mHead+this.mSize-1;
         if (destIndex>=this.mArray.length) {
-            this.destIndex-=this.mArray.length;
+            destIndex-=this.mArray.length;
         }
         var retval=this.mArray[destIndex];
         this.mArray[destIndex]=null;

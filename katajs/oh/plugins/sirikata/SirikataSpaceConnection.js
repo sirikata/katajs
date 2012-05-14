@@ -228,9 +228,9 @@ Kata.require([
             resetTime=true;
         }
         Kata.LocationCopyUnifyTime(loc, reqloc);
-
-        if (resetTime) {
 /*
+        if (resetTime) {
+
             delete loc.time;
             delete reqloc.time;
             if (reqloc.posTime!==undefined)
@@ -239,8 +239,8 @@ Kata.require([
                 delete reqloc.orientTime;                
             if (reqloc.scaleTime!==undefined)
                 delete reqloc.scaleTime;                
-*/
         }
+*/
         reqloc.visual = loc.visual;
         this.mOutstandingConnectRequests[objid] =
             {

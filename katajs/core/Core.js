@@ -30,6 +30,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @suppress {duplicate}
+ */
 var Kata;
 
 var network_debug = false;
@@ -50,7 +53,11 @@ if (typeof(console) == "undefined") {
 }
 if (typeof(JSON) == "undefined") {JSON = {};}
 
-Kata.urlGetVars = new (function (sSearch) {  
+Kata.urlGetVars = new (
+/**
+ * @constructor
+ */
+ function (sSearch) {  
   'use strict';
   var rNull = /^\s*$/, rBool = /^(true|false)$/i;  
   function buildValue(sValue) {  
@@ -352,7 +359,10 @@ if (!Kata.queryString) {
             };
         }
     };
-
+/**
+ * @param {Object} msg
+ * @param {string=} level
+ */
     Kata.stringify = function(msg, level) {
         'use strict';
         if (!level) {
@@ -374,15 +384,14 @@ if (!Kata.queryString) {
 
     if (console.log && console.log.apply && debug_console) {
         /** Logs msg to the console, in addition to some json object.
-         * @param {...(object|string)} var_args  Some optional JSON data to log.
+         * @param {...(Object|string)} var_args  Some optional JSON data to log.
          */
         Kata.log = function(var_args) {
             'use strict';
             console.log.apply(console, arguments);
         };
     } else if (typeof(document)=="undefined" || typeof(window)=="undefined") {
-        /** Logs msg to the parent web worker, in addition to some json object.
-         * @param {...(object|string)} var_args  Logs some optional JSON data.
+        /* Logs msg to the parent web worker, in addition to some json object.
          */
         Kata.log = console.log = function(var_args) {
             'use strict';
@@ -399,11 +408,10 @@ if (!Kata.queryString) {
                 msg : __magic_debug_msg_string,
                 debug : "log",
                 contents : args
-            });
+            },"*");
         };
     } else if (debug_console) {
-        /** Logs msg to the console, in addition to some json object.
-         * @param {...(object|string)} var_args  Logs some optional JSON data.
+        /* Logs msg to the console, in addition to some json object.
          */
         Kata.log = console.log = function(var_args) {
             'use strict';
@@ -476,7 +484,7 @@ if (!Kata.queryString) {
                 msg : __magic_debug_msg_string,
                 debug : "error",
                 contents : error
-            });
+            },"*");
             throw error;
         }
         // Main thread
@@ -493,7 +501,7 @@ if (!Kata.queryString) {
      *
      *  @param {string} note If supplied, this note will be reported
      *         with the rest of the information.
-     *  @param {string} type If supplied, is used as a prefix to .
+     *  @param {string=} type If supplied, is used as a prefix to .
      */
     Kata.warn = function(note, type) {
         'use strict';
@@ -508,7 +516,7 @@ if (!Kata.queryString) {
                 debug : "warn",
                 type : type,
                 contents : note
-            });
+            },"*");
             console.trace && console.trace();
             return;
         }

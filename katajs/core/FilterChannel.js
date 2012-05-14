@@ -39,8 +39,9 @@ Kata.require([
       * listeners.
       *
       * @constructor
+      * @extends {Kata.Channel}
       * @param {Kata.Channel} channel the channel which feeds this one
-      * @param {function(Kata.Channel, (string|object))} filter the filter to apply. Takes the same
+      * @param {function(Kata.Channel, (string|Object))} filter the filter to apply. Takes the same
       * form as a listener but returns a boolean indicating whether to
       * deliver to listeners
       */
