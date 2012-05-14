@@ -37,6 +37,7 @@ Kata.require([
     'katajs/core/URL.js',
     'katajs/oh/impl/ScriptProtocol.js'
 ], function() {
+    self["Kata"] = Kata;
      /** Bootstraps an object's script, enabling it to communicate
       *  with the HostedObject it was instantiated for.  This also
       *  sets up creation/destruction of Presences and makes sure they
@@ -52,7 +53,7 @@ Kata.require([
       * @param {Array} args additional arguments passed by the creating
       * object
       */
-     Kata.BootstrapScript = function(channel,args) {
+     Kata.BootstrapScript = Kata["BootstrapScript"] = function(channel,args) {
          this.mChannel = channel;
 
          // Setup dispatcher and register

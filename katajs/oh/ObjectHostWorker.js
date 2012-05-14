@@ -37,14 +37,14 @@ Kata.require([
                     'katajs/oh/plugins/sirikata/SirikataSpaceConnection.js',
                     'katajs/oh/plugins/loop/LoopbackSpaceConnection.js'
 ], function() {
-
+    self["Kata"] = Kata;
     /** A worker thread to instantiate an ObjectHost and manage the channel to
      * the main thread and the graphics system (which may be multiplexed?).
      * This class is only ever created by Kata.MainThread.
      * @constructor
      * @param {Kata.Channel=} graphicsChannel A channel to Kata.MainThread.
      */
-    Kata.ObjectHostWorker = function (graphicsChannel, blessed_args) {
+    Kata.ObjectHostWorker = Kata["ObjectHostWorker"] = function (graphicsChannel, blessed_args) {
         this.mObjectHost = new Kata.ObjectHost(blessed_args.script, blessed_args.method, blessed_args.args, blessed_args.args.main_thread?graphicsChannel:false);
         if (!blessed_args.args.disable_simulation) 
             this.mObjectHost.registerSimulation(graphicsChannel, "graphics");
