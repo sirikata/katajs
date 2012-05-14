@@ -408,7 +408,7 @@ if (!Kata.queryString) {
                 msg : __magic_debug_msg_string,
                 debug : "log",
                 contents : args
-            },"*");
+            });
         };
     } else if (debug_console) {
         /* Logs msg to the console, in addition to some json object.
@@ -484,7 +484,7 @@ if (!Kata.queryString) {
                 msg : __magic_debug_msg_string,
                 debug : "error",
                 contents : error
-            },"*");
+            });
             throw error;
         }
         // Main thread
@@ -516,7 +516,7 @@ if (!Kata.queryString) {
                 debug : "warn",
                 type : type,
                 contents : note
-            },"*");
+            });
             console.trace && console.trace();
             return;
         }
