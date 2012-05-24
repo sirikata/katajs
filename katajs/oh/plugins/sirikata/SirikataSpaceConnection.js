@@ -56,7 +56,10 @@ Kata.require([
         if (success!=Kata.SST.SUCCESS) {
             Kata.warn("location packet lost due to unsuccessful packet send");
         }
-        sptr.close(false);
+        if (sptr != null)
+            sptr.close(false);
+        else
+            Kata.warn("Failed to connect child stream to loc");
     }
 
     var SUPER = Kata.SpaceConnection.prototype;
@@ -221,12 +224,12 @@ Kata.require([
 
         //Kata.warn("Connecting " + id + " == " + objid);
 
-        var reqloc = Kata.LocationIdentity(0);
         var resetTime=false;
         if (loc.posTime===undefined&&loc.time === undefined) {
             loc.time=Date.now();
             resetTime=true;
         }
+        var reqloc = Kata.LocationIdentity(loc.posTime === undefined?loc.time:loc.posTime);
         Kata.LocationCopyUnifyTime(loc, reqloc);
 /*
         if (resetTime) {
