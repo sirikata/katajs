@@ -225,9 +225,9 @@ Kata.require([
       *  @param from
       *  @param to
       */
-     Kata.SessionManager.prototype.presenceLocUpdate = function(space, from, to, loc, visual) {
+     Kata.SessionManager.prototype.presenceLocUpdate = function(space, from, to, loc, visual, physics) {
          var obj = this.mObjects[to];
-         obj.presenceLocUpdate(space, from, loc, visual);
+         obj.presenceLocUpdate(space, from, loc, visual, physics);
      };
 
      Kata.SessionManager.prototype.subscribe = function(space, id, observed) {

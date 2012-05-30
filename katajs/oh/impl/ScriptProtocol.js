@@ -464,12 +464,13 @@ Kata.require([
                  this.visual = visual;
              },
 
-             PresenceLocUpdate : function(space, observed, loc, visual) {
+             PresenceLocUpdate : function(space, observed, loc, visual, physics) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.PresenceLocUpdate;
                  this.space = space;
                  this.observed = observed;
                  this.loc = loc;
                  this.visual = visual;
+                 this.physics = physics;
              }
 
          }
