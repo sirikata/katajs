@@ -292,17 +292,17 @@ Kata.require([
     };
 
     Kata.SirikataSpaceConnection.prototype.disconnectObject = function(id) {
-        var objid = this._getObjectID(id);
+        //var objid = this._getObjectID(id);
 
         var disconnect_msg = new Sirikata.Protocol.Session.Disconnect();
-        disconnect_msg.object = objid;
+        disconnect_msg.object = id;
         disconnect_msg.reason = "Quit";
 
         var session_msg = new Sirikata.Protocol.Session.Container();
         session_msg.disconnect = disconnect_msg;
 
         this._sendODPMessage(
-            objid, this.Ports.Session,
+            id, this.Ports.Session,
             Kata.ObjectID.nil(), this.Ports.Session,
             this._serializeMessage(session_msg)
         );
