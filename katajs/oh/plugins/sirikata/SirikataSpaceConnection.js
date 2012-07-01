@@ -36,6 +36,7 @@ Kata.require([
     'katajs/oh/SessionManager.js',
     'katajs/network/TCPSST.js',
     'katajs/core/Quaternion.js',
+    ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/AggregateBoundingInfo.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimedMotionVector.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/TimedMotionQuaternion.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/Session.pbj.js'],
@@ -690,12 +691,19 @@ Kata.require([
                 this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual, physics);
             }
 
-            if (update.bounds) {
+            if (update.aggregate_bounds) {
                 var loc = {};
                 // Note: currently we expect this to be in milliseconds, not a Date
                 //loc.time = this._toLocalTime(update.bounds.t).getTime();
                 loc.seqno = update.seqno;
-                loc.scale = update.bounds;
+                var size = update.aggregate_bounds.max_object_size;
+                loc.scale = [0,0,0,size?size:0];
+                if (update.aggregate_bounds.center_offset) {
+                    var cp = update.aggregate_bounds.center_offset;
+                    loc.scale[0]=cp[0];
+                    loc.scale[1]=cp[1];
+                    loc.scale[2]=cp[2];
+                }
 				if (!loc.time) {
 					loc.time = Kata.now(this.mSpaceURL); // OMG HACK HACK HACK: The correct fix is to add time field to the space server.
 				}
@@ -744,9 +752,20 @@ Kata.require([
             properties.loc.rotvel = ovel_aa.angle;
             // Note: currently we expect this to be in milliseconds, not a Date
             properties.loc.orientTime = this._toLocalTime(update.addition[add].orientation.t).getTime();
+            if (update.addition[add].aggregate_bounds) {
+                
+                var size = update.addition[add].aggregate_bounds.max_object_size;
+                properties.bounds = [0,0,0,size?size:0];
+                if (update.addition[add].aggregate_bounds.center_offset) {
+                    var cp = update.addition[add].aggregate_bounds.center_offset;
+                    properties.bounds[0]=cp[0];
+                    properties.bounds[1]=cp[1];
+                    properties.bounds[2]=cp[2];
+                }
+                
+            }
 
-            properties.bounds = update.addition[add].bounds;
-            properties.loc.scale = update.addition[add].bounds;
+            properties.loc.scale = properties.bounds;
             // FIXME bounds and scale don't get their own time. Why does Location even have this?
             properties.loc.scaleTime = this._toLocalTime(update.addition[add].location.t).getTime();
 
