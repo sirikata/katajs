@@ -1821,7 +1821,7 @@ Kata.SST.Stream.prototype.serviceStream=function() {
         }
         return true;
     }
-
+    var baseCb = null;
     this.conn = this.mConnection;
     var curTime= new Date();
     //console.log(curTime+" Servicing Stream"+this.mConnection.mLocalEndPoint.uid());
@@ -1845,11 +1845,13 @@ Kata.SST.Stream.prototype.serviceStream=function() {
       this.mInitialDataLength = 0;
 
       if (!this.mConnected) {
-        delete sStreamReturnCallbackMapSST[this.mConnection.mLocalEndPoint.uid()];
         var retVal=true;
         // If this is the root stream that failed to connect, close the
         // connection associated with it as well.
         if (this.mParentLSID == 0) {
+           var localUid = this.mConnection.mLocalEndPoint.uid();
+           baseCb = sStreamReturnCallbackMapSST[localUid];
+           delete sStreamReturnCallbackMapSST[localUid];
            this.mConnection.close(true);
            retVal=false;
         }
@@ -1862,6 +1864,9 @@ Kata.SST.Stream.prototype.serviceStream=function() {
         this.mStreamReturnCallback=null;
         this.mState=DISCONNECTED_STREAM_SST;
           AAdisconnectedCCount.push(this);
+        if (baseCb) {
+            baseCb(Kata.SST.FAILURE,null);
+        }
         if (!retVal) {
             setTimeout(Kata.bind(this.mConnection.cleanup,this.mConnection),0);
         }
