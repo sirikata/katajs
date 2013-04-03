@@ -253,6 +253,18 @@ Kata.require([
         };
 
         /**
+         * closes down the entire stream and all substreams it contains
+         * Does not, at the moment, send callbacks since this is likely in app cleanup code
+         * 
+         */
+        Kata.TCPSST.prototype.close = function () {
+            var len = this.mSockets.length;
+            for (var i=0;i<len;++i) {
+                this.mSockets[i].close();
+            }
+        };
+
+        /**
          * A single substream which is able to send/receive messages.
          * @constructor
          * @extends Kata.Channel
