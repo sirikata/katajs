@@ -47,7 +47,7 @@ Kata.require([
      *  \param cb callback to invoke, passed the current computed
      *  offset when it is updated
      */
-    Kata.Sirikata.SyncClient = function(odp_service, local_endpoint, sync_endpoint, cb) {
+    Kata.Sirikata.SyncClient = function(odp_service, local_endpoint, sync_endpoint, cb, offset) {
         this.mODP = odp_service;
         this.mLocalEndpoint = local_endpoint;
         this.mSyncEndpoint = sync_endpoint;
@@ -62,10 +62,14 @@ Kata.require([
         this.mRequestTimes = new Array(256);
         this.poll();
 
-        this.mOffset = null;
+        this.mOffset = offset!==undefined?offset:null;
     };
 
     Kata.Sirikata.SyncClient.prototype.MaxRTT = 5000;
+
+    Kata.Sirikata.SyncClient.prototype.setOffset = function(offset) {
+        this.mOffset = offset;
+    };
 
     Kata.Sirikata.SyncClient.prototype.valid = function() {
         return (this.mOffset == null);

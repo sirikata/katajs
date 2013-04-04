@@ -53,16 +53,7 @@ Kata.require([
     'katajs/core/URL.js',
     'katajs/oh/impl/ScriptProtocol.js'
 ], function() {
-    function discardChildStream(success,sptr) {
-        if (success!=Kata.SST.SUCCESS) {
-            Kata.warn("location packet lost due to unsuccessful packet send");
-        }
-        if (sptr != null)
-            sptr.close(false);
-        else
-            Kata.warn("Failed to connect child stream to loc");
-    }
-
+    Kata.testRecovery=false;
     var SUPER = Kata.SpaceConnection.prototype;
     /** Kata.SirikataSpaceConnection is an implementation of
      * Kata.SpaceConnection which connects to a local space server,
@@ -73,9 +64,10 @@ Kata.require([
      * SessionManager that owns this connection
      * @param {Kata.URL} spaceurl URL of the space to connect to
      */
-    Kata.SirikataSpaceConnection = function (parent, spaceurl) {
+    Kata.SirikataSpaceConnection = function (parent, spaceurl, auth) {
         SUPER.constructor.call(this, parent);
-
+        this.mRecovered=false;
+        this.mAuth = auth;
         this.mSpaceURL = spaceurl;
 
         // OH ID (which may not be a UUID) -> UUID for identifying object w/ space
@@ -107,6 +99,7 @@ Kata.require([
             new Kata.ODP.Endpoint(this.mSpaceURL, Kata.ObjectID.nil(), this.Ports.TimeSync),
             new Kata.ODP.Endpoint(this.mSpaceURL, Kata.ObjectID.nil(), this.Ports.TimeSync)
         );
+        
     };
     Kata.extend(Kata.SirikataSpaceConnection, Kata.SpaceConnection.prototype);
 
@@ -218,13 +211,75 @@ Kata.require([
 
         return result;
     };
+    function serializeConnect(connect_msg) {
+        var retval="v:";
+        retval+=connect_msg.version;
+        retval+=" type: "+connect_msg.type;
+        retval+=" object: "+connect_msg.object;
+        if (connect_msg.loc) {
+            retval+=" loc: "+connect_msg.loc.position;            
+            retval+=" loct: "+connect_msg.loc.t;            
+            retval+=" vel: "+connect_msg.loc.velocity;
 
+        }
+        if (connect_msg.orientation) {
+            retval+=" o: "+connect_msg.orientation.position;            
+            retval+=" ot: "+connect_msg.orientation.t;            
+            retval+=" ov: "+connect_msg.orientation.velocity;
+
+        }
+        retval+=" bounds: "+connect_msg.loc.bounds;
+        retval+=" angle: "+connect_msg.query_angle;
+        retval+=" max: "+connect_msg.query_max_count;
+        retval+=" qp: "+connect_msg.query_parameters;
+        retval+=" msh: "+connect_msg.mesh;
+        retval+=" phy: "+connect_msg.physics;
+        retval+=" oh: "+connect_msg.oh_name;
+        retval+=" z: "+connect_msg.zernike;
+        return retval;
+    }
+    Kata.SirikataSpaceConnection.prototype._sendOutstandingConnectRequest=function(objid,outstandingConnectRequest) {
+
+        var connect_msg = new Sirikata.Protocol.Session.Connect();
+
+        connect_msg.type = Sirikata.Protocol.Session.Connect.ConnectionType.Fresh;
+        connect_msg.object = objid;
+
+        if (outstandingConnectRequest.auth) {
+            if (typeof(outstandingConnectRequest.auth) == "string")
+                connect_msg.auth = PROTO.encodeUTF8(outstandingConnectRequest.auth);
+            else
+                connect_msg.auth = outstandingConnectRequest.auth;
+        }
+
+        var loc_parts = this._generateLocUpdateParts(outstandingConnectRequest.loc_bounds, true);
+        var query = outstandingConnectRequest.query_angle;
+        if (loc_parts.loc)
+            connect_msg.loc = loc_parts.loc;
+        if (loc_parts.orient)
+            connect_msg.orientation = loc_parts.orient;
+        if (loc_parts.bounds)
+            connect_msg.bounds = loc_parts.bounds;
+        if (loc_parts.visual)
+            connect_msg.mesh = loc_parts.visual;
+        if (outstandingConnectRequest.query_angle!==undefined) {
+            connect_msg.query_angle = outstandingConnectRequest.query_angle;
+        }
+
+        var session_msg = new Sirikata.Protocol.Session.Container();
+        console.log("ICONNECTING WITH "+serializeConnect(connect_msg));
+        session_msg.connect = connect_msg;
+
+        this._sendODPMessage(
+            objid, this.Ports.Session,
+            Kata.ObjectID.nil(), this.Ports.Session,
+            this._serializeMessage(session_msg)
+        );
+        
+    };
 
     Kata.SirikataSpaceConnection.prototype.connectObject = function(id, auth, loc, vis, query) {
         var objid = this._getObjectID(id);
-
-        //Kata.warn("Connecting " + id + " == " + objid);
-
         var resetTime=false;
         if (loc.posTime===undefined&&loc.time === undefined) {
             loc.time=Date.now();
@@ -246,50 +301,23 @@ Kata.require([
         }
 */
         reqloc.visual = loc.visual;
+
         this.mOutstandingConnectRequests[objid] =
             {
+                auth : auth,
                 loc_bounds : reqloc,
                 visual : vis,
                 reset_time : resetTime,
                 deferred_odp : []
             };
-
-        var connect_msg = new Sirikata.Protocol.Session.Connect();
-
-        connect_msg.type = Sirikata.Protocol.Session.Connect.ConnectionType.Fresh;
-        connect_msg.object = objid;
-
-        if (auth) {
-            if (typeof(auth) == "string")
-                connect_msg.auth = PROTO.encodeUTF8(auth);
-            else
-                connect_msg.auth = auth;
-        }
-
-        var loc_parts = this._generateLocUpdateParts(reqloc, true);
-
-        if (loc_parts.loc)
-            connect_msg.loc = loc_parts.loc;
-        if (loc_parts.orient)
-            connect_msg.orientation = loc_parts.orient;
-        if (loc_parts.bounds)
-            connect_msg.bounds = loc_parts.bounds;
-        if (loc_parts.visual)
-            connect_msg.mesh = loc_parts.visual;
         if (query>0.0&&query!=true&&query) {
-            connect_msg.query_angle = query;
+            this.mOutstandingConnectRequests[objid].query_angle = query;
         }else if (query) {
-            connect_msg.query_angle = 0.00000000000000000000000001;
+            this.mOutstandingConnectRequests[objid].query_angle = 0.00000000000000000000000001;
         }
+        this._sendOutstandingConnectRequest(objid,this.mOutstandingConnectRequests[objid]);
+        //Kata.warn("Connecting " + id + " == " + objid);
 
-        var session_msg = new Sirikata.Protocol.Session.Container();
-        session_msg.connect = connect_msg;
-
-        this._sendODPMessage(
-            objid, this.Ports.Session,
-            Kata.ObjectID.nil(), this.Ports.Session,
-            this._serializeMessage(session_msg)
-        );
     };
 
     Kata.SirikataSpaceConnection.prototype.disconnectObject = function(id) {
@@ -343,13 +371,13 @@ Kata.require([
     Kata.SirikataSpaceConnection.prototype._handleDisconnected = function(substream) {
         // We only have the one substream currently, it had better be the right one
         if (substream !== this.mPrimarySubstream) return;
-
+         var objid;
         // All objects connected through us get disconnected
-        for(var objid in this.mConnectedObjects) {
+        for(objid in this.mConnectedObjects) {
             this.mParent.disconnected(objid, this.mSpaceURL);
         }
         // All objects *trying* to connect get rejected
-        for(var objid in this.mOutstandingConnectRequests) {
+        for(objid in this.mOutstandingConnectRequests) {
             var id = this._getLocalID(objid);
             this.mParent.connectionResponse(
                 id, false,
@@ -426,7 +454,6 @@ Kata.require([
         );
     };
 
-
     /* Handle session messages from the space server. */
     Kata.SirikataSpaceConnection.prototype._handleSessionMessage = function(odp_msg) {
         var session_msg = new Sirikata.Protocol.Session.Container();
@@ -436,8 +463,17 @@ Kata.require([
 
         if (session_msg.HasField("connect_response")) {
             var conn_response = session_msg.connect_response;
-
-            if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Success) {
+            if (conn_response.response !== Sirikata.Protocol.Session.ConnectResponse.Response.Success) {
+                //this.recoverConnection(objid);//the connection has failed somehow
+                Kata.log("Would have tried connection recovery here, but that causes a bad loopdiloop");
+                var thus=this;
+                setTimeout(function() {
+                               if (objid in thus.mOutstandingConnectRequests && !(objid in thus.mConnectedObjects)) {
+                                   thus._sendOutstandingConnectRequest(objid,thus.mOutstandingConnectRequests[objid]);                    
+                               }                               
+                           },5000);
+            }
+            if (conn_response.response === Sirikata.Protocol.Session.ConnectResponse.Response.Success) {
                 var id = this._getLocalID(objid);
                 Kata.log("Successfully connected " + id);
 
@@ -454,6 +490,7 @@ Kata.require([
 
                 // Set up SST
                 this.mConnectedObjects[objid] = {};
+                this.mConnectedObjects[objid].queryAngleRequest = this.mOutstandingConnectRequests[objid].query_angle;
                 var odpRouter = new this.ObjectMessageRouter(this);
                 var odpDispatcher = new Kata.SST.ObjectMessageDispatcher();
                 // Store the dispatcher so we can deliver ODP messages
@@ -465,7 +502,11 @@ Kata.require([
                 );
 
                 this.mConnectedObjects[objid].proxdata = [];
-
+                if (this.mOutstandingConnectRequests[objid].locationUpdateRequest)//if we got a location update during connect
+                    this.mConnectedObjects[objid].locationUpdateRequest = this.mOutstandingConnectRequests[objid].locationUpdateRequest;
+                else
+                    this.mConnectedObjects[objid].locationUpdateRequest = new Sirikata.Protocol.Loc.LocationUpdateRequest();
+                this.mConnectedObjects[objid].discardChildStream=Kata.bind(this.discardChildStream,this,objid);
                 // Try to connect the initial stream
                 var tried_sst = Kata.SST.connectStream(
                     new Kata.SST.EndPoint(objid, this.Ports.Space),
@@ -478,10 +519,10 @@ Kata.require([
                     id, {space : this.mSpaceURL, object : objid}
                 );
             }
-            else if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Redirect) {
+            else if (conn_response.response === Sirikata.Protocol.Session.ConnectResponse.Response.Redirect) {
                 Kata.notImplemented("Server redirects for Sirikata are not implemented.");
             }
-            else if (conn_response.response == Sirikata.Protocol.Session.ConnectResponse.Response.Error) {
+            else if (conn_response.response === Sirikata.Protocol.Session.ConnectResponse.Response.Error) {
                 Kata.warn("Connection Error.");
                 var id = this._getLocalID(objid);
                 this.mParent.connectionResponse(
@@ -501,10 +542,126 @@ Kata.require([
             Kata.notImplemented("Migrations not implemented.");
         }
     };
+    function createPlausibleRequestFromConnectMessage(space_conn,connect_msg) {
+        var ptime = space_conn._toLocalTime(connect_msg.loc.t);
+        var otime = space_conn._toLocalTime(connect_msg.orientation.t);
+        var stime = ptime;
+        var retval = Kata.LocationIdentity(ptime);
 
+        retval.pos[0]=connect_msg.loc.position[0];
+        retval.pos[1]=connect_msg.loc.position[1];
+        retval.pos[2]=connect_msg.loc.position[2];
+        retval.vel[0]=0;//connect_msg.loc.velocity[0]; //nonzero velocity when we haven't synced our clocks is a bad idea
+        retval.vel[1]=0;//connect_msg.loc.velocity[1];
+        retval.vel[2]=0;//connect_msg.loc.velocity[2];
+
+        retval.orientTime=otime;
+        retval.orient[0]=connect_msg.orientation.position[0];
+        retval.orient[1]=connect_msg.orientation.position[1];
+        retval.orient[2]=connect_msg.orientation.position[2];
+        retval.orient[3]=connect_msg.orientation.position[3];
+        retval.rotaxis[0]=0;//connect_msg.loc.velocity[0];
+        retval.rotaxis[1]=0;//connect_msg.loc.velocity[1];
+        retval.rotaxis[2]=1;//connect_msg.loc.velocity[2];
+        retval.rotvel=0;//connect_msg.loc.velocity[3];
+        //FIXME no angvel
+        retval.scale[0]=connect_msg.bounds[0];
+        retval.scale[1]=connect_msg.bounds[1];
+        retval.scale[2]=connect_msg.bounds[2];
+        retval.scale[3]=connect_msg.bounds[3];
+        if (connect_msg.visual!==undefined)
+            retval.visual = connect_msg.visual;
+        return retval;
+    }
+    function arrayDup(array) {
+        var retval=[];
+        for (var i=0;i<array.length;++i) {
+            retval.push(array[i]);
+        }
+        return retval;
+    }
+    function copyLocationUpdateRequestToConnectMessage(connect_msg, locCopy, queryAngleRequest) {
+        if (locCopy.location) {
+            var pos = new Sirikata.Protocol.TimedMotionVector();
+            pos.t = locCopy.location.t;
+            pos.position = arrayDup(locCopy.location.position);
+            pos.velocity = [0,0,0];//zero out the velocity
+            connect_msg.loc = pos;            
+        }
+
+        if (locCopy.orientation) {
+            var orient = new Sirikata.Protocol.TimedMotionQuaternion();
+            orient.t = locCopy.location.t;
+            orient.position = arrayDup(locCopy.orientation.position);
+            orient.velocity = [0,0,0,1];//zero out the velocity
+            connect_msg.orientation = orient;            
+            
+        }
+        if (locCopy.bounds) {
+            connect_msg.bounds = arrayDup(locCopy.bounds);   
+        }
+        if (locCopy.mesh)
+            connect_msg.mesh = locCopy.mesh;
+        if (queryAngleRequest>0.0&&queryAngleRequest!=true&&queryAngleRequest) {
+            connect_msg.query_angle = queryAngleRequest;
+        }else if (queryAngleRequest) {
+            connect_msg.query_angle = 0.00000000000000000000000001;
+        }
+    }
+    /**
+     * Copies connect info to a LocationUpdateRequest, only overwriting thigns is shouldOverwrite is passed or the field is missing. Returns true if any old data exists
+     */
+    function copyConnectInfoToLocationUpdateRequest(connection,destinationLocCopy,connect_info,shouldOverwrite) {
+        var newData=false;
+        var loc_parts = connection._generateLocUpdateParts(connect_info.loc_bounds, true);
+        if (destinationLocCopy.HasField("bounds")) {
+            newData=true;
+            if (shouldOverwrite) destinationLocCopy.bounds = loc_parts.bounds;
+        }else {
+            destinationLocCopy.bounds = loc_parts.bounds;
+        }
+        if (destinationLocCopy.HasField("orientation")) {
+            newData=true;
+            if (shouldOverwrite) destinationLocCopy.orientation = loc_parts.orient;
+        }else {
+            destinationLocCopy.orientation = loc_parts.orient;
+        }
+        if (destinationLocCopy.HasField("location")) {
+            newData=true;
+            if (shouldOverwrite) destinationLocCopy.location = loc_parts.loc;
+        }else {
+            destinationLocCopy.location = loc_parts.loc;
+        }
+        if (destinationLocCopy.HasField("mesh")) {
+            newData=true;
+            if (shouldOverwrite) destinationLocCopy.mesh = connect_info.visual;
+        }else {
+            destinationLocCopy.mesh = connect_info.visual;
+        }
+        if (destinationLocCopy.HasField("physics")) {
+            newData=true;
+        }else {//we aren't allowed to set physics on connect I believe--so it's undefined
+            
+        }        
+        return newData;
+    }
     Kata.SirikataSpaceConnection.prototype._spaceSSTConnectCallback = function(objid, error, stream) {
         if (error == Kata.SST.FAILURE) {
+            this.recoverConnection(objid);
+/*
             Kata.warn("Failed to get SST connection to space for " + objid + ".");
+            Kata.warn("RETRYING");
+            var tried_sst = Kata.SST.connectStream(
+                new Kata.SST.EndPoint(objid, this.Ports.Space),
+                new Kata.SST.EndPoint(Kata.SpaceID.nil(), this.Ports.Space),
+                Kata.bind(this._spaceSSTConnectCallback, this, objid)
+                );
+            if (tried_sst) {
+                this.mConnectedObjects[objid].spaceStream=null;//kill any old stream                
+            }else {
+                Kata.warn("Unable to retry connnecting stream");
+            }
+*/
             return;
         }
 
@@ -516,7 +673,7 @@ Kata.require([
         stream.listenSubstream(this.Ports.Location, Kata.bind(this._handleLocationSubstream, this, objid));
         stream.listenSubstream(this.Ports.Proximity, Kata.bind(this._handleProximitySubstream, this, objid));
 
-        // With the successful connection + sst straem, we can indicate success to the parent SessionManager
+        // With the successful connection + sst stream, we can indicate success to the parent SessionManager
         var connect_info = this.mOutstandingConnectRequests[objid];
         if (connect_info.reset_time) {
             connect_info.loc_bounds.time = Kata.now(this.mSpaceURL);
@@ -537,33 +694,170 @@ Kata.require([
         // packets
         for(var di = 0; di < connect_info.deferred_odp.length; di++)
             this._deliverODP( connect_info.deferred_odp[di] );
-    };
+        // now lets send out any outstanding LOC requests
+        var doSendLocationUpdate=false;
+        var savedLocCopy = this.mConnectedObjects[objid].locationUpdateRequest;
 
+        this.mConnectedObjects[objid].auth = connect_info.auth;
+        if (copyConnectInfoToLocationUpdateRequest(this,savedLocCopy,connect_info,false)) {
+            //if there's been new info since we attempted to connect, go ahead and send it out in the usual fashion 
+        
+            var spacestream = this.mConnectedObjects[objid].spaceStream;
+            if (!spacestream) {
+                Kata.warn("Should really have stream by now: this is in the stream creation callback");
+                return;
+            }
+
+            var container = new Sirikata.Protocol.Loc.Container();
+            container.update_request = savedLocCopy;
+
+            spacestream.createChildStream(
+                this.mConnectedObjects[objid].discardChildStream,
+                this._serializeMessage(container).getArray(),
+                this.Ports.Location, this.Ports.Location);
+
+        }
+    };
+    Kata.SirikataSpaceConnection.prototype.recoverConnection = function(whichObjectDisconnected) {
+        this.mRecovered=true;
+        Kata.SST.Stream.traceLog={};
+        this.mParent.spaceConnectionDisconnected(this) ;
+        var space_conn = this.mParent.connectSpaceToServer(this.mSpaceURL,this.mAuth);
+        space_conn.mSync.setOffset(this.mSync.offset());
+        space_conn.mLocalIDs=this.mLocalIDs;
+        space_conn.mObjectUUIDs=this.mObjectUUIDs;
+        this.mLocalIDs={};
+        this.mObjectUUIDs={};
+        var objs = this.mConnectedObjects;
+        var objid;
+        var partiallyConnectedObjs = this.mOutstandingConnectRequests;
+        for (objid in partiallyConnectedObjs) {
+            var obj = partiallyConnectedObjs[objid];
+            space_conn.mOutstandingConnectRequests[objid] = obj;
+            space_conn._sendOutstandingConnectRequest(objid,obj);
+        }
+        for (objid in objs) {
+            if (!(objid in partiallyConnectedObjs)) {//make sure we haven't just reconnected this before that was waiting for sst completion
+                var obj = objs[objid];
+                var connect_msg = new Sirikata.Protocol.Session.Connect();
+                connect_msg.type = Sirikata.Protocol.Session.Connect.ConnectionType.Fresh;
+                connect_msg.object = objid;
+                
+                if (obj.auth) {
+                    if (typeof(auth) == "string")
+                        connect_msg.auth = PROTO.encodeUTF8(auth);
+                    else
+                        connect_msg.auth = auth;
+                }
+                copyLocationUpdateRequestToConnectMessage(connect_msg,obj.locationUpdateRequest,obj.queryAngleRequest);
+                console.log("CONNECTING WITH "+serializeConnect(connect_msg));
+                space_conn.mOutstandingConnectRequests[objid] =
+                    {
+                        query_angle: obj.queryAngleRequest,
+                        auth : connect_msg.auth,
+                        loc_bounds : createPlausibleRequestFromConnectMessage(space_conn,connect_msg),
+                        visual : obj.locationUpdateRequest.mesh,
+                        reset_time : false,
+                        deferred_odp : []
+                    };
+/*
+        if (query>0.0&&query!=true&&query) {
+            this.mOutstandingConnectRequests[objid].query_angle = query;
+        }else if (query) {
+            this.mOutstandingConnectRequests[objid].query_angle = 0.00000000000000000000000001;
+        }
+*/  // should be duplicated by saving the queryAngleRequest from the obj
+
+                this.mParent.unaliasIDs(space_conn._getLocalID(objid),{space:space_conn.mSpaceURL,object:objid});
+                var session_msg = new Sirikata.Protocol.Session.Container();
+                session_msg.connect = connect_msg;
+                
+                if (obj.spaceStream) {
+                    var conn = obj.spaceStream.mConnection;
+                    obj.spaceStream.close(true);
+                    if (conn) {
+                        conn.close(true);                    
+                    }
+                    Kata.SST.destroyBaseDatagramLayer(objid);
+                }
+                
+                space_conn._sendODPMessage(
+                    objid, space_conn.Ports.Session,
+                    Kata.ObjectID.nil(), space_conn.Ports.Session,
+                    space_conn._serializeMessage(session_msg)
+                );
+                
+            }
+        }
+        this.mOutstandingConnectRequests={};
+        this.mConnectedObjects={};
+        this.mSocket.close();
+        this.mPrimarySubstream.close();
+    };
+    Kata.SirikataSpaceConnection.prototype.discardChildStream = function(objid,success,sptr) {
+        if (success!=Kata.SST.SUCCESS||Kata.testRecovery) {
+            Kata.testRecovery=false;
+            this.recoverConnection(objid);
+        }
+        if (sptr != null)
+            sptr.close(false);
+        else
+            Kata.warn("Failed to connect child stream to loc");
+    };
+    
+    /**
+     * Gets the appropriate locationUpdateRequest for saved location update depending on the progress in the connection request
+     */
+    Kata.SirikataSpaceConnection.prototype.getSavedLocationUpdateRequest = function(objid) {
+        var savedLocCopy;
+        if (objid in this.mConnectedObjects) {
+            savedLocCopy = this.mConnectedObjects[objid].locationUpdateRequest;
+        }else {
+            savedLocCopy = this.mOutstandingConnectRequests[objid].locationUpdateRequest;
+            if (!savedLocCopy) {
+                savedLocCopy = this.mOutstandingConnectRequests[objid].locationUpdateRequest = new Sirikata.Protocol.Loc.LocationUpdateRequest();
+            }
+        }
+        return savedLocCopy;
+    };
     Kata.SirikataSpaceConnection.prototype.locUpdateRequest = function(objid, loc, visual) {
         // Generate and send an update to Loc
         var update_request = new Sirikata.Protocol.Loc.LocationUpdateRequest();
-
+        var savedLocCopy = this.getSavedLocationUpdateRequest(objid);
         var loc_parts = this._generateLocUpdateParts(loc, false);
+        
+        if (loc_parts.loc) {
+            savedLocCopy.location = loc_parts.loc;
+            update_request.location = loc_parts.loc;            
+        }
 
-        if (loc_parts.loc)
-            update_request.location = loc_parts.loc;
-        if (loc_parts.orient)
+        if (loc_parts.orient) {
+            savedLocCopy.orientation = loc_parts.orient;            
             update_request.orientation = loc_parts.orient;
-        if (loc_parts.bounds)
+        }
+        if (loc_parts.bounds) {
+            savedLocCopy.bounds = loc_parts.bounds;            
             update_request.bounds = loc_parts.bounds;
-        if (typeof(visual)=="string")
+        }
+        if (typeof(visual)=="string") {
+            savedLocCopy.mesh = visual;            
             update_request.mesh = visual;
+        }
 
         var container = new Sirikata.Protocol.Loc.Container();
         container.update_request = update_request;
 
-        var spacestream = this.mConnectedObjects[objid].spaceStream;
+        var connObj = this.mConnectedObjects[objid];
+        if (!connObj) {
+            return;            
+        }
+        var spacestream = connObj.spaceStream;
         if (!spacestream) {
-            Kata.warn("Tried to send loc update before stream to server was ready.");
+            //Kata.warn("Tried to send loc update before stream to server was ready.");
             return;
         }
         spacestream.createChildStream(
-            discardChildStream,
+            this.mConnectedObjects[objid].discardChildStream,
             this._serializeMessage(container).getArray(),
             this.Ports.Location, this.Ports.Location);
 /*old protocol
@@ -581,8 +875,8 @@ Kata.require([
         // Generate and send an update to PINTO
         var update_request = new Sirikata.Protocol.Prox.QueryRequest();
         update_request.query_angle = newAngle;
-
         var spacestream = this.mConnectedObjects[objid].spaceStream;
+        this.mConnectedObjects[objid].queryAngleRequest = newAngle;
         if (!spacestream) {
             Kata.warn("Tried to send prox update before stream to server was ready.");
             return;
@@ -596,19 +890,23 @@ Kata.require([
 
     Kata.SirikataSpaceConnection.prototype.setPhysics = function(objid, data) {
         // Generate and send an update to Loc
+        var savedLocCopy = this.getSavedLocationUpdateRequest(objid);
         var update_request = new Sirikata.Protocol.Loc.LocationUpdateRequest();
         update_request.physics = data;
-
+        savedLocCopy.physics = data;
         var container = new Sirikata.Protocol.Loc.Container();
         container.update_request = update_request;
-
-        var spacestream = this.mConnectedObjects[objid].spaceStream;
+        var connObj = this.mConnectedObjects[objid];
+        if (!connObj) {
+            return;
+        }
+        var spacestream = connObj.spaceStream;
         if (!spacestream) {
             Kata.warn("Tried to send loc update before stream to server was ready.");
             return;
         }
         spacestream.createChildStream(
-            discardChildStream,
+            this.mConnectedObjects[objid].discardChildStream,
             this._serializeMessage(container).getArray(),
             this.Ports.Location, this.Ports.Location);
 /*

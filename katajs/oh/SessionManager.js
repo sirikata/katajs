@@ -76,15 +76,7 @@ Kata.require([
              return undefined;
          return this._protocols[protocol];
      };
-
-     /** Attempts to connect the object to the specified space.
-      *
-      * @param {Kata.HostedObject} ho the HostedObject to connect
-      * @param {string} space URL of space to connect to
-      * @param {string} auth authentication information for the space
-      */
-     Kata.SessionManager.prototype.connect = function(ho, req, auth) {
-         var spaceURL = req.space;
+     Kata.SessionManager.prototype.connectSpaceToServer = function(spaceURL, auth) {
          var spaceURLProtocol = Kata.URL.protocol(spaceURL);
          // Look up or create a connection
          var space_conn = this.mSpaceConnections[spaceURL];
@@ -95,11 +87,35 @@ Kata.require([
              space_conn = new protoClass(this, spaceURL);
              this.mSpaceConnections[spaceURL] = space_conn;
          }
+         return space_conn;
+     };
+     /** Attempts to connect the object to the specified space.
+      *
+      * @param {Kata.HostedObject} ho the HostedObject to connect
+      * @param {string} space URL of space to connect to
+      * @param {string} auth authentication information for the space
+      */
+     Kata.SessionManager.prototype.connect = function(ho, req, auth) {
+         var spaceURL = req.space;
+         var space_conn = this.connectSpaceToServer(spaceURL,auth);
 
          this.mObjects[ho.getID()] = ho;
 
          // And try to connect
          space_conn.connectObject(ho.getID(), auth, req, req.visual, req.query);
+     };
+
+     /** Callback from SpaceConnection which allows us to unalias an ID
+      *  so that we can roll back a setup connection progress and recover or migrate ourselves
+      */
+     Kata.SessionManager.prototype.unaliasIDs = function(id, presence_id) {
+         var obj = this.mObjects[presence_id.object];
+         if (!obj) {
+             Kata.warn("Got ID aliasing for unknown object: " + id);
+             return;
+         }
+         this.mObjects[id] = obj;
+         this.mObjects[presence_id.object] = obj;
      };
 
      /** Callback from SpaceConnection which allows us to alias an ID
@@ -137,8 +153,8 @@ Kata.require([
              delete this.mObjects[id];
              this.mObjects[presence_id.object] = obj;
          }
-
          obj.connectionResponse(success, presence_id, data);
+
      };
 
     /** Diconnect the given object from the space. */

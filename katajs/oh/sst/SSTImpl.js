@@ -36,6 +36,30 @@ Kata.require([
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/SSTHeader.pbj.js'],
     ['externals/protojs/protobuf.js','externals/protojs/pbj.js','katajs/oh/plugins/sirikata/impl/ObjectMessage.pbj.js']
 ], function() {
+
+function KataTrace(thus,name,args) {
+    if (true||!thus) {
+       thus = Kata.SST.Stream;
+    }
+    if (!thus.traceLog) {
+        thus.traceLog={
+            
+        };
+    }
+    if (name in thus.traceLog) {
+        thus.traceLog[name]++;        
+    }else {
+        thus.traceLog[name]=1;        
+    }
+    if (thus.traceLog[name]<5||thus.traceLog[name]%100==0){
+        var logStr =thus.traceLog[name]+" Called "+name+"("; 
+        for (var i=0;i<args.length;++i) {
+            logStr+=args[i]+",";
+        }
+        console.log(logStr+")");
+    }
+
+}
 function nopArrayClass(){}
 nopArrayClass.prototype.push=function(a){}
 var AAaconnectedACount=new nopArrayClass();
@@ -171,7 +195,13 @@ var getDatagramLayerSST = function(endPoint) {
     }
     return null;
 };
-
+var destroyDatagramLayerSST=function(objectId) {
+    if (objectId in sDatagramLayerMap) {
+        delete sDatagramLayerMap[objectId];
+        return true;
+    }
+    return false;
+};
 /**
  * @param {!Kata.SST.EndPoint} endPoint The end point object (must have .uid() and .objectId() functions)
  * @param {!ObjectMessageRouter} router The place where messages may be sent to the wire
@@ -183,6 +213,15 @@ Kata.SST.createBaseDatagramLayer = function(endPoint,router,dispatcher) {
         return sDatagramLayerMap[id];
     }
     return (sDatagramLayerMap[id]=new Kata.SST.Impl.BaseDatagramLayer(router,dispatcher));
+};
+
+/**
+ * @param {!string} objectId The ID of the object from the space objectUUID 
+ * This function destroys the datagram layer so futuer communications to the object ID do not get sent out along this connection path 
+ * and a new one is created instead
+ */
+Kata.SST.destroyBaseDatagramLayer = function(objectId) {
+    return destroyDatagramLayerSST(objectId);
 };
 
 Kata.SST.getBaseDatagramLayer = function(endPoint) {
@@ -319,6 +358,7 @@ Kata.SST.Impl.ChannelSegment.prototype.setAckTime=function(ackTime) {
  * @param {!Kata.SST.EndPoint} remoteEndPoint 
  */
 Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
+    KataTrace(this,"Kata.SST.Connection",arguments);
     /**
      * @type {!Kata.SST.EndPoint}
      */
@@ -675,6 +715,7 @@ Kata.SST.Connection.prototype.releaseLSID=function(lsid){
  * @param {function(status,Kata.SST.Stream)} scb StreamReturnCallbackFunction == void(int, boost::shared_ptr< Stream<UUID> >)
  */
 Kata.SST.Connection.prototype.listenStream=function(port,scb){
+    KataTrace(this,"listenStream ",arguments);
   this.mListeningStreamsCallbackMap[port]=scb;
 };
   /** Creates a stream on top of this connection. The function also queues
@@ -868,7 +909,7 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
  * @param{!Protcol.SST.SSTChannelHeader} received_channel_msg
  */
 Kata.SST.Connection.prototype.parsePacket=function(received_channel_msg) {
-
+    KataTrace(this,"parsePacket",arguments);
     var received_stream_msg = new Sirikata.Protocol.SST.SSTStreamHeader();
     
     var parsed = received_stream_msg.ParseFromArray(received_channel_msg.payload);
@@ -902,6 +943,7 @@ Kata.SST.Connection.prototype.headerToStringDebug=function(received_stream_msg) 
  * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
 Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg) {
+    KataTrace(this,"handleInitPacket",arguments);
     var incomingLsid = received_stream_msg.lsid;
     
     if (!(incomingLsid in this.mIncomingSubstreamMap)){
@@ -939,6 +981,7 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_stream_msg) {
  * @param {!Sirikata.Protocol.SST.SSTStreamHeader} received_stream_msg
  */
 Kata.SST.Connection.prototype.handleReplyPacket=function(received_stream_msg) {
+    KataTrace(this,"handleReplyPacket",arguments);
     var incomingLsid = received_stream_msg.lsid;
     
     if (!this.mIncomingSubstreamMap[incomingLsid]) {
@@ -949,6 +992,7 @@ Kata.SST.Connection.prototype.handleReplyPacket=function(received_stream_msg) {
           this.mIncomingSubstreamMap[stream.mRemoteLSID = incomingLsid] = stream;
 
         if (stream.mStreamReturnCallback){
+          KataTrace(this,"handleReplyPacket::ReturnSuccess",arguments);
           stream.mStreamReturnCallback(Kata.SST.SUCCESS, stream);
           stream.receiveData(received_stream_msg, received_stream_msg.payload,
                               received_stream_msg.bsn);
@@ -1074,6 +1118,7 @@ Kata.SST.Connection.prototype.receiveMessage=function(object_message) {
         var connectionCallback=sConnectionReturnCallbackMapSST[localEndPointId];
         if (connectionCallback)
         {
+            KataTrace(this,"Kata.SST.Connection.prototype.receiveMessage::fallbackCallback",arguments);
             delete sConnectionReturnCallbackMapSST[localEndPointId];
             connectionCallback(Kata.SST.SUCCESS, this);
         }
@@ -1472,6 +1517,7 @@ Kata.SST.Stream = function(parentLSID, conn,
 		 local_port, remote_port,
 		 usid, lsid, initial_data,
 		 remotelyInitiated, remoteLSID, cb){
+    KataTrace(this,"Kata.SST.Stream(constructor)",arguments);
 /**
  * @type {number} state from CONNECTION_*_STREAM_SST enum
  */
@@ -1790,6 +1836,7 @@ Kata.SST.Stream.prototype.remoteEndPoint=function()  {
  * @param {!Kata.SST.Connection} c
  */
 var connectionCreatedStreamSST = function( errCode, c) {
+    KataTrace(this,"connectionCreatedStreamSST",arguments);
     //boost::mutex::scoped_lock lock(mStreamCreationMutex.getMutex());
     var localEndPoint=c.mLocalEndPoint;
     var localEndPointId=localEndPoint.uid();
@@ -1800,6 +1847,7 @@ var connectionCreatedStreamSST = function( errCode, c) {
       Kata.error("Callback not defined for connectionCreatedStreamSST, "+localEndPointId);
     }
     if (errCode != Kata.SST.SUCCESS) {
+
       cb(Kata.SST.FAILURE, null );
       return;
     }
@@ -1859,6 +1907,7 @@ Kata.SST.Stream.prototype.serviceStream=function() {
         //send back an error to the app by calling mStreamReturnCallback
         //with an error code.
         if (this.mStreamReturnCallback) {
+          KataTrace(this,"Kata.SST.Stream.serviceStream::Failure",arguments);
           this.mStreamReturnCallback(Kata.SST.FAILURE, null );              
         }
         this.mStreamReturnCallback=null;
