@@ -106,7 +106,11 @@ Kata.require([
      Kata.HostedObject.prototype._handleConnect = function (channel, request) {
          this.mObjectHost.connect(this, request, request.auth);
      };
-
+     Kata.HostedObject.prototype.requestResetProxSeqno = function(space) {
+         var msg = new Kata.ScriptProtocol.ToScript.ResetProxSeqno(space);
+         this.sendScriptMessage(msg);
+         
+     };
      Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, data) {
          if ((!success)!==(!this.mIsConnected)) {
              this.mIsConnected=success;
@@ -114,9 +118,9 @@ Kata.require([
              if (success) {
                  var bounds = undefined;
                  msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, data.loc, bounds, data.vis);
-             }
-             else
+             } else {                 
                  msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object, data.msg);
+             }
              this.sendScriptMessage(msg);
          }
      };

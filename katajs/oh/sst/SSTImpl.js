@@ -38,6 +38,7 @@ Kata.require([
 ], function() {
 
 function KataTrace(thus,name,args) {
+    return;
     if (true||!thus) {
        thus = Kata.SST.Stream;
     }

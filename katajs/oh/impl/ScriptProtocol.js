@@ -407,7 +407,8 @@ Kata.require([
                  ReceiveODPMessage : "todp",
                  QueryEvent : "tque",
                  PresenceLocUpdate : "tloc",
-                 GUIMessage : "tgui"
+                 GUIMessage : "tgui",
+                 ResetProxSeqno : "pseqno"
 
              },
 
@@ -415,7 +416,10 @@ Kata.require([
                  data = Kata.ScriptProtocol.commonReconstitute(data);
                  return data;
              },
-
+             ResetProxSeqno : function(space) {
+                 this.__type = Kata.ScriptProtocol.ToScript.Types.ResetProxSeqno;
+                 this.space = space;
+             },
              Connected : function(space, id, loc, bounds, visual) {
                  this.__type = Kata.ScriptProtocol.ToScript.Types.Connected;
                  this.space = space;

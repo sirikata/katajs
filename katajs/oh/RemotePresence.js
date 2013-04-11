@@ -222,6 +222,14 @@ Kata.require([
          return this.mPhysics;
      };
 
+    /**
+     * The presence uses this function to inform the remote presence that future sequence numbers may begin from a different point as the server has "forgotten" us for the moment
+     */
+     Kata.RemotePresence.prototype.resetProxSeqno = function () {
+         this.mScaleSeqNo = undefined;
+         this.mPosSeqNo = undefined;
+         this.mOrientSeqNo = undefined;
+     };
      /** Method that should only be used by the Script base class to
       * update internal state.  Presence should override this to deal
       * with conflicts between outstanding requests and old loc

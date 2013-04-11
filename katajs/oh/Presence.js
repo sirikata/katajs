@@ -417,7 +417,12 @@ Kata.require([
      Kata.Presence.prototype._handleDisconnect = function(data) {
          Kata.notImplemented("Presence._handleDisconnect");
      };
-
+     Kata.Presence.prototype._handleResetProxSeqno = function(msg, remotePresences) {
+          for (var objid in remotePresences){
+              var remote = remotePresences[objid];
+              remote.resetProxSeqno();
+          }
+     };
      /** Handle a location update event received from the space.  This
       * may be an update to our own location or to other objects.
       * Note that location encompasses position, velocity, orientation

@@ -235,6 +235,13 @@ Kata.require([
          if (space_conn !== undefined)
              space_conn.setPhysics(id, data);
      };
+    /**
+     * Request that a hosted object no longer rely on the sequence number being ever-increasing because the server lost state on it.
+     */
+     Kata.SessionManager.prototype.requestResetProxSeqno = function(space,objid) {
+         var obj = this.mObjects[objid];
+         obj.requestResetProxSeqno(space);
+     };
 
      /** Should be invoked by SpaceConnection classes when a location
       *  update for a presence is available.

@@ -668,7 +668,9 @@ Kata.require([
         Kata.log("Successful SST space connection for " + objid + ". Setting up loc and prox listeners.");
         // Store the stream for later use
         this.mConnectedObjects[objid].spaceStream = stream;
-
+        
+        // reset the prox sequence number so future updates will be accepted
+        this.requestResetProxSeqno(objid);
         // And setup listeners for loc and prox
         stream.listenSubstream(this.Ports.Location, Kata.bind(this._handleLocationSubstream, this, objid));
         stream.listenSubstream(this.Ports.Proximity, Kata.bind(this._handleProximitySubstream, this, objid));
@@ -718,11 +720,20 @@ Kata.require([
 
         }
     };
+function sleep(delay) {
+    var start = Date.now();
+    while (Date.now() < start + delay);
+  }
+    Kata.SirikataSpaceConnection.prototype.requestResetProxSeqno = function(objid) {
+        this.mParent.requestResetProxSeqno(this.mSpaceURL,objid);
+    };
     Kata.SirikataSpaceConnection.prototype.recoverConnection = function(whichObjectDisconnected) {
         this.mRecovered=true;
         Kata.SST.Stream.traceLog={};
         this.mParent.spaceConnectionDisconnected(this) ;
         var space_conn = this.mParent.connectSpaceToServer(this.mSpaceURL,this.mAuth);
+        this.mSocket.close();
+
         space_conn.mSync.setOffset(this.mSync.offset());
         space_conn.mLocalIDs=this.mLocalIDs;
         space_conn.mObjectUUIDs=this.mObjectUUIDs;
@@ -733,11 +744,13 @@ Kata.require([
         var partiallyConnectedObjs = this.mOutstandingConnectRequests;
         for (objid in partiallyConnectedObjs) {
             var obj = partiallyConnectedObjs[objid];
+            this.requestResetProxSeqno(objid);
             space_conn.mOutstandingConnectRequests[objid] = obj;
             space_conn._sendOutstandingConnectRequest(objid,obj);
         }
         for (objid in objs) {
             if (!(objid in partiallyConnectedObjs)) {//make sure we haven't just reconnected this before that was waiting for sst completion
+                this.requestResetProxSeqno(objid);
                 var obj = objs[objid];
                 var connect_msg = new Sirikata.Protocol.Session.Connect();
                 connect_msg.type = Sirikata.Protocol.Session.Connect.ConnectionType.Fresh;
@@ -791,7 +804,6 @@ Kata.require([
         }
         this.mOutstandingConnectRequests={};
         this.mConnectedObjects={};
-        this.mSocket.close();
         this.mPrimarySubstream.close();
     };
     Kata.SirikataSpaceConnection.prototype.discardChildStream = function(objid,success,sptr) {

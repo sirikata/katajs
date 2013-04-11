@@ -77,6 +77,7 @@ Kata.require([
          handlers[msgTypes.ReceiveODPMessage] = Kata.bind(this._handleReceiveODPMessage, this);
          handlers[msgTypes.QueryEvent] = Kata.bind(this._handleQueryEvent, this);
          handlers[msgTypes.PresenceLocUpdate] = Kata.bind(this._handlePresenceLocUpdate, this);
+         handlers[msgTypes.ResetProxSeqno] = Kata.bind(this._handleResetProxSeqno, this);
          this.mMessageDispatcher = new Kata.MessageDispatcher(handlers);
 
          this.mBehaviors = [];
@@ -328,6 +329,16 @@ Kata.require([
          }
          else {
              Kata.warn("Got loc update destined for unknown object.");
+             return presence;
+         }
+     };
+     Kata.Script.prototype._handleResetProxSeqno = function(channel, msg) {
+         var presence = this.mPresences[msg.space];
+         if (presence) {
+             return presence._handleResetProxSeqno(msg, this.mRemotePresences);
+         }
+         else {
+             Kata.warn("Got reset prox seqno update destined for unknown object.");
              return presence;
          }
      };
