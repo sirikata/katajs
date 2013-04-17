@@ -173,7 +173,7 @@ Kata.require([
 
         if (loc.pos || loc.vel) {
             var pos = new Sirikata.Protocol.TimedMotionVector();
-            pos.t = this._toSpaceTime(loc.time);
+            pos.t = this._toSpaceTime(loc.posTime?loc.posTime:loc.time);
             if (loc.pos)
                 pos.position = loc.pos;
             if (loc.vel)
@@ -183,7 +183,7 @@ Kata.require([
 
         if (loc.orient || (loc.rotvel != undefined && loc.rotaxis != undefined)) {
             var orient = new Sirikata.Protocol.TimedMotionQuaternion();
-            orient.t = this._toSpaceTime(loc.time);
+            orient.t = this._toSpaceTime(loc.orientTime?loc.orientTime:loc.time);
             if (loc.orient)
                 orient.position = loc.orient;
             if (loc.rotvel != undefined && loc.rotaxis != undefined)
@@ -939,7 +939,14 @@ function sleep(delay) {
             Kata.warn("Proximity substream (error " + error + ")");
         stream.registerReadCallback(Kata.bind(this._handleProximitySubstreamRead, this, objid, stream));
     };
-
+    var posCache={};
+    
+    function printPos(uid,posStr) {
+        if (posCache[uid]!==posStr) {
+            console.log("Loc Update "+uid+" to "+posStr);
+            posCache[uid]=posStr;
+        }
+    }
     Kata.SirikataSpaceConnection.prototype._handleLocationSubstreamRead = function(objid, stream, data) {
         // Currently we just assume each update is a standalone Frame
 
@@ -964,7 +971,7 @@ function sleep(delay) {
         for(var idx = 0; idx < loc_update_msg.update.length; idx++) {
             var update = loc_update_msg.update[idx];
             var from = update.object;
-
+            
             // Note: Currently things go wonky if we include
             // combinations of location and orientation in
             // presenceLocUpdates. To work around this, we generate
@@ -984,7 +991,6 @@ function sleep(delay) {
                 loc.time = this._toLocalTime(update.location.t).getTime();
                 loc.pos = update.location.position;
                 loc.vel = update.location.velocity;
-
                 this.mParent.presenceLocUpdate(this.mSpaceURL, from, objid, loc, visual, physics);
             }
             // FIXME differing time values? Maybe use Location class to handle?

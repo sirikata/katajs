@@ -191,7 +191,12 @@ Kata.require([
          var msg = new Kata.ScriptProtocol.ToScript.PresenceLocUpdate(
              space, from, loc, visual, physics
          );
+         if (!Kata.locUpdateInProgress)
+             Kata.locUpdateInProgress=1;
+         else
+             Kata.locUpdateInProgress++;
          this.sendScriptMessage(msg);
+         Kata.locUpdateInProgress--;
      };
 
      Kata.HostedObject.prototype.handleMessageFromSimulation=function(simName, channel, data) {

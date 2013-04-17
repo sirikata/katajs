@@ -48,6 +48,29 @@
             this.mArray[(i+oldLength)%this.mArray.length]=this.mArray[i];
         }
     };
+    ///Inserts before the given index
+    Kata.Deque.prototype.insert=function(index,data) {
+        if (index==0) {
+            this.push_front(data);
+            return;
+        }
+        if (index>=this.mSize) {
+            this.push_back(data);
+            return;
+        }
+        if (this.mSize>=this.mArray.length) {//expand
+            this.expand();
+        }
+        var cur= (this.mHead+this.mSize)%this.mArray.length;
+        var prev;
+        for (var i=this.mSize-1;i>=index;--i) {
+            prev = (this.mHead+i)%this.mArray.length;
+            this.mArray[cur]=this.mArray[prev];
+            cur = prev;
+        }
+        this.mSize++;
+        this.mArray[cur]=data;
+    };
 
     Kata.Deque.prototype.push_back=function(e) {
         if (this.mSize>=this.mArray.length) {//expand
