@@ -341,6 +341,9 @@ if (!Kata.queryString) {
      *  @return {function(...[*])}  A new function that wraps func.apply()
      */
     Kata.bind = function(func, object) {
+        if (!func){
+            throw "Bound function undefined";
+        }
         'use strict';
         if (arguments.length==2) {
             return function() {
