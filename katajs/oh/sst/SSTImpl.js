@@ -132,7 +132,7 @@ Kata.SST.ObjectMessageDispatcher.prototype.dispatchMessage = function(msg) {
     if (msg.dest_port in this.mObjectMessageRecipients) {
         var recipient = this.mObjectMessageRecipients[msg.dest_port];
         // BaseDatagramLayer
-        return recipient.receiveMessage(msg);
+        return recipient.receiveMessageRaw(msg);
     }
     return false;
 };
@@ -519,7 +519,7 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
     // mode, but we never change out of sending mode during connection
     // setup.
     if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
-        KataDequeClear(this.mOustandingSegments);
+        KataDequeClear(this.mOutstandingSegments);
     }
 
 
@@ -582,7 +582,7 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
             // packets to send by the time we exit.
             if (this.mState != CONNECTION_PENDING_CONNECT_SST || this.mNumInitialRetransmissionAttempts > 5) {
                 this.mInSendingMode = false;
-                KataPopFront(this.mQueuedSegments);
+                KataDequePopFront(this.mQueuedSegments);
             }
             // Stop sending packets after the first one if we're setting
             // up the connection since we'll just keep sending the first
@@ -625,7 +625,7 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
           // Use numattempts - 1 because we've already incremented
           // here. This way we start out with a factor of 2^0 = 1
           // instead of a factor of 2^1 = 2.
-          setTimeout(Kata.bind(this.serviceConnection,this),this.mRTOMilliseconds*Math.pow(2,,(mNumInitialRetransmissionAttempts-1)));
+          setTimeout(Kata.bind(this.serviceConnection,this),this.mRTOMilliseconds*Math.pow(2,(this.mNumInitialRetransmissionAttempts-1)));
       }
       else {
           // Otherwise, just wait the expected RTT time, plus more to
@@ -648,7 +648,7 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
         }
 
         // Otherwise, adjust the congestion window if we have
-        // oustanding packets left.
+        // outstanding packets left.
         if (KataDequeLength(this.mOutstandingSegments) > 0) {
             // This is a non-standard approach, but since this is the only
             // indication of drops we currently use, it balances between the two
@@ -661,7 +661,7 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
             // currently in -- we'll only fully back off if we detect a problem
             // during slow start (but not the first one since that's expected to
             // fail)
-            var old_ssthresh = mSSThresh;
+            var old_ssthresh = this.mSSThresh;
             this.mSSThresh =  this.mCwnd/2>SST_BASE_CWND*2?this.mCwnd/2:SST_BASE_CWND*2;
             
             if (this.mCwnd >= old_ssthresh || old_ssthresh == SST_BASE_SSTHRESH) {// linear growth, light back off
@@ -878,7 +878,7 @@ var streamHeaderTypeIsAckSST = function(data){
   // Implicit version, used when including ack info in self-generated packet,
   // i.e. not in response to packet from other endpoint
   Kata.SST.Connection.prototype.sendDataWithAutoAck=function(data, isAck) {
-      return sendData(data, isAck, this.mLastReceivedSequenceNumber);
+      return this.sendData(data, isAck, this.mLastReceivedSequenceNumber);
   };
 /**
  * Explicit version, used when acking direct response to a packet
@@ -977,7 +977,7 @@ Kata.SST.Connection.prototype.markAcknowledgedPacket=function(receivedAckNum){
             }
             if (!KataDequeEmpty(this.mOutstandingSegments)) {
                 this.mInSendingMode=true;                
-                setTimeout(Kata.bind(this.serviceStream,this),0);                
+                setTimeout(Kata.bind(this.serviceConnection,this),0);                
             }
             return;
         }
@@ -1112,9 +1112,6 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_channel_msg, r
     }
 };
 
-Kata.SST.Connection.prototype.initRemoteLSID=function(remoteLSID) {
-    this.mRemoteLSID = remoteLSID;
-};
 
 
 
@@ -1264,7 +1261,7 @@ Kata.SST.Connection.prototype.receiveMessage=function(received_msg) {
       // avoid retransmitting it, pop it off now.
       // Sanity check that the front segment *is* the first packet (which must
       // be the initial connection request).
-        if (KataDequeFront(this.mQueuedSegments).mChannelSequenceNumber!==1) {
+        if (KataDequeFront(this.mQueuedSegments).mChannelSequenceNumber.toNumber()!==1) {
             Kata.error("ASSERTION FAILED: Initial packet must elong to channel sequence number 1");
         }
 	    KataDequePopFront(this.mQueuedSegments);
@@ -1846,6 +1843,9 @@ Kata.SST.Stream = function(parentLSID, conn,
     }
 */
 };
+Kata.SST.Stream.prototype.initRemoteLSID=function(remoteLSID) {
+    this.mRemoteLSID = remoteLSID;
+};
 
 /**
  * @param {!Array} initial_data
@@ -1864,11 +1864,11 @@ Kata.SST.Stream.prototype.init=function(initial_data,remotelyInitiated, remoteLS
         this.mState = PENDING_CONNECT_STREAM_SST;                
     }
     var remainingData=null;
-    if (initialData.length<=MAX_PAYLOAD_SIZE_SST) {
-        this.mInitialData = initialData.slice(0);        
+    if (initial_data.length<=MAX_PAYLOAD_SIZE_SST) {
+        this.mInitialData = initial_data.slice(0);        
     }else {
-        this.mInitialData = initialData.slice(0,MAX_PAYLOAD_SIZE_SST);                
-        remainingData = initialData.slice(MAX_PAYLOAD_SIZE_SST);
+        this.mInitialData = initial_data.slice(0,MAX_PAYLOAD_SIZE_SST);                
+        remainingData = initial_data.slice(MAX_PAYLOAD_SIZE_SST);
     }
     var numBytesBuffered = this.mInitialData.length;
     if (remotelyInitiated) {

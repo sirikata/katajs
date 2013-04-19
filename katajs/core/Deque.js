@@ -156,10 +156,94 @@
         Kata.Deque.call(this);
     };
     Kata.Deque.prototype.erase=function(index) {
-        for (var i=this.mHead+index;i+1<this.mSize;++i) {
-            this.mArray[i]=this.mArray[i+1];
+        var size = this.mSize;
+        var head = this.mHead;
+        var len = this.mArray.length;
+        for (var i=index;i+1<size;++i) {
+            this.mArray[(i+head)%len]=this.mArray[(i+1+head)%len];
         }
         this.pop_back();
     };
-
+    var checkContents=function(d,l) {
+        var error=false;
+        for (var i=0;i<l.length;++i) {
+            if (d.index(i)!=l[i]) {
+                error=true;
+            }
+        }
+        if (error) {
+            Kata.log(JSON.stringify(d)+"!="+JSON.stringify(l));
+        }
+    };
+    var test = function () {
+        var d0 = new Kata.Deque();
+        d0.push_back(5);
+        d0.push_back(6);
+        d0.push_back(7);
+        d0.push_back(8);
+        d0.push_front(4);
+        d0.push_front(3);
+        d0.push_front(2);
+        d0.push_front(1);
+        checkContents(d0,[1,2,3,4,5,6,7,8]);
+        d0.insert(0,0);
+        checkContents(d0,[0,1,2,3,4,5,6,7,8]);
+        d0.insert(9,9);
+        checkContents(d0,[0,1,2,3,4,5,6,7,8,9]);
+        d0.insert(8,7.5);
+        checkContents(d0,[0,1,2,3,4,5,6,7,7.5,8,9]);
+        d0.insert(1,0.5);
+        checkContents(d0,[0,0.5,1,2,3,4,5,6,7,7.5,8,9]);
+        d0.insert(3,1.5);
+        checkContents(d0,[0,0.5,1,1.5,2,3,4,5,6,7,7.5,8,9]);
+        d0.erase(3);
+        checkContents(d0,[0,0.5,1,2,3,4,5,6,7,7.5,8,9]);
+        d0.pop_front();
+        checkContents(d0,[0.5,1,2,3,4,5,6,7,7.5,8,9]);
+        d0.erase(8);
+        checkContents(d0,[0.5,1,2,3,4,5,6,7,8,9]);        
+        d0.insert(6,5.5);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6,7,8,9]);        
+        d0.insert(7,6.5);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,6,7,8,9]);        
+        d0.insert(8,7.5);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,6,7,8,9]);        
+        d0.insert(9,8.5);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,6,7,8,9]);        
+        d0.insert(10,9.5);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,6,7,8,9]);        
+        d0.insert(11,10.5);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,6,7,8,9]);        
+        d0.insert(12,11.5);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,6,7,8,9]);        
+        d0.insert(13,12.5);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5,6,7,8,9]);
+        d0.erase(17);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5,6,7,8]);
+        d0.erase(15);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5,6,8]);
+        d0.erase(14);
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5,8]);
+        d0.pop_back();
+        checkContents(d0,[0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5]);
+        d0.push_front(0);
+        checkContents(d0,[0,0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5]);
+        d0.push_front(-1);
+        checkContents(d0,[-1,0,0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5]);
+        d0.push_front(-2);
+        checkContents(d0,[-2,-1,0,0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5]);
+        d0.push_front(-3);
+        checkContents(d0,[-3,-2,-1,0,0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5]);
+        d0.push_front(-4);
+        checkContents(d0,[-4,-3,-2,-1,0,0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5]);
+        d0.push_front(-5);
+        checkContents(d0,[-5,-4,-3,-2,-1,0,0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5]);
+        d0.push_front(-6);
+        checkContents(d0,[-6,-5,-4,-3,-2,-1,0,0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5]);
+        d0.push_back(13.5);
+        checkContents(d0,[-6,-5,-4,-3,-2,-1,0,0.5,1,2,3,4,5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5,13.5]);
+        d0.clear();
+        checkContents(d0,[]);
+    };
+    test();
 })();
