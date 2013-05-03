@@ -292,7 +292,7 @@ Kata.SST.Impl.BaseDatagramLayer.prototype.send=function(src,dest,data) {
 /**
  * @param {!Sirikata.Protocol.Object.ObjectMessage} msg 
 */
-Kata.SST.Impl.BaseDatagramLayer.prototype.receiveMessage=function(msg)  {
+Kata.SST.Impl.BaseDatagramLayer.prototype.receiveMessage=Kata.SST.Impl.BaseDatagramLayer.prototype.receiveMessageRaw=function(msg)  {
     return connectionHandleReceiveSST(this,
                             new Kata.SST.EndPoint(msg.source_object, msg.source_port),
                             new Kata.SST.EndPoint(msg.dest_object, msg.dest_port),
@@ -374,12 +374,13 @@ Kata.SST.Impl.ChannelSegment.prototype.setAckTime=function(ackTime) {
 
 var SST_BASE_CWND=10;
 var SST_BASE_SSTHRESH=32768;
-
+var gUniqueName=0;
 /**
  * @param {!Kata.SST.EndPoint} localEndPoint 
  * @param {!Kata.SST.EndPoint} remoteEndPoint 
  */
 Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
+    this.mUniqueName=gUniqueName++;
     KataTrace(this,"Kata.SST.Connection",arguments);
     /**
      * @type {!Kata.SST.EndPoint}
@@ -436,9 +437,18 @@ Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
      */
     this.mLastTransmitTime=Date.now();
     /**
+     * @type {number}
+     */
+    this.mNumInitialRetransmissionAttempts=0;
+    /**
      * @type {boolean}
      */
     this.mInSendingMode=true;
+    this.mCheckAliveTimer = setInterval(Kata.bind(this.checkIfAlive,this),300000);
+
+    this.mServiceTimer = null;
+    this.mServiceTimerExpiresTime=0;
+    this.mServiceConnectionNoReturn = Kata.bind(this.serviceConnection,this);
 
     /**
      * @type{!Kata.SST.Impl.BaseDatagramLayer}
@@ -470,7 +480,7 @@ Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
      * @type {!KataDeque} Deque of Kata.SST.Impl.ChannelSegment
      */
     this.mOutstandingSegments=new Kata.Deque();
-    this.mCheckAliveTimer = setInterval(Kata.bind(this.checkIfAlive,this),300000);
+
 };
 
   /**
@@ -505,11 +515,38 @@ Kata.SST.Connection.prototype.sendSSTChannelPacket=function(sstMsg){
     var buffer=sstMsg.SerializeToArray();
     return this.mDatagramLayer.send(this.mLocalEndPoint,this.mRemoteEndPoint,buffer);
 };
+Kata.SST.Connection.prototype.scheduleConnectionService=function (after) {
+    if (!after) after=0;
+    if (this.mInSendingMode) {
+        if (!((!KataDequeEmpty(this.mQueuedSegments)) && KataDequeLength(this.mOutstandingSegments) <= this.mCwnd)) {
+            Kata.error("ASSERTION FAILED: For our current approach, we should never service in\nsending mode unless we're going to be able to send some\ndata. The correctness of the servicing depends on this since\nyou need to pass through the loop below at least once to\nadjust some properties (e.g. sending mode).");
+        }
+        
+    }
+    var needs_scheduling = false;
+    var now = Date.now();
+    if (this.mServiceTimer===null) {
+        needs_scheduling=true;
+    }else if(this.mServiceTimer!==null && this.mServiceTimerExpiresTime > now+after) {
+        needs_scheduling = true;
+        // No need to check success because we're using a strand and we can
+        // only get here if timer->expiresFromNow() is positive.
+        clearTimeout(this.mServiceTimer);
+        this.mServiceTimer = null;    
+    }
+
+    if (needs_scheduling) {
+        setTimeout(this.mServiceConnectionNoReturn,after);
+        this.mServiceTimerExpiresTime = now+after;
+    }
+};
+
 /**
  * @param {Date} curTime
  * @returns {boolean}
  */
 Kata.SST.Connection.prototype.serviceConnection=function () {
+    this.mServiceTimer=null;//we got called back
     var curTime = Date.now();
 
     // Special case: if we've gotten back into serviceConnection while
@@ -625,12 +662,12 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
           // Use numattempts - 1 because we've already incremented
           // here. This way we start out with a factor of 2^0 = 1
           // instead of a factor of 2^1 = 2.
-          setTimeout(Kata.bind(this.serviceConnection,this),this.mRTOMilliseconds*Math.pow(2,(this.mNumInitialRetransmissionAttempts-1)));
+          this.scheduleConnectionService(this.mRTOMilliseconds*Math.pow(2,(this.mNumInitialRetransmissionAttempts-1)));
       }
       else {
           // Otherwise, just wait the expected RTT time, plus more to
           // account for jitter.
-            setTimeout(Kata.bind(this.serviceConnection,this),this.mRTOMilliseconds*2);
+          this.scheduleConnectionService(this.mRTOMilliseconds*2);
         }
     }
     else {
@@ -693,7 +730,7 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
         // packet.
         if (!KataDequeEmpty(this.mQueuedSegments)) {
             this.mInSendingMode = true;
-            setTimeout(Kata.bind(this.serviceConnection,this),0);
+            this.scheduleConnectionService();
         }
     }
 
@@ -914,7 +951,7 @@ Kata.SST.Connection.prototype.sendData=function(data, sstStreamHeaderTypeIsAck, 
                                                                ack_seqno) );
           if (KataDequeLength(this.mOutstandingSegments) <= this.mCwnd) {
               this.mInSendingMode = true;
-              setTimeout(Kata.bind(this.serviceConnection,this));    
+              this.scheduleConnectionService();
           }
       }
     }    
@@ -975,9 +1012,11 @@ Kata.SST.Connection.prototype.markAcknowledgedPacket=function(receivedAckNum){
                 if (Math.random()*this.mCwnd<1)
                     this.mCwnd += 1;
             }
-            if (!KataDequeEmpty(this.mOutstandingSegments)) {
-                this.mInSendingMode=true;                
-                setTimeout(Kata.bind(this.serviceConnection,this),0);                
+            // We freed up some space in the window. If we have
+            // something left to send, trigger servicing
+            if (!KataDequeEmpty(this.mQueuedSegments)) {
+                this.mInSendingMode=true;               
+                this.scheduleConnectionService();
             }
             return;
         }
@@ -1100,7 +1139,7 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_channel_msg, r
 
         stream.receiveData(received_channel_msg, received_stream_msg, received_stream_msg.payload,
                             received_stream_msg.bsn);
-        stream.receiveAck(received_stream_msg, received_chanenl_msg.ack_sequence_number);
+        stream.receiveAck(received_stream_msg, received_channel_msg.ack_sequence_number);
       }
       else {
         Kata.log("Not listening to streams at: " + this.headerToStringDebug(received_stream_msg));
@@ -1108,7 +1147,7 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_channel_msg, r
     }else {
         Kata.log("Init message for connected stream"+this.headerToStringDebug(received_stream_msg));
         // Re-reply to the init since we either dropped or were too slow.
-        this.mIncomingSubstreamMap[incomingLsid].sendReplyPacket([], incomingLsid, received_channel_message.transmit_sequence_number);
+        this.mIncomingSubstreamMap[incomingLsid].sendReplyPacket([], incomingLsid, received_channel_msg.transmit_sequence_number);
     }
 };
 
@@ -1721,7 +1760,7 @@ Kata.SST.listenStream = function(cb, listeningEndPoint) {
 //		 remotelyInitiated, remoteLSID, 
 Kata.SST.Stream = function(parentLSID, conn,
 		 local_port, remote_port,
-		 usid, lsid, initial_data, cb){
+		 usid, lsid, cb){
     KataTrace(this,"Kata.SST.Stream(constructor)",arguments);
     /**
      * @type {number} state from CONNECTION_*_STREAM_SST enum
@@ -1800,6 +1839,11 @@ Kata.SST.Stream = function(parentLSID, conn,
      * @type {boolean} FIXME: not sure why this replicated data from mState
      */
     this.mConnected=false;
+    this.mKeepAliveCallback = Kata.bind(this.sendKeepAlive,this);
+    this.mKeepAliveTimer = null;
+    this.mServiceTimer = null;
+    this.mServiceTimerExpiresTime=0;
+    this.mServiceStreamNoReturn = Kata.bind(this.serviceStream,this);
     this.mIsAsyncServicing=false;
     this.mInitialData = [];
 
@@ -1881,7 +1925,7 @@ Kata.SST.Stream.prototype.init=function(initial_data,remotelyInitiated, remoteLS
         var writeval = this.write(remainingData);
         numBytesBuffered+=writeval;
     }
-    this.mKeepAliveTimer = setTimeout(Kata.bind(this.sendKeepAlive,this),60000);
+    this.mKeepAliveTimer = setTimeout(this.mKeepAliveCallback,60000);
     return numBytesBuffered;
 };
 
@@ -1919,22 +1963,27 @@ Kata.SST.Stream.prototype.write=function(data) {
     if (this.mState == DISCONNECTED_STREAM_SST || this.mState == PENDING_DISCONNECT_STREAM_SST) {
       return -1;
     }
+    var len = data.length;
 
     var count = 0;
-    var len = data.length;
+    // We only need to schedule servicing when the packet queue
+    // goes from empty to non-empty since we should already be working
+    // on sending data if it wasn't
+    var was_empty = KataDequeEmpty(this.mQueuedBuffers);
 
 
     if (len <= MAX_PAYLOAD_SIZE_STREAM_SST) {
-      if (this.mCurrentQueueLength+len > MAX_QUEUE_LENGTH_STREAM_SST) {
-        return 0;
-      }
-      KataDequePushBack(this.mQueuedBuffers,new StreamBuffer(data, this.mNumBytesSent));
-      this.mCurrentQueueLength += len;
-      this.mNumBytesSent = this.mNumBytesSent.unsigned_add(PROTO.I64.fromNumber(len));
-       
-      setTimeout(Kata.bind(this.serviceStream,this),0);
-
-      return len;
+        if (this.mCurrentQueueLength+len > MAX_QUEUE_LENGTH_STREAM_SST) {
+            return 0;
+        }
+        KataDequePushBack(this.mQueuedBuffers,new StreamBuffer(data, this.mNumBytesSent));
+        this.mCurrentQueueLength += len;
+        this.mNumBytesSent = this.mNumBytesSent.unsigned_add(PROTO.I64.fromNumber(len));
+        if (was_empty) {
+            this.scheduleStreamService();
+        }
+        
+        return len;
     }
     else {
       var currOffset = 0;
@@ -1954,15 +2003,15 @@ Kata.SST.Stream.prototype.write=function(data) {
 
         count++;
       }
-
-      setTimeout(Kata.bind(this.serviceStream,this),0);
+      if (was_empty && currOffset > 0)
+          this.scheduleStreamService();
 
       return currOffset;
     }
 };
 
 Kata.SST.Stream.prototype.sendKeepAlive=function() {
-    if (this.mState == DISCONNECTED_STREAM_SST || this.mState == PENDING_DISCONNECT_STREAM_SSTw) {
+    if (this.mState == DISCONNECTED_STREAM_SST || this.mState == PENDING_DISCONNECT_STREAM_SST) {
       close(true);
       return;
     }
@@ -1971,7 +2020,7 @@ Kata.SST.Stream.prototype.sendKeepAlive=function() {
 
     this.write(buf);
 
-    this.mKeepAliveTimer=setTimeout(Kata.bind(this.sendKeepAlive(this),60000));//60 second timeout
+    this.mKeepAliveTimer=setTimeout(this.mKeepAliveCallback,60000);//60 second timeout
   };
 
   /**
@@ -2009,18 +2058,19 @@ Kata.SST.Stream.prototype.close=function(force) {
     }
 
     if (force) {
-      this.mConnected = false;
-      if (this.mConnection)
-          this.mConnection.eraseDisconnectedStream(this);
-      this.mState = DISCONNECTED_STREAM_SST;
+        this.mConnected = false;
+        if (this.mConnection)
+            this.mConnection.eraseDisconnectedStream(this);
+        this.mState = DISCONNECTED_STREAM_SST;
         AAdisconnectedBCount.push(this);
-      return true;
+        return true;
     }
     else if (this.mState!=DISCONNECTED_STREAM_SST) {
         AApendingDisconnectedBCount.push(this);
-      this.mState = PENDING_DISCONNECT_STREAM_SST;
-      setTimeout(Kata.bind(this.serviceStream,this),0);
-      return true;
+        this.mState = PENDING_DISCONNECT_STREAM_SST;
+        this.scheduleStreamService();
+
+        return true;
     }else return false;
 };
 
@@ -2117,6 +2167,26 @@ var connectionCreatedStreamSST = function( errCode, c) {
     c.stream(cb, new Array(), localEndPoint.port, c.mRemoteEndPoint.port);
 };
 
+Kata.SST.Stream.prototype.scheduleStreamService=function (after) {
+    if (!after) after=0;
+    var needs_scheduling = false;
+    var nowPlusAfter = Date.now()+after;
+    if (this.mServiceTimer===null) {
+        needs_scheduling=true;
+    }else if(this.mServiceTimer!==null && this.mServiceTimerExpiresTime > nowPlusAfter) {
+        needs_scheduling = true;
+        // No need to check success because we're using a strand and we can
+        // only get here if timer->expiresFromNow() is positive.
+        clearTimeout(this.mServiceTimer);
+        this.mServiceTimer = null;    
+    }
+
+    if (needs_scheduling) {
+        setTimeout(this.mServiceStreamNoReturn,after);
+        this.mServiceTimerExpiresTime = nowPlusAfter;
+    }
+};
+
 /**
  * @param {Date} curTime 
  * @return false only if this is the root stream of a connection and it was
@@ -2129,7 +2199,7 @@ Kata.SST.Stream.prototype.serviceStream=function() {
     var conn = this.mConnection;
     
     var curTime= Date.now();
-     if ((curTime - this.mLastReceiveTime)>SECONDS_TO_TIMEOUT_SST*1000) {
+     if ((curTime - this.mLastReceiveTime)>SECONDS_TO_TIMEOUT_SST*1000 && this.mLastReceiveTime!==null) {
          this.close(true);
          return true;
      }
@@ -2180,6 +2250,7 @@ Kata.SST.Stream.prototype.serviceStream=function() {
         if (baseCb) {
             baseCb(Kata.SST.FAILURE,null);
         }
+        conn.eraseDisconnectedStream(this);
         this.mState=DISCONNECTED_STREAM_SST;
 
         if (!retVal) {
@@ -2190,14 +2261,22 @@ Kata.SST.Stream.prototype.serviceStream=function() {
       else {
           AAconnectedACount.push(this);
           this.mState = CONNECTED_STREAM_SST;
-          setTimeout(Kata.bind(this.serviceStream,this), 0);//FIXME 2013 is scheduling service here right?          
+          // Schedule another servicing immediately in case any other operations
+          // should occur, e.g. sending data which was added after the initial
+          // connection request.
+          this.scheduleStreamService();
       }
     }
     else {
-        //this should wait for the queue to get occupied... right now it is
-        //just polling...
 
-        if ( this.mLastSendTime
+        //if the stream has been waiting for an ACK for > 2*mStreamRTOMicroseconds,
+        //resend the unacked packets. We don't actually check if we
+        //have anything to ack here, that happens in resendUnackedPackets. Also,
+        //'resending' really just means sticking them back at the front of
+        //mQueuedBuffers, so the code that follows and actually sends data will
+        //ensure that we trigger a re-servicing sometime in the future.
+
+        if ( this.mLastSendTime!==null
              && (curTime - this.mLastSendTime) > 2*this.mStreamRTOMilliseconds)
         {
           this.resendUnackedPackets();
@@ -2240,10 +2319,11 @@ Kata.SST.Stream.prototype.serviceStream=function() {
           // On the first send (or during a resend where we get a new
           // channel ID) we only mark this as waiting for an ack using
           // the specified channel segment ID.
-          if (!(mWaitingForAcks.find(channelID) == mWaitingForAcks.end()))    {
+          var key=channelID.hash();
+
+          if (key in this.mWaitingForAcks)    {
               Kata.error("Assertion failed mWaitingForAcks.find(channelID) == mWaitingForAcks.end() for channelID="+channelId);
           }
-          var key=channelID.hash();
           if ( !this.mWaitingForAcks[key]) {
               this.mWaitingForAcks[key] = buffer;
           }
@@ -2259,10 +2339,11 @@ Kata.SST.Stream.prototype.serviceStream=function() {
           this.mNumOutstandingBytes += buffer.mBuffer.length;
         }
         if (sentSomething||!KataDequeEmpty(this.mQueuedBuffers)) {
-            if((2*this.mStreamRTOMilliseconds) < (curTime - mLastSendTime)) {
+            if((2*this.mStreamRTOMilliseconds) < (curTime - this.mLastSendTime)) {
                 Kata.error("Assertion failed: Duration::microseconds(2*mStreamRTOMicroseconds) >= (curTime - mLastSendTime) "+(2*this.mStreamRTOMilliseconds)+"<"+(curTime+"-"+this.mLastSendTime));
             }
-            setTimeout(Kata.bind(this.serviceStream,this),this.mStreamRTOMilliseconds*2 - (curTime-this.mLastSendTime));
+            var timeout = this.mStreamRTOMilliseconds*2 - (curTime-this.mLastSendTime);
+            this.scheduleStreamService(timeout);
         }
     }
 
@@ -2294,7 +2375,7 @@ Kata.SST.Stream.prototype.resendUnackedPackets=function() {
         }
      }
      this.mTransmitWindowSize += this.mNumOutstandingBytes;
-     //FIXME:2013 is this ncessary? setTimeout(Kata.bind(this.serviceStream,this),0);
+     //FIXME:2013 is this ncessary? this.scheduleStreamService();
 
     // And make sure we'll be able to ship the first buffer
     // immediately.
@@ -2420,8 +2501,10 @@ Kata.SST.Stream.prototype.receiveData=function(received_channel_msg, streamMsg,
       }else {
          this.mTransmitWindowSize = 0;          
       }
+/*** XXX THIS IS NO LONGER NEEDED (!)
       if (this.mTransmitWindowSize > 0 && !KataDequeEmpty(this.mQueuedBuffers))
-          setTimeout(Kata.bind(this.serviceStream,this), 0);
+          this.scheduleStreamService;
+***/
       var ack_seqno = received_channel_msg.transmit_sequence_number;
 
       var offset64 = offset;
@@ -2457,7 +2540,7 @@ Kata.SST.Stream.prototype.receiveData=function(received_channel_msg, streamMsg,
             this.mReceiveWindowSize -= len;
             for (var i=0;i<len;++i) {
                 var loc=offsetInBuffer+i;
-                this.mReceiveBuffer[loc]=buffer[i];memcpy(receiveBuffer()+offsetInBuffer, buffer, len);
+                this.mReceiveBuffer[loc]=buffer[i];//memcpy(receiveBuffer()+offsetInBuffer, buffer, len);
             }
             if (offset64.less(this.mNextByteExpected)) {
                 Kata.error("ASSERT FAILED: Offset64 less than next byte expected");
@@ -2516,7 +2599,7 @@ Kata.SST.Stream.prototype.receiveData=function(received_channel_msg, streamMsg,
     };
 // Handle reception of ACK packets.
 Kata.SST.Stream.prototype.receiveAck=function(streamMsg, channelSegmentID64 ) {
-    var time = Date.now();
+    var curTime = Date.now();
     var acked_buffer = null; 
 
     var normal_ack=false;
@@ -2538,10 +2621,10 @@ Kata.SST.Stream.prototype.receiveAck=function(streamMsg, channelSegmentID64 ) {
         // Otherwise, we check the graveyard to see if we had
         // retransmitted (or scheduled for retransmit) but now got the
         // the ack anyway.
-        if (channelSegmentIDstr in this.mUnackedGravyard) {
-            acked_buffer = this.mUnackedGravyard[channelSegmentIDstr];
+        if (channelSegmentIDstr in this.mUnackedGraveyard) {
+            acked_buffer = this.mUnackedGraveyard[channelSegmentIDstr];
             // Clear references tracking this buffer
-            delete this.mUnackedGravyard[channelSegmentIDstr];
+            delete this.mUnackedGraveyard[channelSegmentIDstr];
             
             // In this case, we get rid of any entries actively
             // waiting for acks. We could safely do this no matter
@@ -2551,7 +2634,7 @@ Kata.SST.Stream.prototype.receiveAck=function(streamMsg, channelSegmentID64 ) {
             // common case much more expensive than scanning through
             // the graveyard (which should usually be empty).
             
-            for (it in this.mWaitingForAcks){
+            for (var it in this.mWaitingForAcks){
                 if (this.mWaitingForAcks[it]===acked_buffer) {
                     delete this.mWaitingForAcks[it];
                     break;
@@ -2592,7 +2675,7 @@ Kata.SST.Stream.prototype.receiveAck=function(streamMsg, channelSegmentID64 ) {
     // buffer). We can send more data, so schedule servicing if we
     // have anything queued.
     if (acked_buffer!==null && !KataDequeEmpty(this.mQueuedBuffers)) 
-        setTimeout(Kata.bind(this.serviceStream,this), 0);//FIXME 2013 is scheduling service here right?
+        this.scheduleStreamService();
 };
 /**
  * @param {Date} sampleStartTime
@@ -2642,8 +2725,7 @@ Kata.SST.Stream.prototype.sendInitPacket = function(data) {
     var buffer = sstMsg.SerializeToArray();
     if (this.mConnection)
         this.mConnection.sendDataWithAutoAck( buffer , false /*Not an ack*/ );
-
-    setTimeout(Kata.bind(this.serviceStream,this),Math.pow(2*this.mNumInitRetransmissions)*this.mStreamRTOMilliseconds);
+    this.scheduleStreamService(Math.pow(2*this.mNumInitRetransmissions)*this.mStreamRTOMilliseconds);
 };
 
 Kata.SST.Stream.prototype.sendAckPacket=function(ack_seqno) {

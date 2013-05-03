@@ -178,14 +178,15 @@ Kata.ReceivedSegmentList.prototype.insert = function(offset64, length) {
     // to be accounted for here because you just received them. This
     // also *removes this data* from the segment list so it should
     // only be called when you're going to deliver data.
-Kata.ReceivedSegmentList.prototype.readyRange=function(nextStartByte64, skipCheckLength64) {
+Kata.ReceivedSegmentList.prototype.readyRange=function(nextStartByte64, skipCheckLength) {
+        var skipCheckLength64 = PROTO.I64.fromNumber(skipCheckLength);
         // Start looking at our data from after the skip data
         var skipStartByte64 = nextStartByte64.add(skipCheckLength64);
         // In case the skip data covers any of our segments, pop
         // things off the front of the list as long as they are
         // completely covered.
         while(!this.mSegments.empty() && !(skipStartByte64.less(EndByte(this.mSegments.front()))))//EndByte(mSegments.front()) <= skipStartByte)
-            mSegments.pop_front();
+            this.mSegments.pop_front();
 
         // If we don't have any ready segments, we can only account for the
         // skipped data. Otherwise, we're guaranteed only partial coverage,

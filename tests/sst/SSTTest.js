@@ -23,7 +23,8 @@ function TestObjectMessageRouter(targetEndpoint, targetDispatcher) {
 TestObjectMessageRouter.prototype.route = function(msg) {
     //getConnectionSST(this.mTargetEndpoint).receiveMessage(msg);
     console.log("Routing to "+this.mTargetEndpoint+"\n", msg);
-    this.mDispatcher.dispatchMessage(msg);
+    var dispatcher = this.mDispatcher;
+    setTimeout(function(){dispatcher.dispatchMessage(msg);},0);
 };
 SSTTest.prototype.establishedConnection = function(error, stream) {
     print("established, error = "+error+"\n", stream);
