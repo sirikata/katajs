@@ -662,7 +662,7 @@ Kata.SST.Connection.prototype.serviceConnection=function () {
           // Use numattempts - 1 because we've already incremented
           // here. This way we start out with a factor of 2^0 = 1
           // instead of a factor of 2^1 = 2.
-          this.scheduleConnectionService(this.mRTOMilliseconds*Math.pow(2,(this.mNumInitialRetransmissionAttempts-1)));
+          this.scheduleConnectionService(this.mRTOMilliseconds*Math.pow(2.0,(this.mNumInitialRetransmissionAttempts-1)));
       }
       else {
           // Otherwise, just wait the expected RTT time, plus more to
@@ -1280,7 +1280,7 @@ Kata.SST.Connection.prototype.receiveMessageRaw=function(object_message) {
     var recv_buff = object_message.payload;
     var received_msg = new Sirikata.Protocol.SST.SSTChannelHeader();
     var parsed = received_msg.ParseFromArray(recv_buff);
-    this.receiveMessage(received_msg);    
+    return parsed&&this.receiveMessage(received_msg);    
 }
 Kata.SST.Connection.prototype.receiveMessage=function(received_msg) {
     var ack_seqno = received_msg.transmit_sequence_number;
@@ -1337,7 +1337,27 @@ Kata.SST.Connection.prototype.receiveMessage=function(received_msg) {
             handled=true;
         }
         if (received_msg.payload && received_msg.payload.length > 0) {
-	        handled = this.parsePacket(received_msg);
+            
+            if (received_msg.payload.length==8) {
+
+                var a = received_msg.payload[0]*(256*65536)+received_msg.payload[1]*65536+received_msg.payload[2]*256+received_msg.payload[3];
+            
+                var b = (received_msg.payload[4]*(256*65536)+received_msg.payload[5]*65536+received_msg.payload[6]*256+received_msg.payload[7]);
+                if (a===this.mRemoteEndPoint.port&&b===this.mRemoteChannelID) {
+                    Kata.log("Initial handshake: ignore following parsing errors:");
+                }else {
+                    Kata.error("Strange data in packet: seems to be initial handshake item, but doesn't match");                    
+                }
+                try {
+                    handled = true;
+	                handled = this.parsePacket(received_msg);                    
+                } catch (x) {
+                    console.log("Nonfatal error "+x);
+                }
+                console.log("Ignore previous error");
+            }else {
+	            handled = this.parsePacket(received_msg);                
+            }
         }else {
             // Need to ack still so the other side can clear out of their
             // outstanding packet list
@@ -2723,9 +2743,15 @@ Kata.SST.Stream.prototype.sendInitPacket = function(data) {
     sstMsg.payload=data;
 
     var buffer = sstMsg.SerializeToArray();
-    if (this.mConnection)
+
+    var timeToService = Math.pow(2.0,2*this.mNumInitRetransmissions)*this.mStreamRTOMilliseconds;
+
+    if (this.mConnection) {
+        //Kata.log("Sending init "+this.mConnection.headerToStringDebug({lsid:this.mLSID})+" tts "+timeToService);
         this.mConnection.sendDataWithAutoAck( buffer , false /*Not an ack*/ );
-    this.scheduleStreamService(Math.pow(2*this.mNumInitRetransmissions)*this.mStreamRTOMilliseconds);
+    }
+
+    this.scheduleStreamService(timeToService);
 };
 
 Kata.SST.Stream.prototype.sendAckPacket=function(ack_seqno) {
