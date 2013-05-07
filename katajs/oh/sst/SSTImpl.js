@@ -198,11 +198,6 @@ var sDatagramLayerMap={};
 /**
  * map from Kata.SST.EndPoint::uid() to function
  */
-var sConnectionReturnCallbackMapSST={};
-
-/**
- * map from Kata.SST.EndPoint::uid() to function
- */
 var sListeningConnectionsCallbackMapSST={};
 
 /**
@@ -379,7 +374,14 @@ var gUniqueName=0;
  * @param {!Kata.SST.EndPoint} localEndPoint 
  * @param {!Kata.SST.EndPoint} remoteEndPoint 
  */
-Kata.SST.Connection = function(localEndPoint,remoteEndPoint){
+Kata.SST.Connection = function(localEndPoint,remoteEndPoint, callback){
+    var endPointUid = localEndPoint.uid();
+    if (endPointUid in sConnectionMapSST) {
+        Kata.log("mConnectionMap.find failed for " +localEndPoint.uid());
+    }
+    
+    sConnectionMapSST[endPointUid] = this;
+    this.mConnectionReturnCallback = callback;
     this.mUniqueName=gUniqueName++;
     KataTrace(this,"Kata.SST.Connection",arguments);
     /**
@@ -792,17 +794,9 @@ var getConnectionSST = function(endPoint) {
  *     is already using the same local endpoint; true otherwise.
  */
 var createConnectionSST = function(localEndPoint,remoteEndPoint,cb){
-    var endPointUid=localEndPoint.uid();
-    if (endPointUid in sConnectionMapSST) {
-        Kata.log("mConnectionMap.find failed for " +localEndPoint.uid());
-        
-        return false;
-    }
 
-    var conn =  new Kata.SST.Connection(localEndPoint, remoteEndPoint);
-    sConnectionMapSST[endPointUid] = conn;
-    sConnectionReturnCallbackMapSST[endPointUid] = cb;
-
+    var conn =  new Kata.SST.Connection(localEndPoint, remoteEndPoint, cb);
+    
     conn.setState(CONNECTION_PENDING_CONNECT_SST);
 
 
@@ -1291,7 +1285,8 @@ Kata.SST.Connection.prototype.receiveMessage=function(received_msg) {
     this.markAcknowledgedPacket(receivedAckNum);
     var handled = false;
     if (this.mState == CONNECTION_PENDING_CONNECT_SST) {
-        this.mState = CONNECTION_CONNECTED_SST;
+        if (received_msg.payload.length===8) {//the initial packeg must contain only the length and channel id
+            this.mState = CONNECTION_CONNECTED_SST;
 
       // During connection, we don't allow the initial connection request packet
       // out of the queued segments (normally once it has been sent and is in
@@ -1300,26 +1295,31 @@ Kata.SST.Connection.prototype.receiveMessage=function(received_msg) {
       // avoid retransmitting it, pop it off now.
       // Sanity check that the front segment *is* the first packet (which must
       // be the initial connection request).
-        if (KataDequeFront(this.mQueuedSegments).mChannelSequenceNumber.toNumber()!==1) {
-            Kata.error("ASSERTION FAILED: Initial packet must elong to channel sequence number 1");
+            if (KataDequeFront(this.mQueuedSegments).mChannelSequenceNumber.toNumber()!==1) {
+                Kata.error("ASSERTION FAILED: Initial packet must belong to channel sequence number 1");
+            }
+	        KataDequePopFront(this.mQueuedSegments);
+            var originalListeningEndPoint=new Kata.SST.EndPoint(this.mRemoteEndPoint.endPoint, this.mRemoteEndPoint.port);
+            if (received_msg.payload.length>=8) {
+                this.setRemoteChannelID(received_msg.payload[0]*(256*65536)+received_msg.payload[1]*65536+received_msg.payload[2]*256+received_msg.payload[3]);
+                
+                this.mRemoteEndPoint.port = (received_msg.payload[4]*(256*65536)+received_msg.payload[5]*65536+received_msg.payload[6]*256+received_msg.payload[7]);
+            }
+
+            this.sendData( [], false, ack_seqno );//false means not an ack
+            var localEndPointId=this.mLocalEndPoint.uid();
+            var connectionCallback=this.mConnectionReturnCallback;
+            //Kata.log("Initial packet received "+received_msg.payload.length+ "rchan id "+this.mRemoteChannelID+" port "+this.mRemoteEndPoint.port+" cb "+connectionCallback);
+            if (connectionCallback)
+            {
+                KataTrace(this,"Kata.SST.Connection.prototype.receiveMessage::fallbackCallback",arguments);
+                this.mConnectionReturnCallback = null;
+                connectionCallback(Kata.SST.SUCCESS, this);
+            }
+            handled=true;
+        }else {
+            Kata.log("FLAW AVOIDED: remaining in pending connect mode");
         }
-	    KataDequePopFront(this.mQueuedSegments);
-        var originalListeningEndPoint=new Kata.SST.EndPoint(this.mRemoteEndPoint.endPoint, this.mRemoteEndPoint.port);
-        if (received_msg.payload.length>=8) {
-            this.setRemoteChannelID(received_msg.payload[0]*(256*65536)+received_msg.payload[1]*65536+received_msg.payload[2]*256+received_msg.payload[3]);
-            
-            this.mRemoteEndPoint.port = (received_msg.payload[4]*(256*65536)+received_msg.payload[5]*65536+received_msg.payload[6]*256+received_msg.payload[7]);
-        }
-        this.sendData( [], false, ack_seqno );//false means not an ack
-        var localEndPointId=this.mLocalEndPoint.uid();
-        var connectionCallback=sConnectionReturnCallbackMapSST[localEndPointId];
-        if (connectionCallback)
-        {
-            KataTrace(this,"Kata.SST.Connection.prototype.receiveMessage::fallbackCallback",arguments);
-            delete sConnectionReturnCallbackMapSST[localEndPointId];
-            connectionCallback(Kata.SST.SUCCESS, this);
-        }
-        handled=true;
     }
     else if (this.mState == CONNECTION_PENDING_RECEIVE_CONNECT_SST||this.mState == CONNECTION_CONNECTED_SST) {
         // Handle these two cases together because we may get reordering of the
@@ -1447,14 +1447,15 @@ Kata.SST.Connection.prototype.cleanup= function() {
       var localEndPoint=this.mLocalEndPoint;
       var localEndPointId=localEndPoint.uid();        
       //if (localEndPointId in sConnectionReturnCallbackMapSST) {
-      cb = sConnectionReturnCallbackMapSST[localEndPointId];
+      //cb = sConnectionReturnCallbackMapSST[localEndPointId];
       //}
 
       var failed_conn = this;
-
-      delete sConnectionReturnCallbackMapSST[localEndPointId];
-      delete sConnectionMapSST[localEndPointId];
-
+      if (sConnectionMapSST[localEndPointId]===this)
+          delete sConnectionMapSST[localEndPointId];
+      else
+          Kata.log("Avoided error deleting newer SST from connection map");
+        
       this.mState = CONNECTION_DISCONNECTED_SST;
       if (connState == CONNECTION_PENDING_CONNECT_SST && cb)
         cb(Kata.SST.FAILURE, failed_conn);
@@ -1614,7 +1615,13 @@ Kata.SST.Connection.prototype.close=function( force) {
     /* (this.mState != CONNECTION_DISCONNECTED_SST) implies close() wasnt called
        through the destructor. */
     if (force && this.mState != CONNECTION_DISCONNECTED_SST) {//FIXME DRH: do we need to compare force here
-      delete sConnectionMapSST[this.mLocalEndPoint.uid()];
+      var localEndPointId = this.mLocalEndPoint.uid();
+      if (sConnectionMapSST[localEndPointId]===this) {
+          delete sConnectionMapSST[localEndPointId];          
+      } else {
+          Kata.log("Avoided error deleting nonmatching connection map") ;
+      }
+          
     }
 
     if (force) {
