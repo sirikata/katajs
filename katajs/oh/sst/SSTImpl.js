@@ -525,6 +525,10 @@ Kata.SST.Connection.prototype.scheduleConnectionService=function (after) {
         }
         
     }
+    if (this.mState==CONNECTION_DISCONNECTED_SST) {
+        Kata.error("Attempted to schedule connection service that was already disconnected");        
+        return;
+    }
     var needs_scheduling = false;
     var now = Date.now();
     if (this.mServiceTimer===null) {
@@ -924,7 +928,10 @@ Kata.SST.Connection.prototype.sendData=function(data, sstStreamHeaderTypeIsAck, 
     if (sstStreamHeaderTypeIsAck===undefined){
         Kata.log("sendData not setting whether it is an ack");
     }
- 
+    if (this.mState===CONNECTION_DISCONNECTED_SST) {
+        Kata.error("Trying to send data on connection that is closed");
+        return this.mTransmitSequenceNumber;
+    }
     var transmitSequenceNumber =  this.mTransmitSequenceNumber;
 
 
@@ -2196,6 +2203,13 @@ var connectionCreatedStreamSST = function( errCode, c) {
 
 Kata.SST.Stream.prototype.scheduleStreamService=function (after) {
     if (!after) after=0;
+    if (this.mState===DISCONNECTED_STREAM_SST||this.mConnection.mState===CONNECTION_DISCONNECTED_SST) {
+        Kata.error("Attempted to schedule stream service that was already disconnected");        
+        if (this.mState!==DISCONNECTED_STREAM_SST)
+            this.close(true);
+        return;
+    }
+
     var needs_scheduling = false;
     var nowPlusAfter = Date.now()+after;
     if (this.mServiceTimer===null) {
