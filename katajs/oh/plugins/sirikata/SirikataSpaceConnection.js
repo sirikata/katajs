@@ -85,6 +85,7 @@ Kata.require([
         var port = 7777;
         if (Kata.URL.port(spaceurl))
             port = Kata.URL.port(spaceurl);
+        this.mDisconnected=false;
         this.mSocket = new Kata.TCPSST(Kata.URL.host(spaceurl), port);
         this.mPrimarySubstream = this.mSocket.clone();
         this.mPrimarySubstream.registerListener(
@@ -371,6 +372,7 @@ Kata.require([
     Kata.SirikataSpaceConnection.prototype._handleDisconnected = function(substream) {
         // We only have the one substream currently, it had better be the right one
         if (substream !== this.mPrimarySubstream) return;
+        this.mDisconnected=true;
          var objid;
         // All objects connected through us get disconnected
         for(objid in this.mConnectedObjects) {
@@ -395,7 +397,10 @@ Kata.require([
             this._handleDisconnected(substream);
             return;
         }
-
+        if (this.mDisconnected) {
+            Kata.log("Barely avoided error");
+            return;//ignore any packets after this guy has been disconnected
+        }
         var odp_msg = new Sirikata.Protocol.Object.ObjectMessage();
         odp_msg.ParseFromStream(new PROTO.Uint8ArrayStream(data));
 
@@ -733,7 +738,7 @@ function sleep(delay) {
         this.mParent.spaceConnectionDisconnected(this) ;
         var space_conn = this.mParent.connectSpaceToServer(this.mSpaceURL,this.mAuth);
         this.mSocket.close();
-
+        this.mDisconnected=true;
         space_conn.mSync.setOffset(this.mSync.offset());
         space_conn.mLocalIDs=this.mLocalIDs;
         space_conn.mObjectUUIDs=this.mObjectUUIDs;

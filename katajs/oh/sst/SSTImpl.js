@@ -112,13 +112,13 @@ Kata.SST.ObjectMessageDispatcher = function() {
 // Registration and unregistration for object messages destined for the space
 Kata.SST.ObjectMessageDispatcher.prototype.registerObjectMessageRecipient = function(port, oid, recipient) {
     this.mObjectMessageRecipients[port] = recipient;
-    console.log("Registering Listener:{");
+    //console.log("Registering Listener:{");
     for (port in this.mObjectMessageRecipients) {
         var conn =         this.mObjectMessageRecipients[port];
         var transmit_seqno=JSON.stringify(conn.mTransmitSequenceNumber);
-        console.log(oid+":"+port+" -> "+transmit_seqno+","+conn.mLocalChannelID);
+        //console.log(oid+":"+port+" -> "+transmit_seqno+","+conn.mLocalChannelID);
     }
-    console.log("}:Registering Listener");
+    //console.log("}:Registering Listener");
 };
 Kata.SST.ObjectMessageDispatcher.prototype.unregisterObjectMessageRecipient = function(port, recipient) {
     var currentRecipient = this.mObjectMessageRecipients[port];
@@ -526,7 +526,7 @@ Kata.SST.Connection.prototype.scheduleConnectionService=function (after) {
         
     }
     if (this.mState==CONNECTION_DISCONNECTED_SST) {
-        Kata.error("Attempted to schedule connection service that was already disconnected");        
+        //Kata.error("Attempted to schedule connection service that was already disconnected");        
         return;
     }
     var needs_scheduling = false;
@@ -929,7 +929,7 @@ Kata.SST.Connection.prototype.sendData=function(data, sstStreamHeaderTypeIsAck, 
         Kata.log("sendData not setting whether it is an ack");
     }
     if (this.mState===CONNECTION_DISCONNECTED_SST) {
-        Kata.error("Trying to send data on connection that is closed");
+        //Kata.error("Trying to send data on connection that is closed");
         return this.mTransmitSequenceNumber;
     }
     var transmitSequenceNumber =  this.mTransmitSequenceNumber;
@@ -1146,7 +1146,7 @@ Kata.SST.Connection.prototype.handleInitPacket=function (received_channel_msg, r
         Kata.log("Not listening to streams at: " + this.headerToStringDebug(received_stream_msg));
       }
     }else {
-        Kata.log("Init message for connected stream"+this.headerToStringDebug(received_stream_msg));
+        //Kata.log("Init message for connected stream"+this.headerToStringDebug(received_stream_msg));
         // Re-reply to the init since we either dropped or were too slow.
         this.mIncomingSubstreamMap[incomingLsid].sendReplyPacket([], incomingLsid, received_channel_msg.transmit_sequence_number);
     }
@@ -1458,10 +1458,12 @@ Kata.SST.Connection.prototype.cleanup= function() {
       //}
 
       var failed_conn = this;
-      if (sConnectionMapSST[localEndPointId]===this)
+      if (sConnectionMapSST[localEndPointId]===this) {
           delete sConnectionMapSST[localEndPointId];
-      else
-          Kata.log("Avoided error deleting newer SST from connection map");
+      } else {
+          //Kata.log("Avoided error deleting newer SST from connection map");          
+      }
+
         
       this.mState = CONNECTION_DISCONNECTED_SST;
       if (connState == CONNECTION_PENDING_CONNECT_SST && cb)
@@ -2204,7 +2206,7 @@ var connectionCreatedStreamSST = function( errCode, c) {
 Kata.SST.Stream.prototype.scheduleStreamService=function (after) {
     if (!after) after=0;
     if (this.mState===DISCONNECTED_STREAM_SST||this.mConnection.mState===CONNECTION_DISCONNECTED_SST) {
-        Kata.error("Attempted to schedule stream service that was already disconnected");        
+        //Kata.error("Attempted to schedule stream service that was already disconnected");        
         if (this.mState!==DISCONNECTED_STREAM_SST)
             this.close(true);
         return;
