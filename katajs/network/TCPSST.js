@@ -186,7 +186,11 @@ Kata.require([
          * @private
          */
         Kata.TCPSST.prototype._onMessage = function (which, buffer) {
-	    var u8arr = new Uint8Array(buffer, 0, (buffer.length < 5 ? buffer.length : 5));
+        var len = buffer.byteLength;
+        if (len===undefined ){
+            len =buffer.length;
+        }
+	    var u8arr = new Uint8Array(buffer, 0, (len < 5 ? len : 5));
             var parsed = parseVarInt(u8arr, 0, u8arr.length);
 	    if (!parsed) {
 		Kata.log("Error: Failed to parse stream ID!");
