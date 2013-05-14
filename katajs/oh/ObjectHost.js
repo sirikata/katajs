@@ -152,7 +152,7 @@ Kata.require([
      /** Attempts to connect the object to the specified space.
       *
       * @param {Kata.HostedObject} ho the HostedObject to connect
-      * @param {string} space URL of space to connect to
+      * @param {object} req URL of space to connect to among other connection params
       * @param {string} auth authentication information for the space
       */
      Kata.ObjectHost.prototype.connect = function(ho, req, auth) {
@@ -161,6 +161,14 @@ Kata.require([
              req.scale=[0,0,0,req.scale[0]];
          }
          this.mSessionManager.connect(ho, req, auth);
+     };
+     /** Attempts to recover the object connection by disconecting and reconnecting the space stream      
+      *
+      * @param {Kata.HostedObject} ho the HostedObject to connect
+      * @param {string} space URL of space to reconnect to
+      */
+     Kata.ObjectHost.prototype.reconnect = function(ho, space, oid) {
+         this.mSessionManager.reconnect(ho, space, oid);
      };
 
      Kata.ObjectHost.prototype.disconnect = function(ho, req) {

@@ -87,6 +87,7 @@ Kata.require([
              Types : {
                  Connect : "fcon",
                  Disconnect : "fdis",
+                 Reconnect : "frec",
                  SendODPMessage : "fodp",
                  Location : "floc",
                  Visual : "fvis",
@@ -123,6 +124,11 @@ Kata.require([
                      this.visual = vis;
                  if (query)
                      this.query = query;
+             },
+             Reconnect : function(space,oid) {
+                 this.__type = Kata.ScriptProtocol.FromScript.Types.Reconnect;
+                 this.space = space;
+                 this.object = oid;
              },
              RegisterGUIMessage : function (event) {
                  this.__type = Kata.ScriptProtocol.FromScript.Types.EnableGUIMessage;

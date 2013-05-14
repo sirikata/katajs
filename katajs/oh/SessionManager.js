@@ -105,6 +105,20 @@ Kata.require([
          space_conn.connectObject(ho.getID(), auth, req, req.visual, req.query);
      };
 
+     /** Attempts to connect the object to the specified space.
+      *
+      * @param {Kata.HostedObject} ho the HostedObject to connect
+      * @param {string} space URL of space to connect to
+      */
+     Kata.SessionManager.prototype.reconnect = function(ho, space, oid) {
+         var spaceURL = space;
+         var space_conn = this.mSpaceConnections[spaceURL];
+         if (space_conn) {
+             space_conn.recoverConnection(oid);
+         }
+
+     };
+
      /** Callback from SpaceConnection which allows us to unalias an ID
       *  so that we can roll back a setup connection progress and recover or migrate ourselves
       */

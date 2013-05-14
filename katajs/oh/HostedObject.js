@@ -52,6 +52,7 @@ Kata.require([
         var scriptHandlers = {};
         var scriptTypes = Kata.ScriptProtocol.FromScript.Types;
         scriptHandlers[scriptTypes.Connect] = Kata.bind(this._handleConnect, this);
+        scriptHandlers[scriptTypes.Reconnect] = Kata.bind(this._handleReconnect, this);
         scriptHandlers[scriptTypes.Disconnect] = Kata.bind(this._handleDisconnect, this);
         scriptHandlers[scriptTypes.SendODPMessage] = Kata.bind(this._handleSendODPMessage, this);
         scriptHandlers[scriptTypes.Query] = Kata.bind(this._handleQuery, this);
@@ -105,6 +106,9 @@ Kata.require([
 
      Kata.HostedObject.prototype._handleConnect = function (channel, request) {
          this.mObjectHost.connect(this, request, request.auth);
+     };
+     Kata.HostedObject.prototype._handleReconnect = function (channel, request) {
+         this.mObjectHost.reconnect(this, request.space, request.object);
      };
      Kata.HostedObject.prototype.requestResetProxSeqno = function(space) {
          var msg = new Kata.ScriptProtocol.ToScript.ResetProxSeqno(space);
