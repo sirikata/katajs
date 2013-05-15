@@ -732,7 +732,22 @@ function sleep(delay) {
     Kata.SirikataSpaceConnection.prototype.requestResetProxSeqno = function(objid) {
         this.mParent.requestResetProxSeqno(this.mSpaceURL,objid);
     };
+    Kata.SirikataSpaceConnection.prototype.recoverConnectionCallback = function(whichObjectDisconnected) {
+        this.mRecoveryCallback=this;
+        this.recoverConnection(whichObjectDisconnected);
+    };
     Kata.SirikataSpaceConnection.prototype.recoverConnection = function(whichObjectDisconnected) {
+        if (this.mRecovered) return;
+        for (var objid in this.mOutstandingConnectRequests) {
+            if (this.mRecoveryCallback===undefined||(Date.now()-this.mRecoveryStarted)<5000){
+                if (!this.mRecoveryStarted) {
+                    this.mRecoveryStarted = Date.now();
+                }
+                if (this.mRecoveryCallback===this||this.mRecoveryCallback===undefined)//reset timeout...otherwise timeout was set by someone else and we shouldn't clutter
+                    this.mRecoveryCallback = setTimeout(Kata.bind(this.recoverConnectionCallback,this,whichObjectDisconnected),400);
+                return;
+            }
+        }
         this.mRecovered=true;
         Kata.SST.Stream.traceLog={};
         this.mParent.spaceConnectionDisconnected(this) ;

@@ -46,7 +46,7 @@ Kata.require([
     Kata.SessionManager = function () {
         //Kata.include(Kata.scriptRoot+'katajs/oh/plugins/loop/LoopbackSpaceConnection.js');
         //Kata.include(Kata.scriptRoot+'katajs/oh/plugins/sirikata/SirikataSpaceConnection.js');
-
+        this.mPendingSpaceConnections={};
         this.mSpaceConnections = {};
         this.mObjects = {};
     };
