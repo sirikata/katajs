@@ -153,7 +153,13 @@ Kata.require([
         msg.SerializeToStream(serialized);
         return serialized;
     };
-
+    Kata.SirikataSpaceConnection.prototype._generateLocUpdatePartsFromConnectMessage = function(connect_msg, with_defaults) { 
+        var retval = this._generateLocUpdateParts(connect_msg.loc_bounds,with_defaults);
+        if (connect_msg.visual||!retval.visual) {
+            retval.visual = connect_msg.visual;
+        }
+        return retval;
+    };
     // Helper method to generate the parts of a loc update message
     // from a location object. Returns object with fields (loc, orient, bounds, visual)
     Kata.SirikataSpaceConnection.prototype._generateLocUpdateParts = function(loc, with_defaults) {
@@ -253,7 +259,7 @@ Kata.require([
                 connect_msg.auth = outstandingConnectRequest.auth;
         }
 
-        var loc_parts = this._generateLocUpdateParts(outstandingConnectRequest.loc_bounds, true);
+        var loc_parts = this._generateLocUpdatePartsFromConnectMessage(outstandingConnectRequest, true);
         var query = outstandingConnectRequest.query_angle;
         if (loc_parts.loc)
             connect_msg.loc = loc_parts.loc;
@@ -618,7 +624,7 @@ Kata.require([
      */
     function copyConnectInfoToLocationUpdateRequest(connection,destinationLocCopy,connect_info,shouldOverwrite) {
         var newData=false;
-        var loc_parts = connection._generateLocUpdateParts(connect_info.loc_bounds, true);
+        var loc_parts = connection._generateLocUpdatePartsFromConnectMessage(connect_info, true);
         if (destinationLocCopy.HasField("bounds")) {
             newData=true;
             if (shouldOverwrite) destinationLocCopy.bounds = loc_parts.bounds;
