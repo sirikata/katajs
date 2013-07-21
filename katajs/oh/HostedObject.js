@@ -116,16 +116,20 @@ Kata.require([
          
      };
      Kata.HostedObject.prototype.connectionResponse = function(success, presence_id, data) {
-         if ((!success)!==(!this.mIsConnected)) {
+         var msg = null;
+         if (success&&!this.mIsConnected) {
              this.mIsConnected=success;
-             var msg = null;
+
              if (success) {
                  var bounds = undefined;
                  msg = new Kata.ScriptProtocol.ToScript.Connected(presence_id.space, presence_id.object, data.loc, bounds, data.vis);
-             } else {                 
-                 msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object, data.msg);
+                 this.sendScriptMessage(msg);
              }
+         } else if ((!success)&&!this.mIsConnected){                 
+             msg = new Kata.ScriptProtocol.ToScript.ConnectionFailed(presence_id.space, presence_id.object, data.msg);
              this.sendScriptMessage(msg);
+         }else {
+             console.log("Already connected---but reconnect failure---know we will retry again some time");
          }
      };
 
