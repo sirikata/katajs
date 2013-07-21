@@ -542,7 +542,7 @@ Kata.SST.Connection.prototype.scheduleConnectionService=function (after) {
     }
 
     if (needs_scheduling) {
-        setTimeout(this.mServiceConnectionNoReturn,after);
+        this.mServiceTimer = setTimeout(this.mServiceConnectionNoReturn,after);
         this.mServiceTimerExpiresTime = now+after;
     }
 };
